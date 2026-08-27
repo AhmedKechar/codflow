@@ -97,6 +97,7 @@ describe("Products Endpoint - Error Scenarios", () => {
       // Mock successful response
       vi.mocked(queries.getProductById).mockResolvedValue({
         id: "prod_123",
+        storeId: "test-store",
         name: "Samsung Galaxy A54",
         description: "Latest smartphone",
         handle: "samsung-galaxy-a54",
@@ -187,6 +188,7 @@ describe("Products Endpoint - Error Scenarios", () => {
       // Mock successful creation
       vi.mocked(queries.createProduct).mockResolvedValue({
         id: "prod_new",
+        storeId: "test-store",
         name: "Samsung Galaxy A54",
         description: null,
         handle: "samsung-galaxy-a54",
@@ -327,6 +329,7 @@ describe("Products Endpoint - Error Scenarios", () => {
       // Mock getProductById to return existing product
       vi.mocked(queries.getProductById).mockResolvedValue({
         id: "prod_123",
+        storeId: "test-store",
         name: "Samsung Galaxy A54",
         description: null,
         handle: "samsung-galaxy-a54",
@@ -387,6 +390,7 @@ describe("Products Endpoint - Error Scenarios", () => {
       // Mock getProductById to return existing product
       vi.mocked(queries.getProductById).mockResolvedValue({
         id: "prod_123",
+        storeId: "test-store",
         name: "Samsung Galaxy A54",
         description: null,
         handle: "samsung-galaxy-a54",

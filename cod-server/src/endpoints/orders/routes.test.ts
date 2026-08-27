@@ -284,7 +284,7 @@ describe("Orders routes (OpenAPIHono)", () => {
 
       expect(res.status).toBe(200);
       expect(queries.updateOrderStatus).toHaveBeenCalledWith(
-        mockDb, "ord_1", "preparing", "admin_user_001", "Admin User"
+        mockDb, "test-store", "ord_1", "preparing", "admin_user_001", "Admin User"
       );
     });
 
@@ -317,7 +317,7 @@ describe("Orders routes (OpenAPIHono)", () => {
       });
 
       expect(res.status).toBe(200);
-      expect(queries.assignDriver).toHaveBeenCalledWith(mockDb, "ord_1", "drv_1");
+      expect(queries.assignDriver).toHaveBeenCalledWith(mockDb, "test-store", "ord_1", "drv_1");
     });
 
     it("returns 422 when already dispatched to a company", async () => {
@@ -355,7 +355,7 @@ describe("Orders routes (OpenAPIHono)", () => {
       const res = await app.request("/api/orders/ord_1/unassign", { method: "PATCH" });
 
       expect(res.status).toBe(200);
-      expect(queries.unassignDriver).toHaveBeenCalledWith(mockDb, "ord_1");
+      expect(queries.unassignDriver).toHaveBeenCalledWith(mockDb, "test-store", "ord_1");
     });
   });
 

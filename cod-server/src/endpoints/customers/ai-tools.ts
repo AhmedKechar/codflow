@@ -20,7 +20,7 @@ import { getDb } from "@/db";
  * 
  * This ensures the AI agent can recover from validation errors without breaking the conversation.
  */
-export const getCustomerTools = (db: ReturnType<typeof getDb>) => ({
+export const getCustomerTools = (db: ReturnType<typeof getDb>, storeId: string) => ({
 
   
   listCustomers: tool({
@@ -41,7 +41,7 @@ export const getCustomerTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const customers = await queries.getAllCustomers(db, parsed.data);
+        const customers = await queries.getAllCustomers(db, storeId, parsed.data);
         return { 
           success: true,
           count: customers.length,
@@ -87,7 +87,7 @@ export const getCustomerTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const customer = await queries.getCustomerById(db, parsed.data.customerId);
+        const customer = await queries.getCustomerById(db, storeId, parsed.data.customerId);
         if (!customer) {
           return { 
             success: false, 
@@ -126,7 +126,7 @@ export const getCustomerTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const customer = await queries.getCustomerByPhone(db, parsed.data.phone);
+        const customer = await queries.getCustomerByPhone(db, storeId, parsed.data.phone);
         if (!customer) {
           return { 
             success: false, 
@@ -161,7 +161,7 @@ export const getCustomerTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const customer = await queries.createCustomer(db, parsed.data);
+        const customer = await queries.createCustomer(db, storeId, parsed.data);
         return { 
           success: true, 
           customer, 
@@ -206,7 +206,7 @@ export const getCustomerTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const customer = await queries.updateCustomer(db, parsed.data.customerId, parsed.data.updates);
+        const customer = await queries.updateCustomer(db, storeId, parsed.data.customerId, parsed.data.updates);
         if (!customer) {
           return { 
             success: false, 
@@ -256,7 +256,7 @@ export const getCustomerTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const orders = await queries.getOrdersByCustomerId(db, parsed.data.customerId);
+        const orders = await queries.getOrdersByCustomerId(db, storeId, parsed.data.customerId);
         return { 
           success: true, 
           count: orders.length, 
@@ -302,8 +302,8 @@ export const getCustomerTools = (db: ReturnType<typeof getDb>) => ({
 
       try {
         const [groups, tags] = await Promise.all([
-          queries.getCustomerGroupMemberships(db, parsed.data.customerId),
-          queries.getCustomerTagMemberships(db, parsed.data.customerId)
+          queries.getCustomerGroupMemberships(db, storeId, parsed.data.customerId),
+          queries.getCustomerTagMemberships(db, storeId, parsed.data.customerId)
         ]);
         return { 
           success: true, 
@@ -343,7 +343,7 @@ export const getCustomerTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        await queries.deleteCustomer(db, parsed.data.customerId);
+        await queries.deleteCustomer(db, storeId, parsed.data.customerId);
         return { 
           success: true, 
           message: `Customer ${parsed.data.customerId} deleted successfully` 

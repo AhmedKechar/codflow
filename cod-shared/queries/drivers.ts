@@ -53,13 +53,12 @@ export async function getAllDrivers(db: AppDb, storeId: string, filters?: Driver
   }
 
   if (filters?.search) {
-    conditions.push(
-      or(
-        like(drivers.firstName, `%${filters.search}%`),
-        like(drivers.lastName, `%${filters.search}%`),
-        like(drivers.phone, `%${filters.search}%`),
-      ),
+    const searchConditions = or(
+      like(drivers.firstName, `%${filters.search}%`),
+      like(drivers.lastName, `%${filters.search}%`),
+      like(drivers.phone, `%${filters.search}%`),
     );
+    if (searchConditions) conditions.push(searchConditions);
   }
 
   if (filters?.wilayaId) {

@@ -1,0 +1,16 @@
+{
+  "title": "Tableau de bord de la plateforme",
+  "subtitle": "Vue d'ensemble de la plateforme CodFlow",
+  "total_stores": "Total des boutiques",
+  "active_subscriptions": "Abonnements actifs",
+  "pending_payments": "Paiements en attente",
+  "total_revenue": "Revenu total",
+  "stores": "Boutiques",
+  "plans": "Forfaits",
+  "payments": "Paiements",
+  "view_all": "Tout voir",
+  "recent_payments": "Paiements récents",
+  "recent_stores": "Boutiques récentes",
+  "no_data": "Aucune donnée",
+  "currency": "DA"
+}

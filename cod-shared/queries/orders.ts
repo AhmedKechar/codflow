@@ -58,13 +58,12 @@ export async function getAllOrders(db: AppDb, storeId: string, filters: OrderFil
   }
 
   if (filters.search) {
-    conditions.push(
-      or(
-        like(orders.orderNumber, `%${filters.search}%`),
-        like(orders.customerName, `%${filters.search}%`),
-        like(orders.phone, `%${filters.search}%`),
-      ),
+    const searchConditions = or(
+      like(orders.orderNumber, `%${filters.search}%`),
+      like(orders.customerName, `%${filters.search}%`),
+      like(orders.phone, `%${filters.search}%`),
     );
+    if (searchConditions) conditions.push(searchConditions);
   }
 
   return db
@@ -179,6 +178,7 @@ export async function createOrder(
 
   await db.insert(orderStatusHistory).values({
     id: crypto.randomUUID(),
+    storeId,
     orderId: orderData.id!,
     status: orderData.status!,
     timestamp: orderData.createdAt!,
@@ -225,6 +225,7 @@ export async function createOrder(
         .insert(stockMovements)
         .values({
           id: crypto.randomUUID(),
+          storeId,
           productId: item.productId,
           variantId: item.variantId,
           type: "ORDER_DEDUCTED",
@@ -259,6 +260,7 @@ export async function createOrder(
         .insert(stockMovements)
         .values({
           id: crypto.randomUUID(),
+          storeId,
           productId: item.productId,
           variantId: null,
           type: "ORDER_DEDUCTED",
@@ -303,6 +305,7 @@ export async function updateOrderStatus(
 
   await db.insert(orderStatusHistory).values({
     id: crypto.randomUUID(),
+    storeId,
     orderId,
     status: newStatus,
     timestamp: now,
@@ -375,24 +378,25 @@ export async function updateOrderStatus(
           .where(eq(productVariants.id, op.variantId));
 
         await db
-          .insert(stockMovements)
-          .values({
-            id: crypto.randomUUID(),
-            productId: op.productId,
-            variantId: op.variantId,
-            type: movementType,
-            delta: remaining,
-            qtyBefore,
-            qtyAfter,
-            reason: null,
-            reference: orderId,
-            createdBy: userId ?? "system",
-            createdByName: userName ?? "النظام",
-            createdAt: now,
-          })
-          .catch((err) =>
-            console.error("[stock] Failed to log", movementType, "movement:", err),
-          );
+        .insert(stockMovements)
+        .values({
+          id: crypto.randomUUID(),
+          storeId,
+          productId: op.productId,
+          variantId: op.variantId,
+          type: movementType,
+          delta: remaining,
+          qtyBefore,
+          qtyAfter,
+          reason: null,
+          reference: orderId,
+          createdBy: userId ?? "system",
+          createdByName: userName ?? "النظام",
+          createdAt: now,
+        })
+        .catch((err) =>
+          console.error("[stock] Failed to log", movementType, "movement:", err),
+        );
       } else {
         const productInventoryRow = await db
           .select({ inventory: products.inventory })
@@ -412,6 +416,7 @@ export async function updateOrderStatus(
           .insert(stockMovements)
           .values({
             id: crypto.randomUUID(),
+            storeId,
             productId: op.productId,
             variantId: null,
             type: movementType,
@@ -501,6 +506,7 @@ export async function setOrderProductReturn(
           .insert(stockMovements)
           .values({
             id: crypto.randomUUID(),
+            storeId,
             productId: line.productId,
             variantId: line.variantId,
             type: "ORDER_RETURNED",
@@ -535,6 +541,7 @@ export async function setOrderProductReturn(
           .insert(stockMovements)
           .values({
             id: crypto.randomUUID(),
+            storeId,
             productId: line.productId,
             variantId: null,
             type: "ORDER_RETURNED",
@@ -752,6 +759,7 @@ export async function deleteOrder(db: AppDb, storeId: string, orderId: string) {
         .insert(stockMovements)
         .values({
           id: crypto.randomUUID(),
+          storeId,
           productId: op.productId,
           variantId: op.variantId,
           type: "ORDER_CANCELLED",
@@ -787,6 +795,7 @@ export async function deleteOrder(db: AppDb, storeId: string, orderId: string) {
         .insert(stockMovements)
         .values({
           id: crypto.randomUUID(),
+          storeId,
           productId: op.productId,
           variantId: null,
           type: "ORDER_CANCELLED",
@@ -862,6 +871,7 @@ export async function updateOrderStatusWebhook(
 
   await db.insert(orderStatusHistory).values({
     id: crypto.randomUUID(),
+    storeId,
     orderId,
     status: newStatus,
     timestamp: now,
@@ -935,6 +945,7 @@ export async function updateOrderStatusWebhook(
           .insert(stockMovements)
           .values({
             id: crypto.randomUUID(),
+            storeId,
             productId: op.productId,
             variantId: op.variantId,
             type: movementType,
@@ -974,6 +985,7 @@ export async function updateOrderStatusWebhook(
           .insert(stockMovements)
           .values({
             id: crypto.randomUUID(),
+            storeId,
             productId: op.productId,
             variantId: null,
             type: movementType,

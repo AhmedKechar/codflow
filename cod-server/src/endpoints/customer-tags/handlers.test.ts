@@ -94,6 +94,7 @@ describe("Customer Tags Endpoint - Error Scenarios", () => {
       // Mock successful response
       vi.mocked(queries.getTagById).mockResolvedValue({
         id: "tag_123",
+        storeId: "test-store",
         name: "VIP",
         color: "#FF5733",
         assignmentCount: 3,
@@ -143,6 +144,7 @@ describe("Customer Tags Endpoint - Error Scenarios", () => {
       // Mock getTagById to return a tag with assignments
       vi.mocked(queries.getTagById).mockResolvedValue({
         id: "tag_123",
+        storeId: "test-store",
         name: "VIP",
         color: "#FF5733",
         assignmentCount: 5,
@@ -172,6 +174,7 @@ describe("Customer Tags Endpoint - Error Scenarios", () => {
       // Mock getTagById to return a tag with no assignments
       vi.mocked(queries.getTagById).mockResolvedValue({
         id: "tag_123",
+        storeId: "test-store",
         name: "Empty Tag",
         color: "#64748b",
         assignmentCount: 0,
@@ -272,6 +275,7 @@ describe("Customer Tags Endpoint - Error Scenarios", () => {
     it("should include context field when available", async () => {
       vi.mocked(queries.getTagById).mockResolvedValue({
         id: "tag_123",
+        storeId: "test-store",
         name: "VIP",
         color: "#FF5733",
         assignmentCount: 3,

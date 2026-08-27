@@ -1,0 +1,11 @@
+{
+  "dashboard": "Dashboard",
+  "plans": "Plans",
+  "payments": "Payments",
+  "stores": "Stores",
+  "users": "Users",
+  "provider_keys": "Provider Keys",
+  "super_admin": "Platform Dashboard",
+  "sign_out": "Sign Out",
+  "language": "Language"
+}

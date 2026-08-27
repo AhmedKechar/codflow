@@ -88,20 +88,23 @@ export async function logActivity(
   action: ActivityAction,
   entity: { type: string; id: string; label?: string | null },
   metadata?: Record<string, unknown>,
+  storeId?: string,
 ): Promise<void> {
   try {
-    await db.insert(activityLogs).values({
+    const row: typeof activityLogs.$inferInsert = {
       id: crypto.randomUUID(),
+      storeId: storeId ?? "",
       actorId: actor.id,
       actorName: actor.name ?? "Unknown",
-      actorRole: actor.role,
+      actorRole: actor.role === "super_admin" ? "admin" : actor.role,
       action,
       entityType: entity.type,
       entityId: entity.id,
       entityLabel: entity.label ?? null,
       metadata: metadata ? JSON.stringify(metadata) : null,
       createdAt: new Date().toISOString(),
-    });
+    };
+    await db.insert(activityLogs).values(row);
   } catch (err) {
     console.error("[activity] Failed to log:", action, entity.id, err);
   }

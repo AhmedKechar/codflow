@@ -160,12 +160,11 @@ export async function listAbandonedOrders(
   }
 
   if (search) {
-    conditions.push(
-      or(
-        like(abandonedOrders.customerName, `%${search}%`),
-        like(abandonedOrders.phone, `%${search}%`)
-      )
+    const searchConditions = or(
+      like(abandonedOrders.customerName, `%${search}%`),
+      like(abandonedOrders.phone, `%${search}%`)
     );
+    if (searchConditions) conditions.push(searchConditions);
   }
 
   const where = and(...conditions);

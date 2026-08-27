@@ -71,6 +71,7 @@ describe("createDriverPayment", () => {
     await expect(
       createDriverPayment(
         db,
+        "test-store",
         { driverId: "drv_1", type: "cod_remittance", orderIds: ["ord_1", "ord_2"] },
         "user_1",
         "Test User"
@@ -86,6 +87,7 @@ describe("createDriverPayment", () => {
     try {
       await createDriverPayment(
         db,
+        "test-store",
         { driverId: "drv_1", type: "cod_remittance", orderIds: ["ord_1", "ord_2"] },
         "user_1",
         "Test User"
@@ -113,6 +115,7 @@ describe("createDriverPayment", () => {
     await expect(
       createDriverPayment(
         db,
+        "test-store",
         { driverId: "drv_1", type: "cod_remittance", orderIds: ["ord_1", "ord_2"] },
         "user_1",
         "Test User"
@@ -130,6 +133,7 @@ describe("createDriverPayment", () => {
     try {
       await createDriverPayment(
         db,
+        "test-store",
         { driverId: "drv_1", type: "cod_remittance", orderIds: ["ord_1"] },
         "user_1",
         "Test User"
@@ -157,6 +161,7 @@ describe("createDriverPayment", () => {
     await expect(
       createDriverPayment(
         db,
+        "test-store",
         { driverId: "drv_1", type: "fee_payment", orderIds: ["ord_1"] },
         "user_1",
         "Test User"
@@ -174,6 +179,7 @@ describe("createDriverPayment", () => {
     await expect(
       createDriverPayment(
         db,
+        "test-store",
         { driverId: "drv_1", type: "net_settlement", orderIds: ["ord_1"] },
         "user_1",
         "Test User"
@@ -192,6 +198,7 @@ describe("createDriverPayment", () => {
 
     const result = await createDriverPayment(
       db,
+      "test-store",
       { driverId: "drv_1", type: "cod_remittance", orderIds: ["ord_1", "ord_2"] },
       "user_1",
       "Test User"
@@ -218,6 +225,7 @@ describe("createDriverPayment", () => {
 
     const result = await createDriverPayment(
       db,
+      "test-store",
       { driverId: "drv_1", type: "fee_payment", orderIds: ["ord_1", "ord_2"] },
       "user_1",
       "Test User"
@@ -248,6 +256,7 @@ describe("createDriverPayment", () => {
 
     const result = await createDriverPayment(
       db,
+      "test-store",
       { driverId: "drv_1", type: "net_settlement", orderIds: ["ord_1"] },
       "user_1",
       "Test User"
@@ -270,6 +279,7 @@ describe("createDriverPayment", () => {
 
     const result = await createDriverPayment(
       db,
+      "test-store",
       { driverId: "drv_1", type: "cod_remittance", orderIds: ["ord_1"], notes: "Monthly settlement" },
       "user_1",
       "Test User"
@@ -292,6 +302,7 @@ describe("getDriverPayments", () => {
       a([
         {
           id: "pay_1",
+          store_id: "test-store",
           driver_id: "drv_1",
           type: "cod_remittance",
           amount: 5500,

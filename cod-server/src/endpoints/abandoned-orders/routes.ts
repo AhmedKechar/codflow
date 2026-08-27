@@ -164,9 +164,10 @@ const router = new OpenAPIHono<AppContext>();
 
 router.openapi(listRoute, async (c) => {
   const db = getDb(c.env.DB);
+  const storeId = c.get("storeId")!;
   const { status, search, limit, offset } = c.req.valid("query");
 
-  const { rows, total } = await listAbandonedOrders(db, {
+  const { rows, total } = await listAbandonedOrders(db, storeId, {
     status,
     search,
     limit,
@@ -178,23 +179,26 @@ router.openapi(listRoute, async (c) => {
 
 router.openapi(statsRoute, async (c) => {
   const db = getDb(c.env.DB);
-  const stats = await getAbandonedOrderStats(db);
+  const storeId = c.get("storeId")!;
+  const stats = await getAbandonedOrderStats(db, storeId);
   return c.json({ success: true, data: stats }, 200);
 });
 
 router.openapi(updateStatusRoute, async (c) => {
   const db = getDb(c.env.DB);
+  const storeId = c.get("storeId")!;
   const id = c.req.param("id");
   const { status } = c.req.valid("json");
 
-  await updateAbandonedOrderStatus(db, id, status);
+  await updateAbandonedOrderStatus(db, storeId, id, status);
   return c.json({ success: true }, 200);
 });
 
 router.openapi(deleteRoute, async (c) => {
   const db = getDb(c.env.DB);
+  const storeId = c.get("storeId")!;
   const id = c.req.param("id");
-  await deleteAbandonedOrder(db, id);
+  await deleteAbandonedOrder(db, storeId, id);
   return c.json({ success: true }, 200);
 });
 

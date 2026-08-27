@@ -32,6 +32,7 @@ const NOW = new Date().toISOString();
 function tagRow(overrides: Record<string, any> = {}) {
   return {
     id: "tag_123",
+    storeId: "test-store",
     name: "VIP",
     color: "#64748b",
     assignmentCount: 5,

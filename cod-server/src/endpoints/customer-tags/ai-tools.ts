@@ -29,7 +29,7 @@ import { getDb } from "@/db";
  * - Layer 1 (LLM-level): Permissive input schema accepts any object to prevent SDK crashes
  * - Layer 2 (App-level): Strict validation inside execute() with graceful error handling
  */
-export const getCustomerTagTools = (db: ReturnType<typeof getDb>) => ({
+export const getCustomerTagTools = (db: ReturnType<typeof getDb>, storeId: string) => ({
 
   listCustomerTags: tool({
     description:
@@ -49,7 +49,7 @@ export const getCustomerTagTools = (db: ReturnType<typeof getDb>) => ({
         };
       }
       try {
-        const tags = await queries.getAllTags(db, parsed.data);
+        const tags = await queries.getAllTags(db, storeId, parsed.data);
         return { success: true, count: tags.length, tags };
       } catch (error: any) {
         return { success: false, error: `Database error: ${error.message}` };
@@ -81,8 +81,8 @@ export const getCustomerTagTools = (db: ReturnType<typeof getDb>) => ({
       }
       try {
         const tag = parsed.data.withCustomers
-          ? await queries.getTagWithCustomers(db, parsed.data.tagId)
-          : await queries.getTagById(db, parsed.data.tagId);
+          ? await queries.getTagWithCustomers(db, storeId, parsed.data.tagId)
+          : await queries.getTagById(db, storeId, parsed.data.tagId);
         if (!tag) {
           return { success: false, error: `Customer tag not found with ID: ${parsed.data.tagId}` };
         }
@@ -111,7 +111,7 @@ export const getCustomerTagTools = (db: ReturnType<typeof getDb>) => ({
         };
       }
       try {
-        const tag = await queries.createTag(db, parsed.data);
+        const tag = await queries.createTag(db, storeId, parsed.data);
         return {
           success: true,
           tag,
@@ -144,7 +144,7 @@ export const getCustomerTagTools = (db: ReturnType<typeof getDb>) => ({
         };
       }
       try {
-        const tag = await queries.updateTag(db, parsed.data.tagId, parsed.data.updates);
+        const tag = await queries.updateTag(db, storeId, parsed.data.tagId, parsed.data.updates);
         if (!tag) {
           return { success: false, error: `Customer tag not found with ID: ${parsed.data.tagId}` };
         }
@@ -176,7 +176,7 @@ export const getCustomerTagTools = (db: ReturnType<typeof getDb>) => ({
         };
       }
       try {
-        const tag = await queries.getTagById(db, parsed.data.tagId);
+        const tag = await queries.getTagById(db, storeId, parsed.data.tagId);
         if (!tag) {
           return { success: false, error: `Customer tag not found with ID: ${parsed.data.tagId}` };
         }
@@ -186,7 +186,7 @@ export const getCustomerTagTools = (db: ReturnType<typeof getDb>) => ({
             error: `Cannot delete tag "${tag.name}" — it is assigned to ${tag.assignmentCount} customer(s). Unassign all customers first using unassignTagFromCustomer.`,
           };
         }
-        await queries.deleteTag(db, parsed.data.tagId);
+        await queries.deleteTag(db, storeId, parsed.data.tagId);
         return {
           success: true,
           message: `Customer tag "${tag.name}" (${parsed.data.tagId}) deleted successfully`,
@@ -219,11 +219,11 @@ export const getCustomerTagTools = (db: ReturnType<typeof getDb>) => ({
         };
       }
       try {
-        const tag = await queries.getTagById(db, parsed.data.tagId);
+        const tag = await queries.getTagById(db, storeId, parsed.data.tagId);
         if (!tag) {
           return { success: false, error: `Customer tag not found with ID: ${parsed.data.tagId}` };
         }
-        await queries.assignTag(db, parsed.data.tagId, parsed.data.customerId);
+        await queries.assignTag(db, storeId, parsed.data.tagId, parsed.data.customerId);
         return {
           success: true,
           message: `Tag "${tag.name}" assigned to customer ${parsed.data.customerId}`,
@@ -256,11 +256,11 @@ export const getCustomerTagTools = (db: ReturnType<typeof getDb>) => ({
         };
       }
       try {
-        const tag = await queries.getTagById(db, parsed.data.tagId);
+        const tag = await queries.getTagById(db, storeId, parsed.data.tagId);
         if (!tag) {
           return { success: false, error: `Customer tag not found with ID: ${parsed.data.tagId}` };
         }
-        await queries.unassignTag(db, parsed.data.tagId, parsed.data.customerId);
+        await queries.unassignTag(db, storeId, parsed.data.tagId, parsed.data.customerId);
         return {
           success: true,
           message: `Tag "${tag.name}" removed from customer ${parsed.data.customerId}`,

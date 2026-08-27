@@ -1,6 +1,6 @@
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import type { AppContext } from "@/types";
-import { requireAdmin } from "@/rbac/middleware";
+import { requireSuperAdmin } from "@/rbac/middleware";
 import { getDb } from "@/db";
 import * as planQueries from "../../../../cod-shared/queries/plans";
 import * as paymentQueries from "../../../../cod-shared/queries/payments";
@@ -21,7 +21,7 @@ const errorResponse = (description: string) => ({
 const listAllPlansRoute = createRoute({
   method: "get",
   path: "/plans",
-  middleware: [requireAdmin()],
+  middleware: [requireSuperAdmin()],
   tags: ["Super Admin - Plans"],
   summary: "List all plans (including inactive)",
   operationId: "listAllPlans",
@@ -36,7 +36,7 @@ const listAllPlansRoute = createRoute({
 const createPlanRoute = createRoute({
   method: "post",
   path: "/plans",
-  middleware: [requireAdmin()],
+  middleware: [requireSuperAdmin()],
   tags: ["Super Admin - Plans"],
   summary: "Create a new plan",
   operationId: "createPlan",
@@ -76,7 +76,7 @@ const createPlanRoute = createRoute({
 const updatePlanRoute = createRoute({
   method: "patch",
   path: "/plans/{id}",
-  middleware: [requireAdmin()],
+  middleware: [requireSuperAdmin()],
   tags: ["Super Admin - Plans"],
   summary: "Update a plan",
   operationId: "updatePlan",
@@ -114,7 +114,7 @@ const updatePlanRoute = createRoute({
 const listProviderKeysRoute = createRoute({
   method: "get",
   path: "/provider-keys",
-  middleware: [requireAdmin()],
+  middleware: [requireSuperAdmin()],
   tags: ["Super Admin - Provider Keys"],
   summary: "List all provider API keys",
   operationId: "listProviderKeys",
@@ -129,7 +129,7 @@ const listProviderKeysRoute = createRoute({
 const createProviderKeyRoute = createRoute({
   method: "post",
   path: "/provider-keys",
-  middleware: [requireAdmin()],
+  middleware: [requireSuperAdmin()],
   tags: ["Super Admin - Provider Keys"],
   summary: "Create provider API key",
   operationId: "createProviderKey",
@@ -156,7 +156,7 @@ const createProviderKeyRoute = createRoute({
 const deleteProviderKeyRoute = createRoute({
   method: "delete",
   path: "/provider-keys/{id}",
-  middleware: [requireAdmin()],
+  middleware: [requireSuperAdmin()],
   tags: ["Super Admin - Provider Keys"],
   summary: "Delete provider API key",
   operationId: "deleteProviderKey",

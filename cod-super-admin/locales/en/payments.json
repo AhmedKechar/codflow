@@ -1,0 +1,27 @@
+{
+  "title": "Payments",
+  "subtitle": "Review and approve subscription payments",
+  "pending": "Pending",
+  "approved": "Approved",
+  "rejected": "Rejected",
+  "all": "All",
+  "store": "Store",
+  "amount_dzd": "Amount (DZD)",
+  "method": "Method",
+  "status": "Status",
+  "date": "Date",
+  "approve": "Approve",
+  "reject": "Reject",
+  "review_notes": "Review Notes",
+  "no_payments": "No payments found",
+  "approved_success": "Payment approved",
+  "rejected_success": "Payment rejected",
+  "confirm_approve": "Are you sure you want to approve this payment?",
+  "confirm_reject": "Are you sure you want to reject this payment?",
+  "payment_methods": {
+    "ccp": "CCP",
+    "baridi_mob": "Baridi Mob",
+    "wise": "Wise",
+    "redotpay": "Redotpay"
+  }
+}

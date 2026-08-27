@@ -142,6 +142,7 @@ export class CodCapiWorkflow extends WorkflowEntrypoint<Env, CodCapiParams> {
         metaEventId: capiResult.fbtrace_id ?? null,
         error: capiResult.error ?? null,
         sentAt: new Date().toISOString(),
+        storeId: data.storeId,
       });
     });
   }

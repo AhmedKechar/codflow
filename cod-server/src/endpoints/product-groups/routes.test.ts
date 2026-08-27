@@ -32,6 +32,7 @@ const NOW = new Date().toISOString();
 function categoryRow(overrides: Record<string, any> = {}) {
   return {
     id: "cat_123",
+    storeId: "test-store",
     name: "Electronics",
     slug: "electronics-abc12345",
     description: "Electronic products",

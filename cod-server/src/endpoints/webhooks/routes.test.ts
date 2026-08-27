@@ -13,7 +13,7 @@ import webhooksRouter from "./routes";
 vi.mock("@/db", () => ({ getDb: vi.fn(() => mockDb) }));
 vi.mock("./queries");
 vi.mock("@/endpoints/delivery-companies/queries", () => ({
-  getDeliveryCompanyByCode: vi.fn(async () => null), // no ZR company configured
+  getDeliveryCompanyByCodeGlobal: vi.fn(async () => null), // no ZR company configured
 }));
 vi.mock("./svix-verify", () => ({
   verifySvixSignature: vi.fn(async () => true),
@@ -73,8 +73,8 @@ describe("Webhooks routes (OpenAPIHono)", () => {
     });
 
     it("returns 400 INVALID_WEBHOOK_PAYLOAD on bad signature", async () => {
-      const { getDeliveryCompanyByCode } = await import("@/endpoints/delivery-companies/queries");
-      vi.mocked(getDeliveryCompanyByCode).mockResolvedValue({
+      const { getDeliveryCompanyByCodeGlobal } = await import("@/endpoints/delivery-companies/queries");
+      vi.mocked(getDeliveryCompanyByCodeGlobal).mockResolvedValue({
         id: "comp_zr",
         code: "zr_express",
         webhookSecret: "whsec_test",

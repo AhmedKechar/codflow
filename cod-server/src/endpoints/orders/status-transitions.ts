@@ -22,6 +22,7 @@ import { shouldTriggerCapiPurchase } from "@/workflows/capi-helpers";
  */
 export async function updateStatus(c: Context<AppContext>) {
   const db = getDb(c.env.DB);
+  const storeId = c.get("storeId")!;
   const orderId = c.req.param("id");
   
   if (!orderId) {
@@ -36,7 +37,7 @@ export async function updateStatus(c: Context<AppContext>) {
   const validated = bodyData ?? validation.updateOrderStatusSchema.parse(body);
 
   // Check if order exists
-  const order = await queries.getOrderById(db, orderId);
+  const order = await queries.getOrderById(db, storeId, orderId);
   if (!order) {
     throw new NotFoundError("Order", orderId);
   }
@@ -73,7 +74,7 @@ export async function updateStatus(c: Context<AppContext>) {
   // Get user from context (set by auth middleware)
   const user = c.get("user");
 
-  await queries.updateOrderStatus(db, orderId, validated.status, user?.id, user?.name ?? undefined);
+  await queries.updateOrderStatus(db, storeId, orderId, validated.status, user?.id, user?.name ?? undefined);
 
   // Fire CAPI Purchase Workflow fire-and-forget — never block the status response.
   if (shouldTriggerCapiPurchase(validated.status, order.wilayaId)) {
@@ -112,13 +113,14 @@ export async function updateStatus(c: Context<AppContext>) {
  */
 export async function assignDriver(c: Context<AppContext>) {
   const db = getDb(c.env.DB);
+  const storeId = c.get("storeId")!;
   const orderId = c.req.param("id");
 
   if (!orderId) {
     throw new ValidationError("Order ID is required", ERROR_CODES.REQUIRED_FIELD_MISSING);
   }
 
-  const order = await queries.getOrderById(db, orderId);
+  const order = await queries.getOrderById(db, storeId, orderId);
   if (!order) {
     throw new NotFoundError("Order", orderId);
   }
@@ -166,7 +168,7 @@ export async function assignDriver(c: Context<AppContext>) {
     throw new NotFoundError("Driver", validated.driverId);
   }
 
-  await queries.assignDriver(db, orderId, validated.driverId);
+  await queries.assignDriver(db, storeId, orderId, validated.driverId);
 
   const actor = c.get("user");
   await logActivity(db, actor, ACTIONS.ORDER_DRIVER_ASSIGNED, {
@@ -192,13 +194,14 @@ export async function assignDriver(c: Context<AppContext>) {
  */
 export async function unassignDriver(c: Context<AppContext>) {
   const db = getDb(c.env.DB);
+  const storeId = c.get("storeId")!;
   const orderId = c.req.param("id");
 
   if (!orderId) {
     throw new ValidationError("Order ID is required", ERROR_CODES.REQUIRED_FIELD_MISSING);
   }
 
-  const order = await queries.getOrderById(db, orderId);
+  const order = await queries.getOrderById(db, storeId, orderId);
   if (!order) {
     throw new NotFoundError("Order", orderId);
   }
@@ -222,7 +225,7 @@ export async function unassignDriver(c: Context<AppContext>) {
 
   const previousDriverId = order.driverId;
 
-  await queries.unassignDriver(db, orderId);
+  await queries.unassignDriver(db, storeId, orderId);
 
   const actor = c.get("user");
   await logActivity(db, actor, ACTIONS.ORDER_DRIVER_ASSIGNED, {

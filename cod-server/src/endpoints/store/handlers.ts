@@ -52,9 +52,10 @@ export async function listStoreProducts(c: Context<AppContext>) {
 }
 
 export async function getStoreProduct(c: Context<AppContext>) {
+  const storeId = c.get("storeId")!;
   const db = getDb(c.env.DB);
   const handle = c.req.param("handle")!;
-  const data = await queries.getStoreProductByHandle(db, handle);
+  const data = await queries.getStoreProductByHandle(db, storeId, handle);
   if (!data) {
     throw new NotFoundError("Product", handle);
   }
@@ -62,14 +63,16 @@ export async function getStoreProduct(c: Context<AppContext>) {
 }
 
 export async function listStoreCategories(c: Context<AppContext>) {
+  const storeId = c.get("storeId")!;
   const db = getDb(c.env.DB);
-  const data = await queries.getStoreCategories(db);
+  const data = await queries.getStoreCategories(db, storeId);
   return c.json({ success: true, data, count: data.length }, 200);
 }
 
 export async function getShippingRates(c: Context<AppContext>) {
+  const storeId = c.get("storeId")!;
   const db = getDb(c.env.DB);
-  const data = await queries.getShippingRates(db);
+  const data = await queries.getShippingRates(db, storeId);
   return c.json({ success: true, data }, 200);
 }
 
@@ -82,12 +85,14 @@ export async function listStoreCommunes(c: Context<AppContext>) {
       { wilayaId, min: 1, max: 58 }
     );
   }
+  const storeId = c.get("storeId")!;
   const db = getDb(c.env.DB);
-  const data = await queries.getStoreCommunes(db, wilayaId);
+  const data = await queries.getStoreCommunes(db, storeId, wilayaId);
   return c.json({ success: true, data, count: data.length }, 200);
 }
 
 export async function createStoreOrder(c: Context<AppContext>) {
+  const storeId = c.get("storeId")!;
   const db = getDb(c.env.DB);
   const bodyData: any = (c.req as any).valid?.("json");
   const data: import("./validation").StoreOrderInput =
@@ -95,6 +100,7 @@ export async function createStoreOrder(c: Context<AppContext>) {
 
   const skuMissing = await queries.validateOrderSkus(
     db,
+    storeId,
     data.productId,
     data.variantId,
     data.variantSelections
@@ -107,7 +113,7 @@ export async function createStoreOrder(c: Context<AppContext>) {
     );
   }
 
-  const stockError = await queries.checkStoreOrderStock(db, {
+  const stockError = await queries.checkStoreOrderStock(db, storeId, {
     productId: data.productId,
     variantId: data.variantId ?? null,
     variantSelections: data.variantSelections ?? [],
@@ -117,7 +123,7 @@ export async function createStoreOrder(c: Context<AppContext>) {
     throw new BusinessLogicError(stockError, ERROR_CODES.INSUFFICIENT_STOCK);
   }
 
-  const customer = await queries.findOrCreateCustomer(db, {
+  const customer = await queries.findOrCreateCustomer(db, storeId, {
     phone: data.phone,
     name: data.customerName,
     wilayaId: data.wilayaId,
@@ -126,6 +132,7 @@ export async function createStoreOrder(c: Context<AppContext>) {
 
   const deliveryFee = await queries.getDeliveryFee(
     db,
+    storeId,
     data.wilayaId,
     data.deliveryType
   );
@@ -136,7 +143,7 @@ export async function createStoreOrder(c: Context<AppContext>) {
     undefined;
   const userAgent = c.req.header("User-Agent") ?? undefined;
 
-  const order = await queries.createStoreOrder(db, {
+  const order = await queries.createStoreOrder(db, storeId, {
     ...data,
     customerId: customer.id,
     customerName: customer.name,
@@ -148,7 +155,6 @@ export async function createStoreOrder(c: Context<AppContext>) {
   // Inline CAPI Lead mirror — server-side counterpart to the browser Pixel Lead.
   // Uses the same event_id (order.id) so Meta deduplicates within 48h.
   // Fire-and-forget: a CAPI failure must never block order confirmation.
-  const storeId = c.get("storeId")!;
   void sendCapiLeadMirror(db, storeId, order, data.phone, data.fbc, data.fbp, ipAddress, userAgent).catch(
     (err) => console.warn("[capi-lead-mirror] failed:", err?.message)
   );
@@ -205,7 +211,7 @@ export async function submitReview(c: Context<AppContext>) {
   // Duplicate-review check runs against the internal order.id — that's the
   // stable FK stored on the reviews row, and does not change even if the
   // order-number format ever evolves.
-  const existing = await queries.getExistingReviewByOrder(db, order.id);
+  const existing = await queries.getExistingReviewByOrder(db, storeId, order.id);
   if (existing) {
     throw new ConflictError(
       "A review has already been submitted for this order",
@@ -214,8 +220,7 @@ export async function submitReview(c: Context<AppContext>) {
     );
   }
 
-  const review = await queries.createReview(db, {
-    storeId,
+  const review = await queries.createReview(db, storeId, {
     productId: data.productId,
     orderId: order.id,
     orderNumber: order.orderNumber,

@@ -21,6 +21,7 @@ type Database = ReturnType<typeof getDb>;
  */
 export async function createDriverPayment(
   db: Database,
+  storeId: string,
   data: CreatePaymentInput,
   createdBy: string,
   createdByName: string
@@ -85,6 +86,7 @@ export async function createDriverPayment(
   // Insert payment record
   await db.insert(driverPayments).values({
     id,
+    storeId,
     driverId,
     type,
     amount,

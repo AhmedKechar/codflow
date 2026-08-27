@@ -42,6 +42,7 @@ const NOW = new Date().toISOString();
 function driverRow(overrides: Record<string, any> = {}) {
   return {
     id: "drv_123",
+    storeId: "test-store",
     firstName: "Mohamed",
     lastName: "Amiri",
     phone: "0551234567",
@@ -98,7 +99,7 @@ describe("Drivers routes (OpenAPIHono)", () => {
       );
 
       expect(res.status).toBe(200);
-      expect(queries.getAllDrivers).toHaveBeenCalledWith(mockDb, {
+      expect(queries.getAllDrivers).toHaveBeenCalledWith(mockDb, "test-store", {
         wilayaId: 16,
         status: "available",
         vehicleType: "van",
@@ -368,6 +369,7 @@ describe("Drivers routes (OpenAPIHono)", () => {
       vi.mocked(queries.getDriverById).mockResolvedValue(driverRow());
       vi.mocked(queries.setCompensation).mockResolvedValue({
         id: "comp_1",
+        storeId: "test-store",
         driverId: "drv_123",
         wilayaId: 16,
         feePerDelivery: 350,

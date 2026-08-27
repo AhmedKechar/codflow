@@ -34,6 +34,7 @@ import type { StockMovementRow } from "../../../../cod-shared/queries/stock";
 export async function adjustStock(
   db: AppDb,
   params: {
+    storeId?: string;
     productId: string;
     variantId: string | null;
     createdBy: string;
@@ -43,7 +44,7 @@ export async function adjustStock(
 ): Promise<{ movement: StockMovementRow; currentInventory: number }> {
   const { productId, variantId, type, delta, reason, createdBy, createdByName, reference } = params;
 
-  const { inventory: qtyBefore, exists } = await getProductInventory(db, productId, variantId ?? null);
+  const { inventory: qtyBefore, exists } = await getProductInventory(db, params.storeId ?? "", productId, variantId ?? null);
 
   if (!exists) {
     if (variantId) {
@@ -90,6 +91,7 @@ export async function adjustStock(
   const movementId = crypto.randomUUID();
   await db.insert(stockMovements).values({
     id: movementId,
+    storeId: params.storeId ?? "",
     productId,
     variantId: variantId ?? null,
     type,

@@ -34,7 +34,7 @@ import { getDb } from "@/db";
  * - Layer 1 (LLM-level): Permissive input schema accepts any object to prevent SDK crashes
  * - Layer 2 (App-level): Strict validation inside execute() with graceful error handling
  */
-export const getStockTools = (db: ReturnType<typeof getDb>) => ({
+export const getStockTools = (db: ReturnType<typeof getDb>, storeId: string) => ({
 
   getStockOverview: tool({
     description:
@@ -46,7 +46,7 @@ export const getStockTools = (db: ReturnType<typeof getDb>) => ({
     inputSchema: z.object({}).passthrough(), // Layer 1: Permissive input — no parameters
     execute: async (_args) => {
       try {
-        const overview = await queries.getStockOverview(db);
+        const overview = await queries.getStockOverview(db, storeId);
         return { success: true, overview };
       } catch (error: any) {
         return {
@@ -80,7 +80,7 @@ export const getStockTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const result = await queries.getStockAlerts(db, parsed.data);
+        const result = await queries.getStockAlerts(db, storeId, parsed.data);
         return { success: true, ...result };
       } catch (error: any) {
         return {
@@ -122,7 +122,7 @@ export const getStockTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const result = await queries.getStockHistory(db, parsed.data.productId, {
+        const result = await queries.getStockHistory(db, storeId, parsed.data.productId, {
           variantId: parsed.data.variantId,
           limit: parsed.data.limit,
           offset: parsed.data.offset,
@@ -191,6 +191,7 @@ export const getStockTools = (db: ReturnType<typeof getDb>) => ({
 
       try {
         const result = await queries.adjustStock(db, {
+          storeId,
           productId: parsed.data.productId,
           variantId: null,
           createdBy: "ai-agent",
@@ -279,6 +280,7 @@ export const getStockTools = (db: ReturnType<typeof getDb>) => ({
 
       try {
         const result = await queries.adjustStock(db, {
+          storeId,
           productId: parsed.data.productId,
           variantId: parsed.data.variantId,
           createdBy: "ai-agent",
@@ -339,7 +341,7 @@ export const getStockTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const updated = await queries.updateProductThreshold(db, parsed.data.productId, {
+        const updated = await queries.updateProductThreshold(db, storeId, parsed.data.productId, {
           lowStockThreshold: parsed.data.lowStockThreshold,
         });
         if (!updated) {
@@ -392,6 +394,7 @@ export const getStockTools = (db: ReturnType<typeof getDb>) => ({
         // Note: updateVariantThreshold signature is (db, variantId, productId, data)
         const updated = await queries.updateVariantThreshold(
           db,
+          storeId,
           parsed.data.variantId,
           parsed.data.productId,
           { lowStockThreshold: parsed.data.lowStockThreshold },

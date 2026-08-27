@@ -21,9 +21,22 @@ export function requireAdmin(): MiddlewareHandler<AppContext> {
   return async (c: Context<AppContext>, next: Next) => {
     const user = c.get("user");
     if (!user) return c.json({ error: "Unauthorized" }, 401);
-    if (user.role !== "admin") {
+    if (user.role !== "admin" && user.role !== "super_admin") {
       denyLog(c, "required=admin");
       return c.json({ error: "Admin access required" }, 403);
+    }
+    return next();
+  };
+}
+
+/** Require the caller to be a platform super admin. Rejects store admins and staff. */
+export function requireSuperAdmin(): MiddlewareHandler<AppContext> {
+  return async (c: Context<AppContext>, next: Next) => {
+    const user = c.get("user");
+    if (!user) return c.json({ error: "Unauthorized" }, 401);
+    if (user.role !== "super_admin") {
+      denyLog(c, "required=super_admin");
+      return c.json({ error: "Super admin access required" }, 403);
     }
     return next();
   };
@@ -34,7 +47,7 @@ export function requireScope(scope: string): MiddlewareHandler<AppContext> {
   return async (c: Context<AppContext>, next: Next) => {
     const user = c.get("user");
     if (!user) return c.json({ error: "Unauthorized" }, 401);
-    if (user.role === "admin") return next();
+    if (user.role === "admin" || user.role === "super_admin") return next();
 
     if (!hasPermission(user.scopes, scope)) {
       denyLog(c, `required=${scope}`);
@@ -49,7 +62,7 @@ export function requireAnyScope(scopes: string[]): MiddlewareHandler<AppContext>
   return async (c: Context<AppContext>, next: Next) => {
     const user = c.get("user");
     if (!user) return c.json({ error: "Unauthorized" }, 401);
-    if (user.role === "admin") return next();
+    if (user.role === "admin" || user.role === "super_admin") return next();
 
     if (!hasAnyPermission(user.scopes, scopes)) {
       denyLog(c, `requiredAny=${scopes.join(",")}`);
@@ -64,7 +77,7 @@ export function requireAllScopes(scopes: string[]): MiddlewareHandler<AppContext
   return async (c: Context<AppContext>, next: Next) => {
     const user = c.get("user");
     if (!user) return c.json({ error: "Unauthorized" }, 401);
-    if (user.role === "admin") return next();
+    if (user.role === "admin" || user.role === "super_admin") return next();
 
     if (!hasAllPermissions(user.scopes, scopes)) {
       const missing = scopes.filter((s) => !user.scopes.includes(s));

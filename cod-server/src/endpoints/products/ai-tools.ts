@@ -28,7 +28,7 @@ import { getDb } from "@/db";
  * - Status values: DRAFT | ACTIVE | ARCHIVED. Setting ACTIVE auto-sets publishedAt.
  * - Delete is a soft-delete (sets deletedAt). Blocked if the product has existing orders.
  */
-export const getProductTools = (db: ReturnType<typeof getDb>) => ({
+export const getProductTools = (db: ReturnType<typeof getDb>, storeId: string) => ({
 
   listProducts: tool({
     description:
@@ -49,7 +49,7 @@ export const getProductTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const products = await queries.getAllProducts(db, parsed.data);
+        const products = await queries.getAllProducts(db, storeId, parsed.data);
         return {
           success: true,
           count: products.length,
@@ -105,7 +105,7 @@ export const getProductTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const product = await queries.getProductById(db, parsed.data.productId);
+        const product = await queries.getProductById(db, storeId, parsed.data.productId);
         if (!product) {
           return {
             success: false,
@@ -172,7 +172,7 @@ export const getProductTools = (db: ReturnType<typeof getDb>) => ({
           }
         }
 
-        const product = await queries.createProduct(db, parsed.data);
+        const product = await queries.createProduct(db, storeId, parsed.data);
         return {
           success: true,
           product,
@@ -223,6 +223,7 @@ export const getProductTools = (db: ReturnType<typeof getDb>) => ({
       try {
         const product = await queries.updateProduct(
           db,
+          storeId,
           parsed.data.productId,
           parsed.data.updates,
         );
@@ -270,7 +271,7 @@ export const getProductTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const product = await queries.updateProduct(db, parsed.data.productId, {
+        const product = await queries.updateProduct(db, storeId, parsed.data.productId, {
           status: parsed.data.status,
         });
         if (!product) {
@@ -320,7 +321,7 @@ export const getProductTools = (db: ReturnType<typeof getDb>) => ({
 
       try {
         // Verify product exists before attempting delete
-        const existing = await queries.getProductById(db, parsed.data.productId);
+        const existing = await queries.getProductById(db, storeId, parsed.data.productId);
         if (!existing) {
           return {
             success: false,
@@ -346,7 +347,7 @@ export const getProductTools = (db: ReturnType<typeof getDb>) => ({
           };
         }
 
-        await queries.deleteProduct(db, parsed.data.productId);
+        await queries.deleteProduct(db, storeId, parsed.data.productId);
         return {
           success: true,
           message: `Product "${existing.name}" (${parsed.data.productId}) deleted successfully`,

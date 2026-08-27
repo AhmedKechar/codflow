@@ -209,7 +209,7 @@ describe("deleteProfile", () => {
 describe("setProfileRules", () => {
   it("returns null when profile does not exist", async () => {
     const db = makeMockDb([f(null)]);
-    const result = await setProfileRules(db as any, "prof_missing", { rules: [] });
+    const result = await setProfileRules(db as any, "test-store", "prof_missing", { rules: [] });
     expect(result).toBeNull();
   });
 
@@ -225,7 +225,7 @@ describe("setProfileRules", () => {
       a([]),                    // getProfileById → rules.all() (Promise.all[0])
       a([]),                    // getProfileById → products.all() (Promise.all[1])
     ]);
-    const result = await setProfileRules(db as any, "prof_1", {
+    const result = await setProfileRules(db as any, "test-store", "prof_1", {
       rules: [{ wilayaId: 16, homePrice: 300, stopDeskPrice: 250, homeEnabled: true, stopDeskEnabled: false }],
     });
     expect(result).not.toBeNull();
@@ -239,7 +239,7 @@ describe("setProfileRules", () => {
       a([]),                    // rules (Promise.all[0])
       a([]),                    // products (Promise.all[1])
     ]);
-    const result = await setProfileRules(db as any, "prof_1", {
+    const result = await setProfileRules(db as any, "test-store", "prof_1", {
       rules: [
         { wilayaId: 16, homePrice: 0, stopDeskPrice: 0, homeEnabled: false, stopDeskEnabled: false },
         { wilayaId: 31, homePrice: 400, stopDeskPrice: 350, homeEnabled: true, stopDeskEnabled: false },

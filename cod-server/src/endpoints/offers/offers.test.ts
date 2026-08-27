@@ -13,32 +13,13 @@
 import { describe, it, expect } from "vitest";
 import { createOfferSchema, updateOfferSchema } from "./validation";
 import { getOfferById, createOffer, updateOffer, deleteOffer } from "./queries";
-import { makeMockDb, a } from "@/test-utils/mock-db";
+import { makeMockDb, a, offerRow } from "@/test-utils/mock-db";
 import { NotFoundError } from "@/lib/errors/classes";
 import { ERROR_CODES } from "../../../../cod-shared/errors/codes";
 
 const NOW = new Date().toISOString();
 
-// Helper to create a mock offer row
-function offerRow(overrides: Record<string, any> = {}) {
-  return {
-    id: "offer_1",
-    name: "Buy 2 Get 1 Free",
-    discount_type: "free",
-    trigger_product_id: "prod_1",
-    trigger_variant_id: null,
-    trigger_quantity: 2,
-    reward_product_id: "prod_1",
-    reward_variant_id: null,
-    reward_quantity: 1,
-    starts_at: null,
-    ends_at: null,
-    status: "active",
-    created_at: NOW,
-    updated_at: NOW,
-    ...overrides,
-  };
-}
+
 
 // Helper to create a mock product row
 function productRow(overrides: Record<string, any> = {}) {

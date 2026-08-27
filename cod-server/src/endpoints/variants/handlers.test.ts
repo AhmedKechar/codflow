@@ -78,6 +78,7 @@ describe("Variants Endpoint - Error Scenarios", () => {
       // Mock successful response
       vi.mocked(queries.getVariantById).mockResolvedValue({
         id: "var_123",
+        storeId: "test-store",
         productId: "prod_123",
         variations: { Color: "Red", Size: "M" },
         price: 45000,
@@ -144,6 +145,7 @@ describe("Variants Endpoint - Error Scenarios", () => {
       // Mock successful update
       vi.mocked(queries.updateVariant).mockResolvedValue({
         id: "var_123",
+        storeId: "test-store",
         productId: "prod_123",
         variations: { Color: "Red", Size: "M" },
         price: 50000,

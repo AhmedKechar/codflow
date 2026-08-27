@@ -38,6 +38,7 @@ export async function createUser(
   },
   initialScopes: string[],
   grantedBy: string,
+  storeId: string,
 ) {
   const nowDate = new Date();
   const nowMs = nowDate.getTime();
@@ -67,6 +68,7 @@ export async function createUser(
       initialScopes.map(scope => ({
         id: crypto.randomUUID(),
         userId: userData.id,
+        storeId,
         scope,
         grantedBy,
         grantedAt: nowIso,
@@ -112,7 +114,8 @@ export async function grantScope(
   db: Database,
   userId: string,
   scope: string,
-  grantedBy: string
+  grantedBy: string,
+  storeId: string,
 ) {
   const existing = await db
     .select()
@@ -127,6 +130,7 @@ export async function grantScope(
   await db.insert(userScopes).values({
     id: crypto.randomUUID(),
     userId,
+    storeId,
     scope,
     grantedBy,
     grantedAt: new Date(Date.now()).toISOString(),

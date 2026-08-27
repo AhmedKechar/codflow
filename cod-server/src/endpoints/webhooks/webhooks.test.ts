@@ -32,7 +32,7 @@ vi.mock("@/db", () => ({
 
 // Mock delivery companies queries
 vi.mock("@/endpoints/delivery-companies/queries", () => ({
-  getDeliveryCompanyByCode: vi.fn(),
+  getDeliveryCompanyByCodeGlobal: vi.fn(),
 }));
 
 // Mock webhook queries
@@ -68,7 +68,7 @@ vi.mock("@/workflows/capi-helpers", () => ({
   shouldTriggerCapiPurchase: vi.fn().mockReturnValue(false),
 }));
 
-import { getDeliveryCompanyByCode } from "@/endpoints/delivery-companies/queries";
+import { getDeliveryCompanyByCodeGlobal } from "@/endpoints/delivery-companies/queries";
 import {
   insertWebhookEvent,
   updateWebhookEvent,
@@ -110,7 +110,7 @@ describe("Webhooks Endpoint - Error Scenarios", () => {
         webhookSecret: "whsec_test123",
       };
       
-      vi.mocked(getDeliveryCompanyByCode).mockResolvedValue(mockCompany as any);
+      vi.mocked(getDeliveryCompanyByCodeGlobal).mockResolvedValue(mockCompany as any);
       vi.mocked(verifySvixSignature).mockResolvedValue(false);
 
       const payload = {
@@ -152,7 +152,7 @@ describe("Webhooks Endpoint - Error Scenarios", () => {
         webhookSecret: null,
       };
       
-      vi.mocked(getDeliveryCompanyByCode).mockResolvedValue(mockCompany as any);
+      vi.mocked(getDeliveryCompanyByCodeGlobal).mockResolvedValue(mockCompany as any);
 
       const res = await app.request("/webhooks/zr_express", {
         method: "POST",
@@ -184,7 +184,7 @@ describe("Webhooks Endpoint - Error Scenarios", () => {
         webhookSecret: null,
       };
       
-      vi.mocked(getDeliveryCompanyByCode).mockResolvedValue(mockCompany as any);
+      vi.mocked(getDeliveryCompanyByCodeGlobal).mockResolvedValue(mockCompany as any);
       vi.mocked(insertWebhookEvent).mockResolvedValue({
         id: "webhook_123",
         isDuplicate: false,
@@ -234,7 +234,7 @@ describe("Webhooks Endpoint - Error Scenarios", () => {
         webhookSecret: null,
       };
       
-      vi.mocked(getDeliveryCompanyByCode).mockResolvedValue(mockCompany as any);
+      vi.mocked(getDeliveryCompanyByCodeGlobal).mockResolvedValue(mockCompany as any);
       vi.mocked(insertWebhookEvent).mockResolvedValue({
         id: "webhook_123",
         isDuplicate: false,
@@ -308,7 +308,7 @@ describe("Webhooks Endpoint - Error Scenarios", () => {
         webhookSecret: null,
       };
       
-      vi.mocked(getDeliveryCompanyByCode).mockResolvedValue(mockCompany as any);
+      vi.mocked(getDeliveryCompanyByCodeGlobal).mockResolvedValue(mockCompany as any);
 
       const res = await app.request("/webhooks/yalidine", {
         method: "POST",
@@ -337,7 +337,7 @@ describe("Webhooks Endpoint - Error Scenarios", () => {
         webhookSecret: null,
       };
       
-      vi.mocked(getDeliveryCompanyByCode).mockResolvedValue(mockCompany as any);
+      vi.mocked(getDeliveryCompanyByCodeGlobal).mockResolvedValue(mockCompany as any);
       vi.mocked(insertWebhookEvent).mockResolvedValue({
         id: "webhook_123",
         isDuplicate: false,
@@ -391,7 +391,7 @@ describe("Webhooks Endpoint - Error Scenarios", () => {
         webhookSecret: null,
       };
       
-      vi.mocked(getDeliveryCompanyByCode).mockResolvedValue(mockCompany as any);
+      vi.mocked(getDeliveryCompanyByCodeGlobal).mockResolvedValue(mockCompany as any);
       vi.mocked(insertWebhookEvent).mockResolvedValue({
         id: "webhook_123",
         isDuplicate: false,
@@ -447,7 +447,7 @@ describe("Webhooks Endpoint - Error Scenarios", () => {
         webhookSecret: null,
       };
       
-      vi.mocked(getDeliveryCompanyByCode).mockResolvedValue(mockCompany as any);
+      vi.mocked(getDeliveryCompanyByCodeGlobal).mockResolvedValue(mockCompany as any);
 
       const res = await app.request("/webhooks/zr_express", {
         method: "POST",
@@ -477,7 +477,7 @@ describe("Webhooks Endpoint - Error Scenarios", () => {
         webhookSecret: null,
       };
       
-      vi.mocked(getDeliveryCompanyByCode).mockResolvedValue(mockCompany as any);
+      vi.mocked(getDeliveryCompanyByCodeGlobal).mockResolvedValue(mockCompany as any);
 
       const res = await app.request("/webhooks/yalidine", {
         method: "POST",

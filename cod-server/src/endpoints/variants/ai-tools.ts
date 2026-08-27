@@ -28,7 +28,7 @@ import { getDb } from "@/db";
  * - Layer 1 (LLM-level): Permissive input schema accepts any object to prevent SDK crashes
  * - Layer 2 (App-level): Strict validation inside execute() with graceful error handling
  */
-export const getVariantTools = (db: ReturnType<typeof getDb>) => ({
+export const getVariantTools = (db: ReturnType<typeof getDb>, storeId: string) => ({
 
   listProductVariants: tool({
     description:
@@ -55,7 +55,7 @@ export const getVariantTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const variants = await queries.getVariantsByProduct(db, parsed.data.productId);
+        const variants = await queries.getVariantsByProduct(db, storeId, parsed.data.productId);
         return {
           success: true,
           count: variants.length,
@@ -109,7 +109,7 @@ export const getVariantTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const variant = await queries.getVariantById(db, parsed.data.variantId);
+        const variant = await queries.getVariantById(db, storeId, parsed.data.variantId);
         if (!variant) {
           return {
             success: false,
@@ -169,6 +169,7 @@ export const getVariantTools = (db: ReturnType<typeof getDb>) => ({
       try {
         const variant = await queries.createVariant(
           db,
+          storeId,
           parsed.data.productId,
           parsed.data.variant,
         );
@@ -222,6 +223,7 @@ export const getVariantTools = (db: ReturnType<typeof getDb>) => ({
       try {
         const variant = await queries.updateVariant(
           db,
+          storeId,
           parsed.data.variantId,
           parsed.data.updates,
         );
@@ -271,7 +273,7 @@ export const getVariantTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const existing = await queries.getVariantById(db, parsed.data.variantId);
+        const existing = await queries.getVariantById(db, storeId, parsed.data.variantId);
         if (!existing) {
           return {
             success: false,
@@ -279,7 +281,7 @@ export const getVariantTools = (db: ReturnType<typeof getDb>) => ({
           };
         }
 
-        await queries.deleteVariant(db, parsed.data.variantId);
+        await queries.deleteVariant(db, storeId, parsed.data.variantId);
         return {
           success: true,
           message: `Variant ${parsed.data.variantId} (${JSON.stringify(existing.variations)}) deleted successfully`,

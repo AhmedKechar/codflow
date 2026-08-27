@@ -42,6 +42,7 @@ describe("Drivers Endpoint - Error Scenarios", () => {
     // Add middleware to inject mock env and user
     app.use("*", async (c, next) => {
       c.env = { DB: mockDb } as any;
+      c.set("storeId", "test-store");
       c.set("user", {
         id: "user-123",
         email: "test@example.com",
@@ -92,6 +93,7 @@ describe("Drivers Endpoint - Error Scenarios", () => {
       // Mock successful response
       vi.mocked(queries.getDriverById).mockResolvedValue({
         id: "drv_123",
+        storeId: "test-store",
         firstName: "Ahmed",
         lastName: "Benali",
         phone: "0551234567",
@@ -210,6 +212,7 @@ describe("Drivers Endpoint - Error Scenarios", () => {
       // Mock getDriverById to return a driver
       vi.mocked(queries.getDriverById).mockResolvedValue({
         id: "drv_123",
+        storeId: "test-store",
         firstName: "Ahmed",
         lastName: "Benali",
         phone: "0551234567",
@@ -253,6 +256,7 @@ describe("Drivers Endpoint - Error Scenarios", () => {
       // Mock getDriverById to return a driver
       vi.mocked(queries.getDriverById).mockResolvedValue({
         id: "drv_123",
+        storeId: "test-store",
         firstName: "Ahmed",
         lastName: "Benali",
         phone: "0551234567",

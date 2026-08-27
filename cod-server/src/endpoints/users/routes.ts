@@ -45,7 +45,7 @@ const listUsersRoute = createRoute({
   operationId: "listUsers",
   request: {
     query: z.object({
-      role: z.enum(["admin", "staff"]).optional(),
+      role: z.enum(["admin", "staff", "super_admin"]).optional(),
       status: z.enum(["active", "inactive"]).optional(),
       search: z.string().optional().openapi({ description: "Search by name or email" }),
       limit: z.coerce.number().int().positive().max(100).default(50),
@@ -90,7 +90,7 @@ const createUserRoute = createRoute({
         z.object({
           email: z.string().email("Invalid email format").openapi({ example: "staff@example.com" }),
           name: z.string().min(1, "Name is required").openapi({ example: "Ahmed Benali" }),
-          role: z.enum(["admin", "staff"]).default("staff").openapi({
+          role: z.enum(["admin", "staff", "super_admin"]).default("staff").openapi({
             description: "Defaults to `staff`.",
           }),
           scopes: z.array(z.string()).default([]).openapi({
@@ -173,7 +173,7 @@ const updateUserRoute = createRoute({
         z.object({
           email: z.string().email("Invalid email format").optional(),
           name: z.string().min(1, "Name is required").optional(),
-          role: z.enum(["admin", "staff"]).optional(),
+          role: z.enum(["admin", "staff", "super_admin"]).optional(),
           status: z.enum(["active", "inactive"]).optional(),
         })
       ),
@@ -213,7 +213,7 @@ const updateUserRoleRoute = createRoute({
       required: true,
       content: jsonContent(
         z.object({
-          role: z.enum(["admin", "staff"]),
+          role: z.enum(["admin", "staff", "super_admin"]),
         })
       ),
     },

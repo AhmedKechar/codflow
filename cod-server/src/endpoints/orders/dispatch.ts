@@ -33,10 +33,11 @@ export const DEFERRED_LABEL_MARKER = "deferred";
  */
 export async function dispatchToCompany(c: Context<AppContext>) {
   const db = getDb(c.env.DB);
+  const storeId = c.get("storeId")!;
   const orderId = c.req.param("id")!;
 
   // Load order
-  const order = await queries.getOrderById(db, orderId);
+  const order = await queries.getOrderById(db, storeId, orderId);
   if (!order) {
     throw new NotFoundError("Order", orderId);
   }
@@ -75,7 +76,7 @@ export async function dispatchToCompany(c: Context<AppContext>) {
   }
 
   // Load raw company (includes credentials needed by getProvider) - CHECK BEFORE ASSIGNING
-  const company = await getDeliveryCompanyRaw(db, effectiveCompanyId);
+  const company = await getDeliveryCompanyRaw(db, storeId, effectiveCompanyId);
   if (!company) {
     throw new NotFoundError("Delivery company", effectiveCompanyId);
   }
@@ -85,7 +86,7 @@ export async function dispatchToCompany(c: Context<AppContext>) {
 
   // If a new companyId was supplied, persist it on the order before dispatching
   if (bodyCompanyId && bodyCompanyId !== order.companyId) {
-    await queries.assignCompany(db, orderId, bodyCompanyId);
+    await queries.assignCompany(db, storeId, orderId, bodyCompanyId);
   }
 
   if (!order.wilayaId || !order.communeId) {
@@ -187,7 +188,7 @@ export async function dispatchToCompany(c: Context<AppContext>) {
       rawResponse: result.rawResponse,
     });
 
-    await queries.updateOrderTracking(db, order.id, result.trackingNumber);
+    await queries.updateOrderTracking(db, storeId, order.id, result.trackingNumber);
 
     const dispatchUser = c.get("user");
     const PRE_DISPATCH_STATUSES = ["new", "confirmed", "unreachable", "preparing", "ready", "assigned", "dispatched"];
@@ -243,12 +244,12 @@ export async function dispatchToCompany(c: Context<AppContext>) {
         console.warn(`[dispatch] validate failed order=${orderId} via ${company.code}:`, validateMsg);
       }
       if (PRE_DISPATCH_STATUSES.includes(order.status)) {
-        await queries.updateOrderStatus(db, order.id, "out_for_delivery", dispatchUser?.id, dispatchUser?.name ?? undefined);
+        await queries.updateOrderStatus(db, storeId, order.id, "out_for_delivery", dispatchUser?.id, dispatchUser?.name ?? undefined);
       }
     } else {
       // Manual-validate path: parcel created at carrier, waits for team to validate.
       if (PRE_DISPATCH_STATUSES.includes(order.status)) {
-        await queries.updateOrderStatus(db, order.id, "dispatched", dispatchUser?.id, dispatchUser?.name ?? undefined);
+        await queries.updateOrderStatus(db, storeId, order.id, "dispatched", dispatchUser?.id, dispatchUser?.name ?? undefined);
       }
     }
 
@@ -288,9 +289,10 @@ export async function dispatchToCompany(c: Context<AppContext>) {
  */
 export async function validateShipmentManually(c: Context<AppContext>) {
   const db = getDb(c.env.DB);
+  const storeId = c.get("storeId")!;
   const orderId = c.req.param("id")!;
 
-  const order = await queries.getOrderById(db, orderId);
+  const order = await queries.getOrderById(db, storeId, orderId);
   if (!order) throw new NotFoundError("Order", orderId);
 
   if (order.status !== "dispatched") {
@@ -311,7 +313,7 @@ export async function validateShipmentManually(c: Context<AppContext>) {
 
   if (!order.companyId) throw new ValidationError("Order has no delivery company assigned", ERROR_CODES.REQUIRED_FIELD_MISSING);
 
-  const company = await getDeliveryCompanyRaw(db, order.companyId);
+  const company = await getDeliveryCompanyRaw(db, storeId, order.companyId);
   if (!company) throw new NotFoundError("Delivery company", order.companyId);
   if (!company.active) throw new BusinessLogicError("Delivery company is inactive", ERROR_CODES.COMPANY_INACTIVE, { companyId: order.companyId });
 
@@ -343,7 +345,7 @@ export async function validateShipmentManually(c: Context<AppContext>) {
         await setShipmentValidated(db, shipment.id, true);
       }
 
-      await queries.updateOrderStatus(db, orderId, "out_for_delivery",
+      await queries.updateOrderStatus(db, storeId, orderId, "out_for_delivery",
         c.get("user")?.id, c.get("user")?.name ?? undefined);
 
       await logApiCall(db, {
@@ -405,11 +407,12 @@ export async function validateShipmentManually(c: Context<AppContext>) {
  */
 export async function bulkDispatch(c: Context<AppContext>) {
   const db = getDb(c.env.DB);
+  const storeId = c.get("storeId")!;
   const bodyData: any = (c.req as any).valid?.("json");
   const validated = bodyData ?? validation.bulkDispatchSchema.parse(await c.req.json());
 
   // Load the company (with credentials)
-  const company = await getDeliveryCompanyRaw(db, validated.companyId);
+  const company = await getDeliveryCompanyRaw(db, storeId, validated.companyId);
   if (!company) throw new NotFoundError("Delivery company", validated.companyId);
   if (!company.active) throw new BusinessLogicError("Delivery company is inactive", ERROR_CODES.COMPANY_INACTIVE);
 
@@ -446,7 +449,7 @@ export async function bulkDispatch(c: Context<AppContext>) {
   const validOrders: Array<{ order: NonNullable<Awaited<ReturnType<typeof queries.getOrderById>>>; input: import("@/endpoints/delivery-companies/providers/types").CreateShipmentInput }> = [];
 
   for (const orderId of validated.orderIds) {
-    const order = await queries.getOrderById(db, orderId);
+    const order = await queries.getOrderById(db, storeId, orderId);
     if (!order) {
       orderResults.push({ orderId, error: `Order not found: ${orderId}` });
       continue;
@@ -547,7 +550,7 @@ export async function bulkDispatch(c: Context<AppContext>) {
           rawResponse: result,
         });
 
-        await queries.updateOrderTracking(db, order.id, result.trackingNumber);
+        await queries.updateOrderTracking(db, storeId, order.id, result.trackingNumber);
 
         if (company.autoValidate) {
           const validateStart = Date.now();
@@ -581,11 +584,11 @@ export async function bulkDispatch(c: Context<AppContext>) {
           }
 
           if (validated && PRE_DISPATCH_STATUSES.includes(order.status)) {
-            await queries.updateOrderStatus(db, order.id, "out_for_delivery", actor?.id, actor?.name ?? undefined);
+            await queries.updateOrderStatus(db, storeId, order.id, "out_for_delivery", actor?.id, actor?.name ?? undefined);
           }
         } else {
           if (PRE_DISPATCH_STATUSES.includes(order.status)) {
-            await queries.updateOrderStatus(db, order.id, "dispatched", actor?.id, actor?.name ?? undefined);
+            await queries.updateOrderStatus(db, storeId, order.id, "dispatched", actor?.id, actor?.name ?? undefined);
           }
         }
 

@@ -1,0 +1,16 @@
+{
+  "title": "Utilisateurs",
+  "subtitle": "Gérer les utilisateurs de la plateforme",
+  "name": "Nom",
+  "email": "Email",
+  "role": "Rôle",
+  "status": "Statut",
+  "active": "Actif",
+  "inactive": "Inactif",
+  "super_admin": "Super Admin",
+  "admin": "Admin",
+  "staff": "Personnel",
+  "created_at": "Créé le",
+  "no_users": "Aucun utilisateur trouvé",
+  "search": "Rechercher par nom ou email..."
+}

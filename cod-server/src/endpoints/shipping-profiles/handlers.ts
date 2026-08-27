@@ -65,10 +65,11 @@ export async function createProfile(c: Context<AppContext>) {
  */
 export async function updateProfile(c: Context<AppContext>) {
   const db = getDb(c.env.DB);
+  const storeId = c.get("storeId")!;
   const id = c.req.param("id")!;
   const jsonBody: any = (c.req as any).valid?.("json");
   const body = jsonBody ?? validation.updateProfileSchema.parse(await c.req.json());
-  const profile = await queries.updateProfile(db, id, body);
+  const profile = await queries.updateProfile(db, storeId, id, body);
   if (!profile) {
     throw new NotFoundError("shipping_profile", id);
   }
@@ -122,10 +123,11 @@ export async function deleteProfile(c: Context<AppContext>) {
  */
 export async function setProfileRules(c: Context<AppContext>) {
   const db = getDb(c.env.DB);
+  const storeId = c.get("storeId")!;
   const id = c.req.param("id")!;
   const jsonBody: any = (c.req as any).valid?.("json");
   const body = jsonBody ?? validation.bulkRulesSchema.parse(await c.req.json());
-  const profile = await queries.setProfileRules(db, id, body);
+  const profile = await queries.setProfileRules(db, storeId, id, body);
   if (!profile) {
     throw new NotFoundError("shipping_profile", id);
   }

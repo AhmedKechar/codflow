@@ -219,6 +219,7 @@ export async function saveProductImage(c: Context<AppContext>) {
 
   const image = {
     id,
+    storeId: "",
     productId,
     src: body.src,
     r2Key: body.key,

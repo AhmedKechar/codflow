@@ -14,6 +14,7 @@ import { eq, desc } from "drizzle-orm";
 export async function createShipmentRecord(
   db: AppDb,
   data: {
+    storeId?: string;
     orderId: string;
     companyId: string;
     trackingNumber: string;
@@ -26,6 +27,7 @@ export async function createShipmentRecord(
 
   await db.insert(companyShipments).values({
     id,
+    storeId: data.storeId ?? "",
     orderId: data.orderId,
     companyId: data.companyId,
     trackingNumber: data.trackingNumber,
@@ -72,6 +74,7 @@ export async function getShipmentByOrder(db: AppDb, orderId: string) {
 export async function logApiCall(
   db: AppDb,
   data: {
+    storeId?: string;
     companyId: string;
     orderId?: string | null;
     action: string;
@@ -87,6 +90,7 @@ export async function logApiCall(
 ) {
   await db.insert(companyApiLogs).values({
     id: crypto.randomUUID(),
+    storeId: data.storeId ?? "",
     companyId: data.companyId,
     orderId: data.orderId ?? null,
     action: data.action,

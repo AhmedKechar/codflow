@@ -19,6 +19,7 @@ import { ERROR_CODES } from "../../../../cod-shared/errors/codes";
  */
 export async function listDrivers(c: Context<AppContext>) {
   const db = getDb(c.env.DB);
+  const storeId = c.get("storeId")!;
   const query: any = (c.req as any).valid?.("query");
   const filters = query ?? validation.driverFiltersSchema.parse({
     wilayaId: c.req.query("wilayaId"),
@@ -28,7 +29,7 @@ export async function listDrivers(c: Context<AppContext>) {
     limit: c.req.query("limit"),
     offset: c.req.query("offset"),
   });
-  const data = await queries.getAllDrivers(db, filters);
+  const data = await queries.getAllDrivers(db, storeId, filters);
   return c.json({ success: true, data, count: data.length }, 200);
 }
 
@@ -38,13 +39,14 @@ export async function listDrivers(c: Context<AppContext>) {
  */
 export async function getDriver(c: Context<AppContext>) {
   const db = getDb(c.env.DB);
+  const storeId = c.get("storeId")!;
   const driverId = c.req.param("id");
 
   if (!driverId) {
     throw new ValidationError("Driver ID is required", ERROR_CODES.REQUIRED_FIELD_MISSING, { field: "id" });
   }
 
-  const driver = await queries.getDriverById(db, driverId);
+  const driver = await queries.getDriverById(db, storeId, driverId);
 
   if (!driver) {
     throw new NotFoundError("Driver", driverId);
@@ -59,11 +61,12 @@ export async function getDriver(c: Context<AppContext>) {
  */
 export async function createDriver(c: Context<AppContext>) {
   const db = getDb(c.env.DB);
+  const storeId = c.get("storeId")!;
   const jsonBody: any = (c.req as any).valid?.("json");
   const body = jsonBody ?? validation.createDriverSchema.parse(await c.req.json());
   
   try {
-    const driver = await queries.createDriver(db, body);
+    const driver = await queries.createDriver(db, storeId, body);
     if (!driver) {
       throw new SystemError("Failed to create driver");
     }
@@ -87,12 +90,13 @@ export async function createDriver(c: Context<AppContext>) {
  */
 export async function updateDriver(c: Context<AppContext>) {
   const db = getDb(c.env.DB);
+  const storeId = c.get("storeId")!;
   const id = c.req.param("id")!;
   const jsonBody: any = (c.req as any).valid?.("json");
   const body = jsonBody ?? validation.updateDriverSchema.parse(await c.req.json());
   
   try {
-    const driver = await queries.updateDriver(db, id, body);
+    const driver = await queries.updateDriver(db, storeId, id, body);
 
     if (!driver) {
       throw new NotFoundError("Driver", id);
@@ -118,10 +122,11 @@ export async function updateDriver(c: Context<AppContext>) {
  */
 export async function updateDriverStatus(c: Context<AppContext>) {
   const db = getDb(c.env.DB);
+  const storeId = c.get("storeId")!;
   const id = c.req.param("id")!;
   const jsonBody: any = (c.req as any).valid?.("json");
   const body = jsonBody ?? validation.updateDriverStatusSchema.parse(await c.req.json());
-  const driver = await queries.updateDriverStatus(db, id, body.status);
+  const driver = await queries.updateDriverStatus(db, storeId, id, body.status);
 
   if (!driver) {
     throw new NotFoundError("Driver", id);
@@ -140,15 +145,16 @@ export async function updateDriverStatus(c: Context<AppContext>) {
  */
 export async function deleteDriver(c: Context<AppContext>) {
   const db = getDb(c.env.DB);
+  const storeId = c.get("storeId")!;
   const id = c.req.param("id")!;
 
-  const existing = await queries.getDriverById(db, id);
+  const existing = await queries.getDriverById(db, storeId, id);
   if (!existing) {
     throw new NotFoundError("Driver", id);
   }
 
   // ConflictError thrown here if driver has active orders (handled by global error handler)
-  await queries.deleteDriver(db, id);
+  await queries.deleteDriver(db, storeId, id);
 
   const deleteActor = c.get("user");
   await logActivity(db, deleteActor, ACTIONS.DRIVER_DELETED, { type: "driver", id });
@@ -176,14 +182,15 @@ function parseWilayaId(raw: string | undefined): number {
  */
 export async function listCompensations(c: Context<AppContext>) {
   const db = getDb(c.env.DB);
+  const storeId = c.get("storeId")!;
   const driverId = c.req.param("id")!;
 
-  const driver = await queries.getDriverById(db, driverId);
+  const driver = await queries.getDriverById(db, storeId, driverId);
   if (!driver) {
     throw new NotFoundError("Driver", driverId);
   }
 
-  const data = await queries.getCompensationsForDriver(db, driverId);
+  const data = await queries.getCompensationsForDriver(db, storeId, driverId);
   return c.json({ success: true, data }, 200);
 }
 
@@ -193,17 +200,18 @@ export async function listCompensations(c: Context<AppContext>) {
  */
 export async function setCompensation(c: Context<AppContext>) {
   const db = getDb(c.env.DB);
+  const storeId = c.get("storeId")!;
   const driverId = c.req.param("id")!;
   const wilayaId = parseWilayaId(c.req.param("wilayaId"));
 
-  const driver = await queries.getDriverById(db, driverId);
+  const driver = await queries.getDriverById(db, storeId, driverId);
   if (!driver) {
     throw new NotFoundError("Driver", driverId);
   }
 
   const jsonBody: any = (c.req as any).valid?.("json");
   const body = jsonBody ?? validation.setCompensationSchema.parse(await c.req.json());
-  const row = await queries.setCompensation(db, driverId, wilayaId, body.feePerDelivery);
+  const row = await queries.setCompensation(db, storeId, driverId, wilayaId, body.feePerDelivery);
   if (!row) {
     throw new SystemError("Failed to save compensation");
   }
@@ -227,15 +235,16 @@ export async function setCompensation(c: Context<AppContext>) {
  */
 export async function deleteCompensation(c: Context<AppContext>) {
   const db = getDb(c.env.DB);
+  const storeId = c.get("storeId")!;
   const driverId = c.req.param("id")!;
   const wilayaId = parseWilayaId(c.req.param("wilayaId"));
 
-  const driver = await queries.getDriverById(db, driverId);
+  const driver = await queries.getDriverById(db, storeId, driverId);
   if (!driver) {
     throw new NotFoundError("Driver", driverId);
   }
 
-  const deleted = await queries.deleteCompensation(db, driverId, wilayaId);
+  const deleted = await queries.deleteCompensation(db, storeId, driverId, wilayaId);
   if (!deleted) {
     throw new NotFoundError("Driver compensation", `driver=${driverId} wilaya=${wilayaId}`);
   }

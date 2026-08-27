@@ -1,0 +1,16 @@
+{
+  "title": "لوحة تحكم المنصة",
+  "subtitle": "نظرة عامة على منصة CodFlow",
+  "total_stores": "إجمالي المتاجر",
+  "active_subscriptions": "اشتراكات نشطة",
+  "pending_payments": "مدفوعات معلّقة",
+  "total_revenue": "إجمالي الإيرادات",
+  "stores": "المتاجر",
+  "plans": "الخطط",
+  "payments": "المدفوعات",
+  "view_all": "عرض الكل",
+  "recent_payments": "أحدث المدفوعات",
+  "recent_stores": "أحدث المتاجر",
+  "no_data": "لا توجد بيانات",
+  "currency": "دج"
+}

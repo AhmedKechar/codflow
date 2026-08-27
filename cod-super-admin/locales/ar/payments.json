@@ -1,0 +1,27 @@
+{
+  "title": "المدفوعات",
+  "subtitle": "مراجعة واعتماد مدفوعات الاشتراكات",
+  "pending": "معلّقة",
+  "approved": "معتمدة",
+  "rejected": "مرفوضة",
+  "all": "الكل",
+  "store": "المتجر",
+  "amount_dzd": "المبلغ (دج)",
+  "method": "طريقة الدفع",
+  "status": "الحالة",
+  "date": "التاريخ",
+  "approve": "اعتماد",
+  "reject": "رفض",
+  "review_notes": "ملاحظات المراجعة",
+  "no_payments": "لا توجد مدفوعات",
+  "approved_success": "تم اعتماد الدفع",
+  "rejected_success": "تم رفض الدفع",
+  "confirm_approve": "هل أنت متأكد من اعتماد هذه الدفعة؟",
+  "confirm_reject": "هل أنت متأكد من رفض هذه الدفعة؟",
+  "payment_methods": {
+    "ccp": "CCP",
+    "baridi_mob": "بريدي موب",
+    "wise": "Wise",
+    "redotpay": "Redotpay"
+  }
+}

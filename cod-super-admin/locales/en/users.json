@@ -1,0 +1,16 @@
+{
+  "title": "Users",
+  "subtitle": "Manage platform users",
+  "name": "Name",
+  "email": "Email",
+  "role": "Role",
+  "status": "Status",
+  "active": "Active",
+  "inactive": "Inactive",
+  "super_admin": "Super Admin",
+  "admin": "Admin",
+  "staff": "Staff",
+  "created_at": "Created At",
+  "no_users": "No users found",
+  "search": "Search by name or email..."
+}

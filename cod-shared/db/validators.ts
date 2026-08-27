@@ -6,6 +6,7 @@
 import { eq, and } from "drizzle-orm";
 import type { AppDb } from "./client";
 import { stores, storeMembers, subscriptions, plans } from "./schema";
+import type { plans as PlansType } from "./schema";
 
 // ─── Store Validation ──────────────────────────────────────────────────────────
 
@@ -85,15 +86,38 @@ export async function validateSubscription(db: AppDb, storeId: string): Promise<
  * Get the current subscription for a store.
  */
 export async function getCurrentSubscription(db: AppDb, storeId: string) {
-  return db.query.subscriptions.findFirst({
-    where: and(
-      eq(subscriptions.storeId, storeId),
-      eq(subscriptions.status, "active")
-    ),
-    with: {
-      plan: true,
-    },
-  });
+  const row = await db
+    .select({
+      id: subscriptions.id,
+      storeId: subscriptions.storeId,
+      planId: subscriptions.planId,
+      status: subscriptions.status,
+      trialStart: subscriptions.trialStart,
+      trialEnd: subscriptions.trialEnd,
+      currentPeriodStart: subscriptions.currentPeriodStart,
+      currentPeriodEnd: subscriptions.currentPeriodEnd,
+      cancelAt: subscriptions.cancelAt,
+      canceledAt: subscriptions.canceledAt,
+      paymentMethod: subscriptions.paymentMethod,
+      notes: subscriptions.notes,
+      createdAt: subscriptions.createdAt,
+      updatedAt: subscriptions.updatedAt,
+      plan: plans,
+    })
+    .from(subscriptions)
+    .innerJoin(plans, eq(subscriptions.planId, plans.id))
+    .where(
+      and(
+        eq(subscriptions.storeId, storeId),
+        eq(subscriptions.status, "active")
+      )
+    )
+    .get();
+
+  if (!row) return undefined;
+
+  const { plan: planData, ...subData } = row;
+  return { ...subData, plan: planData };
 }
 
 /**

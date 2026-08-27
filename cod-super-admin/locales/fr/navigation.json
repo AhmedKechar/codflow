@@ -1,0 +1,11 @@
+{
+  "dashboard": "Tableau de bord",
+  "plans": "Forfaits",
+  "payments": "Paiements",
+  "stores": "Boutiques",
+  "users": "Utilisateurs",
+  "provider_keys": "Clés fournisseurs",
+  "super_admin": "Panneau de la plateforme",
+  "sign_out": "Déconnexion",
+  "language": "Langue"
+}

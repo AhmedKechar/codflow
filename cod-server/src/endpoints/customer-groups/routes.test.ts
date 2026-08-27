@@ -32,6 +32,7 @@ const NOW = new Date().toISOString();
 function groupRow(overrides: Record<string, any> = {}) {
   return {
     id: "grp_123",
+    storeId: "test-store",
     name: "VIP Customers",
     description: "High value customers",
     color: "#3B82F6",

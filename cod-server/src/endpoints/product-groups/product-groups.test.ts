@@ -111,7 +111,7 @@ describe("groupFiltersSchema", () => {
 describe("getGroupById", () => {
   it("returns null when group does not exist", async () => {
     const db = makeMockDb([f(null)]);
-    const result = await getGroupById(db as any, "cat_missing");
+    const result = await getGroupById(db as any, "test-store", "cat_missing");
     expect(result).toBeNull();
   });
 
@@ -122,7 +122,7 @@ describe("getGroupById", () => {
       a([]),           // children (Promise.all[0])
       f({ count: 0 }), // productsCount (Promise.all[1])
     ]);
-    const result = await getGroupById(db as any, "cat_1");
+    const result = await getGroupById(db as any, "test-store", "cat_1");
     expect(result).not.toBeNull();
     expect(result!.id).toBe("cat_1");
     expect(result!.children).toEqual([]);
@@ -136,7 +136,7 @@ describe("getGroupById", () => {
       a([childCat]),   // 1 child
       f({ count: 0 }),
     ]);
-    const result = await getGroupById(db as any, "cat_1");
+    const result = await getGroupById(db as any, "test-store", "cat_1");
     expect(result!.children).toHaveLength(1);
   });
 
@@ -146,7 +146,7 @@ describe("getGroupById", () => {
       a([]),
       f({ count: 5 }),
     ]);
-    const result = await getGroupById(db as any, "cat_1");
+    const result = await getGroupById(db as any, "test-store", "cat_1");
     expect(result!.productsCount).toBe(5);
   });
 });
@@ -161,7 +161,7 @@ describe("createGroup", () => {
       a([]),
       f({ count: 0 }),
     ]);
-    const result = await createGroup(db as any, { name: "إكسسوارات", position: 0 });
+    const result = await createGroup(db as any, "test-store", { name: "إكسسوارات", position: 0 });
     expect(result).not.toBeNull();
     expect(result!.id).toBeDefined();
   });
@@ -172,7 +172,7 @@ describe("createGroup", () => {
       a([]),
       f({ count: 0 }),
     ]);
-    const result = await createGroup(db as any, { name: "إكسسوارات", position: 0 });
+    const result = await createGroup(db as any, "test-store", { name: "إكسسوارات", position: 0 });
     expect(result!.slug).toBeDefined();
   });
 
@@ -182,7 +182,7 @@ describe("createGroup", () => {
       a([]),
       f({ count: 0 }),
     ]);
-    const result = await createGroup(db as any, {
+    const result = await createGroup(db as any, "test-store", {
       name: "Accessories",
       slug: "accessories",
       position: 1,
@@ -201,7 +201,7 @@ describe("updateGroup", () => {
       a([]),
       f({ count: 2 }),
     ]);
-    const result = await updateGroup(db as any, "cat_1", { name: "ملابس نسائية" });
+    const result = await updateGroup(db as any, "test-store", "cat_1", { name: "ملابس نسائية" });
     expect(result).not.toBeNull();
     expect(result!.productsCount).toBe(2);
   });
@@ -213,13 +213,13 @@ describe("deleteGroup", () => {
   it("succeeds even when category has products (sets categoryId to null via FK)", async () => {
     // DELETE cascades: products.category_id → set null (onDelete: "set null")
     const db = makeMockDb([]);
-    const result = await deleteGroup(db as any, "cat_1");
+    const result = await deleteGroup(db as any, "test-store", "cat_1");
     expect(result).toEqual({ success: true });
   });
 
   it("succeeds when category has no products", async () => {
     const db = makeMockDb([]);
-    const result = await deleteGroup(db as any, "cat_1");
+    const result = await deleteGroup(db as any, "test-store", "cat_1");
     expect(result).toEqual({ success: true });
   });
 });

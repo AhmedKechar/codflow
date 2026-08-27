@@ -85,6 +85,7 @@ describe("Customer Groups Endpoint - Error Scenarios", () => {
       // Mock successful response
       vi.mocked(queries.getGroupById).mockResolvedValue({
         id: "grp_123",
+        storeId: "test-store",
         name: "VIP Customers",
         description: "High value customers",
         color: "#3B82F6",
@@ -135,6 +136,7 @@ describe("Customer Groups Endpoint - Error Scenarios", () => {
       // Mock getGroupById to return a group with members
       vi.mocked(queries.getGroupById).mockResolvedValue({
         id: "grp_123",
+        storeId: "test-store",
         name: "VIP Customers",
         description: "High value customers",
         color: "#3B82F6",
@@ -165,6 +167,7 @@ describe("Customer Groups Endpoint - Error Scenarios", () => {
       // Mock getGroupById to return a group with no members
       vi.mocked(queries.getGroupById).mockResolvedValue({
         id: "grp_123",
+        storeId: "test-store",
         name: "Empty Group",
         description: null,
         color: "#3B82F6",
@@ -266,6 +269,7 @@ describe("Customer Groups Endpoint - Error Scenarios", () => {
     it("should include context field when available", async () => {
       vi.mocked(queries.getGroupById).mockResolvedValue({
         id: "grp_123",
+        storeId: "test-store",
         name: "VIP Customers",
         description: null,
         color: "#3B82F6",

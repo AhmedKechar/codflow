@@ -1,0 +1,15 @@
+{
+  "title": "Stores",
+  "subtitle": "Manage all platform stores",
+  "name": "Name",
+  "domain": "Domain",
+  "status": "Status",
+  "active": "Active",
+  "inactive": "Inactive",
+  "plan": "Plan",
+  "subscription_status": "Subscription Status",
+  "created_at": "Created At",
+  "no_stores": "No stores found",
+  "view_store": "View",
+  "search": "Search by name or domain..."
+}

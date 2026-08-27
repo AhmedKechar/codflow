@@ -63,6 +63,7 @@ describe("Abandoned Orders routes (OpenAPIHono)", () => {
     app = new OpenAPIHono<AppContext>({ defaultHook: openApiValidationHook });
     app.use("*", async (c, next) => {
       c.env = { DB: mockDb } as any;
+      c.set("storeId", "test-store");
       c.set("user", {
         id: "admin_user_001",
         email: "admin@example.com",
@@ -99,6 +100,7 @@ describe("Abandoned Orders routes (OpenAPIHono)", () => {
       expect(body.offset).toBe(5);
       expect(listAbandonedOrders).toHaveBeenCalledWith(
         mockDb,
+        "test-store",
         expect.objectContaining({ status: "abandoned", limit: 25, offset: 5 })
       );
     });
@@ -138,7 +140,7 @@ describe("Abandoned Orders routes (OpenAPIHono)", () => {
       });
 
       expect(res.status).toBe(200);
-      expect(updateAbandonedOrderStatus).toHaveBeenCalledWith(mockDb, "ab_1", "contacted");
+      expect(updateAbandonedOrderStatus).toHaveBeenCalledWith(mockDb, "test-store", "ab_1", "contacted");
     });
 
     it("rejects an invalid status with 400", async () => {
@@ -159,7 +161,7 @@ describe("Abandoned Orders routes (OpenAPIHono)", () => {
       const res = await app.request("/api/abandoned-orders/ab_1", { method: "DELETE" });
 
       expect(res.status).toBe(200);
-      expect(deleteAbandonedOrder).toHaveBeenCalledWith(mockDb, "ab_1");
+      expect(deleteAbandonedOrder).toHaveBeenCalledWith(mockDb, "test-store", "ab_1");
     });
   });
 
@@ -186,6 +188,7 @@ describe("Abandoned Orders routes (OpenAPIHono)", () => {
       expect(body.id).toBe("ab_new");
       expect(upsertAbandonedOrder).toHaveBeenCalledWith(
         mockDb,
+        "test-store",
         expect.objectContaining({ sessionId: "9b2f8a3c-1d4e-5f67-a89b-cd012345ef67" })
       );
     });

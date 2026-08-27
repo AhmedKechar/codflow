@@ -1,0 +1,15 @@
+{
+  "title": "Boutiques",
+  "subtitle": "Gérer toutes les boutiques de la plateforme",
+  "name": "Nom",
+  "domain": "Domaine",
+  "status": "Statut",
+  "active": "Actif",
+  "inactive": "Inactif",
+  "plan": "Forfait",
+  "subscription_status": "Statut d'abonnement",
+  "created_at": "Créé le",
+  "no_stores": "Aucune boutique trouvée",
+  "view_store": "Voir",
+  "search": "Rechercher par nom ou domaine..."
+}

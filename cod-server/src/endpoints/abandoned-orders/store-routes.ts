@@ -108,6 +108,7 @@ const router = new OpenAPIHono<AppContext>();
 
 router.openapi(upsertAbandonedRoute, async (c) => {
   const db = getDb(c.env.DB);
+  const storeId = c.get("storeId")!;
   const data = c.req.valid("json");
 
   const ipAddress =
@@ -116,7 +117,7 @@ router.openapi(upsertAbandonedRoute, async (c) => {
     undefined;
   const userAgent = c.req.header("User-Agent") ?? undefined;
 
-  const id = await upsertAbandonedOrder(db, {
+  const id = await upsertAbandonedOrder(db, storeId, {
     ...data,
     ipAddress,
     userAgent,
@@ -127,11 +128,12 @@ router.openapi(upsertAbandonedRoute, async (c) => {
 
 router.openapi(convertAbandonedRoute, async (c) => {
   const db = getDb(c.env.DB);
+  const storeId = c.get("storeId")!;
   const sessionId = c.req.param("sessionId");
   const { orderId, orderNumber } = c.req.valid("json");
 
   // Intentionally returns 200 even if session not found — convert is fire-and-forget
-  await markAbandonedOrderConverted(db, sessionId, orderId, orderNumber).catch(
+  await markAbandonedOrderConverted(db, storeId, sessionId, orderId, orderNumber).catch(
     () => {}
   );
 

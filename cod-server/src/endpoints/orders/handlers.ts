@@ -96,7 +96,7 @@ export async function createOrder(c: Context<AppContext>) {
 
     // Validate companyId if provided — it references a delivery_companies FK
     if (validated.companyId) {
-      const company = await getDeliveryCompanyById(db, validated.companyId);
+      const company = await getDeliveryCompanyById(db, storeId, validated.companyId);
       if (!company) {
         throw new NotFoundError("Delivery company", validated.companyId);
       }
@@ -148,6 +148,7 @@ export async function createOrder(c: Context<AppContext>) {
 
       await db.insert(customers).values({
         id: validated.customerId,
+        storeId,
         name: validated.customerName,
         phone: validated.phone,
         phone2: null,
@@ -166,6 +167,7 @@ export async function createOrder(c: Context<AppContext>) {
     // Prepare order data
     const orderData = {
       id: orderId,
+      storeId,
       orderNumber,
       customerId: validated.customerId,
       customerName: validated.customerName,
@@ -191,6 +193,7 @@ export async function createOrder(c: Context<AppContext>) {
     // Prepare order products
     const productsData = validated.products.map((p) => ({
       id: crypto.randomUUID(),
+      storeId,
       orderId,
       productId: p.productId,
       productName: p.productName,

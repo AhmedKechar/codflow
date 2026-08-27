@@ -102,11 +102,13 @@ export async function createUser(c: Context<AppContext>) {
   }
 
   // 5. Insert user + credential account + scopes
+  const storeId = c.get("storeId")!;
   const user = await queries.createUser(
     db,
     { id: userId, email: validated.email, name: validated.name, role: validated.role, status: "active", apiKey: rawApiKey, passwordHash },
     validated.scopes,
     actor.id,
+    storeId,
   );
 
   if (!user) {
@@ -115,7 +117,7 @@ export async function createUser(c: Context<AppContext>) {
 
   await logActivity(db, actor, ACTIONS.USER_CREATED, {
     type: "user", id: userId, label: validated.name,
-  }, { role: validated.role });
+  }, { role: validated.role }, storeId);
 
   return c.json({
     success: true,
@@ -144,7 +146,7 @@ export async function updateUser(c: Context<AppContext>) {
   const actor = c.get("user");
   await logActivity(db, actor, ACTIONS.USER_UPDATED, {
     type: "user", id, label: user.name ?? undefined,
-  });
+  }, undefined, c.get("storeId")!);
   return c.json({ success: true, data: user, message: "User updated successfully" }, 200);
 }
 
@@ -167,7 +169,7 @@ export async function updateUserRole(c: Context<AppContext>) {
   const actor = c.get("user");
   await logActivity(db, actor, ACTIONS.USER_ROLE_CHANGED, {
     type: "user", id, label: user.name ?? undefined,
-  }, { role });
+  }, { role }, c.get("storeId")!);
   return c.json({ success: true, data: user, message: "User role updated successfully" }, 200);
 }
 
@@ -188,14 +190,15 @@ export async function grantScope(c: Context<AppContext>) {
   }
 
   try {
-    const user = await queries.grantScope(db, id, validated.scope, currentUser?.id || "system");
+    const storeId = c.get("storeId")!;
+    const user = await queries.grantScope(db, id, validated.scope, currentUser?.id || "system", storeId);
     if (!user) {
       throw new SystemError("Failed to grant scope");
     }
     if (currentUser) {
       await logActivity(db, currentUser, ACTIONS.USER_SCOPE_GRANTED, {
         type: "user", id,
-      }, { scope: validated.scope });
+      }, { scope: validated.scope }, storeId);
     }
     return c.json({ success: true, data: user, message: "Scope granted successfully" }, 200);
   } catch (err) {
@@ -234,7 +237,7 @@ export async function revokeScope(c: Context<AppContext>) {
     throw new SystemError("Failed to revoke scope");
   }
   const actor = c.get("user");
-  await logActivity(db, actor, ACTIONS.USER_SCOPE_REVOKED, { type: "user", id }, { scope });
+  await logActivity(db, actor, ACTIONS.USER_SCOPE_REVOKED, { type: "user", id }, { scope }, c.get("storeId")!);
   return c.json({ success: true, data: user, message: "Scope revoked successfully" }, 200);
 }
 

@@ -1,0 +1,16 @@
+{
+  "title": "Platform Dashboard",
+  "subtitle": "CodFlow platform overview",
+  "total_stores": "Total Stores",
+  "active_subscriptions": "Active Subscriptions",
+  "pending_payments": "Pending Payments",
+  "total_revenue": "Total Revenue",
+  "stores": "Stores",
+  "plans": "Plans",
+  "payments": "Payments",
+  "view_all": "View All",
+  "recent_payments": "Recent Payments",
+  "recent_stores": "Recent Stores",
+  "no_data": "No data",
+  "currency": "DA"
+}

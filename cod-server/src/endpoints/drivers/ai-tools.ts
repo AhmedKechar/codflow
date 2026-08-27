@@ -21,7 +21,7 @@ import { getDb } from "@/db";
  * 
  * This ensures the AI agent can recover from validation errors without breaking the conversation.
  */
-export const getDriverTools = (db: ReturnType<typeof getDb>) => ({
+export const getDriverTools = (db: ReturnType<typeof getDb>, storeId: string) => ({
   
   listDrivers: tool({
     description: "Search and filter drivers in the CRM. Returns driver profile info, availability status, and performance metrics. Use this to find available drivers or those covering specific wilayas.",
@@ -41,7 +41,7 @@ export const getDriverTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const drivers = await queries.getAllDrivers(db, parsed.data);
+        const drivers = await queries.getAllDrivers(db, storeId, parsed.data);
         return { 
           success: true,
           count: drivers.length,
@@ -88,7 +88,7 @@ export const getDriverTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const driver = await queries.getDriverById(db, parsed.data.driverId);
+        const driver = await queries.getDriverById(db, storeId, parsed.data.driverId);
         if (!driver) {
           return { 
             success: false, 
@@ -123,7 +123,7 @@ export const getDriverTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const driver = await queries.createDriver(db, parsed.data);
+        const driver = await queries.createDriver(db, storeId, parsed.data);
         return { 
           success: true, 
           driver, 
@@ -161,7 +161,7 @@ export const getDriverTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const driver = await queries.updateDriver(db, parsed.data.driverId, parsed.data.updates);
+        const driver = await queries.updateDriver(db, storeId, parsed.data.driverId, parsed.data.updates);
         if (!driver) {
           return { 
             success: false, 
@@ -205,7 +205,7 @@ export const getDriverTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const driver = await queries.updateDriverStatus(db, parsed.data.driverId, parsed.data.status);
+        const driver = await queries.updateDriverStatus(db, storeId, parsed.data.driverId, parsed.data.status);
         if (!driver) {
           return { 
             success: false, 
@@ -248,7 +248,7 @@ export const getDriverTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        await queries.deleteDriver(db, parsed.data.driverId);
+        await queries.deleteDriver(db, storeId, parsed.data.driverId);
         return { 
           success: true, 
           message: `Driver ${parsed.data.driverId} deleted successfully` 

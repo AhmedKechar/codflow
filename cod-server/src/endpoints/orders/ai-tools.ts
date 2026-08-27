@@ -55,7 +55,7 @@ import { getDb } from "@/db";
  * - Layer 1 (LLM-level): Permissive input schema accepts any object to prevent SDK crashes
  * - Layer 2 (App-level): Strict validation inside execute() with graceful error handling
  */
-export const getOrderTools = (db: ReturnType<typeof getDb>) => ({
+export const getOrderTools = (db: ReturnType<typeof getDb>, storeId: string) => ({
 
   listOrders: tool({
     description:
@@ -79,7 +79,7 @@ export const getOrderTools = (db: ReturnType<typeof getDb>) => ({
         };
       }
       try {
-        const orders = await queries.getAllOrders(db, parsed.data);
+        const orders = await queries.getAllOrders(db, storeId, parsed.data);
         return {
           success: true,
           count: orders.length,
@@ -133,7 +133,7 @@ export const getOrderTools = (db: ReturnType<typeof getDb>) => ({
         };
       }
       try {
-        const order = await queries.getOrderById(db, parsed.data.orderId);
+        const order = await queries.getOrderById(db, storeId, parsed.data.orderId);
         if (!order) {
           return { success: false, error: `Order not found with ID: ${parsed.data.orderId}` };
         }
@@ -190,7 +190,7 @@ export const getOrderTools = (db: ReturnType<typeof getDb>) => ({
         // Validate companyId if provided
         if (parsed.data.companyId) {
           const { getDeliveryCompanyById } = await import("@/endpoints/delivery-companies/queries");
-          const company = await getDeliveryCompanyById(db, parsed.data.companyId);
+          const company = await getDeliveryCompanyById(db, storeId, parsed.data.companyId);
           if (!company) {
             return { success: false, error: `Delivery company not found with ID: ${parsed.data.companyId}` };
           }
@@ -237,6 +237,7 @@ export const getOrderTools = (db: ReturnType<typeof getDb>) => ({
           ]);
           await db.insert(customers).values({
             id: parsed.data.customerId,
+            storeId,
             name: parsed.data.customerName,
             phone: parsed.data.phone,
             phone2: null,
@@ -254,6 +255,7 @@ export const getOrderTools = (db: ReturnType<typeof getDb>) => ({
 
         const orderData = {
           id: orderId,
+          storeId,
           orderNumber,
           customerId: parsed.data.customerId,
           customerName: parsed.data.customerName,
@@ -278,6 +280,7 @@ export const getOrderTools = (db: ReturnType<typeof getDb>) => ({
 
         const productsData = parsed.data.products.map((p) => ({
           id: crypto.randomUUID(),
+          storeId,
           orderId,
           productId: p.productId,
           productName: p.productName,
@@ -289,7 +292,7 @@ export const getOrderTools = (db: ReturnType<typeof getDb>) => ({
           createdAt: now,
         }));
 
-        await queries.createOrder(db, orderData, productsData, null);
+        await queries.createOrder(db, storeId, orderData, productsData, null);
 
         return {
           success: true,
@@ -350,7 +353,7 @@ export const getOrderTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const order = await queries.getOrderById(db, parsed.data.orderId);
+        const order = await queries.getOrderById(db, storeId, parsed.data.orderId);
         if (!order) {
           return { success: false, error: `Order not found with ID: ${parsed.data.orderId}` };
         }
@@ -378,7 +381,7 @@ export const getOrderTools = (db: ReturnType<typeof getDb>) => ({
           };
         }
 
-        await queries.updateOrderStatus(db, parsed.data.orderId, parsed.data.status, "ai-agent", "AI Agent");
+        await queries.updateOrderStatus(db, storeId, parsed.data.orderId, parsed.data.status, "ai-agent", "AI Agent");
 
         return {
           success: true,
@@ -418,7 +421,7 @@ export const getOrderTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const order = await queries.getOrderById(db, parsed.data.orderId);
+        const order = await queries.getOrderById(db, storeId, parsed.data.orderId);
         if (!order) {
           return { success: false, error: `Order not found with ID: ${parsed.data.orderId}` };
         }
@@ -452,7 +455,7 @@ export const getOrderTools = (db: ReturnType<typeof getDb>) => ({
           return { success: false, error: `Driver not found with ID: ${parsed.data.driverId}` };
         }
 
-        await queries.assignDriver(db, parsed.data.orderId, parsed.data.driverId);
+        await queries.assignDriver(db, storeId, parsed.data.orderId, parsed.data.driverId);
 
         return {
           success: true,
@@ -487,7 +490,7 @@ export const getOrderTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const order = await queries.getOrderById(db, parsed.data.orderId);
+        const order = await queries.getOrderById(db, storeId, parsed.data.orderId);
         if (!order) {
           return { success: false, error: `Order not found with ID: ${parsed.data.orderId}` };
         }
@@ -502,7 +505,7 @@ export const getOrderTools = (db: ReturnType<typeof getDb>) => ({
           };
         }
 
-        await queries.unassignDriver(db, parsed.data.orderId);
+        await queries.unassignDriver(db, storeId, parsed.data.orderId);
 
         return {
           success: true,
@@ -544,7 +547,7 @@ export const getOrderTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const order = await queries.getOrderById(db, parsed.data.orderId);
+        const order = await queries.getOrderById(db, storeId, parsed.data.orderId);
         if (!order) {
           return { success: false, error: `Order not found with ID: ${parsed.data.orderId}` };
         }
@@ -559,6 +562,7 @@ export const getOrderTools = (db: ReturnType<typeof getDb>) => ({
 
         const result = await queries.setOrderProductReturn(
           db,
+          storeId,
           parsed.data.orderId,
           parsed.data.productLineId,
           parsed.data.returnedQuantity,
@@ -600,12 +604,12 @@ export const getOrderTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const order = await queries.getOrderById(db, parsed.data.orderId);
+        const order = await queries.getOrderById(db, storeId, parsed.data.orderId);
         if (!order) {
           return { success: false, error: `Order not found with ID: ${parsed.data.orderId}` };
         }
 
-        await queries.deleteOrder(db, parsed.data.orderId);
+        await queries.deleteOrder(db, storeId, parsed.data.orderId);
 
         return {
           success: true,

@@ -44,7 +44,7 @@ import { getDb } from "@/db";
  * - Layer 1 (LLM-level): Permissive input schema accepts any object to prevent SDK crashes
  * - Layer 2 (App-level): Strict validation inside execute() with graceful error handling
  */
-export const getShippingProfileTools = (db: ReturnType<typeof getDb>) => ({
+export const getShippingProfileTools = (db: ReturnType<typeof getDb>, storeId: string) => ({
 
   listShippingProfiles: tool({
     description:
@@ -54,7 +54,7 @@ export const getShippingProfileTools = (db: ReturnType<typeof getDb>) => ({
     inputSchema: z.object({}).passthrough(), // Layer 1: Permissive input — no parameters
     execute: async (_args) => {
       try {
-        const profiles = await queries.getAllProfiles(db);
+        const profiles = await queries.getAllProfiles(db, storeId);
         return { success: true, count: profiles.length, profiles };
       } catch (error: any) {
         return { success: false, error: `Database error: ${error.message}` };
@@ -82,7 +82,7 @@ export const getShippingProfileTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const profile = await queries.getProfileById(db, parsed.data.profileId);
+        const profile = await queries.getProfileById(db, storeId, parsed.data.profileId);
         if (!profile) {
           return { success: false, error: `Shipping profile not found with ID: ${parsed.data.profileId}` };
         }
@@ -101,7 +101,7 @@ export const getShippingProfileTools = (db: ReturnType<typeof getDb>) => ({
     inputSchema: z.object({}).passthrough(), // Layer 1: Permissive input — no parameters
     execute: async (_args) => {
       try {
-        const rules = await queries.getDefaultProfileRules(db);
+        const rules = await queries.getDefaultProfileRules(db, storeId);
         return { success: true, count: rules.length, rules };
       } catch (error: any) {
         return { success: false, error: `Database error: ${error.message}` };
@@ -130,7 +130,7 @@ export const getShippingProfileTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const profile = await queries.createProfile(db, parsed.data);
+        const profile = await queries.createProfile(db, storeId, parsed.data);
         return {
           success: true,
           profile,
@@ -168,7 +168,7 @@ export const getShippingProfileTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const profile = await queries.updateProfile(db, parsed.data.profileId, parsed.data.updates);
+        const profile = await queries.updateProfile(db, storeId, parsed.data.profileId, parsed.data.updates);
         if (!profile) {
           return { success: false, error: `Shipping profile not found with ID: ${parsed.data.profileId}` };
         }
@@ -209,7 +209,7 @@ export const getShippingProfileTools = (db: ReturnType<typeof getDb>) => ({
 
       try {
         // Replicate handler-level guards before calling the shared deleteProfile
-        const profile = await queries.getProfileById(db, parsed.data.profileId);
+        const profile = await queries.getProfileById(db, storeId, parsed.data.profileId);
         if (!profile) {
           return { success: false, error: `Shipping profile not found with ID: ${parsed.data.profileId}` };
         }
@@ -228,7 +228,7 @@ export const getShippingProfileTools = (db: ReturnType<typeof getDb>) => ({
           };
         }
 
-        await queries.deleteProfile(db, parsed.data.profileId);
+        await queries.deleteProfile(db, storeId, parsed.data.profileId);
         return {
           success: true,
           message: `Shipping profile "${profile.name}" (${parsed.data.profileId}) deleted successfully`,
@@ -273,7 +273,7 @@ export const getShippingProfileTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const profile = await queries.setProfileRules(db, parsed.data.profileId, {
+        const profile = await queries.setProfileRules(db, storeId, parsed.data.profileId, {
           rules: parsed.data.rules,
         });
         if (!profile) {
@@ -321,7 +321,7 @@ export const getShippingProfileTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const rule = await queries.getWilayaRule(db, parsed.data.profileId, parsed.data.wilayaId);
+        const rule = await queries.getWilayaRule(db, storeId, parsed.data.profileId, parsed.data.wilayaId);
         if (!rule) {
           return {
             success: false,
@@ -329,7 +329,7 @@ export const getShippingProfileTools = (db: ReturnType<typeof getDb>) => ({
           };
         }
 
-        const communes = await queries.getCommunesWithOverrides(db, rule.id, parsed.data.wilayaId, {
+        const communes = await queries.getCommunesWithOverrides(db, storeId, rule.id, parsed.data.wilayaId, {
           homeEnabled: Boolean(rule.homeEnabled ?? true),
           stopDeskEnabled: Boolean(rule.stopDeskEnabled ?? false),
           homePrice: rule.homePrice ?? 0,
@@ -378,7 +378,7 @@ export const getShippingProfileTools = (db: ReturnType<typeof getDb>) => ({
 
       try {
         // Resolve ruleId from profileId + wilayaId
-        const rule = await queries.getWilayaRule(db, parsed.data.profileId, parsed.data.wilayaId);
+        const rule = await queries.getWilayaRule(db, storeId, parsed.data.profileId, parsed.data.wilayaId);
         if (!rule) {
           return {
             success: false,
@@ -386,7 +386,7 @@ export const getShippingProfileTools = (db: ReturnType<typeof getDb>) => ({
           };
         }
 
-        await queries.setCommuneOverride(db, rule.id, parsed.data.communeId, parsed.data.override);
+        await queries.setCommuneOverride(db, storeId, rule.id, parsed.data.communeId, parsed.data.override);
         return {
           success: true,
           message: `Commune override set for commune ${parsed.data.communeId} in wilaya ${parsed.data.wilayaId}`,
@@ -423,7 +423,7 @@ export const getShippingProfileTools = (db: ReturnType<typeof getDb>) => ({
 
       try {
         // Resolve ruleId from profileId + wilayaId
-        const rule = await queries.getWilayaRule(db, parsed.data.profileId, parsed.data.wilayaId);
+        const rule = await queries.getWilayaRule(db, storeId, parsed.data.profileId, parsed.data.wilayaId);
         if (!rule) {
           return {
             success: false,
@@ -431,7 +431,7 @@ export const getShippingProfileTools = (db: ReturnType<typeof getDb>) => ({
           };
         }
 
-        const deleted = await queries.deleteCommuneOverride(db, rule.id, parsed.data.communeId);
+        const deleted = await queries.deleteCommuneOverride(db, storeId, rule.id, parsed.data.communeId);
         if (!deleted) {
           return {
             success: false,

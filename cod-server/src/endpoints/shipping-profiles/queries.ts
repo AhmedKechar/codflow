@@ -44,6 +44,7 @@ function now() {
 
 export async function updateProfile(
   db: AppDb,
+  storeId: string,
   id: string,
   data: UpdateProfileInput,
 ): Promise<ShippingProfileWithRules | null> {
@@ -87,12 +88,13 @@ export async function updateProfile(
     .where(eq(shippingProfiles.id, id))
     .run();
 
-  return getProfileById(db, id);
+  return getProfileById(db, storeId, id);
 }
 
 /** Replace all rules for a profile. Deletes existing rules (and their commune overrides via CASCADE), then inserts new ones. */
 export async function setProfileRules(
   db: AppDb,
+  storeId: string,
   profileId: string,
   data: BulkRulesInput,
 ): Promise<ShippingProfileWithRules | null> {
@@ -126,6 +128,7 @@ export async function setProfileRules(
       .insert(shippingRules)
       .values({
         id: newProfileId(),
+        storeId,
         profileId,
         wilayaId: rule.wilayaId,
         homePrice: rule.homePrice,
@@ -143,5 +146,5 @@ export async function setProfileRules(
     .where(eq(shippingProfiles.id, profileId))
     .run();
 
-  return getProfileById(db, profileId);
+  return getProfileById(db, storeId, profileId);
 }

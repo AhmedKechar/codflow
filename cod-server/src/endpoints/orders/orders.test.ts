@@ -129,6 +129,7 @@ describe("Orders — targeted business-logic tests", () => {
     app = new OpenAPIHono<AppContext>({ defaultHook: openApiValidationHook });
     app.use("*", async (c, next) => {
       c.env = { DB: mockDb } as any;
+      c.set("storeId", "test-store");
       c.set("user", {
         id: "admin_1",
         email: "admin@example.com",
@@ -243,7 +244,7 @@ describe("Orders — targeted business-logic tests", () => {
       expect(res.status).toBe(200);
       // queries.assignDriver is called — the auto-advance logic lives in the query,
       // which checks preAssignmentStatuses = ["new", "preparing", "ready"]
-      expect(queries.assignDriver).toHaveBeenCalledWith(mockDb, "ord_1", "drv_1");
+      expect(queries.assignDriver).toHaveBeenCalledWith(mockDb, "test-store", "ord_1", "drv_1");
     });
 
     it("order in 'confirmed' status: handler allows it, but status does NOT auto-advance (confirmed not in preAssignmentStatuses)", async () => {
@@ -273,7 +274,7 @@ describe("Orders — targeted business-logic tests", () => {
       // Handler succeeds (200) — it doesn't block confirmed orders
       expect(res.status).toBe(200);
       // The query IS called — proving assignment goes through
-      expect(queries.assignDriver).toHaveBeenCalledWith(mockDb, "ord_1", "drv_1");
+      expect(queries.assignDriver).toHaveBeenCalledWith(mockDb, "test-store", "ord_1", "drv_1");
       // NOTE: The DB query will NOT set status="assigned" for "confirmed" orders.
       // A confirmed order with a driver attached stays "confirmed" — this is the documented
       // gap: the handler should either block it or the query should include "confirmed"
@@ -300,7 +301,7 @@ describe("Orders — targeted business-logic tests", () => {
       });
 
       expect(res.status).toBe(200);
-      expect(queries.assignDriver).toHaveBeenCalledWith(mockDb, "ord_1", "drv_1");
+      expect(queries.assignDriver).toHaveBeenCalledWith(mockDb, "test-store", "ord_1", "drv_1");
     });
 
     it("driver not found returns 404", async () => {
@@ -388,7 +389,7 @@ describe("Orders — targeted business-logic tests", () => {
       const res = await app.request("/api/orders/ord_1/unassign", { method: "PATCH" });
 
       expect(res.status).toBe(200);
-      expect(queries.unassignDriver).toHaveBeenCalledWith(mockDb, "ord_1");
+      expect(queries.unassignDriver).toHaveBeenCalledWith(mockDb, "test-store", "ord_1");
     });
   });
 
@@ -509,7 +510,7 @@ describe("Orders — targeted business-logic tests", () => {
 
       // And the order is still advanced to out_for_delivery
       expect(queries.updateOrderStatus).toHaveBeenCalledWith(
-        expect.anything(), "ord_1", "out_for_delivery", expect.anything(), expect.anything()
+        expect.anything(), "test-store", "ord_1", "out_for_delivery", expect.anything(), expect.anything()
       );
     });
   });
@@ -581,7 +582,7 @@ describe("Orders — targeted business-logic tests", () => {
       await app.request("/api/orders/ord_1/cancel-shipment", { method: "POST" });
 
       expect(queries.updateOrderStatus).toHaveBeenCalledWith(
-        expect.anything(), "ord_1", "ready", expect.anything(), expect.anything()
+        expect.anything(), "test-store", "ord_1", "ready", expect.anything(), expect.anything()
       );
     });
   });
@@ -610,7 +611,7 @@ describe("Orders — targeted business-logic tests", () => {
       const body: any = await res.json();
       expect(body.success).toBe(true);
       expect(queries.updateOrderStatus).toHaveBeenCalledWith(
-        expect.anything(), "ord_1", "out_for_delivery", expect.anything(), expect.anything()
+        expect.anything(), "test-store", "ord_1", "out_for_delivery", expect.anything(), expect.anything()
       );
     });
 
@@ -690,6 +691,7 @@ describe("Orders — targeted business-logic tests", () => {
       // syncOrderAfterCarrierUpdate is called with the new price
       expect(queries.syncOrderAfterCarrierUpdate).toHaveBeenCalledWith(
         expect.anything(),
+        "test-store",
         "ord_1",
         expect.objectContaining({ price: 12000 })
       );
@@ -698,7 +700,7 @@ describe("Orders — targeted business-logic tests", () => {
       // This is the documented gap: carrier collects 12600 but our DB says 9600.
       expect(queries.syncOrderAfterCarrierUpdate).not.toHaveBeenCalledWith(
         expect.anything(),
-        expect.anything(),
+        "test-store",
         "ord_1",
         expect.objectContaining({ codAmount: expect.any(Number) })
       );

@@ -64,6 +64,7 @@ const staffActor = {
 
 const activityLogRow = (overrides: Partial<typeof schema.activityLogs.$inferInsert> = {}) => ({
   id: "log_001",
+  storeId: "test-store",
   actorId: staffActor.id,
   actorName: staffActor.name,
   actorRole: "staff" as const,

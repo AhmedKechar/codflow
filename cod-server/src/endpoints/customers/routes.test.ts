@@ -48,6 +48,7 @@ const NOW = new Date().toISOString();
 function customerRow(overrides: Record<string, any> = {}) {
   return {
     id: "cust_123",
+    storeId: "test-store",
     name: "Ahmed Benali",
     phone: "0551234567",
     phone2: null,

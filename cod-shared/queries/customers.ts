@@ -53,12 +53,11 @@ export async function getAllCustomers(db: AppDb, storeId: string, filters?: Cust
   }
 
   if (filters?.search) {
-    conditions.push(
-      or(
-        like(customers.name, `%${filters.search}%`),
-        like(customers.phone, `%${filters.search}%`),
-      ),
+    const searchConditions = or(
+      like(customers.name, `%${filters.search}%`),
+      like(customers.phone, `%${filters.search}%`),
     );
+    if (searchConditions) conditions.push(searchConditions);
   }
 
   const limit = filters?.limit || 50;

@@ -1,0 +1,26 @@
+name = "codflow-super-admin"
+main = ".open-next/worker.js"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
+keep_names = false
+
+assets = { directory = ".open-next/assets", binding = "ASSETS" }
+
+[[d1_databases]]
+binding           = "DB"
+database_name     = "codflow-db"
+database_id       = "00000000-0000-0000-0000-000000000000"
+
+[[send_email]]
+name = "SEND_EMAIL"
+
+[[kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "00000000000000000000000000000000"
+
+[vars]
+NEXT_PUBLIC_APP_URL = "http://localhost:3002"
+NEXT_PUBLIC_WORKER_URL = "http://localhost:8787"
+
+[dev]
+port = 8789

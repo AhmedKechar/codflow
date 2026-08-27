@@ -107,6 +107,19 @@ export async function getDeliveryCompanyByCode(db: AppDb, storeId: string, code:
 }
 
 /**
+ * Global lookup by code (no storeId filter). Used by webhook handlers that
+ * receive events from external services and need to resolve the company
+ * before knowing which store owns it.
+ */
+export async function getDeliveryCompanyByCodeGlobal(db: AppDb, code: string) {
+  return await db
+    .select()
+    .from(deliveryCompanies)
+    .where(eq(deliveryCompanies.code, code))
+    .get();
+}
+
+/**
  * Internal: get raw company record including credentials. Used by providers/handlers
  * that need to make outbound API calls. Never returned to clients.
  */

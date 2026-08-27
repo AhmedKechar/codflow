@@ -49,6 +49,7 @@ import {
 function opRow(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {
     id: "op_1",
+    store_id: "test-store",
     order_id: "ord_1",
     product_id: "prod_1",
     product_name: "Galaxy A54",
@@ -84,6 +85,7 @@ function compRow(overrides: Record<string, unknown> = {}): Record<string, unknow
 describe("createOrder", () => {
   const baseOrder = {
     id: "ord_1",
+    storeId: "test-store",
     orderNumber: "ORD-20260101-0001",
     customerId: "cust_1",
     customerName: "Ahmed Benali",
@@ -113,7 +115,7 @@ describe("createOrder", () => {
       db,
       "test-store",
       baseOrder,
-      [{ id: "op_1", orderId: "ord_1", productId: "prod_1", productName: "Galaxy A54",
+      [{ id: "op_1", orderId: "ord_1", storeId: "test-store", productId: "prod_1", productName: "Galaxy A54",
          variantId: null, variantLabel: null, sku: null, quantity: 2,
          pricePerUnit: 4500, lineTotal: 9000, createdAt: NOW }],
       { id: "user_1", name: "Admin" },
@@ -130,7 +132,7 @@ describe("createOrder", () => {
     ]);
 
     await createOrder(db, "test-store", baseOrder, [
-      { id: "op_1", orderId: "ord_1", productId: "prod_1", productName: "T-Shirt",
+      { id: "op_1", orderId: "ord_1", storeId: "test-store", productId: "prod_1", productName: "T-Shirt",
         variantId: null, variantLabel: null, sku: null, quantity: 3,
         pricePerUnit: 3000, lineTotal: 9000, createdAt: NOW },
     ], null);
@@ -152,7 +154,7 @@ describe("createOrder", () => {
     // Should not throw even when qty > inventory
     await expect(
       createOrder(db, "test-store", baseOrder, [
-        { id: "op_1", orderId: "ord_1", productId: "prod_1", productName: "T-Shirt",
+        { id: "op_1", orderId: "ord_1", storeId: "test-store", productId: "prod_1", productName: "T-Shirt",
           variantId: null, variantLabel: null, sku: null, quantity: 5,
           pricePerUnit: 3000, lineTotal: 15000, createdAt: NOW },
       ], null)
@@ -167,7 +169,7 @@ describe("createOrder", () => {
 
     await expect(
       createOrder(db, "test-store", baseOrder, [
-        { id: "op_1", orderId: "ord_1", productId: "prod_1", productName: "T-Shirt",
+        { id: "op_1", orderId: "ord_1", storeId: "test-store", productId: "prod_1", productName: "T-Shirt",
           variantId: "var_1", variantLabel: "أحمر / L", sku: null, quantity: 2,
           pricePerUnit: 3000, lineTotal: 6000, createdAt: NOW },
       ], null)
@@ -183,7 +185,7 @@ describe("createOrder", () => {
 
     await expect(
       createOrder(db, "test-store", baseOrder, [
-        { id: "op_1", orderId: "ord_1", productId: "prod_1", productName: "T-Shirt",
+        { id: "op_1", orderId: "ord_1", storeId: "test-store", productId: "prod_1", productName: "T-Shirt",
           variantId: null, variantLabel: null, sku: null, quantity: 10,
           pricePerUnit: 3000, lineTotal: 30000, createdAt: NOW },
       ], null)
@@ -199,10 +201,10 @@ describe("createOrder", () => {
 
     await expect(
       createOrder(db, "test-store", baseOrder, [
-        { id: "op_1", orderId: "ord_1", productId: "prod_1", productName: "P1",
+        { id: "op_1", orderId: "ord_1", storeId: "test-store", productId: "prod_1", productName: "P1",
           variantId: null, variantLabel: null, sku: null, quantity: 2,
           pricePerUnit: 4500, lineTotal: 9000, createdAt: NOW },
-        { id: "op_2", orderId: "ord_1", productId: "prod_2", productName: "P2",
+        { id: "op_2", orderId: "ord_1", storeId: "test-store", productId: "prod_2", productName: "P2",
           variantId: null, variantLabel: null, sku: null, quantity: 1,
           pricePerUnit: 2000, lineTotal: 2000, createdAt: NOW },
       ], null)

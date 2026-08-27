@@ -196,20 +196,20 @@ describe("updateDriverStatus", () => {
 describe("deleteDriver", () => {
   it("throws when driver has active orders (assigned)", async () => {
     const db = makeMockDb([f({ count: 2 })]);
-    await expect(deleteDriver(db, "drv_1")).rejects.toThrow(
+    await expect(deleteDriver(db, "test-store", "drv_1")).rejects.toThrow(
       "Cannot delete driver with active orders"
     );
   });
 
   it("throws when driver has active orders (out_for_delivery)", async () => {
     const db = makeMockDb([f({ count: 1 })]);
-    await expect(deleteDriver(db, "drv_1")).rejects.toThrow(
+    await expect(deleteDriver(db, "test-store", "drv_1")).rejects.toThrow(
       "Cannot delete driver with active orders"
     );
   });
 
   it("succeeds when driver has no active orders", async () => {
     const db = makeMockDb([f({ count: 0 })]);
-    await expect(deleteDriver(db, "drv_1")).resolves.toEqual({ success: true });
+    await expect(deleteDriver(db, "test-store", "drv_1")).resolves.toEqual({ success: true });
   });
 });

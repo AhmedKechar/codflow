@@ -80,6 +80,7 @@ describe("Product Groups Endpoint - Error Scenarios", () => {
       // Mock successful response
       vi.mocked(queries.getGroupById).mockResolvedValue({
         id: "group_123",
+        storeId: "test-store",
         name: "Electronics",
         slug: "electronics-abc12345",
         description: "Electronic products",
@@ -143,6 +144,7 @@ describe("Product Groups Endpoint - Error Scenarios", () => {
       // Mock successful update
       vi.mocked(queries.updateGroup).mockResolvedValue({
         id: "group_123",
+        storeId: "test-store",
         name: "Updated Electronics",
         slug: "electronics-abc12345",
         description: "Updated description",
@@ -205,6 +207,7 @@ describe("Product Groups Endpoint - Error Scenarios", () => {
       // Mock getGroupById to return a group with products
       vi.mocked(queries.getGroupById).mockResolvedValue({
         id: "group_123",
+        storeId: "test-store",
         name: "Electronics",
         slug: "electronics-abc12345",
         description: "Electronic products",
@@ -242,6 +245,7 @@ describe("Product Groups Endpoint - Error Scenarios", () => {
       // Mock getGroupById to return a group with no products
       vi.mocked(queries.getGroupById).mockResolvedValue({
         id: "group_123",
+        storeId: "test-store",
         name: "Empty Group",
         slug: "empty-group-abc12345",
         description: null,
@@ -291,6 +295,7 @@ describe("Product Groups Endpoint - Error Scenarios", () => {
     it("should include context field when available", async () => {
       vi.mocked(queries.getGroupById).mockResolvedValue({
         id: "group_123",
+        storeId: "test-store",
         name: "Electronics",
         slug: "electronics-abc12345",
         description: "Electronic products",

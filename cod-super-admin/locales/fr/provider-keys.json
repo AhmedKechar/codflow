@@ -1,0 +1,22 @@
+{
+  "title": "Clés fournisseurs",
+  "subtitle": "Gérer les clés API des fournisseurs tiers",
+  "create": "Ajouter une clé",
+  "provider": "Fournisseur",
+  "key_name": "Nom de la clé",
+  "key_value": "Valeur de la clé",
+  "is_active": "Actif",
+  "last_used_at": "Dernière utilisation",
+  "expires_at": "Expire le",
+  "created_at": "Créé le",
+  "actions": "Actions",
+  "no_keys": "Aucune clé trouvée",
+  "toggle_active": "Basculer le statut",
+  "delete": "Supprimer",
+  "confirm_delete": "Êtes-vous sûr de vouloir supprimer cette clé ?",
+  "key_value_hidden": "Valeur masquée",
+  "created_success": "Clé créée",
+  "deleted_success": "Clé supprimée",
+  "master_card": "Master Card",
+  "visa_code": "Code Visa"
+}

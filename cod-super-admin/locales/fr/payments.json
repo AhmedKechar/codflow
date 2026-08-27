@@ -1,0 +1,27 @@
+{
+  "title": "Paiements",
+  "subtitle": "Examiner et approuver les paiements d'abonnement",
+  "pending": "En attente",
+  "approved": "Approuvé",
+  "rejected": "Rejeté",
+  "all": "Tous",
+  "store": "Boutique",
+  "amount_dzd": "Montant (DZD)",
+  "method": "Méthode",
+  "status": "Statut",
+  "date": "Date",
+  "approve": "Approuver",
+  "reject": "Rejeter",
+  "review_notes": "Notes de révision",
+  "no_payments": "Aucun paiement trouvé",
+  "approved_success": "Paiement approuvé",
+  "rejected_success": "Paiement rejeté",
+  "confirm_approve": "Êtes-vous sûr de vouloir approuver ce paiement ?",
+  "confirm_reject": "Êtes-vous sûr de vouloir rejeter ce paiement ?",
+  "payment_methods": {
+    "ccp": "CCP",
+    "baridi_mob": "Baridi Mob",
+    "wise": "Wise",
+    "redotpay": "Redotpay"
+  }
+}

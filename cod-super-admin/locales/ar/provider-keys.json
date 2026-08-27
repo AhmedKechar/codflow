@@ -1,0 +1,22 @@
+{
+  "title": "مفاتيح المزوّدين",
+  "subtitle": "إدارة مفاتيح API لمزودي الخدمات",
+  "create": "إضافة مفتاح",
+  "provider": "المزوّد",
+  "key_name": "اسم المفتاح",
+  "key_value": "قيمة المفتاح",
+  "is_active": "نشط",
+  "last_used_at": "آخر استخدام",
+  "expires_at": "تاريخ الانتهاء",
+  "created_at": "تاريخ الإنشاء",
+  "actions": "إجراءات",
+  "no_keys": "لا توجد مفاتيح",
+  "toggle_active": "تبديل الحالة",
+  "delete": "حذف",
+  "confirm_delete": "هل أنت متأكد من حذف هذا المفتاح؟",
+  "key_value_hidden": "قيمة مخفية",
+  "created_success": "تم إنشاء المفتاح",
+  "deleted_success": "تم حذف المفتاح",
+  "master_card": "بطاقة الماستر",
+  "visa_code": "رمز فيزا"
+}

@@ -16,7 +16,7 @@ import { getDb } from "@/db";
  * 
  * This ensures the AI agent can recover from validation errors without breaking the conversation.
  */
-export const getDriverPaymentTools = (db: ReturnType<typeof getDb>) => ({
+export const getDriverPaymentTools = (db: ReturnType<typeof getDb>, storeId: string) => ({
   listDriverPayments: tool({
     description: "Fetch all settlement and payment records for a specific driver. Returns history of COD remittances, fee payments, and net settlements.",
     inputSchema: z.object({}).passthrough(), // Layer 1: Permissive input
@@ -39,7 +39,7 @@ export const getDriverPaymentTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const payments = await queries.getDriverPayments(db, parsed.data.driverId);
+        const payments = await queries.getDriverPayments(db, storeId, parsed.data.driverId);
         return { 
           success: true,
           count: payments.length,
@@ -84,7 +84,7 @@ export const getDriverPaymentTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const orders = await queries.getPendingSettlementOrders(db, parsed.data.driverId);
+        const orders = await queries.getPendingSettlementOrders(db, storeId, parsed.data.driverId);
         return { 
           success: true,
           count: orders.length,
@@ -130,6 +130,7 @@ export const getDriverPaymentTools = (db: ReturnType<typeof getDb>) => ({
       try {
         const result = await queries.createDriverPayment(
           db, 
+          storeId,
           {
             driverId: parsed.data.driverId,
             type: parsed.data.type,

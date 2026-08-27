@@ -1,0 +1,22 @@
+{
+  "title": "Provider Keys",
+  "subtitle": "Manage third-party provider API keys",
+  "create": "Add Key",
+  "provider": "Provider",
+  "key_name": "Key Name",
+  "key_value": "Key Value",
+  "is_active": "Active",
+  "last_used_at": "Last Used",
+  "expires_at": "Expires At",
+  "created_at": "Created At",
+  "actions": "Actions",
+  "no_keys": "No keys found",
+  "toggle_active": "Toggle Status",
+  "delete": "Delete",
+  "confirm_delete": "Are you sure you want to delete this key?",
+  "key_value_hidden": "Hidden value",
+  "created_success": "Key created",
+  "deleted_success": "Key deleted",
+  "master_card": "Master Card",
+  "visa_code": "Visa Code"
+}

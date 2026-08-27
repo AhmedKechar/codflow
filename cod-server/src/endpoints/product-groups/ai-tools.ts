@@ -25,7 +25,7 @@ import { getDb } from "@/db";
  * - position is an integer >= 0 (controls display order, default 0)
  * - deleteProductGroup is blocked when productsCount > 0 (PRODUCT_GROUP_HAS_PRODUCTS)
  */
-export const getProductGroupTools = (db: ReturnType<typeof getDb>) => ({
+export const getProductGroupTools = (db: ReturnType<typeof getDb>, storeId: string) => ({
 
   listProductGroups: tool({
     description:
@@ -49,7 +49,7 @@ export const getProductGroupTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const groups = await queries.getAllGroups(db, parsed.data);
+        const groups = await queries.getAllGroups(db, storeId, parsed.data);
         return {
           success: true,
           count: groups.length,
@@ -100,7 +100,7 @@ export const getProductGroupTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const group = await queries.getGroupById(db, parsed.data.groupId);
+        const group = await queries.getGroupById(db, storeId, parsed.data.groupId);
         if (!group) {
           return {
             success: false,
@@ -149,7 +149,7 @@ export const getProductGroupTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const group = await queries.createGroup(db, parsed.data);
+        const group = await queries.createGroup(db, storeId, parsed.data);
         return {
           success: true,
           group,
@@ -198,7 +198,7 @@ export const getProductGroupTools = (db: ReturnType<typeof getDb>) => ({
       }
 
       try {
-        const group = await queries.updateGroup(db, parsed.data.groupId, parsed.data.updates);
+        const group = await queries.updateGroup(db, storeId, parsed.data.groupId, parsed.data.updates);
         if (!group) {
           return {
             success: false,
@@ -246,7 +246,7 @@ export const getProductGroupTools = (db: ReturnType<typeof getDb>) => ({
 
       try {
         // Verify group exists and check productsCount before attempting delete
-        const group = await queries.getGroupById(db, parsed.data.groupId);
+        const group = await queries.getGroupById(db, storeId, parsed.data.groupId);
         if (!group) {
           return {
             success: false,
@@ -263,7 +263,7 @@ export const getProductGroupTools = (db: ReturnType<typeof getDb>) => ({
           };
         }
 
-        await queries.deleteGroup(db, parsed.data.groupId);
+        await queries.deleteGroup(db, storeId, parsed.data.groupId);
         return {
           success: true,
           message: `Product group "${group.name}" (${parsed.data.groupId}) deleted successfully`,

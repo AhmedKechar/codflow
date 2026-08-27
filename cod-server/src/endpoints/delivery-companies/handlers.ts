@@ -190,6 +190,7 @@ export async function syncCompanyStopDesks(c: Context<AppContext>) {
         .insert(companyStopDesks)
         .values({
           id: crypto.randomUUID(),
+          storeId,
           companyId: id,
           code: desk.code,
           name: desk.name,

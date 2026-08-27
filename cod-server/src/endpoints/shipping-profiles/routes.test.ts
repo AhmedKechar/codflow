@@ -47,6 +47,7 @@ function profileWithRules(overrides: Record<string, any> = {}) {
 function ruleRow(overrides: Record<string, any> = {}) {
   return {
     id: "rule_1",
+    storeId: "test-store",
     profileId: "profile_123",
     wilayaId: 16,
     wilayaName: "Alger",

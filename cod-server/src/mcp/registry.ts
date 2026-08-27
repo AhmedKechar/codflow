@@ -51,7 +51,7 @@ import { getOrderTools }         from "@/endpoints/orders/ai-tools";
 
 type ToolFactory = (
   db: ReturnType<typeof getDb>,
-  props: McpProps,
+  props?: McpProps,
 ) => Record<string, Tool>;
 
 export interface ToolRegistryEntry {
@@ -97,7 +97,7 @@ export const TOOL_REGISTRY: ToolRegistryEntry[] = [
   // ─── Customers ────────────────────────────────────────────────────────────
   {
     requires: [SCOPES.CUSTOMERS_READ],
-    build: (db) => pick(getCustomerTools(db), [
+    build: (db, props) => pick(getCustomerTools(db, props?.storeId ?? ""), [
       "listCustomers",
       "getCustomerDetails",
       "findCustomerByPhone",
@@ -107,36 +107,36 @@ export const TOOL_REGISTRY: ToolRegistryEntry[] = [
   },
   {
     requires: [SCOPES.CUSTOMERS_CREATE],
-    build: (db) => pick(getCustomerTools(db), ["createNewCustomer"]),
+    build: (db, props) => pick(getCustomerTools(db, props?.storeId ?? ""), ["createNewCustomer"]),
   },
   {
     requires: [SCOPES.CUSTOMERS_UPDATE],
-    build: (db) => pick(getCustomerTools(db), ["updateCustomerProfile"]),
+    build: (db, props) => pick(getCustomerTools(db, props?.storeId ?? ""), ["updateCustomerProfile"]),
   },
   {
     requires: [SCOPES.CUSTOMERS_DELETE],
-    build: (db) => pick(getCustomerTools(db), ["deleteCustomer"]),
+    build: (db, props) => pick(getCustomerTools(db, props?.storeId ?? ""), ["deleteCustomer"]),
   },
 
   // ─── Drivers (scope family is "delivery:*") ───────────────────────────────
   {
     requires: [SCOPES.DELIVERY_READ],
-    build: (db) => pick(getDriverTools(db), ["listDrivers", "getDriverDetails"]),
+    build: (db, props) => pick(getDriverTools(db, props?.storeId ?? ""), ["listDrivers", "getDriverDetails"]),
   },
   {
     requires: [SCOPES.DELIVERY_CREATE],
-    build: (db) => pick(getDriverTools(db), ["createNewDriver"]),
+    build: (db, props) => pick(getDriverTools(db, props?.storeId ?? ""), ["createNewDriver"]),
   },
   {
     requires: [SCOPES.DELIVERY_UPDATE],
-    build: (db) => pick(getDriverTools(db), [
+    build: (db, props) => pick(getDriverTools(db, props?.storeId ?? ""), [
       "updateDriverProfile",
       "updateDriverStatus",
     ]),
   },
   {
     requires: [SCOPES.DELIVERY_DELETE],
-    build: (db) => pick(getDriverTools(db), ["deleteDriver"]),
+    build: (db, props) => pick(getDriverTools(db, props?.storeId ?? ""), ["deleteDriver"]),
   },
 
   // ─── Driver payments ──────────────────────────────────────────────────────
@@ -145,7 +145,7 @@ export const TOOL_REGISTRY: ToolRegistryEntry[] = [
   // elicitation gate — wired in MCP-11 via the DANGEROUS_TOOLS set.
   {
     requires: [SCOPES.DELIVERY_MANAGE],
-    build: (db) => pick(getDriverPaymentTools(db), [
+    build: (db, props) => pick(getDriverPaymentTools(db, props?.storeId ?? ""), [
       "listDriverPayments",
       "getPendingSettlements",
       "createDriverSettlement",
@@ -155,14 +155,14 @@ export const TOOL_REGISTRY: ToolRegistryEntry[] = [
   // ─── Products ─────────────────────────────────────────────────────────────
   {
     requires: [SCOPES.PRODUCTS_READ],
-    build: (db) => pick(getProductTools(db), [
+    build: (db, props) => pick(getProductTools(db, props?.storeId ?? ""), [
       "listProducts",
       "getProductDetails",
     ]),
   },
   {
     requires: [SCOPES.PRODUCTS_MANAGE],
-    build: (db) => pick(getProductTools(db), [
+    build: (db, props) => pick(getProductTools(db, props?.storeId ?? ""), [
       "createNewProduct",
       "updateProductDetails",
       "updateProductStatus",
@@ -173,14 +173,14 @@ export const TOOL_REGISTRY: ToolRegistryEntry[] = [
   // ─── Product Groups ───────────────────────────────────────────────────────
   {
     requires: [SCOPES.PRODUCT_GROUPS_READ],
-    build: (db) => pick(getProductGroupTools(db), [
+    build: (db, props) => pick(getProductGroupTools(db, props?.storeId ?? ""), [
       "listProductGroups",
       "getProductGroupDetails",
     ]),
   },
   {
     requires: [SCOPES.PRODUCT_GROUPS_MANAGE],
-    build: (db) => pick(getProductGroupTools(db), [
+    build: (db, props) => pick(getProductGroupTools(db, props?.storeId ?? ""), [
       "createProductGroup",
       "updateProductGroup",
       "deleteProductGroup",
@@ -190,32 +190,32 @@ export const TOOL_REGISTRY: ToolRegistryEntry[] = [
   // ─── Offers ───────────────────────────────────────────────────────────────
   {
     requires: [SCOPES.OFFERS_READ],
-    build: (db, props) => pick(getOfferTools(db, props.storeId ?? ""), [
+    build: (db, props) => pick(getOfferTools(db, props?.storeId ?? ""), [
       "listOffers",
       "getOfferDetails",
     ]),
   },
   {
     requires: [SCOPES.OFFERS_MANAGE],
-    build: (db, props) => pick(getOfferTools(db, props.storeId ?? ""), [
-      "createOffer",
-      "updateOffer",
-      "deleteOffer",
-    ]),
+  build: (db, props) => pick(getOfferTools(db, props?.storeId ?? ""), [
+    "createOffer",
+    "updateOffer",
+    "deleteOffer",
+  ]),
   },
 
   // ─── Variants ─────────────────────────────────────────────────────────────
   // Variants are sub-resources of products and share the same scope family.
   {
     requires: [SCOPES.PRODUCTS_READ],
-    build: (db) => pick(getVariantTools(db), [
+    build: (db, props) => pick(getVariantTools(db, props?.storeId ?? ""), [
       "listProductVariants",
       "getVariantDetails",
     ]),
   },
   {
     requires: [SCOPES.PRODUCTS_MANAGE],
-    build: (db) => pick(getVariantTools(db), [
+    build: (db, props) => pick(getVariantTools(db, props?.storeId ?? ""), [
       "createProductVariant",
       "updateVariant",
       "deleteProductVariant",
@@ -239,7 +239,7 @@ export const TOOL_REGISTRY: ToolRegistryEntry[] = [
   // ─── Stock ────────────────────────────────────────────────────────────────
   {
     requires: [SCOPES.STOCK_READ],
-    build: (db) => pick(getStockTools(db), [
+    build: (db, props) => pick(getStockTools(db, props?.storeId ?? ""), [
       "getStockOverview",
       "getStockAlerts",
       "getProductStockHistory",
@@ -247,7 +247,7 @@ export const TOOL_REGISTRY: ToolRegistryEntry[] = [
   },
   {
     requires: [SCOPES.STOCK_MANAGE],
-    build: (db) => pick(getStockTools(db), [
+    build: (db, props) => pick(getStockTools(db, props?.storeId ?? ""), [
       "adjustProductStock",
       "adjustVariantStock",
       "updateProductStockThreshold",
@@ -258,7 +258,7 @@ export const TOOL_REGISTRY: ToolRegistryEntry[] = [
   // ─── Shipping Profiles ────────────────────────────────────────────────────
   {
     requires: [SCOPES.DELIVERY_READ],
-    build: (db) => pick(getShippingProfileTools(db), [
+    build: (db, props) => pick(getShippingProfileTools(db, props?.storeId ?? ""), [
       "listShippingProfiles",
       "getShippingProfile",
       "getDefaultShippingRules",
@@ -267,7 +267,7 @@ export const TOOL_REGISTRY: ToolRegistryEntry[] = [
   },
   {
     requires: [SCOPES.DELIVERY_MANAGE],
-    build: (db) => pick(getShippingProfileTools(db), [
+    build: (db, props) => pick(getShippingProfileTools(db, props?.storeId ?? ""), [
       "createShippingProfile",
       "updateShippingProfile",
       "deleteShippingProfile",
@@ -280,27 +280,27 @@ export const TOOL_REGISTRY: ToolRegistryEntry[] = [
   // ─── Reviews ──────────────────────────────────────────────────────────────
   {
     requires: [SCOPES.REVIEWS_READ],
-    build: (db, props) => pick(getReviewTools(db, props.storeId ?? ""), ["listReviews"]),
+    build: (db, props) => pick(getReviewTools(db, props?.storeId ?? ""), ["listReviews"]),
   },
   {
     requires: [SCOPES.REVIEWS_MANAGE],
-    build: (db, props) => pick(getReviewTools(db, props.storeId ?? ""), [
-      "moderateReview",
-      "deleteReview",
-    ]),
+  build: (db, props) => pick(getReviewTools(db, props?.storeId ?? ""), [
+    "moderateReview",
+    "deleteReview",
+  ]),
   },
 
   // ─── Customer Groups ──────────────────────────────────────────────────────
   {
     requires: [SCOPES.CUSTOMER_GROUPS_READ],
-    build: (db) => pick(getCustomerGroupTools(db), [
+    build: (db, props) => pick(getCustomerGroupTools(db, props?.storeId ?? ""), [
       "listCustomerGroups",
       "getCustomerGroupDetails",
     ]),
   },
   {
     requires: [SCOPES.CUSTOMER_GROUPS_MANAGE],
-    build: (db) => pick(getCustomerGroupTools(db), [
+    build: (db, props) => pick(getCustomerGroupTools(db, props?.storeId ?? ""), [
       "createCustomerGroup",
       "updateCustomerGroup",
       "deleteCustomerGroup",
@@ -312,14 +312,14 @@ export const TOOL_REGISTRY: ToolRegistryEntry[] = [
   // ─── Customer Tags ────────────────────────────────────────────────────────
   {
     requires: [SCOPES.CUSTOMER_TAGS_READ],
-    build: (db) => pick(getCustomerTagTools(db), [
+    build: (db, props) => pick(getCustomerTagTools(db, props?.storeId ?? ""), [
       "listCustomerTags",
       "getCustomerTagDetails",
     ]),
   },
   {
     requires: [SCOPES.CUSTOMER_TAGS_MANAGE],
-    build: (db) => pick(getCustomerTagTools(db), [
+    build: (db, props) => pick(getCustomerTagTools(db, props?.storeId ?? ""), [
       "createCustomerTag",
       "updateCustomerTag",
       "deleteCustomerTag",
@@ -331,32 +331,32 @@ export const TOOL_REGISTRY: ToolRegistryEntry[] = [
   // ─── Orders ───────────────────────────────────────────────────────────────
   {
     requires: [SCOPES.ORDERS_READ],
-    build: (db) => pick(getOrderTools(db), [
+    build: (db, props) => pick(getOrderTools(db, props?.storeId ?? ""), [
       "listOrders",
       "getOrderDetails",
     ]),
   },
   {
     requires: [SCOPES.ORDERS_CREATE],
-    build: (db) => pick(getOrderTools(db), ["createOrder"]),
+    build: (db, props) => pick(getOrderTools(db, props?.storeId ?? ""), ["createOrder"]),
   },
   {
     requires: [SCOPES.ORDERS_UPDATE],
-    build: (db) => pick(getOrderTools(db), [
+    build: (db, props) => pick(getOrderTools(db, props?.storeId ?? ""), [
       "updateOrderStatus",
       "recordOrderProductReturn",
     ]),
   },
   {
     requires: [SCOPES.ORDERS_ASSIGN],
-    build: (db) => pick(getOrderTools(db), [
+    build: (db, props) => pick(getOrderTools(db, props?.storeId ?? ""), [
       "assignDriverToOrder",
       "unassignDriverFromOrder",
     ]),
   },
   {
     requires: [SCOPES.ORDERS_DELETE],
-    build: (db) => pick(getOrderTools(db), ["deleteOrder"]),
+    build: (db, props) => pick(getOrderTools(db, props?.storeId ?? ""), ["deleteOrder"]),
   },
 ];
 

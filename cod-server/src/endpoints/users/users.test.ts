@@ -209,7 +209,8 @@ describe("createUser", () => {
       db as any,
       { id: "user_1", email: "admin@example.com", name: "Admin", role: "admin", status: "active", apiKey: "codflow_test", passwordHash: "salt:hash" },
       ["orders.read"],  // scopes ignored for admin
-      "system"
+      "system",
+      "test-store"
     );
     expect(result).not.toBeNull();
     expect(result!.scopes).toEqual(["*"]);
@@ -225,7 +226,8 @@ describe("createUser", () => {
       db as any,
       { id: "user_1", email: "staff@example.com", name: "Staff", role: "staff", status: "active", apiKey: "codflow_test", passwordHash: "salt:hash" },
       ["orders.read"],
-      "admin_1"
+      "admin_1",
+      "test-store"
     );
     expect(result!.scopes).toEqual(["orders.read"]);
   });
@@ -240,7 +242,8 @@ describe("createUser", () => {
       db as any,
       { id: "user_1", email: "staff@example.com", name: "Staff", role: "staff", status: "active", apiKey: "codflow_test", passwordHash: "salt:hash" },
       [],  // empty → no INSERT
-      "admin_1"
+      "admin_1",
+      "test-store"
     );
     expect(result!.scopes).toEqual([]);
   });
@@ -253,7 +256,7 @@ describe("grantScope", () => {
     // userScopes.get() → returns existing row → throws
     const db = makeMockDb([f(scopeRow("orders.read"))]);
     await expect(
-      grantScope(db as any, "user_1", "orders.read", "admin_1")
+      grantScope(db as any, "user_1", "orders.read", "admin_1", "test-store")
     ).rejects.toThrow("Scope already granted to user");
   });
 
@@ -264,7 +267,7 @@ describe("grantScope", () => {
       f(userRow({ role: "staff" })),                  // getUserById → user
       a([{ scope: "orders.read" }]),                  // getUserById → scopes
     ]);
-    const result = await grantScope(db as any, "user_1", "orders.read", "admin_1");
+    const result = await grantScope(db as any, "user_1", "orders.read", "admin_1", "test-store");
     expect(result).not.toBeNull();
     expect(result!.scopes).toEqual(["orders.read"]);
   });

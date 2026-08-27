@@ -29,7 +29,7 @@ import { getDb } from "@/db";
  * - Layer 1 (LLM-level): Permissive input schema accepts any object to prevent SDK crashes
  * - Layer 2 (App-level): Strict validation inside execute() with graceful error handling
  */
-export const getCustomerGroupTools = (db: ReturnType<typeof getDb>) => ({
+export const getCustomerGroupTools = (db: ReturnType<typeof getDb>, storeId: string) => ({
 
   listCustomerGroups: tool({
     description:
@@ -49,7 +49,7 @@ export const getCustomerGroupTools = (db: ReturnType<typeof getDb>) => ({
         };
       }
       try {
-        const groups = await queries.getAllGroups(db, parsed.data);
+        const groups = await queries.getAllGroups(db, storeId, parsed.data);
         return { success: true, count: groups.length, groups };
       } catch (error: any) {
         return { success: false, error: `Database error: ${error.message}` };
@@ -80,8 +80,8 @@ export const getCustomerGroupTools = (db: ReturnType<typeof getDb>) => ({
       }
       try {
         const group = parsed.data.withMembers
-          ? await queries.getGroupWithMembers(db, parsed.data.groupId)
-          : await queries.getGroupById(db, parsed.data.groupId);
+          ? await queries.getGroupWithMembers(db, storeId, parsed.data.groupId)
+          : await queries.getGroupById(db, storeId, parsed.data.groupId);
         if (!group) {
           return { success: false, error: `Customer group not found with ID: ${parsed.data.groupId}` };
         }
@@ -110,7 +110,7 @@ export const getCustomerGroupTools = (db: ReturnType<typeof getDb>) => ({
         };
       }
       try {
-        const group = await queries.createGroup(db, parsed.data);
+        const group = await queries.createGroup(db, storeId, parsed.data);
         return {
           success: true,
           group,
@@ -144,7 +144,7 @@ export const getCustomerGroupTools = (db: ReturnType<typeof getDb>) => ({
         };
       }
       try {
-        const group = await queries.updateGroup(db, parsed.data.groupId, parsed.data.updates);
+        const group = await queries.updateGroup(db, storeId, parsed.data.groupId, parsed.data.updates);
         if (!group) {
           return { success: false, error: `Customer group not found with ID: ${parsed.data.groupId}` };
         }
@@ -176,7 +176,7 @@ export const getCustomerGroupTools = (db: ReturnType<typeof getDb>) => ({
         };
       }
       try {
-        const group = await queries.getGroupById(db, parsed.data.groupId);
+        const group = await queries.getGroupById(db, storeId, parsed.data.groupId);
         if (!group) {
           return { success: false, error: `Customer group not found with ID: ${parsed.data.groupId}` };
         }
@@ -186,7 +186,7 @@ export const getCustomerGroupTools = (db: ReturnType<typeof getDb>) => ({
             error: `Cannot delete group "${group.name}" — it has ${group.memberCount} member(s). Remove all members first using removeCustomerFromGroup.`,
           };
         }
-        await queries.deleteGroup(db, parsed.data.groupId);
+        await queries.deleteGroup(db, storeId, parsed.data.groupId);
         return {
           success: true,
           message: `Customer group "${group.name}" (${parsed.data.groupId}) deleted successfully`,
@@ -219,11 +219,11 @@ export const getCustomerGroupTools = (db: ReturnType<typeof getDb>) => ({
         };
       }
       try {
-        const group = await queries.getGroupById(db, parsed.data.groupId);
+        const group = await queries.getGroupById(db, storeId, parsed.data.groupId);
         if (!group) {
           return { success: false, error: `Customer group not found with ID: ${parsed.data.groupId}` };
         }
-        await queries.addMember(db, parsed.data.groupId, parsed.data.customerId);
+        await queries.addMember(db, storeId, parsed.data.groupId, parsed.data.customerId);
         return {
           success: true,
           message: `Customer ${parsed.data.customerId} added to group "${group.name}"`,
@@ -256,11 +256,11 @@ export const getCustomerGroupTools = (db: ReturnType<typeof getDb>) => ({
         };
       }
       try {
-        const group = await queries.getGroupById(db, parsed.data.groupId);
+        const group = await queries.getGroupById(db, storeId, parsed.data.groupId);
         if (!group) {
           return { success: false, error: `Customer group not found with ID: ${parsed.data.groupId}` };
         }
-        await queries.removeMember(db, parsed.data.groupId, parsed.data.customerId);
+        await queries.removeMember(db, storeId, parsed.data.groupId, parsed.data.customerId);
         return {
           success: true,
           message: `Customer ${parsed.data.customerId} removed from group "${group.name}"`,

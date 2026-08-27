@@ -14,7 +14,7 @@
 import type { Context } from "hono";
 import type { AppContext } from "@/types";
 import { getDb } from "@/db";
-import { getDeliveryCompanyByCode } from "@/endpoints/delivery-companies/queries";
+import { getDeliveryCompanyByCodeGlobal } from "@/endpoints/delivery-companies/queries";
 import {
   insertWebhookEvent,
   updateWebhookEvent,
@@ -54,7 +54,8 @@ export async function handleZrWebhook(c: Context<AppContext>) {
   const db = getDb(c.env.DB);
 
   // Locate the ZR Express delivery company record
-  const company = await getDeliveryCompanyByCode(db, "zr_express");
+  // Note: storeId is resolved from the company after lookup (webhook context)
+  const company = await getDeliveryCompanyByCodeGlobal(db, "zr_express");
   if (!company) {
     console.warn("[webhook][zr] No zr_express delivery company configured");
     return c.json({ received: true }, 200);
@@ -193,6 +194,7 @@ export async function handleZrWebhook(c: Context<AppContext>) {
 
     const { updated } = await updateOrderStatusWebhook(
       db,
+      storeId,
       resolvedOrder.id,
       newStatus,
       "webhook:zr_express"
@@ -277,7 +279,7 @@ export async function handleYalidineWebhook(c: Context<AppContext>) {
   const rawBody = await c.req.text();
   const db = getDb(c.env.DB);
 
-  const company = await getDeliveryCompanyByCode(db, "yalidine");
+  const company = await getDeliveryCompanyByCodeGlobal(db, "yalidine");
   if (!company) {
     console.warn("[webhook][yalidine] No yalidine delivery company configured");
     return c.json({ received: true }, 200);
@@ -363,7 +365,7 @@ export async function handleYalidineWebhook(c: Context<AppContext>) {
         if (tracking) {
           const order = await getOrderByTracking(db, storeId, tracking);
           if (order) {
-            await incrementDeliveryAttempts(db, order.id);
+            await incrementDeliveryAttempts(db, storeId, order.id);
             await updateWebhookEvent(db, storeId, webhookEventId, {
               result: "ignored", // not a status transition
               reason: reason ?? undefined,
@@ -401,6 +403,7 @@ export async function handleYalidineWebhook(c: Context<AppContext>) {
 
       const { updated } = await updateOrderStatusWebhook(
         db,
+        storeId,
         order.id,
         nextStatus,
         "webhook:yalidine"

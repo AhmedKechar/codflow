@@ -29,9 +29,10 @@ import { DEFERRED_LABEL_MARKER } from "./dispatch";
  */
 export async function updateShipmentInfo(c: Context<AppContext>) {
   const db = getDb(c.env.DB);
+  const storeId = c.get("storeId")!;
   const orderId = c.req.param("id")!;
 
-  const order = await queries.getOrderById(db, orderId);
+  const order = await queries.getOrderById(db, storeId, orderId);
   if (!order) throw new NotFoundError("Order", orderId);
 
   if (!order.trackingNumber) {
@@ -44,7 +45,7 @@ export async function updateShipmentInfo(c: Context<AppContext>) {
 
   if (!order.companyId) throw new ValidationError("Order has no delivery company assigned", ERROR_CODES.REQUIRED_FIELD_MISSING);
 
-  const company = await getDeliveryCompanyRaw(db, order.companyId);
+  const company = await getDeliveryCompanyRaw(db, storeId, order.companyId);
   if (!company) throw new NotFoundError("Delivery company", order.companyId);
 
   let provider;
@@ -128,7 +129,7 @@ export async function updateShipmentInfo(c: Context<AppContext>) {
     const durationMs = Date.now() - startMs;
 
     // Sync changed fields back to our DB so the order record stays in sync with the carrier.
-    await syncOrderAfterCarrierUpdate(db, orderId, {
+    await syncOrderAfterCarrierUpdate(db, storeId, orderId, {
       customerName: input.customerName !== order.customerName ? input.customerName : undefined,
       phone:        input.phone        !== order.phone        ? input.phone        : undefined,
       price:        input.amount       !== order.price        ? input.amount       : undefined,
@@ -180,9 +181,10 @@ export async function updateShipmentInfo(c: Context<AppContext>) {
  */
 export async function cancelShipment(c: Context<AppContext>) {
   const db = getDb(c.env.DB);
+  const storeId = c.get("storeId")!;
   const orderId = c.req.param("id")!;
 
-  const order = await queries.getOrderById(db, orderId);
+  const order = await queries.getOrderById(db, storeId, orderId);
   if (!order) throw new NotFoundError("Order", orderId);
 
   if (!order.trackingNumber) {
@@ -195,7 +197,7 @@ export async function cancelShipment(c: Context<AppContext>) {
 
   if (!order.companyId) throw new ValidationError("Order has no delivery company assigned", ERROR_CODES.REQUIRED_FIELD_MISSING);
 
-  const company = await getDeliveryCompanyRaw(db, order.companyId);
+  const company = await getDeliveryCompanyRaw(db, storeId, order.companyId);
   if (!company) throw new NotFoundError("Delivery company", order.companyId);
 
   let provider;
@@ -234,12 +236,12 @@ export async function cancelShipment(c: Context<AppContext>) {
     const shipment = await getShipmentByOrder(db, orderId);
     if (shipment) await setShipmentValidated(db, shipment.id, false);
 
-    await clearOrderTracking(db, orderId);
+    await clearOrderTracking(db, storeId, orderId);
 
     const actor = c.get("user");
     const PRE_DISPATCH_STATUSES = ["new", "confirmed", "unreachable", "preparing", "ready", "assigned", "dispatched"];
     if (PRE_DISPATCH_STATUSES.includes(order.status)) {
-      await queries.updateOrderStatus(db, orderId, "ready", actor?.id, actor?.name ?? undefined);
+      await queries.updateOrderStatus(db, storeId, orderId, "ready", actor?.id, actor?.name ?? undefined);
     }
 
     await logActivity(db, actor, ACTIONS.ORDER_STATUS_CHANGED, {
@@ -273,9 +275,10 @@ export async function cancelShipment(c: Context<AppContext>) {
  */
 export async function addShipmentRemark(c: Context<AppContext>) {
   const db = getDb(c.env.DB);
+  const storeId = c.get("storeId")!;
   const orderId = c.req.param("id")!;
 
-  const order = await queries.getOrderById(db, orderId);
+  const order = await queries.getOrderById(db, storeId, orderId);
   if (!order) throw new NotFoundError("Order", orderId);
 
   if (!order.trackingNumber) {
@@ -284,7 +287,7 @@ export async function addShipmentRemark(c: Context<AppContext>) {
 
   if (!order.companyId) throw new ValidationError("Order has no delivery company assigned", ERROR_CODES.REQUIRED_FIELD_MISSING);
 
-  const company = await getDeliveryCompanyRaw(db, order.companyId);
+  const company = await getDeliveryCompanyRaw(db, storeId, order.companyId);
   if (!company) throw new NotFoundError("Delivery company", order.companyId);
 
   let provider;
@@ -351,9 +354,10 @@ export async function addShipmentRemark(c: Context<AppContext>) {
  */
 export async function getShipmentRemarks(c: Context<AppContext>) {
   const db = getDb(c.env.DB);
+  const storeId = c.get("storeId")!;
   const orderId = c.req.param("id")!;
 
-  const order = await queries.getOrderById(db, orderId);
+  const order = await queries.getOrderById(db, storeId, orderId);
   if (!order) throw new NotFoundError("Order", orderId);
 
   if (!order.trackingNumber) {
@@ -362,7 +366,7 @@ export async function getShipmentRemarks(c: Context<AppContext>) {
 
   if (!order.companyId) throw new ValidationError("Order has no delivery company assigned", ERROR_CODES.REQUIRED_FIELD_MISSING);
 
-  const company = await getDeliveryCompanyRaw(db, order.companyId);
+  const company = await getDeliveryCompanyRaw(db, storeId, order.companyId);
   if (!company) throw new NotFoundError("Delivery company", order.companyId);
 
   let provider;
@@ -392,9 +396,10 @@ export async function getShipmentRemarks(c: Context<AppContext>) {
  */
 export async function getShipmentTracking(c: Context<AppContext>) {
   const db = getDb(c.env.DB);
+  const storeId = c.get("storeId")!;
   const orderId = c.req.param("id")!;
 
-  const order = await queries.getOrderById(db, orderId);
+  const order = await queries.getOrderById(db, storeId, orderId);
   if (!order) throw new NotFoundError("Order", orderId);
 
   if (!order.trackingNumber) {
@@ -403,7 +408,7 @@ export async function getShipmentTracking(c: Context<AppContext>) {
 
   if (!order.companyId) throw new ValidationError("Order has no delivery company assigned", ERROR_CODES.REQUIRED_FIELD_MISSING);
 
-  const company = await getDeliveryCompanyRaw(db, order.companyId);
+  const company = await getDeliveryCompanyRaw(db, storeId, order.companyId);
   if (!company) throw new NotFoundError("Delivery company", order.companyId);
 
   let provider;
@@ -437,9 +442,10 @@ export async function getShipmentTracking(c: Context<AppContext>) {
  */
 export async function proxyShipmentLabel(c: Context<AppContext>) {
   const db = getDb(c.env.DB);
+  const storeId = c.get("storeId")!;
   const orderId = c.req.param("id")!;
 
-  const order = await queries.getOrderById(db, orderId);
+  const order = await queries.getOrderById(db, storeId, orderId);
   if (!order) throw new NotFoundError("Order", orderId);
 
   if (!order.trackingNumber) {
@@ -448,7 +454,7 @@ export async function proxyShipmentLabel(c: Context<AppContext>) {
 
   if (!order.companyId) throw new ValidationError("Order has no delivery company assigned", ERROR_CODES.REQUIRED_FIELD_MISSING);
 
-  const company = await getDeliveryCompanyRaw(db, order.companyId);
+  const company = await getDeliveryCompanyRaw(db, storeId, order.companyId);
   if (!company) throw new NotFoundError("Delivery company", order.companyId);
 
   if (!company.apiToken) {
