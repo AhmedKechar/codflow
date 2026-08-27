@@ -38,7 +38,13 @@ import mcpManagementRoutes from "@/endpoints/mcp/routes";
 import analyticsRoutes from "@/endpoints/analytics/routes";
 import abandonedOrdersRoutes from "@/endpoints/abandoned-orders/routes";
 import storeAbandonedRoutes from "@/endpoints/abandoned-orders/store-routes";
+import subscriptionsRoutes from "@/endpoints/subscriptions/routes";
+import paymentsRoutes from "@/endpoints/payments/routes";
+import aiCreditsRoutes from "@/endpoints/ai-credits/routes";
+import storeMembersRoutes from "@/endpoints/store-members/routes";
+import superAdminRoutes from "@/endpoints/super-admin/routes";
 
+import { subscriptionGating } from "@/middleware/subscription-gating";
 import { sweepAbandonedOrders } from "@/cron/sweep-abandoned-orders";
 
 // MCP remote server (remote Model Context Protocol endpoint for Claude / AI agents).
@@ -159,6 +165,7 @@ app.get("/health", (c) => {
 
 // Protected routes (require authentication)
 app.use("/api/*", authMiddleware);
+app.use("/api/*", subscriptionGating);
 
 // Mount endpoint routes
 app.route("/api/images", uploadRouter);
@@ -183,6 +190,15 @@ app.route("/api/products", productStockRouter);
 app.route("/api/mcp", mcpManagementRoutes);
 app.route("/api/analytics", analyticsRoutes);
 app.route("/api/abandoned-orders", abandonedOrdersRoutes);
+
+// ─── SaaS Feature Routes ─────────────────────────────────────────────────────
+app.route("/api/subscriptions", subscriptionsRoutes);
+app.route("/api/payments", paymentsRoutes);
+app.route("/api/ai-credits", aiCreditsRoutes);
+app.route("/api/store-members", storeMembersRoutes);
+
+// ─── Super Admin Routes (admin only) ─────────────────────────────────────────
+app.route("/api/super-admin", superAdminRoutes);
 
 // 404 handler
 app.notFound((c) => {

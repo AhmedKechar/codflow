@@ -123,6 +123,7 @@ export const NOW = "2026-01-01T00:00:00.000Z";
 export function driverRow(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {
     id: "drv_1",
+    store_id: "test-store",
     first_name: "Ahmed",
     last_name: "Benali",
     phone: "0551234567",
@@ -143,6 +144,7 @@ export function driverRow(overrides: Record<string, unknown> = {}): Record<strin
 export function orderRow(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {
     id: "ord_1",
+    store_id: "test-store",
     order_number: "ORD-001",
     customer_id: "cust_1",
     customer_name: "Fatima Zahra",
@@ -186,6 +188,7 @@ export function orderRow(overrides: Record<string, unknown> = {}): Record<string
 export function productRow(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {
     id: "prod_1",
+    store_id: "test-store",
     name: "T-Shirt",
     description: null,
     handle: "t-shirt-prod_1",
@@ -218,6 +221,7 @@ export function productRow(overrides: Record<string, unknown> = {}): Record<stri
 export function customerRow(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {
     id: "cust_1",
+    store_id: "test-store",
     name: "Fatima Zahra",
     phone: "0661234567",
     phone2: null,
@@ -238,6 +242,7 @@ export function customerRow(overrides: Record<string, unknown> = {}): Record<str
 export function shippingProfileRow(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {
     id: "prof_1",
+    store_id: "test-store",
     name: "Standard DZ",
     is_default: 0,
     notes: null,
@@ -251,6 +256,7 @@ export function shippingProfileRow(overrides: Record<string, unknown> = {}): Rec
 export function categoryRow(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {
     id: "cat_1",
+    store_id: "test-store",
     name: "ملابس",
     slug: "malbas-cat_1",
     description: null,
@@ -268,6 +274,7 @@ export function categoryRow(overrides: Record<string, unknown> = {}): Record<str
 export function variantRow(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {
     id: "var_1",
+    store_id: "test-store",
     product_id: "prod_1",
     variations: '{"Color":"Red"}',
     currency: "DZD",
@@ -294,6 +301,7 @@ export function variantRow(overrides: Record<string, unknown> = {}): Record<stri
 export function offerRow(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {
     id: "offer_1",
+    store_id: "test-store",
     name: "Buy 2 Get 1 Free",
     trigger_product_id: "prod_1",
     trigger_variant_id: null,
@@ -335,6 +343,7 @@ export function userRow(overrides: Record<string, unknown> = {}): Record<string,
 export function deliveryCompanyRow(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {
     id: "co_1",
+    store_id: "test-store",
     name: "Yalidine",
     name_ar: "ياليدين",
     code: "yalidine",

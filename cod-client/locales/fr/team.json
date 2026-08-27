@@ -139,6 +139,14 @@
     "stock": "Stock",
     "reviews": "Avis",
     "offers": "Offres",
+    "abandonedOrders": "Commandes abandonnées",
+    "mcp": "Agents IA (MCP)",
+    "subscriptions": "Abonnements",
+    "payments": "Paiements",
+    "aiCredits": "Crédits IA",
+    "storeMembers": "Membres de l'équipe",
+    "providerApiKeys": "Clés API fournisseurs",
+    "customDomains": "Domaines personnalisés",
     "settings": "Paramètres"
   },
   "scope_actions": {
@@ -150,6 +158,8 @@
     "assign": "Assigner",
     "manage": "Gérer",
     "dispatch": "Expédier",
+    "approve": "Approuver",
+    "invite": "Inviter",
     "team": "Équipe",
     "integrations": "Intégrations",
     "notifications": "Notifications"

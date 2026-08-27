@@ -172,6 +172,37 @@ export const ERROR_CODES = {
   // BUSINESS LOGIC ERRORS - PAYMENTS
   // ============================================================================
   PAYMENT_NOT_FOUND: "PAYMENT_NOT_FOUND",
+  PAYMENT_ALREADY_REVIEWED: "PAYMENT_ALREADY_REVIEWED",
+  
+  // ============================================================================
+  // BUSINESS LOGIC ERRORS - SUBSCRIPTIONS
+  // ============================================================================
+  SUBSCRIPTION_NOT_FOUND: "SUBSCRIPTION_NOT_FOUND",
+  SUBSCRIPTION_EXPIRED: "SUBSCRIPTION_EXPIRED",
+  SUBSCRIPTION_REQUIRED: "SUBSCRIPTION_REQUIRED",
+  SUBSCRIPTION_READ_ONLY: "SUBSCRIPTION_READ_ONLY",
+  PLAN_NOT_FOUND: "PLAN_NOT_FOUND",
+  PLAN_LIMIT_EXCEEDED: "PLAN_LIMIT_EXCEEDED",
+  
+  // ============================================================================
+  // BUSINESS LOGIC ERRORS - STORE MEMBERS
+  // ============================================================================
+  MEMBER_NOT_FOUND: "MEMBER_NOT_FOUND",
+  INVITATION_NOT_FOUND: "INVITATION_NOT_FOUND",
+  INVITATION_EXPIRED: "INVITATION_EXPIRED",
+  INVITATION_ALREADY_ACCEPTED: "INVITATION_ALREADY_ACCEPTED",
+  DUPLICATE_MEMBER: "DUPLICATE_MEMBER",
+  
+  // ============================================================================
+  // BUSINESS LOGIC ERRORS - AI CREDITS
+  // ============================================================================
+  INSUFFICIENT_AI_CREDITS: "INSUFFICIENT_AI_CREDITS",
+  
+  // ============================================================================
+  // BUSINESS LOGIC ERRORS - PROVIDER API KEYS
+  // ============================================================================
+  PROVIDER_KEY_NOT_FOUND: "PROVIDER_KEY_NOT_FOUND",
+  PROVIDER_KEY_DUPLICATE: "PROVIDER_KEY_DUPLICATE",
   
   // ============================================================================
   // SYSTEM ERRORS (500, 502, 503)

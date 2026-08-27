@@ -125,6 +125,46 @@ export const SCOPES = {
    */
   MCP_VIEW: "mcp:view",
 
+  // Subscriptions
+  /** View subscription details and plan information */
+  SUBSCRIPTIONS_READ: "subscriptions:read",
+  /** Manage (upgrade, downgrade, cancel) store subscription */
+  SUBSCRIPTIONS_MANAGE: "subscriptions:manage",
+
+  // Payments
+  /** View payment history and receipt status */
+  PAYMENTS_READ: "payments:read",
+  /** Submit payment receipts and manage payment methods */
+  PAYMENTS_MANAGE: "payments:manage",
+  /** Approve or reject payment receipts (super admin only) */
+  PAYMENTS_APPROVE: "payments:approve",
+
+  // AI Credits
+  /** View AI credit balance and usage history */
+  AI_CREDITS_READ: "ai_credits:read",
+  /** Manage AI credit allocations and usage */
+  AI_CREDITS_MANAGE: "ai_credits:manage",
+
+  // Store Members
+  /** View team members and their roles */
+  STORE_MEMBERS_READ: "store_members:read",
+  /** Add, update, or remove team members */
+  STORE_MEMBERS_MANAGE: "store_members:manage",
+  /** Send team invitations */
+  STORE_MEMBERS_INVITE: "store_members:invite",
+
+  // Provider API Keys (super admin)
+  /** View provider API keys */
+  PROVIDER_API_KEYS_READ: "provider_api_keys:read",
+  /** Manage provider API keys */
+  PROVIDER_API_KEYS_MANAGE: "provider_api_keys:manage",
+
+  // Custom Domains
+  /** View custom domain configuration */
+  CUSTOM_DOMAINS_READ: "custom_domains:read",
+  /** Manage custom domain setup and verification */
+  CUSTOM_DOMAINS_MANAGE: "custom_domains:manage",
+
   // Wildcard (admin only)
   /** All permissions - admin users only */
   ALL: "*",
@@ -220,5 +260,29 @@ export const SCOPE_CATEGORIES = {
   mcp: {
     label: "AI Agents (MCP)",
     scopes: [SCOPES.MCP_VIEW],
+  },
+  subscriptions: {
+    label: "Subscriptions",
+    scopes: [SCOPES.SUBSCRIPTIONS_READ, SCOPES.SUBSCRIPTIONS_MANAGE],
+  },
+  payments: {
+    label: "Payments",
+    scopes: [SCOPES.PAYMENTS_READ, SCOPES.PAYMENTS_MANAGE, SCOPES.PAYMENTS_APPROVE],
+  },
+  aiCredits: {
+    label: "AI Credits",
+    scopes: [SCOPES.AI_CREDITS_READ, SCOPES.AI_CREDITS_MANAGE],
+  },
+  storeMembers: {
+    label: "Team Members",
+    scopes: [SCOPES.STORE_MEMBERS_READ, SCOPES.STORE_MEMBERS_MANAGE, SCOPES.STORE_MEMBERS_INVITE],
+  },
+  providerApiKeys: {
+    label: "Provider API Keys",
+    scopes: [SCOPES.PROVIDER_API_KEYS_READ, SCOPES.PROVIDER_API_KEYS_MANAGE],
+  },
+  customDomains: {
+    label: "Custom Domains",
+    scopes: [SCOPES.CUSTOM_DOMAINS_READ, SCOPES.CUSTOM_DOMAINS_MANAGE],
   },
 } as const;

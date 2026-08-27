@@ -139,6 +139,14 @@
     "stock": "المخزون",
     "reviews": "التقييمات",
     "offers": "العروض",
+    "abandonedOrders": "الطلبات المهجورة",
+    "mcp": "وكلاء الذكاء الاصطناعي (MCP)",
+    "subscriptions": "الاشتراكات",
+    "payments": "المدفوعات",
+    "aiCredits": "أرصدة الذكاء الاصطناعي",
+    "storeMembers": "أعضاء الفريق",
+    "providerApiKeys": "مفاتيح API لمزودي الخدمات",
+    "customDomains": "النطاقات المخصصة",
     "settings": "الإعدادات"
   },
   "scope_actions": {
@@ -150,6 +158,8 @@
     "assign": "تعيين",
     "manage": "إدارة",
     "dispatch": "إرسال",
+    "approve": "الموافقة",
+    "invite": "دعوة",
     "team": "الفريق",
     "integrations": "التكاملات",
     "notifications": "الإشعارات"

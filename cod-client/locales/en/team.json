@@ -139,6 +139,14 @@
     "stock": "Stock",
     "reviews": "Reviews",
     "offers": "Offers",
+    "abandonedOrders": "Abandoned Orders",
+    "mcp": "AI Agents (MCP)",
+    "subscriptions": "Subscriptions",
+    "payments": "Payments",
+    "aiCredits": "AI Credits",
+    "storeMembers": "Team Members",
+    "providerApiKeys": "Provider API Keys",
+    "customDomains": "Custom Domains",
     "settings": "Settings"
   },
   "scope_actions": {
@@ -150,6 +158,8 @@
     "assign": "Assign",
     "manage": "Manage",
     "dispatch": "Dispatch",
+    "approve": "Approve",
+    "invite": "Invite",
     "team": "Team",
     "integrations": "Integrations",
     "notifications": "Notifications"

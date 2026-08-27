@@ -31,7 +31,7 @@ async function hashPassword(password) {
   const key = await scryptAsync(
     password.normalize("NFKC"),
     salt,
-    SCRYPT.dkLen,
+    SCRYPT.dkLen, 
     { N: SCRYPT.N, r: SCRYPT.r, p: SCRYPT.p, maxmem: 128 * SCRYPT.N * SCRYPT.r * 2 }
   );
   return `${salt}:${key.toString("hex")}`;

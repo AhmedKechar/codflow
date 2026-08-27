@@ -14,6 +14,8 @@ export interface AppVariables {
   user: AuthUser;
   /** Set by storeAuthMiddleware on /store/* routes */
   storeId?: string;
+  /** Set by subscriptionGating when subscription is in grace period */
+  subscriptionGrace?: boolean;
 }
 
 /**
