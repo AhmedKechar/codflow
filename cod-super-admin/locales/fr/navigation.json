@@ -2,6 +2,8 @@
   "dashboard": "Tableau de bord",
   "plans": "Forfaits",
   "payments": "Paiements",
+  "subscriptions": "Abonnements",
+  "ai_credits": "Crédits IA",
   "stores": "Boutiques",
   "users": "Utilisateurs",
   "provider_keys": "Clés fournisseurs",

@@ -1,0 +1,21 @@
+{
+  "title": "Abonnements",
+  "subtitle": "Gérer les abonnements des boutiques sur la plateforme",
+  "store": "Boutique",
+  "plan": "Forfait",
+  "status": "Statut",
+  "active": "Actif",
+  "trialing": "Essai",
+  "past_due": "En retard",
+  "canceled": "Annulé",
+  "expired": "Expiré",
+  "payment_method": "Moyen de paiement",
+  "end_date": "Date de fin",
+  "no_subscriptions": "Aucun abonnement trouvé",
+  "search": "Rechercher par boutique ou forfait...",
+  "cancel": "Annuler l'abonnement",
+  "confirm_cancel": "Êtes-vous sûr de vouloir annuler cet abonnement ?",
+  "canceled_success": "Abonnement annulé",
+  "error": "Une erreur est survenue",
+  "currency": "DA"
+}

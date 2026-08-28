@@ -50,7 +50,7 @@ export async function authMiddleware(c: Context<AppContext>, next: Next) {
 
     let scopes: string[];
 
-    if (user.role === "admin") {
+    if (user.role === "admin" || user.role === "super_admin") {
       scopes = ["*"];
     } else {
       try {
@@ -87,9 +87,12 @@ export async function authMiddleware(c: Context<AppContext>, next: Next) {
         )
         .get();
 
-      if (membership) {
+      // Admin and super_admin users can access any store even without membership
+      const isAdmin = user.role === "admin" || user.role === "super_admin";
+
+      if (membership || isAdmin) {
         c.set("storeId", storeIdHeader);
-      } else if (user.role !== "admin") {
+      } else {
         // Non-admin users must have explicit store membership
         return c.json({
           error: "User does not have access to this store",
@@ -97,7 +100,6 @@ export async function authMiddleware(c: Context<AppContext>, next: Next) {
           category: "AUTHORIZATION"
         }, 403);
       }
-      // Admin users can access any store even without membership
     }
 
     await next();

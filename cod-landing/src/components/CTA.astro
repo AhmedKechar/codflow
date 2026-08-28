@@ -1,0 +1,58 @@
+---
+interface Props {
+  lang?: string;
+}
+
+const { lang = 'ar' } = Astro.props;
+
+const cta = {
+  ar: {
+    title: 'هل أنت مستعد لإطلاق متجرك؟',
+    subtitle: 'انضم إلى آلاف البائعين الذين يستخدمون CodFlow لنمو أعمالهم.',
+    cta: 'ابدأ مجاناً الآن',
+    note: 'لا حاجة لبطاقة ائتمان - ابدأ في 5 دقائق',
+  },
+  en: {
+    title: 'Ready to Launch Your Store?',
+    subtitle: 'Join thousands of sellers using CodFlow to grow their business.',
+    cta: 'Start Free Now',
+    note: 'No credit card required - Get started in 5 minutes',
+  },
+  fr: {
+    title: 'Prêt à Lancer Votre Boutique?',
+    subtitle: 'Rejoignez des milliers de vendeurs qui utilisent CodFlow pour développer leur activité.',
+    cta: 'Commencer Gratuitement',
+    note: 'Pas de carte de crédit requise - Commencez en 5 minutes',
+  },
+};
+
+const content = cta[lang as keyof typeof cta] ?? cta.ar;
+---
+
+<section class="py-20">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="glass-card rounded-3xl p-12 text-center relative overflow-hidden">
+      <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary-500/10 to-blue-500/10 pointer-events-none"></div>
+      
+      <div class="relative z-10">
+        <h2 class="text-3xl sm:text-4xl font-black text-gray-900 mb-4">
+          {content.title}
+        </h2>
+        <p class="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+          {content.subtitle}
+        </p>
+        
+        <a
+          href="http://localhost:3000"
+          class="inline-block px-10 py-4 text-lg font-bold text-white bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl hover:shadow-xl hover:shadow-primary-500/25 transition-all active:scale-95"
+        >
+          {content.cta}
+        </a>
+        
+        <p class="text-sm text-gray-500 mt-4">
+          {content.note}
+        </p>
+      </div>
+    </div>
+  </div>
+</section>

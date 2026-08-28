@@ -648,6 +648,20 @@ export function initProductPage() {
   // Initialize address fields visibility based on default delivery type (home)
   toggleAddressFields();
 
+  // ── SUMMARY TOGGLE ─────────────────────────────────────────────────────
+  function initSummaryToggle() {
+    const header = document.getElementById("summary-toggle");
+    const content = document.getElementById("summary-content");
+    if (!header || !content) return;
+    
+    header.addEventListener("click", () => {
+      content.classList.toggle("hidden");
+      const icon = header.querySelector("svg");
+      if (icon) icon.classList.toggle("rotate-180");
+    });
+  }
+  initSummaryToggle();
+
   // ── META PIXEL EVENTS ─────────────────────────────────────────────────────
   const pixelId   = el.dataset.pixelId || "";
   const productId = el.dataset.productId || "";

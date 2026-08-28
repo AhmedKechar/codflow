@@ -36,16 +36,21 @@ function storeRow(overrides: Record<string, any> = {}) {
     bgColor: "#ffffff",
     fontFamily: "Cairo",
     fontUrl: "https://fonts.googleapis.com/css2?family=Cairo",
+    borderRadius: "rounded" as const,
+    shadowIntensity: "soft" as const,
     lang: "ar" as const,
     currency: "DZD",
     currencySymbol: "دج",
     contentJson: null,
+    siteJson: null,
     metaTitle: "My Shop — Best Products",
     metaDescription: "Find the best products at My Shop.",
     ogImage: "https://cdn.example.com/og.png",
     announcementBar: "Free delivery on orders above 3000 دج",
     reviewsEnabled: true,
     status: "active" as const,
+    trustSeals: null,
+    orderFormConfig: null,
     storeApiKey: "sk_store_abc123",
     createdAt: NOW,
     updatedAt: NOW,
@@ -162,6 +167,48 @@ describe("Stores routes (OpenAPIHono)", () => {
       });
 
       expect(res.status).toBe(404);
+    });
+
+    it("updates borderRadius and shadowIntensity", async () => {
+      vi.mocked(queries.getStore).mockResolvedValue(storeRow());
+      vi.mocked(queries.updateStore).mockResolvedValue(
+        storeRow({ borderRadius: "sharp", shadowIntensity: "strong" })
+      );
+
+      const res = await app.request("/api/stores/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ borderRadius: "sharp", shadowIntensity: "strong" }),
+      });
+
+      expect(res.status).toBe(200);
+      const body: any = await res.json();
+      expect(body.data.borderRadius).toBe("sharp");
+      expect(body.data.shadowIntensity).toBe("strong");
+    });
+
+    it("returns 400 for invalid borderRadius", async () => {
+      vi.mocked(queries.getStore).mockResolvedValue(storeRow());
+
+      const res = await app.request("/api/stores/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ borderRadius: "invalid" }),
+      });
+
+      expect(res.status).toBe(400);
+    });
+
+    it("returns 400 for invalid shadowIntensity", async () => {
+      vi.mocked(queries.getStore).mockResolvedValue(storeRow());
+
+      const res = await app.request("/api/stores/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ shadowIntensity: "invalid" }),
+      });
+
+      expect(res.status).toBe(400);
     });
   });
 

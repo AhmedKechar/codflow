@@ -2,13 +2,32 @@
 import { Image } from "astro:assets";
 import type { StoreConfig } from "@/core/api/types";
 import type { StoreFrontContent } from "@/theme/config/content";
+import type { SiteBuilderConfig, NavLink } from "../../../../../../cod-shared/site-builder";
 import { Icon } from "astro-icon/components";
+import SocialLinks from "./SocialLinks.astro";
 
 interface Props {
   config: StoreConfig;
   content?: StoreFrontContent;
+  siteBuilder?: SiteBuilderConfig;
 }
+
 const { config, content } = Astro.props;
+
+// Resolve navLink labels against the content pack (labels are content keys).
+const contentMap = (content ?? {}) as Record<string, string>;
+function resolveLabel(label: string): string {
+  return contentMap[label] ?? label;
+}
+
+const navLinks: NavLink[] = (Astro.props.siteBuilder?.header.navLinks ?? []).map((l) => ({
+  label: resolveLabel(l.label),
+  href: l.href,
+}));
+const showSearch = Astro.props.siteBuilder?.header.showSearch ?? true;
+const showStoreButton = Astro.props.siteBuilder?.header.showStoreButton ?? true;
+const showSocials = Astro.props.siteBuilder?.header.showSocials ?? false;
+const socials = Astro.props.siteBuilder?.socials ?? [];
 ---
 
 <header
@@ -48,30 +67,33 @@ const { config, content } = Astro.props;
       class="hidden md:flex items-center gap-4 text-[0.9375rem] font-bold flex-1 justify-center"
       aria-label={content?.ariaMainNavigation}
     >
-      <a href="/#new-arrivals" class="px-5 py-2 transition-all hover:text-primary active:scale-95" style="color: var(--clr-text)">
-        {content?.navNewArrivals}
-      </a>
-      <a href="/#best-sellers" class="px-5 py-2 transition-all hover:text-primary active:scale-95" style="color: var(--clr-text)">
-        {content?.navBestSellers}
-      </a>
-      <a href="/products" class="px-5 py-2 transition-all hover:text-primary active:scale-95" style="color: var(--clr-text)">
-        {content?.navProducts}
-      </a>
-      <a href="/#how-it-works" class="px-5 py-2 transition-all hover:text-primary active:scale-95" style="color: var(--clr-text)">
-        {content?.navContact}
-      </a>
+      {navLinks.map((link) => (
+        <a href={link.href} class="px-5 py-2 transition-all hover:text-primary active:scale-95" style="color: var(--clr-text)">
+          {link.label}
+        </a>
+      ))}
     </nav>
 
-    {/* Search icon — end */}
+    {/* Right side — socials + search */}
     <div class="flex items-center gap-1 sm:gap-2 shrink-0">
-      <a
-        href="/products"
-        class="p-2.5 rounded-full hover:bg-black/5 active:scale-90 transition-all"
-        style="color: var(--clr-text)"
-        aria-label={content?.searchLabel}
-      >
-        <Icon name="heroicons:magnifying-glass" class="w-[22px] h-[22px]" aria-hidden="true" />
-      </a>
+      {showSocials && socials.length > 0 && (
+        <SocialLinks
+          socials={socials}
+          itemClass="w-9 h-9"
+          ariaLabel={content?.ariaSocials ?? "Social"}
+        />
+      )}
+      {showSearch && (
+        <a
+          href="/products"
+          class="p-2.5 rounded-full hover:bg-black/5 active:scale-90 transition-all"
+          style="color: var(--clr-text)"
+          aria-label={content?.searchLabel}
+        >
+          <Icon name="heroicons:magnifying-glass" class="w-[22px] h-[22px]" aria-hidden="true" />
+        </a>
+      )}
+      {!showSearch && !showSocials && <span class="w-0" aria-hidden="true" />}
     </div>
 
   </div>

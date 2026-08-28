@@ -1,0 +1,85 @@
+---
+interface Props {
+  trustSeals: Record<string, boolean> | null;
+  primaryColor: string;
+  accentColor: string;
+  borderRadius: string;
+  content: {
+    sealCashOnDelivery: string;
+    sealFreeReturns: string;
+    sealSecureCheckout: string;
+    sealFastDelivery: string;
+    sealCustomerSupport: string;
+    sealQualityGuarantee: string;
+  };
+}
+const { trustSeals, primaryColor, accentColor, borderRadius, content } = Astro.props;
+
+const radiusMap: Record<string, string> = {
+  rounded: "0.75rem",
+  sharp: "0.25rem",
+  minimal: "0.5rem",
+};
+const radius = radiusMap[borderRadius] ?? "0.75rem";
+
+const seals = [
+  { key: "cashOnDelivery", icon: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z", label: content.sealCashOnDelivery },
+  { key: "freeReturns", icon: "M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z", label: content.sealFreeReturns },
+  { key: "secureCheckout", icon: "M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z", label: content.sealSecureCheckout },
+  { key: "fastDelivery", icon: "M13 10V3L4 14h7v7l9-11h-7z", label: content.sealFastDelivery },
+  { key: "customerSupport", icon: "M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z", label: content.sealCustomerSupport },
+  { key: "qualityGuarantee", icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z", label: content.sealQualityGuarantee },
+];
+
+const activeSeals = seals.filter(s => trustSeals?.[s.key]);
+---
+
+{activeSeals.length > 0 && (
+  <div
+    class="trust-seals-grid"
+    style={`--seal-primary: ${primaryColor}; --seal-accent: ${accentColor}; --seal-radius: ${radius};`}
+  >
+    {activeSeals.map(seal => (
+      <div class="trust-seal-item">
+        <svg class="trust-seal-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d={seal.icon} />
+        </svg>
+        <span class="trust-seal-label">{seal.label}</span>
+      </div>
+    ))}
+  </div>
+)}
+
+<style>
+  .trust-seals-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+  @media (min-width: 640px) {
+    .trust-seals-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  .trust-seal-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid color-mix(in srgb, var(--seal-primary) 15%, transparent);
+    background: color-mix(in srgb, var(--seal-primary) 3%, transparent);
+    border-radius: var(--seal-radius);
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+  .trust-seal-icon {
+    width: 1.125rem;
+    height: 1.125rem;
+    flex-shrink: 0;
+    color: var(--seal-primary);
+  }
+  .trust-seal-label {
+    color: var(--seal-primary);
+    font-weight: 500;
+  }
+</style>

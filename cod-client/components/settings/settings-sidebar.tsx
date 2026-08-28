@@ -3,7 +3,7 @@
 import { Store, Palette, Search, Star, BarChart2, Key, type LucideIcon } from "lucide-react";
 import { useSettings } from "@/lib/translations";
 
-export type CategoryId = "general" | "branding" | "seo" | "reviews" | "analytics" | "api";
+export type CategoryId = "general" | "branding" | "seo" | "reviews" | "analytics" | "api" | "theme";
 
 interface CategoryItem {
   id: CategoryId;
@@ -28,6 +28,7 @@ export function SettingsSidebar({
   const categories: CategoryItem[] = [
     { id: "general", label: s.general_title, icon: Store },
     { id: "branding", label: s.branding_title, icon: Palette },
+    { id: "theme", label: s.theme_title ?? "Theme", icon: Palette },
     { id: "seo", label: s.seo_title, icon: Search },
     { id: "reviews", label: s.reviews_title, icon: Star },
     { id: "analytics", label: s.tracking_title, icon: BarChart2 },

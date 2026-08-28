@@ -8,6 +8,7 @@ import { getMyStore, updateMyStore, type StoreConfig } from "@/actions/stores";
 import { SettingsSidebar, type CategoryId } from "./settings-sidebar";
 import { GeneralSettings } from "./general-settings";
 import { BrandingSettings } from "./branding-settings";
+import { ThemeSettings } from "./theme-settings";
 import { SeoSettings } from "./seo-settings";
 import { ReviewsSettings } from "./reviews-settings";
 import { TrackingSettings } from "./tracking-settings";
@@ -71,6 +72,8 @@ export function SettingsLayout() {
         return <GeneralSettings storeConfig={storeConfig} onSave={handleSave} />;
       case "branding":
         return <BrandingSettings storeConfig={storeConfig} onSave={handleSave} />;
+      case "theme":
+        return <ThemeSettings storeConfig={storeConfig} onSave={handleSave} />;
       case "seo":
         return <SeoSettings storeConfig={storeConfig} onSave={handleSave} />;
       case "reviews":

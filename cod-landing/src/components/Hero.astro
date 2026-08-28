@@ -1,0 +1,249 @@
+---
+interface Props {
+  version?: 1 | 2 | 3 | 4 | 5;
+  lang?: string;
+}
+
+const { version = 1, lang = 'ar' } = Astro.props;
+
+const heroContent = {
+  1: {
+    ar: {
+      badge: '🚀 منصة التجارة الإلكترونية #1 في الجزائر',
+      title: ' ابنِ متجرك الإلكتروني في دقائق',
+      subtitle: 'أطلق متجرك онлайн مع CodFlow. إدارة المنتجات، الطلبات، والتوصيل - كل شيء في مكان واحد.',
+      cta: 'ابدأ مجاناً الآن',
+      ctaSecondary: 'شاهد العرض التوضيحي',
+      stats: [
+        { value: '10,000+', label: 'متجر نشط' },
+        { value: '50,000+', label: 'طلب تم تسليمه' },
+        { value: '99.9%', label: 'وقت التشغيل' },
+      ],
+    },
+    en: {
+      badge: '🚀 #1 E-commerce Platform in Algeria',
+      title: 'Build Your Online Store in Minutes',
+      subtitle: 'Launch your online store with CodFlow. Manage products, orders, and delivery - all in one place.',
+      cta: 'Start Free Now',
+      ctaSecondary: 'Watch Demo',
+      stats: [
+        { value: '10,000+', label: 'Active Stores' },
+        { value: '50,000+', label: 'Orders Delivered' },
+        { value: '99.9%', label: 'Uptime' },
+      ],
+    },
+    fr: {
+      badge: '🚀 Plateforme E-commerce N°1 en Algérie',
+      title: 'Créez Votre Boutique en Ligne en Quelques Minutes',
+      subtitle: 'Lancez votre boutique en ligne avec CodFlow. Gérez les produits, commandes et livraisons - tout au même endroit.',
+      cta: 'Commencer Gratuitement',
+      ctaSecondary: 'Voir la Démo',
+      stats: [
+        { value: '10 000+', label: 'Boutiques Actives' },
+        { value: '50 000+', label: 'Commandes Livrées' },
+        { value: '99,9%', label: 'Disponibilité' },
+      ],
+    },
+  },
+  2: {
+    ar: {
+      badge: '💰 ا赚更多 مع الدفع عند الاستلام',
+      title: '_opcode codecqr للجزائر',
+      subtitle: 'المنصة الوحيدة المصممة خصيصاً للسوق الجزائري. اجمع المدفوعات عند الاستلام وتابع شحناتك.',
+      cta: 'افتح متجرك مجاناً',
+      ctaSecondary: 'كيف يعمل؟',
+      stats: [
+        { value: '80%', label: 'الsellers يستخدمون COD' },
+        { value: '24 ساعة', label: 'تفعيل المتجر' },
+        { value: '0 دج', label: 'رسوم التأسيس' },
+      ],
+    },
+    en: {
+      badge: '💰 Earn More with Cash on Delivery',
+      title: 'Built for Algeria\'s COD Market',
+      subtitle: 'The only platform designed specifically for the Algerian market. Collect cash payments and track your shipments.',
+      cta: 'Open Your Store Free',
+      ctaSecondary: 'How It Works',
+      stats: [
+        { value: '80%', label: 'Sellers Use COD' },
+        { value: '24 Hours', label: 'Store Activation' },
+        { value: '0 DZD', label: 'Setup Fees' },
+      ],
+    },
+    fr: {
+      badge: '💰 Gagnez Plus avec Paiement à la Livraison',
+      title: 'Conçu pour le Marché Algérien du COD',
+      subtitle: 'La seule plateforme spécialement conçue pour le marché algérien. Percez les paiements et suivez vos envois.',
+      cta: 'Ouvrez Votre Boutique Gratuitement',
+      ctaSecondary: 'Comment Ça Marche',
+      stats: [
+        { value: '80%', label: 'Vendeurs Utilisent le COD' },
+        { value: '24 Heures', label: 'Activation Boutique' },
+        { value: '0 DA', label: 'Frais d\'Installation' },
+      ],
+    },
+  },
+  3: {
+    ar: {
+      badge: '📦 إدارة سهلة للطلبات والتوصيل',
+      title: 'تحكم في مبيعاتك من أي مكان',
+      subtitle: 'تتبع كل طلب، إدارة السائقين، وشحن الشركات - كل ذلك من هاتفك.',
+      cta: 'جرّب مجاناً',
+      ctaSecondary: 'شاهد الفيديو',
+      stats: [
+        { value: '5 دقائق', label: 'إعداد المتجر' },
+        { value: '100%', label: 'تتبع مباشر' },
+        { value: '+', label: 'شركات توصيل متكاملة' },
+      ],
+    },
+    en: {
+      badge: '📦 Easy Order & Delivery Management',
+      title: 'Control Your Sales From Anywhere',
+      subtitle: 'Track every order, manage drivers, and ship with companies - all from your phone.',
+      cta: 'Try Free',
+      ctaSecondary: 'Watch Video',
+      stats: [
+        { value: '5 Minutes', label: 'Store Setup' },
+        { value: '100%', label: 'Live Tracking' },
+        { value: '+', label: 'Integrated Carriers' },
+      ],
+    },
+    fr: {
+      badge: '📦 Gestion Facile des Commandes et Livraisons',
+      title: 'Contrôlez Ventes Partout',
+      subtitle: 'Suivez chaque commande, gérez les livreurs et expédiez avec les sociétés - tout depuis votre téléphone.',
+      cta: 'Essayer Gratuitement',
+      ctaSecondary: 'Voir la Vidéo',
+      stats: [
+        { value: '5 Minutes', label: 'Configuration' },
+        { value: '100%', label: 'Suivi en Direct' },
+        { value: '+', label: 'Transporteurs Intégrés' },
+      ],
+    },
+  },
+  4: {
+    ar: {
+      badge: '🤖 ذكاء اصطناعي لمتجرك',
+      title: 'متجر ذكي مع AI مدمج',
+      subtitle: 'وصف المنتجات التلقائي، تحليل المبيعات، وتشغيل المخزون بالذكاء الاصطناعي.',
+      cta: 'استكشف المميزات',
+      ctaSecondary: 'تعرّف على AI',
+      stats: [
+        { value: 'AI', label: 'مساعد ذكي' },
+        { value: '3x', label: 'زيادة المبيعات' },
+        { value: '50%', label: 'توفير الوقت' },
+      ],
+    },
+    en: {
+      badge: '🤖 AI-Powered for Your Store',
+      title: 'Smart Store with Built-in AI',
+      subtitle: 'Automatic product descriptions, sales analytics, and intelligent inventory management.',
+      cta: 'Explore Features',
+      ctaSecondary: 'Learn About AI',
+      stats: [
+        { value: 'AI', label: 'Smart Assistant' },
+        { value: '3x', label: 'Sales Increase' },
+        { value: '50%', label: 'Time Saved' },
+      ],
+    },
+    fr: {
+      badge: '🤖 IA Intégré pour Votre Boutique',
+      title: 'Boutique Intelligente avec IA Intégrée',
+      subtitle: 'Descriptions automatiques, analyses de ventes et gestion intelligente des stocks.',
+      cta: 'Explorer les Fonctionnalités',
+      ctaSecondary: 'Découvrir l\'IA',
+      stats: [
+        { value: 'IA', label: 'Assistant Intelligent' },
+        { value: '3x', label: 'Augmentation Ventes' },
+        { value: '50%', label: 'Temps Économisé' },
+      ],
+    },
+  },
+  5: {
+    ar: {
+      badge: '📊 لوحات تحكم احترافية',
+      title: 'بيانات مبيعاتك بين عينيك',
+      subtitle: 'تقارير مفصلة، رسوم بيانية تفاعلية، ورؤى ذكية لنمو أعمالك.',
+      cta: 'شاهد التقارير',
+      ctaSecondary: 'ابدأ الآن',
+      stats: [
+        { value: '24/7', label: 'تقارير مباشرة' },
+        { value: '100%', label: 'بيانات حقيقية' },
+        { value: 'AI', label: 'تحليل ذكي' },
+      ],
+    },
+    en: {
+      badge: '📊 Professional Analytics Dashboards',
+      title: 'Your Sales Data at a Glance',
+      subtitle: 'Detailed reports, interactive charts, and smart insights to grow your business.',
+      cta: 'See Reports',
+      ctaSecondary: 'Start Now',
+      stats: [
+        { value: '24/7', label: 'Live Reports' },
+        { value: '100%', label: 'Real Data' },
+        { value: 'AI', label: 'Smart Analysis' },
+      ],
+    },
+    fr: {
+      badge: '📊 Tableaux de Bord Analytiques Professionnels',
+      title: 'Vos Données de Vente en Un Coup d\'Œil',
+      subtitle: 'Rapports détaillés, graphiques interactifs et insights intelligents pour développer votre entreprise.',
+      cta: 'Voir les Rapports',
+      ctaSecondary: 'Commencer Maintenant',
+      stats: [
+        { value: '24/7', label: 'Rapports en Direct' },
+        { value: '100%', label: 'Données Réelles' },
+        { value: 'IA', label: 'Analyse Intelligente' },
+      ],
+    },
+  },
+};
+
+const content = heroContent[version]?.[lang as keyof typeof heroContent[1]] ?? heroContent[1].ar;
+---
+
+<section class="relative pt-32 pb-20 overflow-hidden">
+  <div class="absolute inset-0 bg-gradient-to-br from-primary-50/50 via-white to-blue-50/50"></div>
+  <div class="absolute top-20 right-10 w-72 h-72 bg-primary-200/30 rounded-full blur-3xl animate-float"></div>
+  <div class="absolute bottom-10 left-10 w-64 h-64 bg-blue-200/30 rounded-full blur-3xl animate-float" style="animation-delay: -3s;"></div>
+
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center max-w-4xl mx-auto">
+      <div class="inline-flex items-center gap-2 px-4 py-2 bg-white/60 backdrop-blur-sm rounded-full border border-white/20 shadow-sm mb-8">
+        <span class="text-sm font-medium text-gray-700">{content.badge}</span>
+      </div>
+
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-gray-900 leading-tight mb-6">
+        {content.title}
+      </h1>
+
+      <p class="text-lg sm:text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
+        {content.subtitle}
+      </p>
+
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+        <a
+          href="http://localhost:3000"
+          class="px-8 py-4 text-base font-bold text-white bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl hover:shadow-xl hover:shadow-primary-500/25 transition-all active:scale-95"
+        >
+          {content.cta}
+        </a>
+        <a
+          href="#features"
+          class="px-8 py-4 text-base font-semibold text-gray-700 bg-white/60 backdrop-blur-sm rounded-2xl border border-white/20 hover:bg-white/80 transition-all"
+        >
+          {content.ctaSecondary}
+        </a>
+      </div>
+
+      <div class="grid grid-cols-3 gap-8 max-w-2xl mx-auto">
+        {content.stats.map((stat) => (
+          <div class="text-center">
+            <div class="text-2xl sm:text-3xl font-black text-primary-600">{stat.value}</div>
+            <div class="text-sm text-gray-500 mt-1">{stat.label}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>

@@ -41,6 +41,8 @@ export const OfferSchema = z.object({
   rewardProductName: z.string(),
   rewardVariantId: z.string().nullable(),
   rewardVariantLabel: z.string().nullable(),
+  startsAt: z.string().nullable(),
+  endsAt: z.string().nullable(),
 });
 
 /**

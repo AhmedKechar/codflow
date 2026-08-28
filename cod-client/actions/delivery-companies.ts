@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { apiClient, ApiClientError } from "@/lib/api-client";
 import { getDb } from "@/db";
-import { getUserApiKey, requirePermission } from "@/lib/auth";
+import { getUserApiKey, requirePermission, getUserStoreId } from "@/lib/auth";
 import { SCOPES } from "@/../cod-shared/rbac/scopes";
 import {
   getAllDeliveryCompanies,
@@ -47,7 +47,8 @@ export async function getDeliveryCompanies(active?: boolean): Promise<DeliveryCo
   await requirePermission(SCOPES.DELIVERY_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  const rows = await getAllDeliveryCompanies(db, { active });
+  const storeId = await getUserStoreId();
+  const rows = await getAllDeliveryCompanies(db, storeId, { active });
   return rows as unknown as DeliveryCompany[];
 }
 
@@ -58,7 +59,8 @@ export async function getDeliveryCompany(id: string): Promise<DeliveryCompany | 
   await requirePermission(SCOPES.DELIVERY_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  const row = await getDeliveryCompanyById(db, id);
+  const storeId = await getUserStoreId();
+  const row = await getDeliveryCompanyById(db, storeId, id);
   return (row as unknown as DeliveryCompany | null) ?? null;
 }
 

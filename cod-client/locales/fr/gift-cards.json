@@ -1,0 +1,69 @@
+{
+  "page_title": "Cartes Cadeaux",
+  "page_subtitle": "Gérez les cartes cadeaux de votre boutique",
+  "search_placeholder": "Rechercher par code ou destinataire...",
+  "filters": {
+    "status": "Statut"
+  },
+  "status": {
+    "all": "Tous les statuts",
+    "active": "Active",
+    "used": "Utilisée",
+    "expired": "Expirée",
+    "disabled": "Désactivée"
+  },
+  "table": {
+    "code": "Code",
+    "amount": "Montant",
+    "remaining": "Restant",
+    "recipient": "Destinataire",
+    "status": "Statut",
+    "date": "Date"
+  },
+  "actions": {
+    "create": "Créer une Carte Cadeau",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "disable": "Désactiver",
+    "disable_confirm": "Êtes-vous sûr de vouloir désactiver cette carte cadeau ?"
+  },
+  "form": {
+    "card_info": "Informations de la Carte",
+    "code": "Code",
+    "amount": "Montant Initial (DA)",
+    "expires_at": "Date d'Expiration",
+    "status": "Statut",
+    "generate": "Générer un Nouveau Code",
+    "recipient_info": "Informations du Destinataire",
+    "recipient_name": "Nom du Destinataire",
+    "recipient_name_placeholder": "Entrez le nom du destinataire",
+    "recipient_phone": "Téléphone du Destinataire",
+    "recipient_email": "Email du Destinataire",
+    "sender_name": "Nom de l'Expéditeur",
+    "sender_name_placeholder": "Entrez le nom de l'expéditeur",
+    "message": "Message",
+    "message_placeholder": "Entrez un message personnel",
+    "cancel": "Annuler",
+    "create": "Créer la Carte Cadeau",
+    "save": "Enregistrer les Modifications",
+    "title_create": "Créer une Carte Cadeau",
+    "subtitle_create": "Créez une nouvelle carte cadeau pour vos clients"
+  },
+  "empty": {
+    "title": "Aucune carte cadeau",
+    "description": "Créez votre première carte cadeau pour commencer."
+  },
+  "delete_dialog": {
+    "title": "Supprimer la Carte Cadeau",
+    "description": "Êtes-vous sûr de vouloir supprimer cette carte cadeau ? Cette action est irréversible.",
+    "cancel": "Annuler",
+    "confirm": "Supprimer"
+  },
+  "toast": {
+    "created": "Carte cadeau créée avec succès",
+    "updated": "Carte cadeau mise à jour avec succès",
+    "deleted": "Carte cadeau supprimée avec succès",
+    "disabled": "Carte cadeau désactivée avec succès",
+    "error": "Une erreur s'est produite, veuillez réessayer"
+  }
+}

@@ -23,9 +23,17 @@
     "system": "النظام",
     "reviews": "التقييمات",
     "offers": "العروض",
+    "discounts": "أكواد الخصم",
     "stock_management": "إدارة المخزون",
     "api_reference": "مرجع API",
-    "mcp": "وكلاء الذكاء الاصطناعي"
+    "mcp": "وكلاء الذكاء الاصطناعي",
+    "ai_assistant": "مساعد الذكاء الاصطناعي",
+    "subscriptions": "الاشتراكات",
+    "billing": "الفواتير",
+    "messaging": "الرسائل",
+    "custom_domains": "النطاقات المخصصة",
+    "theme_selector": "المظهر",
+    "gift_cards": "بطاقات الهدايا"
   },
   "navbar": {
     "search_placeholder": "البحث عن طلبات، عملاء...",

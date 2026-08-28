@@ -11,5 +11,15 @@
   "created_at": "Créé le",
   "no_stores": "Aucune boutique trouvée",
   "view_store": "Voir",
-  "search": "Rechercher par nom ou domaine..."
+  "search": "Rechercher par nom ou domaine...",
+  "create": "Ajouter une boutique",
+  "edit": "Modifier",
+  "delete": "Supprimer",
+  "confirm_delete": "Êtes-vous sûr de vouloir supprimer cette boutique ?",
+  "created": "Boutique créée",
+  "updated": "Boutique mise à jour",
+  "deleted": "Boutique supprimée",
+  "error": "Une erreur est survenue",
+  "save": "Enregistrer",
+  "cancel": "Annuler"
 }

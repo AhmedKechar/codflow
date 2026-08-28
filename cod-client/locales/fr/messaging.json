@@ -1,0 +1,79 @@
+{
+  "page_title": "Messages",
+  "messages_count": "messages",
+  "send_button": "Envoyer un message",
+  "tabs": {
+    "messages": "Messages",
+    "send": "Envoyer",
+    "templates": "Modèles"
+  },
+  "table": {
+    "recipient": "Destinataire",
+    "phone": "Téléphone",
+    "type": "Type",
+    "content": "Contenu",
+    "status": "Statut",
+    "channel": "Canal",
+    "date": "Date"
+  },
+  "filters": {
+    "status": "Statut",
+    "type": "Type",
+    "channel": "Canal",
+    "all_status": "Tous les statuts",
+    "all_types": "Tous les types",
+    "all_channels": "Tous les canaux"
+  },
+  "status": {
+    "pending": "En attente",
+    "sent": "Envoyé",
+    "delivered": "Livré",
+    "read": "Lu",
+    "failed": "Échoué"
+  },
+  "message_type": {
+    "order_update": "Mise à jour de commande",
+    "marketing": "Marketing",
+    "support": "Support",
+    "automated": "Automatisé"
+  },
+  "channel": {
+    "whatsapp": "WhatsApp",
+    "sms": "SMS",
+    "both": "Les deux canaux"
+  },
+  "form": {
+    "title": "Envoyer un nouveau message",
+    "phone_label": "Numéro de téléphone",
+    "phone_placeholder": "0555123456",
+    "phone_hint": "Entrez un numéro de téléphone valide",
+    "type_label": "Type de message",
+    "channel_label": "Canal",
+    "content_label": "Contenu du message",
+    "content_placeholder": "Tapez votre message ici...",
+    "content_hint": "Laissez vide pour envoyer un modèle automatique",
+    "send": "Envoyer",
+    "sending": "Envoi en cours...",
+    "success": "Message envoyé avec succès",
+    "error": "Échec de l'envoi du message",
+    "error_invalid_phone": "Numéro de téléphone invalide",
+    "error_content_required": "Le contenu du message est requis"
+  },
+  "templates": {
+    "title": "Modèles de messages",
+    "order_update": "Mise à jour du statut de commande",
+    "marketing": "Message marketing",
+    "support": "Message de support",
+    "automated": "Message automatisé"
+  },
+  "empty_state": {
+    "title": "Aucun message pour le moment",
+    "description": "Commencez par envoyer votre premier message aux clients via WhatsApp ou SMS.",
+    "action": "Envoyer un message"
+  },
+  "actions": {
+    "view": "Voir",
+    "retry": "Réessayer",
+    "delete": "Supprimer"
+  }
+}

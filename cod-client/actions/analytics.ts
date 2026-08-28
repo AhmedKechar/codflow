@@ -2,7 +2,7 @@
 
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { getDb } from "@/db";
-import { requirePermission } from "@/lib/auth";
+import { requirePermission, getUserStoreId } from "@/lib/auth";
 import { SCOPES } from "@/../cod-shared/rbac/scopes";
 import {
   getOrderStatusStats,
@@ -13,6 +13,6 @@ export async function getDashboardStats(): Promise<OrderStatusStat[]> {
   await requirePermission(SCOPES.DASHBOARD_VIEW);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  const storeId = env.STORE_ID;
+  const storeId = await getUserStoreId();
   return getOrderStatusStats(db, storeId);
 }

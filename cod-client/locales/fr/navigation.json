@@ -23,9 +23,17 @@
     "system": "Système",
     "reviews": "Avis",
     "offers": "Offres",
+    "discounts": "Codes de réduction",
     "stock_management": "Gestion de stock",
     "api_reference": "Référence API",
-    "mcp": "Agents IA"
+    "mcp": "Agents IA",
+    "ai_assistant": "Assistant IA",
+    "subscriptions": "Abonnements",
+    "billing": "Facturation",
+    "messaging": "Messages",
+    "custom_domains": "Domaines Personnalisés",
+    "theme_selector": "Thème",
+    "gift_cards": "Cartes cadeaux"
   },
   "navbar": {
     "search_placeholder": "Rechercher des commandes, clients...",

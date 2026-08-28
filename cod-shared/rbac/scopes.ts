@@ -110,6 +110,18 @@ export const SCOPES = {
   /** Create, update, and delete promotional offers */
   OFFERS_MANAGE: "offers:manage",
 
+  // Discount Codes
+  /** View discount codes list */
+  DISCOUNTS_READ: "discounts:read",
+  /** Create, update, and delete discount codes */
+  DISCOUNTS_MANAGE: "discounts:manage",
+
+  // Gift Cards
+  /** View gift cards list */
+  GIFT_CARDS_READ: "gift_cards:read",
+  /** Create, update, delete, and redeem gift cards */
+  GIFT_CARDS_MANAGE: "gift_cards:manage",
+
   // Abandoned Orders
   /** View abandoned orders list and stats */
   ABANDONED_ORDERS_READ: "abandoned_orders:read",
@@ -164,6 +176,14 @@ export const SCOPES = {
   CUSTOM_DOMAINS_READ: "custom_domains:read",
   /** Manage custom domain setup and verification */
   CUSTOM_DOMAINS_MANAGE: "custom_domains:manage",
+
+  // Messaging
+  /** View WhatsApp and SMS message history */
+  MESSAGING_READ: "messaging:read",
+  /** Manage messaging settings and templates */
+  MESSAGING_MANAGE: "messaging:manage",
+  /** Send WhatsApp and SMS messages */
+  MESSAGING_SEND: "messaging:send",
 
   // Wildcard (admin only)
   /** All permissions - admin users only */
@@ -253,6 +273,14 @@ export const SCOPE_CATEGORIES = {
     label: "Offers",
     scopes: [SCOPES.OFFERS_READ, SCOPES.OFFERS_MANAGE],
   },
+  discounts: {
+    label: "Discount Codes",
+    scopes: [SCOPES.DISCOUNTS_READ, SCOPES.DISCOUNTS_MANAGE],
+  },
+  giftCards: {
+    label: "Gift Cards",
+    scopes: [SCOPES.GIFT_CARDS_READ, SCOPES.GIFT_CARDS_MANAGE],
+  },
   abandonedOrders: {
     label: "Abandoned Orders",
     scopes: [SCOPES.ABANDONED_ORDERS_READ, SCOPES.ABANDONED_ORDERS_MANAGE],
@@ -284,5 +312,9 @@ export const SCOPE_CATEGORIES = {
   customDomains: {
     label: "Custom Domains",
     scopes: [SCOPES.CUSTOM_DOMAINS_READ, SCOPES.CUSTOM_DOMAINS_MANAGE],
+  },
+  messaging: {
+    label: "Messaging",
+    scopes: [SCOPES.MESSAGING_READ, SCOPES.MESSAGING_MANAGE, SCOPES.MESSAGING_SEND],
   },
 } as const;

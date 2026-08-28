@@ -41,8 +41,14 @@ import storeAbandonedRoutes from "@/endpoints/abandoned-orders/store-routes";
 import subscriptionsRoutes from "@/endpoints/subscriptions/routes";
 import paymentsRoutes from "@/endpoints/payments/routes";
 import aiCreditsRoutes from "@/endpoints/ai-credits/routes";
+import aiChatRoutes from "@/endpoints/ai-chat/routes";
 import storeMembersRoutes from "@/endpoints/store-members/routes";
 import superAdminRoutes from "@/endpoints/super-admin/routes";
+import discountCodesRoutes from "@/endpoints/discount-codes/routes";
+import giftCardsRoutes from "@/endpoints/gift-cards/routes";
+import whatsappRoutes from "@/endpoints/whatsapp/routes";
+import smsRoutes from "@/endpoints/sms/routes";
+import customDomainsRoutes from "@/endpoints/custom-domains/routes";
 
 import { subscriptionGating } from "@/middleware/subscription-gating";
 import { sweepAbandonedOrders } from "@/cron/sweep-abandoned-orders";
@@ -190,11 +196,21 @@ app.route("/api/products", productStockRouter);
 app.route("/api/mcp", mcpManagementRoutes);
 app.route("/api/analytics", analyticsRoutes);
 app.route("/api/abandoned-orders", abandonedOrdersRoutes);
+app.route("/api/discount-codes", discountCodesRoutes);
+app.route("/api/gift-cards", giftCardsRoutes);
+
+// ─── Custom Domains Routes ────────────────────────────────────────────────────
+app.route("/api/custom-domains", customDomainsRoutes);
+
+// ─── Messaging Routes ─────────────────────────────────────────────────────────
+app.route("/api/whatsapp", whatsappRoutes);
+app.route("/api/sms", smsRoutes);
 
 // ─── SaaS Feature Routes ─────────────────────────────────────────────────────
 app.route("/api/subscriptions", subscriptionsRoutes);
 app.route("/api/payments", paymentsRoutes);
 app.route("/api/ai-credits", aiCreditsRoutes);
+app.route("/api/ai-chat", aiChatRoutes);
 app.route("/api/store-members", storeMembersRoutes);
 
 // ─── Super Admin Routes (admin only) ─────────────────────────────────────────

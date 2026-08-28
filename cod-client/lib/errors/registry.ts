@@ -86,6 +86,14 @@ export const ERROR_REGISTRY: Record<string, ErrorMessage> = {
     en: "You are not authorized to access this resource",
     ar: "غير مصرح لك بالوصول إلى هذا المورد",
   },
+  [ERROR_CODES.FORBIDDEN]: {
+    en: "You do not have permission to perform this action",
+    ar: "لا تملك الإذن لتنفيذ هذا الإجراء",
+  },
+  [ERROR_CODES.STORE_ACCESS_DENIED]: {
+    en: "You do not have access to this store",
+    ar: "ليس لديك حق الوصول إلى هذا المتجر",
+  },
 
   // ============================================================================
   // BUSINESS LOGIC ERRORS - GENERAL
@@ -451,6 +459,82 @@ export const ERROR_REGISTRY: Record<string, ErrorMessage> = {
     en: "{{settledCount}} order(s) are already settled for this payment type. Remove them from your selection and retry.",
     ar: "{{settledCount}} طلب(طلبات) تمت تسويته بالفعل لهذا النوع من الدفع. قم بإزالتها من التحديد وحاول مرة أخرى.",
     fr: "{{settledCount}} commande(s) sont déjà réglées pour ce type de paiement. Retirez-les de votre sélection et réessayez.",
+  },
+  [ERROR_CODES.PAYMENT_ALREADY_REVIEWED]: {
+    en: "This payment has already been reviewed",
+    ar: "تمت مراجعة هذا الدفع بالفعل",
+  },
+
+  // ============================================================================
+  // BUSINESS LOGIC ERRORS - SUBSCRIPTIONS
+  // ============================================================================
+  [ERROR_CODES.SUBSCRIPTION_NOT_FOUND]: {
+    en: "Subscription not found",
+    ar: "الاشتراك غير موجود",
+  },
+  [ERROR_CODES.SUBSCRIPTION_EXPIRED]: {
+    en: "Your subscription has expired. Please renew to continue.",
+    ar: "انتهى اشتراكك. يرجى تجديده للمتابعة.",
+  },
+  [ERROR_CODES.SUBSCRIPTION_REQUIRED]: {
+    en: "An active subscription is required to perform this action",
+    ar: "يلزم وجود اشتراك نشط لتنفيذ هذا الإجراء",
+  },
+  [ERROR_CODES.SUBSCRIPTION_READ_ONLY]: {
+    en: "Your store is in read-only mode. Please renew your subscription.",
+    ar: "متجرك في وضع القراءة فقط. يرجى تجديد اشتراكك.",
+  },
+  [ERROR_CODES.PLAN_NOT_FOUND]: {
+    en: "Plan not found",
+    ar: "الباقة غير موجودة",
+  },
+  [ERROR_CODES.PLAN_LIMIT_EXCEEDED]: {
+    en: "You have reached the limit for your current plan",
+    ar: "لقد وصلت إلى الحد المسموح في باقتك الحالية",
+  },
+
+  // ============================================================================
+  // BUSINESS LOGIC ERRORS - STORE MEMBERS
+  // ============================================================================
+  [ERROR_CODES.MEMBER_NOT_FOUND]: {
+    en: "Team member not found",
+    ar: "عضو الفريق غير موجود",
+  },
+  [ERROR_CODES.INVITATION_NOT_FOUND]: {
+    en: "Invitation not found",
+    ar: "الدعوة غير موجودة",
+  },
+  [ERROR_CODES.INVITATION_EXPIRED]: {
+    en: "This invitation has expired",
+    ar: "انتهت صلاحية هذه الدعوة",
+  },
+  [ERROR_CODES.INVITATION_ALREADY_ACCEPTED]: {
+    en: "This invitation has already been accepted",
+    ar: "تم قبول هذه الدعوة بالفعل",
+  },
+  [ERROR_CODES.DUPLICATE_MEMBER]: {
+    en: "This user is already a team member",
+    ar: "هذا المستخدم عضو في الفريق بالفعل",
+  },
+
+  // ============================================================================
+  // BUSINESS LOGIC ERRORS - AI CREDITS
+  // ============================================================================
+  [ERROR_CODES.INSUFFICIENT_AI_CREDITS]: {
+    en: "Insufficient AI credits. Please top up your account.",
+    ar: "رصيد الذكاء الاصطناعي غير كافٍ. يرجى شحن حسابك.",
+  },
+
+  // ============================================================================
+  // BUSINESS LOGIC ERRORS - PROVIDER API KEYS
+  // ============================================================================
+  [ERROR_CODES.PROVIDER_KEY_NOT_FOUND]: {
+    en: "Provider API key not found",
+    ar: "مفتاح API للمزود غير موجود",
+  },
+  [ERROR_CODES.PROVIDER_KEY_DUPLICATE]: {
+    en: "A provider API key with this name already exists",
+    ar: "يوجد مفتاح API لهذا المزود بنفس الاسم بالفعل",
   },
 
   // ============================================================================

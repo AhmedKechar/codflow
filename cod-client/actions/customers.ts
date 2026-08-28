@@ -12,7 +12,7 @@ import { redirect } from "next/navigation";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { apiClient, ApiClientError } from "@/lib/api-client";
 import { getDb } from "@/db";
-import { getUserApiKey, requirePermission } from "@/lib/auth";
+import { getUserApiKey, requirePermission, getUserStoreId } from "@/lib/auth";
 import { SCOPES } from "@/../cod-shared/rbac/scopes";
 import {
   getAllCustomers,
@@ -82,7 +82,8 @@ export async function getCustomers(filters?: CustomerFilters): Promise<Customer[
   await requirePermission(SCOPES.CUSTOMERS_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  const rows = await getAllCustomers(db, filters);
+  const storeId = await getUserStoreId();
+  const rows = await getAllCustomers(db, storeId, filters);
   return rows as unknown as Customer[];
 }
 
@@ -93,7 +94,8 @@ export async function getCustomer(id: string): Promise<Customer | null> {
   await requirePermission(SCOPES.CUSTOMERS_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  const row = await getCustomerById(db, id);
+  const storeId = await getUserStoreId();
+  const row = await getCustomerById(db, storeId, id);
   return (row as unknown as Customer | null) ?? null;
 }
 
@@ -186,7 +188,8 @@ export async function getCustomerOrders(customerId: string): Promise<Order[]> {
   await requirePermission(SCOPES.CUSTOMERS_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  const rows = await getOrdersByCustomerId(db, customerId);
+  const storeId = await getUserStoreId();
+  const rows = await getOrdersByCustomerId(db, storeId, customerId);
   return rows as unknown as Order[];
 }
 
@@ -197,7 +200,8 @@ export async function getCustomerGroupMemberships(customerId: string): Promise<C
   await requirePermission(SCOPES.CUSTOMER_GROUPS_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  const rows = await getCustomerGroupMembershipsQuery(db, customerId);
+  const storeId = await getUserStoreId();
+  const rows = await getCustomerGroupMembershipsQuery(db, storeId, customerId);
   return rows as unknown as CustomerGroupSummary[];
 }
 
@@ -208,7 +212,8 @@ export async function getCustomerTagMemberships(customerId: string): Promise<Cus
   await requirePermission(SCOPES.CUSTOMER_TAGS_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  const rows = await getCustomerTagMembershipsQuery(db, customerId);
+  const storeId = await getUserStoreId();
+  const rows = await getCustomerTagMembershipsQuery(db, storeId, customerId);
   return rows as unknown as CustomerTagSummary[];
 }
 

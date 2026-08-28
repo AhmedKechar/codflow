@@ -11,10 +11,15 @@ import { getStoreContext } from "@/theme/config/store";
 // Store context is fetched first (needed for layout)
 // Products and categories are fetched inside streaming component
 // This allows layout/navigation to render immediately while data loads
-const { config, content } = await getStoreContext();
+const { config, content, siteBuilder } = await getStoreContext();
+
+// Page-level visibility: honour the dashboard "Pages" tab toggle.
+if (!siteBuilder.pages.showProductsPage) {
+  return Astro.redirect("/");
+}
 ---
 
-<StoreLayout config={config} content={content} title={`${content.allProductsSection} — ${config.name}`}>
+<StoreLayout config={config} content={content} siteBuilder={siteBuilder} title={`${content.allProductsSection} — ${config.name}`}>
   <!-- 
     ProductsListContent streams in after layout renders
     Products and categories fetch in parallel inside component
@@ -22,5 +27,6 @@ const { config, content } = await getStoreContext();
   <ProductsListContent 
     currencySymbol={config.currencySymbol}
     content={content}
+    productsConfig={siteBuilder.products}
   />
 </StoreLayout>

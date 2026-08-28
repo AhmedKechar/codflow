@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { apiClient, ApiClientError } from "@/lib/api-client";
 import { getDb } from "@/db";
-import { getUserApiKey, requirePermission } from "@/lib/auth";
+import { getUserApiKey, requirePermission, getUserStoreId } from "@/lib/auth";
 import { SCOPES } from "@/../cod-shared/rbac/scopes";
 import {
   getAllProducts,
@@ -38,7 +38,7 @@ export async function getProducts(filters?: {
   await requirePermission(SCOPES.PRODUCTS_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  const rows = await getAllProducts(db, {
+  const rows = await getAllProducts(db, await getUserStoreId(), {
     categoryId: filters?.categoryId,
     status: filters?.status as "DRAFT" | "ACTIVE" | "ARCHIVED" | undefined,
     visibility: filters?.visibility,
@@ -53,7 +53,7 @@ export async function getProduct(id: string): Promise<Product | null> {
   await requirePermission(SCOPES.PRODUCTS_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  const product = await getProductById(db, id);
+  const product = await getProductById(db, await getUserStoreId(), id);
   return (product as unknown as Product | null) ?? null;
 }
 
@@ -137,7 +137,7 @@ export async function getVariants(productId: string): Promise<ProductVariant[]> 
   await requirePermission(SCOPES.PRODUCTS_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  const rows = await getVariantsByProduct(db, productId);
+  const rows = await getVariantsByProduct(db, await getUserStoreId(), productId);
   return rows as unknown as ProductVariant[];
 }
 
@@ -223,7 +223,7 @@ export async function getProductImages(productId: string): Promise<ProductImage[
   await requirePermission(SCOPES.PRODUCTS_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  const rows = await getProductImagesQuery(db, productId);
+  const rows = await getProductImagesQuery(db, await getUserStoreId(), productId);
   return rows as unknown as ProductImage[];
 }
 

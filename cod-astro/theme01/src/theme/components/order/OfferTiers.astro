@@ -2,6 +2,7 @@
 import type { Product, Offer } from "@/core/api/types";
 import type { StoreFrontContent } from "@/theme/config/content";
 import { Icon } from "astro-icon/components";
+import CountdownTimer from "./CountdownTimer.astro";
 
 interface Props {
   product: Product;
@@ -135,6 +136,7 @@ function varVal(variations: unknown, key: string): string | undefined {
           data-qty={offer.triggerQuantity}
           data-offer-id={offer.id}
           data-discount-type={offer.discountType}
+          data-tier-card
         >
           <input type="radio" name="tierSelect" value={offer.id} class="sr-only" />
 
@@ -200,6 +202,10 @@ function varVal(variations: unknown, key: string): string | undefined {
                 <div class="text-[0.625rem] line-through font-bold mt-0.5" style="color: var(--clr-text)">{fmt(tierCompare)} {cur}</div>
               )}
             </div>
+          </div>
+
+          <div class="px-4 pb-2">
+            <CountdownTimer endsAt={offer.endsAt} />
           </div>
 
           <!-- Per-unit variant pills — shown when this offer is selected -->

@@ -11,5 +11,15 @@
   "created_at": "Created At",
   "no_stores": "No stores found",
   "view_store": "View",
-  "search": "Search by name or domain..."
+  "search": "Search by name or domain...",
+  "create": "Add Store",
+  "edit": "Edit",
+  "delete": "Delete",
+  "confirm_delete": "Are you sure you want to delete this store?",
+  "created": "Store created",
+  "updated": "Store updated",
+  "deleted": "Store deleted",
+  "error": "An error occurred",
+  "save": "Save",
+  "cancel": "Cancel"
 }

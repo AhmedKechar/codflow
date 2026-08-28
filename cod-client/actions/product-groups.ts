@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { apiClient, ApiClientError } from "@/lib/api-client";
 import { getDb } from "@/db";
-import { getUserApiKey, requirePermission } from "@/lib/auth";
+import { getUserApiKey, requirePermission, getUserStoreId } from "@/lib/auth";
 import { getWorkerApiUrl } from "@/lib/api-config";
 import { SCOPES } from "@/../cod-shared/rbac/scopes";
 import {
@@ -28,14 +28,16 @@ export async function getProductGroups(filters?: { search?: string; parentId?: s
   await requirePermission(SCOPES.PRODUCT_GROUPS_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  return getAllProductGroups(db, filters);
+  const storeId = await getUserStoreId();
+  return getAllProductGroups(db, storeId, filters);
 }
 
 export async function getProductGroup(id: string): Promise<ProductCategory | null> {
   await requirePermission(SCOPES.PRODUCT_GROUPS_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  return getProductGroupById(db, id);
+  const storeId = await getUserStoreId();
+  return getProductGroupById(db, storeId, id);
 }
 
 export async function createProductGroup(data: Partial<ProductCategory>): Promise<ProductCategory> {

@@ -1,0 +1,69 @@
+{
+  "page_title": "Gift Cards",
+  "page_subtitle": "Manage your store's gift cards",
+  "search_placeholder": "Search by code or recipient...",
+  "filters": {
+    "status": "Status"
+  },
+  "status": {
+    "all": "All Statuses",
+    "active": "Active",
+    "used": "Used",
+    "expired": "Expired",
+    "disabled": "Disabled"
+  },
+  "table": {
+    "code": "Code",
+    "amount": "Amount",
+    "remaining": "Remaining",
+    "recipient": "Recipient",
+    "status": "Status",
+    "date": "Date"
+  },
+  "actions": {
+    "create": "Create Gift Card",
+    "edit": "Edit",
+    "delete": "Delete",
+    "disable": "Disable",
+    "disable_confirm": "Are you sure you want to disable this gift card?"
+  },
+  "form": {
+    "card_info": "Card Information",
+    "code": "Code",
+    "amount": "Initial Amount (DZD)",
+    "expires_at": "Expiry Date",
+    "status": "Status",
+    "generate": "Generate New Code",
+    "recipient_info": "Recipient Information",
+    "recipient_name": "Recipient Name",
+    "recipient_name_placeholder": "Enter recipient name",
+    "recipient_phone": "Recipient Phone",
+    "recipient_email": "Recipient Email",
+    "sender_name": "Sender Name",
+    "sender_name_placeholder": "Enter sender name",
+    "message": "Message",
+    "message_placeholder": "Enter a personal message",
+    "cancel": "Cancel",
+    "create": "Create Gift Card",
+    "save": "Save Changes",
+    "title_create": "Create Gift Card",
+    "subtitle_create": "Create a new gift card for your customers"
+  },
+  "empty": {
+    "title": "No gift cards",
+    "description": "Create your first gift card to get started."
+  },
+  "delete_dialog": {
+    "title": "Delete Gift Card",
+    "description": "Are you sure you want to delete this gift card? This action cannot be undone.",
+    "cancel": "Cancel",
+    "confirm": "Delete"
+  },
+  "toast": {
+    "created": "Gift card created successfully",
+    "updated": "Gift card updated successfully",
+    "deleted": "Gift card deleted successfully",
+    "disabled": "Gift card disabled successfully",
+    "error": "An error occurred, please try again"
+  }
+}

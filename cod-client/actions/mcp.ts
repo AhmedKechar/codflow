@@ -77,7 +77,7 @@ export async function getMcpConfig(): Promise<McpConfig> {
     brandName,
     currentUserId:    user.id,
     currentUserEmail: user.email,
-    currentUserRole:  user.role,
+    currentUserRole:  user.role as "admin" | "staff",
   };
 }
 

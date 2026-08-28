@@ -5,7 +5,7 @@
  */
 
 import { eq, and, desc, sql } from "drizzle-orm";
-import { plans, subscriptions } from "../db/schema";
+import { plans, subscriptions, stores } from "../db/schema";
 import type { AppDb } from "../db/client";
 
 // ─── Plans (platform-level, read-only for merchants) ──────────────────────────
@@ -118,4 +118,28 @@ export async function hasActiveSubscription(db: AppDb, storeId: string): Promise
     .limit(1)
     .get();
   return !!row;
+}
+
+/** Get all subscriptions across all stores (super admin view) */
+export async function getAllSubscriptions(db: AppDb) {
+  return db.select({
+    subscription: subscriptions,
+    plan: plans,
+    store: { id: stores.id, name: stores.name, domain: stores.domain },
+  })
+    .from(subscriptions)
+    .innerJoin(plans, eq(subscriptions.planId, plans.id))
+    .innerJoin(stores, eq(subscriptions.storeId, stores.id))
+    .orderBy(desc(subscriptions.createdAt))
+    .all();
+}
+
+/** Cancel a subscription (super admin action) */
+export async function cancelSubscription(db: AppDb, subscriptionId: string) {
+  const now = new Date().toISOString();
+  return db.update(subscriptions)
+    .set({ status: "canceled", canceledAt: now, updatedAt: now })
+    .where(eq(subscriptions.id, subscriptionId))
+    .returning()
+    .get();
 }

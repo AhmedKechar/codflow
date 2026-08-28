@@ -23,9 +23,17 @@
     "system": "System",
     "reviews": "Reviews",
     "offers": "Offers",
+    "discounts": "Discount Codes",
     "stock_management": "Stock Management",
     "api_reference": "API Reference",
-    "mcp": "AI Agents"
+    "mcp": "AI Agents",
+    "ai_assistant": "AI Assistant",
+    "subscriptions": "Subscriptions",
+    "billing": "Billing",
+    "messaging": "Messages",
+    "custom_domains": "Custom Domains",
+    "theme_selector": "Theme",
+    "gift_cards": "Gift Cards"
   },
   "navbar": {
     "search_placeholder": "Search for orders, customers...",

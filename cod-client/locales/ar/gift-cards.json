@@ -1,0 +1,69 @@
+{
+  "page_title": "بطاقات الهدايا",
+  "page_subtitle": "إدارة بطاقات الهدايا للمتجر",
+  "search_placeholder": "البحث بالرمز أو اسم المستلم...",
+  "filters": {
+    "status": "الحالة"
+  },
+  "status": {
+    "all": "جميع الحالات",
+    "active": "نشطة",
+    "used": "مستخدمة",
+    "expired": "منتهية",
+    "disabled": "معطلة"
+  },
+  "table": {
+    "code": "الرمز",
+    "amount": "المبلغ",
+    "remaining": "المتبقي",
+    "recipient": "المستلم",
+    "status": "الحالة",
+    "date": "التاريخ"
+  },
+  "actions": {
+    "create": "إنشاء بطاقة هدية",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "disable": "تعطيل",
+    "disable_confirm": "هل أنت متأكد من تعطيل هذه البطاقة؟"
+  },
+  "form": {
+    "card_info": "معلومات البطاقة",
+    "code": "الرمز",
+    "amount": "المبلغ الأولي (دج)",
+    "expires_at": "تاريخ الانتهاء",
+    "status": "الحالة",
+    "generate": "توليد رمز جديد",
+    "recipient_info": "معلومات المستلم",
+    "recipient_name": "اسم المستلم",
+    "recipient_name_placeholder": "أدخل اسم المستلم",
+    "recipient_phone": "هاتف المستلم",
+    "recipient_email": "بريد المستلم",
+    "sender_name": "اسم المرسل",
+    "sender_name_placeholder": "أدخل اسم المرسل",
+    "message": "رسالة",
+    "message_placeholder": "أدخل رسالة شخصية",
+    "cancel": "إلغاء",
+    "create": "إنشاء بطاقة هدية",
+    "save": "حفظ التغييرات",
+    "title_create": "إنشاء بطاقة هدية",
+    "subtitle_create": "إنشاء بطاقة هدية جديدة لعملائك"
+  },
+  "empty": {
+    "title": "لا توجد بطاقات هدايا",
+    "description": "أنشئ أول بطاقة هدية للبدء."
+  },
+  "delete_dialog": {
+    "title": "حذف بطاقة الهدية",
+    "description": "هل أنت متأكد من حذف هذه البطاقة؟ لا يمكن التراجع عن هذا الإجراء.",
+    "cancel": "إلغاء",
+    "confirm": "حذف"
+  },
+  "toast": {
+    "created": "تم إنشاء بطاقة الهدية بنجاح",
+    "updated": "تم تحديث بطاقة الهدية بنجاح",
+    "deleted": "تم حذف بطاقة الهدية بنجاح",
+    "disabled": "تم تعطيل بطاقة الهدية بنجاح",
+    "error": "حدث خطأ، يرجى المحاولة مرة أخرى"
+  }
+}

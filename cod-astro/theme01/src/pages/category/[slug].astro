@@ -14,11 +14,16 @@ const { slug } = Astro.params;
 // Store context is fetched first (needed for layout)
 // Category data and products are fetched inside streaming component
 // This allows layout/navigation to render immediately while data loads
-const { config, content } = await getStoreContext();
+const { config, content, siteBuilder } = await getStoreContext();
 
 // Fetch categories for SEO meta tags (lightweight — no products)
 const categories = await fetchCategoriesRaw();
 const category = categories.find((c: any) => c.slug === slug);
+
+// Page-level visibility: honour the dashboard "Pages" tab toggle.
+if (!siteBuilder.pages.showCategoryPages) {
+  return Astro.redirect("/");
+}
 
 const metaTitle = category?.metaTitle || (category ? `${category.name} - ${config.name}` : config.name);
 const metaDescription = category?.metaDescription || category?.description || undefined;
@@ -28,6 +33,7 @@ const ogImage = category?.imageUrl || undefined;
 <StoreLayout
   config={config}
   content={content}
+  siteBuilder={siteBuilder}
   title={metaTitle}
   description={metaDescription}
   ogImage={ogImage}

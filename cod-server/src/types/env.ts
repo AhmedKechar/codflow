@@ -50,4 +50,8 @@ export interface Env {
    * Fires CAPI Purchase events at order delivery — decoupled from status handler.
    */
   CAPI_WORKFLOW: Workflow;
+
+  // ─── AI Chat ───────────────────────────────────────────────────────────────
+  /** OpenAI API key for AI chat streaming (set via wrangler secret put) */
+  OPENAI_API_KEY: string;
 }

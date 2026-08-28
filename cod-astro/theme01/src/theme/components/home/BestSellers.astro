@@ -9,14 +9,34 @@ import type { StoreFrontContent } from "@/theme/config/content";
 interface Props {
   currencySymbol: string;
   content: StoreFrontContent;
+  /** Number of product rows on desktop / mobile. */
+  rows?: number;
+  rowsMobile?: number;
+  /** Grid columns on desktop / mobile. */
+  columnsDesktop?: number;
+  columnsMobile?: number;
 }
 
-const { currencySymbol, content } = Astro.props;
+const { currencySymbol, content, rows = 2, rowsMobile = 2, columnsDesktop = 4, columnsMobile = 2 } = Astro.props;
 
 const allProducts = await fetchProductsRaw();
 const featured = allProducts.filter((p: any) => p.storeFeatured);
-const products = featured.length ? featured.slice(0, 8) : allProducts.slice(0, 8);
-const showViewAll = allProducts.length > 8;
+const limit = Math.max(columnsDesktop * rows, columnsMobile * rowsMobile);
+const products = featured.length ? featured.slice(0, limit) : allProducts.slice(0, limit);
+const showViewAll = allProducts.length > limit;
+
+// Map column counts to explicit Tailwind classes (dynamic class names won't compile).
+const gridClass: Record<number, { base: string; lg: string }> = {
+  1: { base: "grid-cols-1", lg: "lg:grid-cols-1" },
+  2: { base: "grid-cols-2", lg: "lg:grid-cols-2" },
+  3: { base: "grid-cols-2", lg: "lg:grid-cols-3" },
+  4: { base: "grid-cols-2", lg: "lg:grid-cols-4" },
+  5: { base: "grid-cols-2", lg: "lg:grid-cols-5" },
+  6: { base: "grid-cols-3", lg: "lg:grid-cols-6" },
+};
+const mobileCols = gridClass[columnsMobile]?.base ?? "grid-cols-2";
+const desktopCols = gridClass[columnsDesktop]?.lg ?? "lg:grid-cols-4";
+const gridClassNames = `grid ${mobileCols} sm:grid-cols-3 ${desktopCols}`;
 ---
 
 {products.length > 0 && (
@@ -43,13 +63,13 @@ const showViewAll = allProducts.length > 8;
       )}
     </div>
 
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+    <div class={`${gridClassNames} gap-4 sm:gap-6 lg:gap-8`}>
       {products.map((p: any, i: number) => (
         <ProductCard
           product={p}
           currencySymbol={currencySymbol}
           content={content}
-          eager={i < 4}
+          eager={i < columnsDesktop}
         />
       ))}
     </div>

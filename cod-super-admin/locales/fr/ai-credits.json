@@ -1,0 +1,17 @@
+{
+  "title": "Crédits IA",
+  "subtitle": "Gérer les crédits IA des boutiques",
+  "store": "Boutique",
+  "total_credits": "Crédits totaux",
+  "used_credits": "Crédits utilisés",
+  "remaining": "Restant",
+  "allocate": "Allouer des crédits",
+  "allocate_to": "Allouer des crédits à",
+  "amount": "Montant",
+  "confirm": "Confirmer",
+  "no_credits": "Aucun crédit trouvé",
+  "search": "Rechercher par boutique...",
+  "allocated": "Crédits alloués",
+  "error": "Une erreur est survenue",
+  "cancel": "Annuler"
+}

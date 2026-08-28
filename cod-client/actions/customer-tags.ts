@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { apiClient, ApiClientError } from "@/lib/api-client";
 import { getDb } from "@/db";
-import { getUserApiKey, requirePermission } from "@/lib/auth";
+import { getUserApiKey, requirePermission, getUserStoreId } from "@/lib/auth";
 import { SCOPES } from "@/../cod-shared/rbac/scopes";
 import { getAllTags, getTagWithCustomers } from "@/../cod-shared/queries/customer-tags";
 import { mapError } from "@/lib/errors/mapper";
@@ -32,14 +32,16 @@ export async function getCustomerTags(): Promise<CustomerTag[]> {
   await requirePermission(SCOPES.CUSTOMER_TAGS_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  return getAllTags(db);
+  const storeId = await getUserStoreId();
+  return getAllTags(db, storeId);
 }
 
 export async function getCustomerTag(id: string): Promise<CustomerTagWithCustomers | null> {
   await requirePermission(SCOPES.CUSTOMER_TAGS_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  return getTagWithCustomers(db, id);
+  const storeId = await getUserStoreId();
+  return getTagWithCustomers(db, storeId, id);
 }
 
 export async function createCustomerTag(data: CreateTagData): Promise<CustomerTag> {

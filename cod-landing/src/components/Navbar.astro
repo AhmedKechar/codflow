@@ -1,0 +1,69 @@
+---
+interface Props {
+  lang?: string;
+}
+
+const { lang = 'ar' } = Astro.props;
+
+const navItems = {
+  ar: [
+    { label: 'الرئيسية', href: '#' },
+    { label: 'المميزات', href: '#features' },
+    { label: 'الأسعار', href: '#pricing' },
+    { label: 'الأسئلة الشائعة', href: '#faq' },
+  ],
+  en: [
+    { label: 'Home', href: '#' },
+    { label: 'Features', href: '#features' },
+    { label: 'Pricing', href: '#pricing' },
+    { label: 'FAQ', href: '#faq' },
+  ],
+  fr: [
+    { label: 'Accueil', href: '#' },
+    { label: 'Fonctionnalités', href: '#features' },
+    { label: 'Tarifs', href: '#pricing' },
+    { label: 'FAQ', href: '#faq' },
+  ],
+};
+
+const ctaText = {
+  ar: 'ابدأ مجاناً',
+  en: 'Start Free',
+  fr: 'Commencer gratuitement',
+};
+
+const items = navItems[lang as keyof typeof navItems] ?? navItems.ar;
+---
+
+<nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-white/20">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center">
+          <span class="text-white font-bold text-sm">C</span>
+        </div>
+        <span class="font-bold text-lg text-gray-900">CodFlow</span>
+      </div>
+
+      <div class="hidden md:flex items-center gap-8">
+        {items.map((item) => (
+          <a href={item.href} class="text-sm font-medium text-gray-600 hover:text-primary-600 transition-colors">
+            {item.label}
+          </a>
+        ))}
+      </div>
+
+      <div class="flex items-center gap-4">
+        <a href="#pricing" class="text-sm font-medium text-gray-600 hover:text-primary-600 transition-colors">
+          {lang === 'ar' ? 'الأسعار' : lang === 'fr' ? 'Tarifs' : 'Pricing'}
+        </a>
+        <a
+          href="http://localhost:3000"
+          class="px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl hover:shadow-lg hover:shadow-primary-500/25 transition-all active:scale-95"
+        >
+          {ctaText[lang as keyof typeof ctaText] ?? ctaText.ar}
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>

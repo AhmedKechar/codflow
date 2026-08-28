@@ -5,11 +5,34 @@ import { redirect } from "next/navigation";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { apiClient, ApiClientError } from "@/lib/api-client";
 import { getDb } from "@/db";
-import { getUserApiKey, requirePermission, requireAdmin } from "@/lib/auth";
+import { getUserApiKey, requirePermission, requireAdmin, getUserStoreId } from "@/lib/auth";
 import { SCOPES } from "@/../cod-shared/rbac/scopes";
 import { getStore } from "@/../cod-shared/queries/stores";
 import { mapError } from "@/lib/errors/mapper";
 import { getLocale } from "@/lib/locale";
+
+export interface TrustSealsConfig {
+  cashOnDelivery?: boolean;
+  freeReturns?: boolean;
+  secureCheckout?: boolean;
+  fastDelivery?: boolean;
+  customerSupport?: boolean;
+  qualityGuarantee?: boolean;
+}
+
+export interface OrderFormConfig {
+  showName?: boolean;
+  showPhone?: boolean;
+  showEmail?: boolean;
+  showAddress?: boolean;
+  showWilaya?: boolean;
+  showCommune?: boolean;
+  showDeliveryType?: boolean;
+  showNotes?: boolean;
+  showQuantity?: boolean;
+  submitButtonText?: string | null;
+  summaryDisplay?: "open" | "closed" | "hidden";
+}
 
 export interface StoreConfig {
   id: string;
@@ -22,6 +45,8 @@ export interface StoreConfig {
   bgColor: string;
   fontFamily: string;
   fontUrl: string | null;
+  borderRadius: "rounded" | "sharp" | "minimal";
+  shadowIntensity: "soft" | "medium" | "strong";
   lang: "ar" | "en";
   currency: string;
   currencySymbol: string;
@@ -33,6 +58,9 @@ export interface StoreConfig {
   reviewsEnabled: boolean;
   status: "active" | "inactive";
   storeApiKey: string | null;
+  trustSeals: TrustSealsConfig | null;
+  orderFormConfig: OrderFormConfig | null;
+  siteJson: string | null;
 }
 
 export type UpdateStoreData = Partial<
@@ -45,6 +73,8 @@ export type UpdateStoreData = Partial<
     | "bgColor"
     | "fontFamily"
     | "fontUrl"
+    | "borderRadius"
+    | "shadowIntensity"
     | "lang"
     | "currencySymbol"
     | "contentJson"
@@ -54,6 +84,9 @@ export type UpdateStoreData = Partial<
     | "announcementBar"
     | "reviewsEnabled"
     | "status"
+    | "trustSeals"
+    | "orderFormConfig"
+    | "siteJson"
   >
 >;
 
@@ -63,12 +96,29 @@ async function getApiKey() {
   return key;
 }
 
+function parseJsonSafe<T>(value: unknown): T | null {
+  if (typeof value !== "string") return null;
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return null;
+  }
+}
+
 export async function getMyStore(): Promise<StoreConfig | null> {
   await requireAdmin();
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  const store = await getStore(db);
-  return store ?? null;
+  const store = await getStore(db, await getUserStoreId());
+  if (!store) return null;
+  return {
+    ...store,
+    borderRadius: store.borderRadius as StoreConfig["borderRadius"],
+    shadowIntensity: store.shadowIntensity as StoreConfig["shadowIntensity"],
+    trustSeals: parseJsonSafe<TrustSealsConfig>(store.trustSeals),
+    orderFormConfig: parseJsonSafe<OrderFormConfig>(store.orderFormConfig),
+    siteJson: store.siteJson ?? null,
+  };
 }
 
 export interface PixelConfig {

@@ -240,6 +240,8 @@ export async function getStoreProductByHandle(db: AppDb, storeId: string, handle
               JSON.parse(rewardVariant.variations) as Record<string, string>,
             ).join(" / ")
           : null,
+        startsAt: offer.startsAt ?? null,
+        endsAt: offer.endsAt ?? null,
       };
     }),
   );

@@ -16,7 +16,7 @@ const { slug } = Astro.params;
 // Store context is fetched first (needed for layout)
 // Product data is fetched inside ProductDetailContent component
 // This allows layout/head/navigation to render immediately while product streams in
-const { config, content, isRTL } = await getStoreContext();
+const { config, content, isRTL, siteBuilder } = await getStoreContext();
 
 // Action result (must be checked before rendering)
 const result = Astro.getActionResult(actions.placeOrder);
@@ -37,6 +37,7 @@ const serverError  = result?.error && !isInputError(result.error) ? result.error
 <StoreLayout
   config={config}
   content={content}
+  siteBuilder={siteBuilder}
   title={`${config.name}`}
   hideMobileNav={true}
 >
@@ -51,6 +52,7 @@ const serverError  = result?.error && !isInputError(result.error) ? result.error
     isRTL={isRTL}
     fieldErrors={fieldErrors}
     serverError={serverError}
+    productPageConfig={siteBuilder.productPage}
   />
 </StoreLayout>
 

@@ -1,0 +1,11 @@
+{
+  "page_title": "AI Assistant",
+  "page_subtitle": "Ask questions about your store, orders, customers, and more.",
+  "empty_title": "How can I help you today?",
+  "empty_description": "Ask me anything about your store — orders, products, customers, delivery, or stock.",
+  "input_placeholder": "Type your message...",
+  "new_chat": "New chat",
+  "thinking": "Thinking...",
+  "error_prefix": "Error:",
+  "credits_remaining": "credits remaining"
+}

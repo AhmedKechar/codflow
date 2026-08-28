@@ -179,6 +179,23 @@ export interface StoreFrontContent {
   /** "Most Popular" badge on the first offer tier */
   offerMostPopular: string;
 
+  // ── Countdown ─────────────────────────────────────────────────────────────
+  countdownLabel: string;
+  countdownExpired: string;
+
+  // ── Trust Seals ───────────────────────────────────────────────────────────
+  sealCashOnDelivery: string;
+  sealFreeReturns: string;
+  sealSecureCheckout: string;
+  sealFastDelivery: string;
+  sealCustomerSupport: string;
+  sealQualityGuarantee: string;
+
+  // ── Order form (email & summary) ──────────────────────────────────────────
+  formEmailPlaceholder: string;
+  formSummaryOpen: string;
+  formSummaryClosed: string;
+
   // ── Misc ──────────────────────────────────────────────────────────────────
   breadcrumbHome: string;
   required: string;
@@ -199,6 +216,7 @@ export interface StoreFrontContent {
   offerSavingsText: string;
   offerUnitLabel: string;
   ariaMainNavigation: string;
+  ariaSocials: string;
   ariaQuantity: string;
   ariaGoToImage: string;
   ariaBrowseAllProducts: string;

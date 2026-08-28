@@ -7,6 +7,9 @@
 // We don't actually navigate between pages on the storefront — full page
 // loads are fine and removed the regression entirely.
 
+import { getRadiusTokens, getShadowTokens } from "../../../../../../cod-shared/design-tokens";
+import type { BorderRadius, ShadowIntensity } from "../../../../../../cod-shared/design-presets";
+
 interface Props {
   title: string;
   description: string;
@@ -18,9 +21,14 @@ interface Props {
   font: string;
   bg: string;
   accent: string;
+  borderRadius: BorderRadius;
+  shadowIntensity: ShadowIntensity;
 }
 
-const { title, description, ogImage, noindex, config, primary, fontHref, font, bg, accent } = Astro.props;
+const { title, description, ogImage, noindex, config, primary, fontHref, font, bg, accent, borderRadius, shadowIntensity } = Astro.props;
+
+const radii = getRadiusTokens(borderRadius);
+const shadows = getShadowTokens(shadowIntensity);
 ---
 
 <head>
@@ -107,6 +115,13 @@ fbq('track','PageView');
       --clr-accent:  ${accent};
       --clr-bg:      ${bg};
       --font-body:   ${font};
+      --radius-card: ${radii.card};
+      --radius-input: ${radii.input};
+      --radius-btn: ${radii.btn};
+      --shadow-sm: ${shadows.sm};
+      --shadow-md: ${shadows.md};
+      --shadow-lg: ${shadows.lg};
+      --shadow-primary: ${shadows.primary};
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
     }

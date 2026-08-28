@@ -1,0 +1,207 @@
+---
+interface Props {
+  lang?: string;
+}
+
+const { lang = 'ar' } = Astro.props;
+
+const pricing = {
+  ar: [
+    {
+      name: 'مجاني',
+      price: '0',
+      period: '/شهر',
+      description: 'للمبتدئين',
+      features: [
+        '100 منتج',
+        '50 طلب شهرياً',
+        'دعم عبر البريد',
+        'تتبع الأساسي',
+      ],
+      cta: 'ابدأ مجاناً',
+      popular: false,
+    },
+    {
+      name: 'أساسي',
+      price: '2,000',
+      period: '/شهر',
+      description: 'للمتاجر الناشئة',
+      features: [
+        '500 منتج',
+        '500 طلب شهرياً',
+        'دعم أولوية',
+        'تحليلات متقدمة',
+        'فريق حتى 3 أعضاء',
+      ],
+      cta: 'اشترك الآن',
+      popular: true,
+    },
+    {
+      name: 'احترافي',
+      price: '5,000',
+      period: '/شهر',
+      description: 'للمتاجر الكبيرة',
+      features: [
+        'منتجات غير محدودة',
+        'طلبات غير محدودة',
+        'دعم 24/7',
+        'AI مساعد',
+        'فريق غير محدود',
+        'API مخصص',
+      ],
+      cta: 'اشترك الآن',
+      popular: false,
+    },
+  ],
+  en: [
+    {
+      name: 'Free',
+      price: '0',
+      period: '/month',
+      description: 'For beginners',
+      features: [
+        '100 products',
+        '50 orders/month',
+        'Email support',
+        'Basic tracking',
+      ],
+      cta: 'Start Free',
+      popular: false,
+    },
+    {
+      name: 'Basic',
+      price: '2,000',
+      period: '/month',
+      description: 'For growing stores',
+      features: [
+        '500 products',
+        '500 orders/month',
+        'Priority support',
+        'Advanced analytics',
+        'Team up to 3',
+      ],
+      cta: 'Subscribe Now',
+      popular: true,
+    },
+    {
+      name: 'Professional',
+      price: '5,000',
+      period: '/month',
+      description: 'For large stores',
+      features: [
+        'Unlimited products',
+        'Unlimited orders',
+        '24/7 support',
+        'AI assistant',
+        'Unlimited team',
+        'Custom API',
+      ],
+      cta: 'Subscribe Now',
+      popular: false,
+    },
+  ],
+  fr: [
+    {
+      name: 'Gratuit',
+      price: '0',
+      period: '/mois',
+      description: 'Pour les débutants',
+      features: [
+        '100 produits',
+        '50 commandes/mois',
+        'Support email',
+        'Suivi basique',
+      ],
+      cta: 'Commencer Gratuitement',
+      popular: false,
+    },
+    {
+      name: 'Basique',
+      price: '2 000',
+      period: '/mois',
+      description: 'Pour les boutiques en croissance',
+      features: [
+        '500 produits',
+        '500 commandes/mois',
+        'Support prioritaire',
+        'Analyses avancées',
+        'Équipe jusqu\'à 3',
+      ],
+      cta: 'S\'abonner Maintenant',
+      popular: true,
+    },
+    {
+      name: 'Professionnel',
+      price: '5 000',
+      period: '/mois',
+      description: 'Pour les grandes boutiques',
+      features: [
+        'Produits illimités',
+        'Commandes illimitées',
+        'Support 24/7',
+        'Assistant IA',
+        'Équipe illimitée',
+        'API personnalisée',
+      ],
+      cta: 'S\'abonner Maintenant',
+      popular: false,
+    },
+  ],
+};
+
+const items = pricing[lang as keyof typeof pricing] ?? pricing.ar;
+---
+
+<section id="pricing" class="py-20">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl sm:text-4xl font-black text-gray-900 mb-4">
+        {lang === 'ar' ? 'أسعار واضحة وعادلة' : lang === 'fr' ? 'Tarifs Clairs et Équitables' : 'Clear and Fair Pricing'}
+      </h2>
+      <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+        {lang === 'ar' ? 'اختر الخطة المناسبة لمتجرك' : lang === 'fr' ? 'Choisissez le plan adapté à votre boutique' : 'Choose the plan that fits your store'}
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+      {items.map((plan) => (
+        <div class={`glass-card rounded-2xl p-8 ${plan.popular ? 'ring-2 ring-primary-500 shadow-xl shadow-primary-500/10' : ''}`}>
+          {plan.popular && (
+            <div class="text-center mb-4">
+              <span class="px-3 py-1 text-xs font-bold text-primary-600 bg-primary-100 rounded-full">
+                {lang === 'ar' ? 'الأكثر شعبية' : lang === 'fr' ? 'Le Plus Populaire' : 'Most Popular'}
+              </span>
+            </div>
+          )}
+          <h3 class="text-xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+          <p class="text-sm text-gray-500 mb-4">{plan.description}</p>
+          <div class="mb-6">
+            <span class="text-4xl font-black text-gray-900">{plan.price}</span>
+            <span class="text-gray-500">{plan.period}</span>
+            {lang === 'ar' && <span class="text-gray-500"> دج</span>}
+          </div>
+          <ul class="space-y-3 mb-8">
+            {plan.features.map((feature) => (
+              <li class="flex items-center gap-2 text-sm text-gray-600">
+                <svg class="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                {feature}
+              </li>
+            ))}
+          </ul>
+          <a
+            href="http://localhost:3000"
+            class={`block w-full py-3 text-center text-sm font-bold rounded-xl transition-all ${
+              plan.popular
+                ? 'text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:shadow-lg hover:shadow-primary-500/25'
+                : 'text-gray-700 bg-gray-100 hover:bg-gray-200'
+            }`}
+          >
+            {plan.cta}
+          </a>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

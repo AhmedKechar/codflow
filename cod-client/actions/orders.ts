@@ -12,7 +12,7 @@ import { redirect } from "next/navigation";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { apiClient, ApiClientError } from "@/lib/api-client";
 import { getDb } from "@/db";
-import { getUserApiKey, requirePermission } from "@/lib/auth";
+import { getUserApiKey, requirePermission, getUserStoreId } from "@/lib/auth";
 import { SCOPES } from "@/../cod-shared/rbac/scopes";
 import { getAllOrders, getOrderById, type OrderFilters } from "@/../cod-shared/queries/orders";
 import { mapError } from "@/lib/errors/mapper";
@@ -87,7 +87,8 @@ export async function getOrders(filters: OrderFilters = {}): Promise<Order[]> {
   await requirePermission(SCOPES.ORDERS_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  const rows = await getAllOrders(db, filters);
+  const storeId = await getUserStoreId();
+  const rows = await getAllOrders(db, storeId, filters);
   return rows as unknown as Order[];
 }
 
@@ -98,7 +99,8 @@ export async function getOrder(id: string): Promise<Order | null> {
   await requirePermission(SCOPES.ORDERS_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  const row = await getOrderById(db, id);
+  const storeId = await getUserStoreId();
+  const row = await getOrderById(db, storeId, id);
   return (row as unknown as Order | null) ?? null;
 }
 

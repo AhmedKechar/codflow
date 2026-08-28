@@ -2,6 +2,8 @@
   "dashboard": "لوحة التحكم",
   "plans": "الخطط",
   "payments": "المدفوعات",
+  "subscriptions": "الاشتراكات",
+  "ai_credits": "أرصدة الذكاء الاصطناعي",
   "stores": "المتاجر",
   "users": "المستخدمون",
   "provider_keys": "مفاتيح المزوّدين",

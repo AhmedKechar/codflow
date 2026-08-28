@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { apiClient, ApiClientError } from "@/lib/api-client";
 import { getDb } from "@/db";
-import { getUserApiKey, requirePermission } from "@/lib/auth";
+import { getUserApiKey, requirePermission, getUserStoreId } from "@/lib/auth";
 import { SCOPES } from "@/../cod-shared/rbac/scopes";
 import { listOffers, getOfferById } from "@/../cod-shared/queries/offers";
 import { mapError } from "@/lib/errors/mapper";
@@ -64,7 +64,7 @@ export async function getOffers(): Promise<Offer[]> {
   await requirePermission(SCOPES.OFFERS_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  const storeId = env.STORE_ID;
+  const storeId = await getUserStoreId();
   return listOffers(db, storeId);
 }
 
@@ -72,7 +72,7 @@ export async function getOffer(id: string): Promise<Offer | null> {
   await requirePermission(SCOPES.OFFERS_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  const storeId = env.STORE_ID;
+  const storeId = await getUserStoreId();
   return getOfferById(db, storeId, id);
 }
 

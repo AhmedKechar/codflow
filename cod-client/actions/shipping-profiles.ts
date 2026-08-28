@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { apiClient, ApiClientError } from "@/lib/api-client";
 import { getDb } from "@/db";
-import { getUserApiKey, requirePermission } from "@/lib/auth";
+import { getUserApiKey, requirePermission, getUserStoreId } from "@/lib/auth";
 import { SCOPES } from "@/../cod-shared/rbac/scopes";
 import {
   getAllProfiles,
@@ -27,7 +27,7 @@ export async function getShippingProfiles(): Promise<ShippingProfile[]> {
   await requirePermission(SCOPES.DELIVERY_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  const rows = await getAllProfiles(db);
+  const rows = await getAllProfiles(db, await getUserStoreId());
   return rows as unknown as ShippingProfile[];
 }
 
@@ -35,7 +35,7 @@ export async function getShippingProfile(id: string): Promise<ShippingProfileWit
   await requirePermission(SCOPES.DELIVERY_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  const row = await getProfileById(db, id);
+  const row = await getProfileById(db, await getUserStoreId(), id);
   return (row as unknown as ShippingProfileWithRules | null) ?? null;
 }
 
@@ -44,7 +44,7 @@ export async function getDefaultShippingRules(): Promise<ShippingRule[]> {
   await requirePermission(SCOPES.DELIVERY_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  const rows = await getDefaultProfileRules(db);
+  const rows = await getDefaultProfileRules(db, await getUserStoreId());
   return rows as unknown as ShippingRule[];
 }
 
@@ -53,7 +53,7 @@ export async function getShippingRulesByProfileId(profileId: string): Promise<Sh
   await requirePermission(SCOPES.DELIVERY_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  const profile = await getProfileById(db, profileId);
+  const profile = await getProfileById(db, await getUserStoreId(), profileId);
   if (!profile) return [];
   return profile.rules as unknown as ShippingRule[];
 }
@@ -162,9 +162,9 @@ export async function getShippingRuleCommunes(
   await requirePermission(SCOPES.DELIVERY_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  const rule = await getWilayaRule(db, profileId, wilayaId);
+  const rule = await getWilayaRule(db, await getUserStoreId(), profileId, wilayaId);
   if (!rule) return [];
-  const rows = await getCommunesWithOverrides(db, rule.id, wilayaId, {
+  const rows = await getCommunesWithOverrides(db, await getUserStoreId(), rule.id, wilayaId, {
     homeEnabled: Boolean(rule.homeEnabled ?? true),
     stopDeskEnabled: Boolean(rule.stopDeskEnabled ?? false),
     homePrice: rule.homePrice ?? 0,

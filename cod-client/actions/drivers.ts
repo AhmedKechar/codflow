@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { apiClient, ApiClientError } from "@/lib/api-client";
 import { getDb } from "@/db";
-import { getUserApiKey, requirePermission } from "@/lib/auth";
+import { getUserApiKey, requirePermission, getUserStoreId } from "@/lib/auth";
 import { SCOPES } from "@/../cod-shared/rbac/scopes";
 import {
   getAllDrivers,
@@ -52,7 +52,8 @@ export async function getDrivers(filters?: DriverFilters): Promise<Driver[]> {
   await requirePermission(SCOPES.DELIVERY_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  const rows = await getAllDrivers(db, filters);
+  const storeId = await getUserStoreId();
+  const rows = await getAllDrivers(db, storeId, filters);
   return rows as unknown as Driver[];
 }
 
@@ -63,7 +64,8 @@ export async function getDriver(id: string): Promise<Driver | null> {
   await requirePermission(SCOPES.DELIVERY_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  const row = await getDriverById(db, id);
+  const storeId = await getUserStoreId();
+  const row = await getDriverById(db, storeId, id);
   return (row as unknown as Driver | null) ?? null;
 }
 
@@ -199,7 +201,8 @@ export async function getDriverCompensations(driverId: string): Promise<DriverCo
   await requirePermission(SCOPES.DELIVERY_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  const rows = await getCompensationsForDriver(db, driverId);
+  const storeId = await getUserStoreId();
+  const rows = await getCompensationsForDriver(db, storeId, driverId);
   return rows.filter((row) => row.feePerDelivery !== null) as unknown as DriverCompensation[];
 }
 

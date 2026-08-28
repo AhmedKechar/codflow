@@ -1,0 +1,60 @@
+{
+  "page_title": "Nombre de dominio personalizado",
+  "page_subtitle": "Gestionar los dominios personalizados de tu tienda",
+  "search_placeholder": "Buscar dominios...",
+  "filters": {
+    "status": "Estado"
+  },
+  "status": {
+    "pending": "Pendiente",
+    "verifying": "Verificando",
+    "active": "Activo",
+    "failed": "Fallido",
+    "expired": "Expirado"
+  },
+  "ssl": {
+    "pending": "SSL Pendiente",
+    "active": "SSL Activo",
+    "failed": "SSL Fallido"
+  },
+  "table": {
+    "domain": "Dominio",
+    "status": "Estado",
+    "ssl": "SSL",
+    "added": "Agregado"
+  },
+  "actions": {
+    "add": "Agregar Dominio",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "verify": "Verificar",
+    "verify_confirm": "¿Estás seguro de que quieres verificar este dominio?"
+  },
+  "form": {
+    "add_domain": "Agregar Dominio Personalizado",
+    "domain": "Nombre de Dominio",
+    "domain_hint": "Ingresa el dominio que quieres conectar a tu tienda.",
+    "dns_instructions": "Instrucciones de Configuración DNS",
+    "dns_description": "Agrega el siguiente registro DNS en tu proveedor de dominio:",
+    "cancel": "Cancelar",
+    "add": "Agregar Dominio"
+  },
+  "empty": {
+    "title": "No hay dominios personalizados",
+    "description": "Agrega tu primer dominio personalizado para comenzar."
+  },
+  "delete_dialog": {
+    "title": "Eliminar Dominio",
+    "description": "¿Estás seguro de que quieres eliminar este dominio? Esta acción no se puede deshacer.",
+    "cancel": "Cancelar",
+    "confirm": "Eliminar"
+  },
+  "toast": {
+    "created": "Dominio agregado exitosamente",
+    "updated": "Dominio actualizado exitosamente",
+    "deleted": "Dominio eliminado exitosamente",
+    "verified": "Dominio verificado exitosamente",
+    "verifying": "Verificando dominio...",
+    "error": "Ocurrió un error, por favor intenta de nuevo"
+  }
+}

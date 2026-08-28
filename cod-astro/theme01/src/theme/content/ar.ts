@@ -169,6 +169,23 @@ export const ar: StoreFrontContent = {
   offerFullPrice: "السعر الكامل",
   offerMostPopular: "الأكثر طلباً",
 
+  // ── Countdown ─────────────────────────────────────────────────────────────
+  countdownLabel: "ينتهي خلال:",
+  countdownExpired: "انتهى العرض",
+
+  // ── Trust Seals ───────────────────────────────────────────────────────────
+  sealCashOnDelivery: "الدفع عند الاستلام",
+  sealFreeReturns: "استرجاع مجاني خلال 7 أيام",
+  sealSecureCheckout: "دفع آمن ومشفر",
+  sealFastDelivery: "توصيل سريع",
+  sealCustomerSupport: "دعم فني 24/7",
+  sealQualityGuarantee: "ضمان الجودة",
+
+  // ── Order form (email & summary) ──────────────────────────────────────────
+  formEmailPlaceholder: "بريدك الإلكتروني",
+  formSummaryOpen: "ملخص الطلب",
+  formSummaryClosed: "افتح ملخص الطلب",
+
   // ── Misc ──────────────────────────────────────────────────────────────────
   breadcrumbHome: "الرئيسية",
   required: "*",
@@ -189,6 +206,7 @@ export const ar: StoreFrontContent = {
   offerSavingsText: "توفير {amount} {currency}",
   offerUnitLabel: "الوحدة {n}",
   ariaMainNavigation: "التنقل الرئيسي",
+  ariaSocials: "وسائل التواصل الاجتماعي",
   ariaQuantity: "الكمية",
   ariaGoToImage: "الانتقال إلى الصورة {n} من {total}",
   ariaBrowseAllProducts: "تصفح جميع المنتجات",

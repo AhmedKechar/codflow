@@ -6,6 +6,7 @@
  */
 
 import { API_CONFIG, ApiResponse, ApiError, getWorkerApiUrl } from './api-config';
+import { getUserStoreId } from './auth';
 
 /**
  * HTTP Methods
@@ -73,9 +74,18 @@ async function makeRequest<T>(
   const baseUrl = await getWorkerApiUrl();
   const url = `${baseUrl}${endpoint}`;
   
+  // Attach the user's store ID for multi-tenant isolation
+  let storeId: string | undefined;
+  try {
+    storeId = await getUserStoreId();
+  } catch {
+    storeId = undefined;
+  }
+
   const requestHeaders = {
     ...API_CONFIG.headers,
     'X-API-Key': apiKey, // Use the user's API key from database
+    ...(storeId ? { 'X-Store-Id': storeId } : {}),
     ...headers,
   };
 

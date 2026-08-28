@@ -2,13 +2,22 @@
 import { Image } from "astro:assets";
 import type { StoreConfig } from "@/core/api/types";
 import type { StoreFrontContent } from "@/theme/config/content";
+import type { SiteBuilderConfig } from "../../../../../../cod-shared/site-builder";
 import { Icon } from "astro-icon/components";
+import SocialLinks from "./SocialLinks.astro";
 
 interface Props {
   config: StoreConfig;
   content?: StoreFrontContent;
+  siteBuilder?: SiteBuilderConfig;
 }
+
 const { config, content } = Astro.props;
+const siteBuilder = Astro.props.siteBuilder;
+const showBrand = siteBuilder?.footer.showBrand ?? true;
+const showLinks = siteBuilder?.footer.showLinks ?? true;
+const showSocials = siteBuilder?.footer.showSocials ?? false;
+const socials = siteBuilder?.socials ?? [];
 const year = new Date().getFullYear();
 
 const badges = [
@@ -22,6 +31,7 @@ const badges = [
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
     <div class="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8">
       {/* Brand Column */}
+      {showBrand && (
       <div class="md:col-span-4 space-y-3">
         <a href="/" class="flex items-center gap-3 active:scale-95 transition-transform">
           {config.logoUrl ? (
@@ -42,10 +52,19 @@ const badges = [
         <p class="text-[0.8125rem] sm:text-[0.875rem] font-medium leading-relaxed max-w-sm" style="color: var(--clr-text-2)">
           {content?.footerAbout}
         </p>
+        {showSocials && socials.length > 0 && (
+          <SocialLinks
+            socials={socials}
+            itemClass="w-9 h-9"
+            ariaLabel={content?.ariaSocials ?? "Social"}
+          />
+        )}
       </div>
+      )}
 
       {/* Links Columns */}
-      <div class="md:col-span-8 grid grid-cols-2 sm:grid-cols-3 gap-6">
+      {showLinks && (
+      <div class={showBrand ? "md:col-span-8 grid grid-cols-2 sm:grid-cols-3 gap-6" : "md:col-span-12 grid grid-cols-2 sm:grid-cols-3 gap-6"}>
         <div>
           <h3 class="text-[0.6875rem] sm:text-[0.75rem] font-black uppercase tracking-widest mb-3 sm:mb-4" style="color: var(--clr-text)">
             {content?.footerQuickLinks}
@@ -104,6 +123,7 @@ const badges = [
           </div>
         </div>
       </div>
+      )}
     </div>
 
     {/* Bottom Bar */}

@@ -7,8 +7,13 @@ import ProductGallery from "@/theme/components/product/ProductGallery.astro";
 import ProductInfo from "@/theme/components/product/ProductInfo.astro";
 import ReviewsIsland from "@/theme/components/product/ReviewsIsland.astro";
 import ShippingIsland from "@/theme/components/product/ShippingIsland.astro";
+import TrustSeals from "@/theme/components/product/TrustSeals.astro";
 import { getProductJsonLd } from "@/theme/utils/seo";
 import { fetchProductByHandle } from "@/core/api/client";
+import {
+  getDefaultSiteBuilder,
+  type ProductPageConfig,
+} from "../../../../../../cod-shared/site-builder";
 
 interface Props {
   slug: string;
@@ -17,9 +22,16 @@ interface Props {
   isRTL: boolean;
   fieldErrors: any;
   serverError: string | null;
+  productPageConfig?: Partial<ProductPageConfig>;
 }
 
-const { slug, config, content, isRTL, fieldErrors, serverError } = Astro.props;
+const { slug, config, content, isRTL, fieldErrors, serverError, productPageConfig } = Astro.props;
+
+// Backward compatible: absent config keeps the current full layout.
+const pp: ProductPageConfig = {
+  ...getDefaultSiteBuilder().productPage,
+  ...(productPageConfig ?? {}),
+};
 
 // Fetch product data (this component streams when ready)
 const product = await fetchProductByHandle(slug);
@@ -38,6 +50,11 @@ const discountPct  = hasDiscount ? Math.round((1 - basePrice / comparePrice!) * 
 const isOutOfStock = product.trackInventory && product.inventory === 0;
 const isLowStock   = product.trackInventory && product.inventory > 0 && product.inventory <= 5;
 const lowStockText = content.lowStock.replace("{n}", String(product.inventory));
+
+const HEX = /^#[0-9a-fA-F]{3,8}$/;
+const primaryColor = HEX.test(config.primaryColor) ? config.primaryColor : "#7c3aed";
+const accentColor  = HEX.test(config.accentColor)  ? config.accentColor  : "#f59e0b";
+const borderRadius = config.borderRadius ?? "rounded";
 
 const defaultVariantId = defaultVariant?.id ?? null;
 const jsonLd = getProductJsonLd(product, basePrice);
@@ -78,63 +95,84 @@ const jsonLd = getProductJsonLd(product, basePrice);
 />
 
 <!-- Dynamic data Island (Deferred) -->
-<ShippingIsland server:defer />
+{pp.showShipping && <ShippingIsland server:defer />}
 
 <div class="max-w-5xl mx-auto px-0 sm:px-5 py-0 sm:py-8">
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-12">
 
     <!-- ── LEFT: Images ── -->
     <div>
-      <ProductGallery
-        product={product}
-        hasDiscount={hasDiscount}
-        discountPct={discountPct}
-        isRTL={isRTL}
-        content={content}
-      />
-      <ProductInfo
-        product={product}
-        basePrice={basePrice}
-        comparePrice={comparePrice}
-        cur={cur}
-        isLowStock={isLowStock}
-        lowStockText={lowStockText}
-        isDesktop={true}
-      />
+      {pp.showGallery && (
+        <ProductGallery
+          product={product}
+          hasDiscount={hasDiscount}
+          discountPct={discountPct}
+          isRTL={isRTL}
+          content={content}
+        />
+      )}
+      {pp.showInfo && (
+        <ProductInfo
+          product={product}
+          basePrice={basePrice}
+          comparePrice={comparePrice}
+          cur={cur}
+          isLowStock={isLowStock}
+          lowStockText={lowStockText}
+          isDesktop={true}
+        />
+      )}
     </div>
 
     <!-- ── RIGHT: Product info + Order form ── -->
     <div class="px-5 sm:px-0 py-6 sm:py-0">
 
       <!-- Mobile Info -->
-      <ProductInfo
-        product={product}
-        basePrice={basePrice}
-        comparePrice={comparePrice}
-        cur={cur}
-        isLowStock={isLowStock}
-        lowStockText={lowStockText}
-      />
+      {pp.showInfo && (
+        <ProductInfo
+          product={product}
+          basePrice={basePrice}
+          comparePrice={comparePrice}
+          cur={cur}
+          isLowStock={isLowStock}
+          lowStockText={lowStockText}
+        />
+      )}
 
-      <OrderForm
-        product={product}
-        content={content}
-        fieldErrors={fieldErrors}
-        serverError={serverError}
-        basePrice={basePrice}
-        defaultVariant={defaultVariant ?? null}
-        cur={cur}
-        isRTL={isRTL}
-        offers={product.offers}
-        defaultVariantId={defaultVariantId}
-        isOutOfStock={isOutOfStock}
-      />
+      {pp.showOrderForm && (
+        <OrderForm
+          product={product}
+          content={content}
+          fieldErrors={fieldErrors}
+          serverError={serverError}
+          basePrice={basePrice}
+          defaultVariant={defaultVariant ?? null}
+          cur={cur}
+          isRTL={isRTL}
+          offers={product.offers}
+          defaultVariantId={defaultVariantId}
+          isOutOfStock={isOutOfStock}
+          orderFormConfig={config.orderFormConfig}
+        />
+      )}
+
+      {pp.showTrustSeals && (
+        <div class="mt-4">
+          <TrustSeals
+            trustSeals={config.trustSeals}
+            primaryColor={primaryColor}
+            accentColor={accentColor}
+            borderRadius={borderRadius}
+            content={content}
+          />
+        </div>
+      )}
     </div>
   </div>
 </div>
 
 <!-- Reviews section (Deferred Server Island) -->
-{config.reviewsEnabled && (
+{pp.showReviews && config.reviewsEnabled && (
   <div class="max-w-5xl mx-auto px-5 pb-12">
     <ReviewsIsland productId={product.id} content={content} server:defer>
       <!-- Skeleton fallback while loading -->

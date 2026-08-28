@@ -1,0 +1,50 @@
+{
+  "page_title": "Abandoned Orders",
+  "page_subtitle": "Track and manage orders abandoned by customers",
+  "search_placeholder": "Search by name or phone number...",
+  "stats": {
+    "abandoned": "Abandoned",
+    "converted": "Converted",
+    "conversion_rate": "Conversion Rate",
+    "lost_revenue": "Lost Revenue"
+  },
+  "filters": {
+    "status": "Status"
+  },
+  "status": {
+    "all": "All Statuses",
+    "pending": "Pending",
+    "abandoned": "Abandoned",
+    "contacted": "Contacted",
+    "converted": "Converted"
+  },
+  "table": {
+    "customer": "Customer",
+    "phone": "Phone",
+    "location": "Location",
+    "product": "Product",
+    "price": "Price",
+    "status": "Status",
+    "date": "Date"
+  },
+  "actions": {
+    "mark_contacted": "Mark Contacted",
+    "mark_converted": "Mark Converted",
+    "delete": "Delete"
+  },
+  "empty": {
+    "title": "No abandoned orders",
+    "description": "Orders abandoned by customers will appear here."
+  },
+  "delete_dialog": {
+    "title": "Delete Order",
+    "description": "Are you sure you want to delete this abandoned order? This action cannot be undone.",
+    "cancel": "Cancel",
+    "confirm": "Delete"
+  },
+  "toast": {
+    "status_updated": "Status updated successfully",
+    "deleted": "Order deleted successfully",
+    "error": "An error occurred, please try again"
+  }
+}

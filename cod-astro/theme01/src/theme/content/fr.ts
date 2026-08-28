@@ -169,6 +169,23 @@ export const fr: StoreFrontContent = {
   offerFullPrice: "Prix complet",
   offerMostPopular: "Le plus demandé",
 
+  // ── Countdown ─────────────────────────────────────────────────────────────
+  countdownLabel: "Se termine dans:",
+  countdownExpired: "Offre expirée",
+
+  // ── Trust Seals ───────────────────────────────────────────────────────────
+  sealCashOnDelivery: "Paiement à la livraison",
+  sealFreeReturns: "Retours gratuits (7 jours)",
+  sealSecureCheckout: "Paiement sécurisé",
+  sealFastDelivery: "Livraison rapide",
+  sealCustomerSupport: "Support client 24/7",
+  sealQualityGuarantee: "Garantie qualité",
+
+  // ── Order form (email & summary) ──────────────────────────────────────────
+  formEmailPlaceholder: "Votre email",
+  formSummaryOpen: "Résumé de la commande",
+  formSummaryClosed: "Ouvrir le résumé",
+
   // ── Misc ──────────────────────────────────────────────────────────────────
   breadcrumbHome: "Accueil",
   required: "*",
@@ -189,6 +206,7 @@ export const fr: StoreFrontContent = {
   offerSavingsText: "Économie de {amount} {currency}",
   offerUnitLabel: "Unité {n}",
   ariaMainNavigation: "Navigation principale",
+  ariaSocials: "Réseaux sociaux",
   ariaQuantity: "Quantité",
   ariaGoToImage: "Aller à l'image {n} sur {total}",
   ariaBrowseAllProducts: "Parcourir tous les produits",

@@ -1,0 +1,84 @@
+{
+  "page_title": "أكواد الخصم",
+  "page_subtitle": "إنشاء وإدارة أكواد الخصم للعملاء",
+  "add_code": "إنشاء كود خصم",
+  "codes_count": "كود",
+  "table": {
+    "code": "الكود",
+    "type": "النوع",
+    "value": "القيمة",
+    "min_order": "الحد الأدنى للطلب",
+    "uses": "الاستخدامات",
+    "status": "الحالة",
+    "date": "التاريخ",
+    "actions": "الإجراءات"
+  },
+  "status": {
+    "active": "نشط",
+    "inactive": "معطَّل",
+    "expired": "منتهي"
+  },
+  "type": {
+    "percentage": "نسبة مئوية",
+    "fixed": "مبلغ ثابت"
+  },
+  "empty_state": {
+    "title": "لا توجد أكواد خصم",
+    "description": "أنشئ أكواد خصم لجذب العملاء وزيادة المبيعات.",
+    "action": "أنشئ كود خصمك الأول"
+  },
+  "filters": {
+    "all": "الكل",
+    "status": "الحالة",
+    "search": "بحث بالكود..."
+  },
+  "actions": {
+    "create": "إنشاء",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "activate": "تفعيل",
+    "deactivate": "تعطيل"
+  },
+  "form": {
+    "title_add": "إنشاء كود خصم جديد",
+    "title_edit": "تعديل كود الخصم",
+    "code_label": "الكود",
+    "code_placeholder": "مثال: SUMMER25",
+    "type_label": "نوع الخصم",
+    "value_label": "القيمة",
+    "value_placeholder": "أدخل القيمة",
+    "min_order_label": "الحد الأدنى للطلب (اختياري)",
+    "min_order_placeholder": "لا يوجد حد أدنى",
+    "max_uses_label": "الحد الأقصى للاستخدام (اختياري)",
+    "max_uses_placeholder": "بدون حد",
+    "starts_at_label": "تاريخ البداية (اختياري)",
+    "expires_at_label": "تاريخ الانتهاء (اختياري)",
+    "status_label": "حالة الكود",
+    "status_active": "نشط",
+    "status_inactive": "معطَّل",
+    "save": "حفظ الكود",
+    "saving": "جارٍ الحفظ...",
+    "cancel": "إلغاء",
+    "success_add": "تم إنشاء كود الخصم بنجاح",
+    "success_edit": "تم تحديث كود الخصم بنجاح",
+    "error_save": "فشل الحفظ، يرجى المحاولة مجدداً",
+    "delete_confirm": "حذف كود الخصم هذا نهائياً؟",
+    "error_code_required": "الكود مطلوب",
+    "error_code_format": "الكود يجب أن يحتوي على أحرف وأرقام فقط",
+    "error_value_required": "القيمة مطلوبة",
+    "error_value_positive": "القيمة يجب أن تكون أكبر من صفر",
+    "error_percentage_max": "النسبة لا يمكن أن تتجاوز 100%"
+  },
+  "confirm_delete_title": "حذف كود الخصم؟",
+  "confirm_delete_description": "هل أنت متأكد من حذف هذا الكود نهائياً؟ لا يمكن التراجع عن هذا الإجراء.",
+  "toast": {
+    "success_create": "تم إنشاء كود الخصم بنجاح",
+    "success_update": "تم تحديث كود الخصم بنجاح",
+    "success_delete": "تم حذف كود الخصم بنجاح",
+    "error_create": "فشل إنشاء كود الخصم",
+    "error_update": "فشل تحديث كود الخصم",
+    "error_delete": "فشل حذف كود الخصم"
+  }
+}

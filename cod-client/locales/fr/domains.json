@@ -1,0 +1,60 @@
+{
+  "page_title": "Domaines Personnalisés",
+  "page_subtitle": "Gérez les domaines personnalisés de votre boutique",
+  "search_placeholder": "Rechercher des domaines...",
+  "filters": {
+    "status": "Statut"
+  },
+  "status": {
+    "pending": "En attente",
+    "verifying": "Vérification",
+    "active": "Actif",
+    "failed": "Échoué",
+    "expired": "Expiré"
+  },
+  "ssl": {
+    "pending": "SSL En attente",
+    "active": "SSL Actif",
+    "failed": "SSL Échoué"
+  },
+  "table": {
+    "domain": "Domaine",
+    "status": "Statut",
+    "ssl": "SSL",
+    "added": "Ajouté"
+  },
+  "actions": {
+    "add": "Ajouter un Domaine",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "verify": "Vérifier",
+    "verify_confirm": "Êtes-vous sûr de vouloir vérifier ce domaine ?"
+  },
+  "form": {
+    "add_domain": "Ajouter un Domaine Personnalisé",
+    "domain": "Nom de Domaine",
+    "domain_hint": "Entrez le domaine que vous souhaitez connecter à votre boutique.",
+    "dns_instructions": "Instructions de Configuration DNS",
+    "dns_description": "Ajoutez l'enregistrement DNS suivant chez votre registrar :",
+    "cancel": "Annuler",
+    "add": "Ajouter le Domaine"
+  },
+  "empty": {
+    "title": "Aucun domaine personnalisé",
+    "description": "Ajoutez votre premier domaine personnalisé pour commencer."
+  },
+  "delete_dialog": {
+    "title": "Supprimer le Domaine",
+    "description": "Êtes-vous sûr de vouloir supprimer ce domaine ? Cette action est irréversible.",
+    "cancel": "Annuler",
+    "confirm": "Supprimer"
+  },
+  "toast": {
+    "created": "Domaine ajouté avec succès",
+    "updated": "Domaine mis à jour avec succès",
+    "deleted": "Domaine supprimé avec succès",
+    "verified": "Domaine vérifié avec succès",
+    "verifying": "Vérification du domaine...",
+    "error": "Une erreur s'est produite, veuillez réessayer"
+  }
+}

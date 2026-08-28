@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { apiClient, ApiClientError } from "@/lib/api-client";
 import { getDb } from "@/db";
-import { getUserApiKey, requirePermission } from "@/lib/auth";
+import { getUserApiKey, requirePermission, getUserStoreId } from "@/lib/auth";
 import { SCOPES } from "@/../cod-shared/rbac/scopes";
 import { getAllReviews } from "@/../cod-shared/queries/reviews";
 import { mapError } from "@/lib/errors/mapper";
@@ -42,7 +42,7 @@ export async function getReviews(params?: {
   await requirePermission(SCOPES.REVIEWS_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  const storeId = env.STORE_ID;
+  const storeId = await getUserStoreId();
   return getAllReviews(db, storeId, {
     status: params?.status,
     productId: params?.productId,

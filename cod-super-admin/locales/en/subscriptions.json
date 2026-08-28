@@ -1,0 +1,21 @@
+{
+  "title": "Subscriptions",
+  "subtitle": "Manage store subscriptions on the platform",
+  "store": "Store",
+  "plan": "Plan",
+  "status": "Status",
+  "active": "Active",
+  "trialing": "Trial",
+  "past_due": "Past Due",
+  "canceled": "Canceled",
+  "expired": "Expired",
+  "payment_method": "Payment Method",
+  "end_date": "End Date",
+  "no_subscriptions": "No subscriptions found",
+  "search": "Search by store or plan...",
+  "cancel": "Cancel Subscription",
+  "confirm_cancel": "Are you sure you want to cancel this subscription?",
+  "canceled_success": "Subscription canceled",
+  "error": "An error occurred",
+  "currency": "DA"
+}

@@ -11,6 +11,9 @@ interface CloudflareEnv {
   // ─── Dashboard app URL ────────────────────────────────────────────────────────
   NEXT_PUBLIC_APP_URL: string;
 
+  // ─── Store ID ─────────────────────────────────────────────────────────────────
+  STORE_ID: string;
+
   // ─── better-auth ──────────────────────────────────────────────────────────────
   // Set via: wrangler secret put BETTER_AUTH_SECRET
   BETTER_AUTH_SECRET: string;

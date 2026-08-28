@@ -865,6 +865,10 @@ export const stores = sqliteTable("stores", {
   fontFamily: text("font_family").notNull().default("Cairo, sans-serif"),
   /** Google Fonts import URL (optional override) */
   fontUrl: text("font_url"),
+  /** Border radius style: "rounded" (1.25rem), "sharp" (0.75rem), "minimal" (0.5rem) */
+  borderRadius: text("border_radius").notNull().default("rounded"),
+  /** Shadow intensity: "soft", "medium", "strong" */
+  shadowIntensity: text("shadow_intensity").notNull().default("soft"),
 
   // ── Locale ────────────────────────────────────────────────────────────────
   /** Store UI language: "ar" | "en" */
@@ -884,6 +888,29 @@ export const stores = sqliteTable("stores", {
   metaTitle: text("meta_title"),
   metaDescription: text("meta_description"),
   ogImage: text("og_image"),
+
+  // ── CRO Enhancements ─────────────────────────────────────────────────────
+  /**
+   * JSON object with enabled trust seal types.
+   * Keys: cashOnDelivery, freeReturns, secureCheckout, fastDelivery, customerSupport, qualityGuarantee
+   * NULL = no seals displayed.
+   */
+  trustSeals: text("trust_seals"),
+  /**
+   * JSON object controlling order form field visibility.
+   * Keys: showName, showPhone, showEmail, showAddress, showWilaya, showCommune,
+   *       showDeliveryType, showNotes, showQuantity, submitButtonText, summaryDisplay
+   * NULL = use defaults (all standard fields visible, summary open).
+   */
+  orderFormConfig: text("order_form_config"),
+
+  // ── Site Builder ──────────────────────────────────────────────────────────
+  /**
+   * JSON blob of the site-builder layout & section configuration.
+   * Schema: SiteBuilderConfig (see cod-shared/site-builder.ts)
+   * NULL = use defaults (current storefront layout). Stored as a raw string.
+   */
+  siteJson: text("site_json"),
 
   // ── Optional features ─────────────────────────────────────────────────────
   /** Top announcement bar text (null = hidden) */

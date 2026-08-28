@@ -13,6 +13,20 @@ export type ProductImage = z.infer<typeof ProductImageSchema>;
 export type ProductVariant = z.infer<typeof ProductVariantSchema>;
 export type Offer = z.infer<typeof OfferSchema>;
 
+export interface OrderFormConfig {
+  showName?: boolean;
+  showPhone?: boolean;
+  showEmail?: boolean;
+  showAddress?: boolean;
+  showWilaya?: boolean;
+  showCommune?: boolean;
+  showDeliveryType?: boolean;
+  showNotes?: boolean;
+  showQuantity?: boolean;
+  submitButtonText?: string | null;
+  summaryDisplay?: "open" | "closed" | "hidden";
+}
+
 export interface StoreConfig {
   id: string;
   name: string;
@@ -24,6 +38,8 @@ export interface StoreConfig {
   bgColor: string;
   fontFamily: string;
   fontUrl: string | null;
+  borderRadius: "rounded" | "sharp" | "minimal";
+  shadowIntensity: "soft" | "medium" | "strong";
   lang: "ar" | "en";
   currency: string;
   currencySymbol: string;
@@ -35,6 +51,8 @@ export interface StoreConfig {
   reviewsEnabled: boolean;
   status: "active" | "inactive";
   pixelId?: string | null;
+  orderFormConfig?: OrderFormConfig | null;
+  trustSeals: Record<string, boolean> | null;
 }
 
 export interface ShippingRates {

@@ -1,8 +1,10 @@
 ---
 // ── Home page layout ────────────────────────────────────────────────────────
-// Full home page: hero, categories, best sellers, how it works,
-// new arrivals, features bar, promo banner, testimonials.
-// Streaming components fetch their own data in parallel for optimal performance.
+// Sections are rendered in the order defined by the site-builder config
+// (siteBuilder.home.sections). Disabled sections are skipped, so merchants can
+// reorder / hide parts of the homepage from the dashboard. Each section stays a
+// reusable component; streaming components still fetch their own data.
+// Fall back to the default order when no config is present.
 // ─────────────────────────────────────────────────────────────────────────────
 import StoreLayout from "@/theme/layouts/StoreLayout.astro";
 import Hero from "@/theme/components/home/Hero.astro";
@@ -14,41 +16,66 @@ import FeaturesBar from "@/theme/components/home/FeaturesBar.astro";
 import WhatsAppCTA from "@/theme/components/home/WhatsAppCTA.astro";
 import CustomerTestimonials from "@/theme/components/home/CustomerTestimonials.astro";
 import { getStoreContext } from "@/theme/config/store";
+import type { HomeSectionId } from "../../../../cod-shared/site-builder";
 
-const { config, content } = await getStoreContext();
+const { config, content, siteBuilder } = await getStoreContext();
+
+// Ordered list of enabled sections (config already merged over defaults).
+const sections = siteBuilder.home.sections
+  .filter((s) => s.enabled)
+  .sort((a, b) => a.order - b.order)
+  .map((s) => s.id);
+
+const rows = siteBuilder.home.rowsDesktop;
+const rowsMobile = siteBuilder.home.rowsMobile;
+const colsDesktop = siteBuilder.home.columnsDesktop;
+const colsMobile = siteBuilder.home.columnsMobile;
 ---
 
-<StoreLayout config={config} content={content}>
-  <!-- Hero renders immediately (no data fetch) -->
-  <Hero content={content} />
+<StoreLayout config={config} content={content} siteBuilder={siteBuilder}>
+  {sections.includes("hero") && (
+    <Hero content={content} heroConfig={siteBuilder.hero} />
+  )}
 
-  <!-- CategoryCards streams (fetches categories) -->
-  <CategoryCards content={content} />
+  {sections.includes("categoryCards") && (
+    <CategoryCards content={content} />
+  )}
 
-  <!-- BestSellers streams (fetches featured products) -->
-  <BestSellers
-    currencySymbol={config.currencySymbol}
-    content={content}
-  />
+  {sections.includes("bestSellers") && (
+    <BestSellers
+      currencySymbol={config.currencySymbol}
+      content={content}
+      rows={rows}
+      rowsMobile={rowsMobile}
+      columnsDesktop={colsDesktop}
+      columnsMobile={colsMobile}
+    />
+  )}
 
-  <!-- HowItWorks renders immediately (presentational) -->
-  <HowItWorks content={content} />
+  {sections.includes("howItWorks") && (
+    <HowItWorks content={content} />
+  )}
 
-  <!-- NewArrivals streams (fetches products) -->
-  <NewArrivals
-    currencySymbol={config.currencySymbol}
-    content={content}
-  />
+  {sections.includes("newArrivals") && (
+    <NewArrivals
+      currencySymbol={config.currencySymbol}
+      content={content}
+      rows={rows}
+      rowsMobile={rowsMobile}
+      columnsDesktop={colsDesktop}
+      columnsMobile={colsMobile}
+    />
+  )}
 
-  <!-- FeaturesBar renders immediately (presentational) -->
-  <FeaturesBar content={content} />
+  {sections.includes("featuresBar") && (
+    <FeaturesBar content={content} />
+  )}
 
-  <!-- Promo banner renders immediately (presentational) -->
-  <WhatsAppCTA content={content} />
+  {sections.includes("whatsappCta") && (
+    <WhatsAppCTA content={content} />
+  )}
 
-  <!-- CustomerTestimonials streams (fetches reviews, conditional) -->
-  <CustomerTestimonials
-    config={config}
-    content={content}
-  />
+  {sections.includes("testimonials") && (
+    <CustomerTestimonials config={config} content={content} />
+  )}
 </StoreLayout>

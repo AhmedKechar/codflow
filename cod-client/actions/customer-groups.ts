@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { apiClient, ApiClientError } from "@/lib/api-client";
 import { getDb } from "@/db";
-import { getUserApiKey, requirePermission } from "@/lib/auth";
+import { getUserApiKey, requirePermission, getUserStoreId } from "@/lib/auth";
 import { SCOPES } from "@/../cod-shared/rbac/scopes";
 import { getAllGroups, getGroupWithMembers } from "@/../cod-shared/queries/customer-groups";
 import { mapError } from "@/lib/errors/mapper";
@@ -34,14 +34,16 @@ export async function getCustomerGroups(): Promise<CustomerGroup[]> {
   await requirePermission(SCOPES.CUSTOMER_GROUPS_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  return getAllGroups(db);
+  const storeId = await getUserStoreId();
+  return getAllGroups(db, storeId);
 }
 
 export async function getCustomerGroup(id: string): Promise<CustomerGroupWithMembers | null> {
   await requirePermission(SCOPES.CUSTOMER_GROUPS_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  return getGroupWithMembers(db, id);
+  const storeId = await getUserStoreId();
+  return getGroupWithMembers(db, storeId, id);
 }
 
 export async function createCustomerGroup(data: CreateGroupData): Promise<CustomerGroup> {

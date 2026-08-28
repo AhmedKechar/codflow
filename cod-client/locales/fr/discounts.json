@@ -1,0 +1,84 @@
+{
+  "page_title": "Codes de Réduction",
+  "page_subtitle": "Créer et gérer les codes de réduction pour vos clients",
+  "add_code": "Créer un code",
+  "codes_count": "code",
+  "table": {
+    "code": "Code",
+    "type": "Type",
+    "value": "Valeur",
+    "min_order": "Commande min.",
+    "uses": "Utilisations",
+    "status": "Statut",
+    "date": "Date",
+    "actions": "Actions"
+  },
+  "status": {
+    "active": "Actif",
+    "inactive": "Inactif",
+    "expired": "Expiré"
+  },
+  "type": {
+    "percentage": "Pourcentage",
+    "fixed": "Montant fixe"
+  },
+  "empty_state": {
+    "title": "Aucun code de réduction",
+    "description": "Créez des codes de réduction pour attirer les clients et booster vos ventes.",
+    "action": "Créer votre premier code"
+  },
+  "filters": {
+    "all": "Tous",
+    "status": "Statut",
+    "search": "Rechercher par code..."
+  },
+  "actions": {
+    "create": "Créer",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "activate": "Activer",
+    "deactivate": "Désactiver"
+  },
+  "form": {
+    "title_add": "Créer un nouveau code de réduction",
+    "title_edit": "Modifier le code de réduction",
+    "code_label": "Code",
+    "code_placeholder": "Ex: ÉTÉ25",
+    "type_label": "Type de réduction",
+    "value_label": "Valeur",
+    "value_placeholder": "Entrer la valeur",
+    "min_order_label": "Montant minimum de commande (optionnel)",
+    "min_order_placeholder": "Pas de minimum",
+    "max_uses_label": "Utilisations max. (optionnel)",
+    "max_uses_placeholder": "Illimité",
+    "starts_at_label": "Date de début (optionnel)",
+    "expires_at_label": "Date d'expiration (optionnel)",
+    "status_label": "Statut du code",
+    "status_active": "Actif",
+    "status_inactive": "Inactif",
+    "save": "Enregistrer le code",
+    "saving": "Enregistrement...",
+    "cancel": "Annuler",
+    "success_add": "Code de réduction créé avec succès",
+    "success_edit": "Code de réduction mis à jour avec succès",
+    "error_save": "Échec de l'enregistrement, réessayez",
+    "delete_confirm": "Supprimer définitivement ce code de réduction ?",
+    "error_code_required": "Le code est requis",
+    "error_code_format": "Le code ne doit contenir que des lettres et des chiffres",
+    "error_value_required": "La valeur est requise",
+    "error_value_positive": "La valeur doit être supérieure à zéro",
+    "error_percentage_max": "Le pourcentage ne peut pas dépasser 100%"
+  },
+  "confirm_delete_title": "Supprimer le code de réduction ?",
+  "confirm_delete_description": "Êtes-vous sûr de vouloir supprimer ce code définitivement ? Cette action est irréversible.",
+  "toast": {
+    "success_create": "Code de réduction créé avec succès",
+    "success_update": "Code de réduction mis à jour avec succès",
+    "success_delete": "Code de réduction supprimé avec succès",
+    "error_create": "Échec de la création du code",
+    "error_update": "Échec de la mise à jour du code",
+    "error_delete": "Échec de la suppression du code"
+  }
+}

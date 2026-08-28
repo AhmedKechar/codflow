@@ -19,6 +19,14 @@ import arAuth from '@/locales/ar/auth.json';
 import arCommon from '@/locales/ar/common.json';
 import arProfile from '@/locales/ar/profile.json';
 import arMcp from '@/locales/ar/mcp.json';
+import arBilling from '@/locales/ar/billing.json';
+import arAbandonedOrders from '@/locales/ar/abandoned-orders.json';
+import arDiscounts from '@/locales/ar/discounts.json';
+import arGiftCards from '@/locales/ar/gift-cards.json';
+import arThemes from '@/locales/ar/themes.json';
+import arAi from '@/locales/ar/ai.json';
+import arDomains from '@/locales/ar/domains.json';
+import arMessaging from '@/locales/ar/messaging.json';
 
 import enNavigation from '@/locales/en/navigation.json';
 import enDashboard from '@/locales/en/dashboard.json';
@@ -38,6 +46,14 @@ import enAuth from '@/locales/en/auth.json';
 import enCommon from '@/locales/en/common.json';
 import enProfile from '@/locales/en/profile.json';
 import enMcp from '@/locales/en/mcp.json';
+import enBilling from '@/locales/en/billing.json';
+import enAbandonedOrders from '@/locales/en/abandoned-orders.json';
+import enDiscounts from '@/locales/en/discounts.json';
+import enGiftCards from '@/locales/en/gift-cards.json';
+import enThemes from '@/locales/en/themes.json';
+import enAi from '@/locales/en/ai.json';
+import enDomains from '@/locales/en/domains.json';
+import enMessaging from '@/locales/en/messaging.json';
 
 import frNavigation from '@/locales/fr/navigation.json';
 import frDashboard from '@/locales/fr/dashboard.json';
@@ -56,6 +72,14 @@ import frAuth from '@/locales/fr/auth.json';
 import frCommon from '@/locales/fr/common.json';
 import frProfile from '@/locales/fr/profile.json';
 import frMcp from '@/locales/fr/mcp.json';
+import frBilling from '@/locales/fr/billing.json';
+import frAbandonedOrders from '@/locales/fr/abandoned-orders.json';
+import frDiscounts from '@/locales/fr/discounts.json';
+import frGiftCards from '@/locales/fr/gift-cards.json';
+import frThemes from '@/locales/fr/themes.json';
+import frAi from '@/locales/fr/ai.json';
+import frDomains from '@/locales/fr/domains.json';
+import frMessaging from '@/locales/fr/messaging.json';
 
 import { useLanguage } from './i18n-context';
 
@@ -78,6 +102,14 @@ export const allTranslations = {
     offers: arOffers,
     profile: arProfile,
     mcp: arMcp,
+    billing: arBilling,
+    abandonedOrders: arAbandonedOrders,
+    discounts: arDiscounts,
+    giftCards: arGiftCards,
+    themes: arThemes,
+    ai: arAi,
+    domains: arDomains,
+    messaging: arMessaging,
   },
   en: {
     navigation: enNavigation,
@@ -97,6 +129,14 @@ export const allTranslations = {
     common: enCommon,
     profile: enProfile,
     mcp: enMcp,
+    billing: enBilling,
+    abandonedOrders: enAbandonedOrders,
+    discounts: enDiscounts,
+    giftCards: enGiftCards,
+    themes: enThemes,
+    ai: enAi,
+    domains: enDomains,
+    messaging: enMessaging,
   },
   fr: {
     navigation: frNavigation,
@@ -116,6 +156,14 @@ export const allTranslations = {
     common: frCommon,
     profile: frProfile,
     mcp: frMcp,
+    billing: frBilling,
+    abandonedOrders: frAbandonedOrders,
+    discounts: frDiscounts,
+    giftCards: frGiftCards,
+    themes: frThemes,
+    ai: frAi,
+    domains: frDomains,
+    messaging: frMessaging,
   }
 };
 
@@ -144,6 +192,14 @@ export const useAuth = () => useTranslations().auth;
 export const useCommon = () => useTranslations().common;
 export const useProfile = () => useTranslations().profile;
 export const useMcp = () => useTranslations().mcp;
+export const useBilling = () => useTranslations().billing;
+export const useAbandonedOrders = () => useTranslations().abandonedOrders;
+export const useDiscounts = () => useTranslations().discounts;
+export const useGiftCards = () => useTranslations().giftCards;
+export const useThemes = () => useTranslations().themes;
+export const useAi = () => useTranslations().ai;
+export const useDomains = () => useTranslations().domains;
+export const useMessaging = () => useTranslations().messaging;
 
 /**
  * Legacy t function - might need locale context

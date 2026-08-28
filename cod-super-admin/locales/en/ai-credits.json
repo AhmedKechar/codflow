@@ -1,0 +1,17 @@
+{
+  "title": "AI Credits",
+  "subtitle": "Manage AI credits for stores",
+  "store": "Store",
+  "total_credits": "Total Credits",
+  "used_credits": "Used Credits",
+  "remaining": "Remaining",
+  "allocate": "Allocate Credits",
+  "allocate_to": "Allocate credits to",
+  "amount": "Amount",
+  "confirm": "Confirm",
+  "no_credits": "No credits found",
+  "search": "Search by store...",
+  "allocated": "Credits allocated",
+  "error": "An error occurred",
+  "cancel": "Cancel"
+}

@@ -1,0 +1,117 @@
+---
+interface Props {
+  lang?: string;
+}
+
+const { lang = 'ar' } = Astro.props;
+
+const footer = {
+  ar: {
+    product: 'المنتج',
+    features: 'المميزات',
+    pricing: 'الأسعار',
+    docs: 'التوثيق',
+    company: 'الشركة',
+    about: 'من نحن',
+    blog: 'المدونة',
+    contact: 'اتصل بنا',
+    support: 'الدعم',
+    help: 'مركز المساعدة',
+    status: 'حالة النظام',
+    terms: 'الشروط',
+    privacy: 'الخصوصية',
+    copyright: '© 2024 CodFlow. جميع الحقوق محفوظة.',
+    madeIn: 'صنع في الجزائر 🇩🇿',
+  },
+  en: {
+    product: 'Product',
+    features: 'Features',
+    pricing: 'Pricing',
+    docs: 'Documentation',
+    company: 'Company',
+    about: 'About Us',
+    blog: 'Blog',
+    contact: 'Contact',
+    support: 'Support',
+    help: 'Help Center',
+    status: 'System Status',
+    terms: 'Terms',
+    privacy: 'Privacy',
+    copyright: '© 2024 CodFlow. All rights reserved.',
+    madeIn: 'Made in Algeria 🇩🇿',
+  },
+  fr: {
+    product: 'Produit',
+    features: 'Fonctionnalités',
+    pricing: 'Tarifs',
+    docs: 'Documentation',
+    company: 'Entreprise',
+    about: 'À Propos',
+    blog: 'Blog',
+    contact: 'Contact',
+    support: 'Support',
+    help: 'Centre d\'Aide',
+    status: 'État du Système',
+    terms: 'Conditions',
+    privacy: 'Confidentialité',
+    copyright: '© 2024 CodFlow. Tous droits réservés.',
+    madeIn: 'Fabriqué en Algérie 🇩🇿',
+  },
+};
+
+const content = footer[lang as keyof typeof footer] ?? footer.ar;
+---
+
+<footer class="py-12 bg-gray-900 text-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+      <div>
+        <h3 class="font-bold mb-4">{content.product}</h3>
+        <ul class="space-y-2 text-sm text-gray-400">
+          <li><a href="#features" class="hover:text-white transition-colors">{content.features}</a></li>
+          <li><a href="#pricing" class="hover:text-white transition-colors">{content.pricing}</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">{content.docs}</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="font-bold mb-4">{content.company}</h3>
+        <ul class="space-y-2 text-sm text-gray-400">
+          <li><a href="#" class="hover:text-white transition-colors">{content.about}</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">{content.blog}</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">{content.contact}</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="font-bold mb-4">{content.support}</h3>
+        <ul class="space-y-2 text-sm text-gray-400">
+          <li><a href="#" class="hover:text-white transition-colors">{content.help}</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">{content.status}</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="font-bold mb-4">{content.product}</h3>
+        <ul class="space-y-2 text-sm text-gray-400">
+          <li><a href="#" class="hover:text-white transition-colors">{content.terms}</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">{content.privacy}</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center">
+          <span class="text-white font-bold text-sm">C</span>
+        </div>
+        <span class="font-bold text-lg">CodFlow</span>
+      </div>
+      
+      <div class="text-sm text-gray-400">
+        {content.copyright}
+      </div>
+      
+      <div class="text-sm text-gray-400">
+        {content.madeIn}
+      </div>
+    </div>
+  </div>
+</footer>

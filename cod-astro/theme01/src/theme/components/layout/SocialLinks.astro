@@ -1,0 +1,45 @@
+---
+// Social media icon links — rendered in the header and/or footer per the
+// site-builder config (header.showSocials / footer.showSocials).
+import { Icon } from "astro-icon/components";
+import type { SocialLink, SocialPlatform } from "../../../../../../cod-shared/site-builder";
+
+interface Props {
+  socials: SocialLink[];
+  /** Tailwind sizing classes applied to each link/button. */
+  itemClass?: string;
+  iconClass?: string;
+  ariaLabel: string;
+}
+
+const { socials, itemClass = "", iconClass = "w-4 h-4", ariaLabel } = Astro.props;
+
+const ICONS: Record<SocialPlatform, string> = {
+  facebook: "simple-icons:facebook",
+  instagram: "simple-icons:instagram",
+  tiktok: "simple-icons:tiktok",
+  whatsapp: "simple-icons:whatsapp",
+  youtube: "simple-icons:youtube",
+  x: "simple-icons:x",
+  telegram: "simple-icons:telegram",
+};
+---
+
+{socials.length > 0 && (
+  <div class="flex items-center gap-2" aria-label={ariaLabel}>
+    {socials.map((s) => {
+      const icon = ICONS[s.platform] ?? "heroicons:link";
+      return (
+        <a
+          href={s.url}
+          target="_blank"
+          rel="noopener noreferrer nofollow"
+          class={`flex items-center justify-center rounded-full bg-black/[0.04] border border-black/[0.06] text-primary transition-all hover:bg-primary hover:text-white hover:scale-105 active:scale-95 ${itemClass}`}
+          aria-label={`${s.platform}`}
+        >
+          <Icon name={icon} class={iconClass} />
+        </a>
+      );
+    })}
+  </div>
+)}

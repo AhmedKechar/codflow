@@ -9,7 +9,7 @@
 
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { getDb } from "@/db";
-import { getUserRole, ForbiddenError } from "@/lib/auth";
+import { getUserRole, ForbiddenError, getUserStoreId } from "@/lib/auth";
 import {
   listActivityLogs,
   getUserActivityLogs as getUserActivityLogsQuery,
@@ -50,7 +50,7 @@ export async function getActivityLogs(
   await requireAdmin();
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  const storeId = env.STORE_ID;
+  const storeId = await getUserStoreId();
   const limitNum = params?.limit ?? 50;
   const limit = Math.min(Math.max(limitNum, 1), 100);
   const offset = Math.max(params?.offset ?? 0, 0);
@@ -75,7 +75,7 @@ export async function getUserActivityLogs(
   await requireAdmin();
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  const storeId = env.STORE_ID;
+  const storeId = await getUserStoreId();
   const limitNum = params?.limit ?? 30;
   const limit = Math.min(Math.max(limitNum, 1), 100);
   const offset = Math.max(params?.offset ?? 0, 0);

@@ -5,19 +5,38 @@
 import ProductCard from "@/theme/components/product/ProductCard.astro";
 import { Icon } from "astro-icon/components";
 import { fetchProductsRaw, fetchCategoriesRaw } from "@/core/api/client";
+import {
+  getDefaultSiteBuilder,
+  type ProductsConfig,
+} from "../../../../../../cod-shared/site-builder";
 
 interface Props {
   currencySymbol: string;
   content: any;
+  productsConfig?: Partial<ProductsConfig>;
 }
 
-const { currencySymbol, content } = Astro.props;
+const { currencySymbol, content, productsConfig } = Astro.props;
+
+// Merge the dashboard config over defaults (backward compatible: absent =
+// current layout). Safe because mergeSiteBuilder shapes the object.
+const cfg: ProductsConfig = {
+  ...getDefaultSiteBuilder().products,
+  ...(productsConfig ?? {}),
+};
+
+const colDesktop =
+  ({ 2: "lg:grid-cols-2", 3: "lg:grid-cols-3", 4: "lg:grid-cols-4", 5: "lg:grid-cols-5", 6: "lg:grid-cols-6" } as Record<number, string>)[cfg.desktopCols] ?? "lg:grid-cols-4";
+const colMobile =
+  ({ 1: "grid-cols-1", 2: "grid-cols-2", 3: "grid-cols-3" } as Record<number, string>)[cfg.mobileCols] ?? "grid-cols-2";
 
 // Fetch products and categories in parallel (this component streams when ready)
 const [products, categories] = await Promise.all([
   fetchProductsRaw(),
   fetchCategoriesRaw(),
 ]);
+
+const shownProducts = cfg.pageSize > 0 ? products.slice(0, cfg.pageSize) : products;
 ---
 
 <div class="max-w-5xl mx-auto px-5 py-8">
@@ -31,7 +50,7 @@ const [products, categories] = await Promise.all([
   </div>
 
   <!-- Category filter -->
-  {categories.length > 0 && (
+  {cfg.showCategoryFilter && categories.length > 0 && (
     <div class="flex items-center gap-2.5 overflow-x-auto scrollbar-hide pb-4 mb-8 touch-pan-x">
       <a
         href="/products"
@@ -53,9 +72,9 @@ const [products, categories] = await Promise.all([
     </div>
   )}
 
-  {products.length > 0 ? (
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-      {products.map((p, i) => (
+  {shownProducts.length > 0 ? (
+    <div class={`grid ${colMobile} ${colDesktop} gap-4 sm:gap-6`}>
+      {shownProducts.map((p, i) => (
         <ProductCard
           product={p}
           currencySymbol={currencySymbol}

@@ -1,0 +1,79 @@
+{
+  "page_title": "الرسائل",
+  "messages_count": "رسالة",
+  "send_button": "إرسال رسالة",
+  "tabs": {
+    "messages": "الرسائل",
+    "send": "إرسال رسالة",
+    "templates": "القوالب"
+  },
+  "table": {
+    "recipient": "المستلم",
+    "phone": "الهاتف",
+    "type": "النوع",
+    "content": "المحتوى",
+    "status": "الحالة",
+    "channel": "القناة",
+    "date": "التاريخ"
+  },
+  "filters": {
+    "status": "الحالة",
+    "type": "النوع",
+    "channel": "القناة",
+    "all_status": "جميع الحالات",
+    "all_types": "جميع الأنواع",
+    "all_channels": "جميع القنوات"
+  },
+  "status": {
+    "pending": "قيد الانتظار",
+    "sent": "تم الإرسال",
+    "delivered": "تم التوصيل",
+    "read": "تمت القراءة",
+    "failed": "فشل"
+  },
+  "message_type": {
+    "order_update": "تحديث الطلب",
+    "marketing": "إعلاني",
+    "support": "دعم فني",
+    "automated": "تلقائي"
+  },
+  "channel": {
+    "whatsapp": "واتساب",
+    "sms": "رسالة نصية",
+    "both": "القناتين"
+  },
+  "form": {
+    "title": "إرسال رسالة جديدة",
+    "phone_label": "رقم الهاتف",
+    "phone_placeholder": "0555123456",
+    "phone_hint": "أدخل رقم الهاتف بصيغة صحيحة",
+    "type_label": "نوع الرسالة",
+    "channel_label": "القناة",
+    "content_label": "محتوى الرسالة",
+    "content_placeholder": "اكتب رسالتك هنا...",
+    "content_hint": "اتركه فارغاً لإرسال قالب تلقائي",
+    "send": "إرسال",
+    "sending": "جاري الإرسال...",
+    "success": "تم إرسال الرسالة بنجاح",
+    "error": "فشل إرسال الرسالة",
+    "error_invalid_phone": "رقم الهاتف غير صحيح",
+    "error_content_required": "محتوى الرسالة مطلوب"
+  },
+  "templates": {
+    "title": "قوالب الرسائل",
+    "order_update": "تحديث حالة الطلب",
+    "marketing": "رسالة إعلانية",
+    "support": "رسالة دعم",
+    "automated": "رسالة تلقائية"
+  },
+  "empty_state": {
+    "title": "لا توجد رسائل بعد",
+    "description": "ابدأ بإرسال أول رسالة لعملائك عبر واتساب أو الرسائل النصية.",
+    "action": "إرسال رسالة"
+  },
+  "actions": {
+    "view": "عرض",
+    "retry": "إعادة المحاولة",
+    "delete": "حذف"
+  }
+}

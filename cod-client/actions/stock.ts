@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { apiClient, ApiClientError } from "@/lib/api-client";
 import { getDb } from "@/db";
-import { getUserApiKey, requirePermission } from "@/lib/auth";
+import { getUserApiKey, requirePermission, getUserStoreId } from "@/lib/auth";
 import { SCOPES } from "@/../cod-shared/rbac/scopes";
 import {
   getStockHistory as getStockHistoryQuery,
@@ -114,7 +114,7 @@ export async function getStockHistory(
   await requirePermission(SCOPES.PRODUCTS_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  const res = await getStockHistoryQuery(db, productId, {
+  const res = await getStockHistoryQuery(db, await getUserStoreId(), productId, {
     variantId: filters?.variantId,
     limit: filters?.limit ?? 50,
     offset: filters?.offset ?? 0,
@@ -128,7 +128,7 @@ export async function getStockOverview(): Promise<StockOverview> {
   await requirePermission(SCOPES.PRODUCTS_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  const res = await getStockOverviewQuery(db);
+  const res = await getStockOverviewQuery(db, await getUserStoreId());
   return res as unknown as StockOverview;
 }
 
@@ -141,7 +141,7 @@ export async function getStockAlerts(filters?: {
   await requirePermission(SCOPES.PRODUCTS_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  const res = await getStockAlertsQuery(db, {
+  const res = await getStockAlertsQuery(db, await getUserStoreId(), {
     limit: filters?.limit ?? 50,
     offset: filters?.offset ?? 0,
   });

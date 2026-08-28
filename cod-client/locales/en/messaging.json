@@ -1,0 +1,79 @@
+{
+  "page_title": "Messages",
+  "messages_count": "messages",
+  "send_button": "Send Message",
+  "tabs": {
+    "messages": "Messages",
+    "send": "Send Message",
+    "templates": "Templates"
+  },
+  "table": {
+    "recipient": "Recipient",
+    "phone": "Phone",
+    "type": "Type",
+    "content": "Content",
+    "status": "Status",
+    "channel": "Channel",
+    "date": "Date"
+  },
+  "filters": {
+    "status": "Status",
+    "type": "Type",
+    "channel": "Channel",
+    "all_status": "All Statuses",
+    "all_types": "All Types",
+    "all_channels": "All Channels"
+  },
+  "status": {
+    "pending": "Pending",
+    "sent": "Sent",
+    "delivered": "Delivered",
+    "read": "Read",
+    "failed": "Failed"
+  },
+  "message_type": {
+    "order_update": "Order Update",
+    "marketing": "Marketing",
+    "support": "Support",
+    "automated": "Automated"
+  },
+  "channel": {
+    "whatsapp": "WhatsApp",
+    "sms": "SMS",
+    "both": "Both Channels"
+  },
+  "form": {
+    "title": "Send New Message",
+    "phone_label": "Phone Number",
+    "phone_placeholder": "0555123456",
+    "phone_hint": "Enter a valid phone number",
+    "type_label": "Message Type",
+    "channel_label": "Channel",
+    "content_label": "Message Content",
+    "content_placeholder": "Type your message here...",
+    "content_hint": "Leave empty to send an auto-generated template",
+    "send": "Send",
+    "sending": "Sending...",
+    "success": "Message sent successfully",
+    "error": "Failed to send message",
+    "error_invalid_phone": "Invalid phone number",
+    "error_content_required": "Message content is required"
+  },
+  "templates": {
+    "title": "Message Templates",
+    "order_update": "Order Status Update",
+    "marketing": "Marketing Message",
+    "support": "Support Message",
+    "automated": "Automated Message"
+  },
+  "empty_state": {
+    "title": "No messages yet",
+    "description": "Start by sending your first message to customers via WhatsApp or SMS.",
+    "action": "Send Message"
+  },
+  "actions": {
+    "view": "View",
+    "retry": "Retry",
+    "delete": "Delete"
+  }
+}

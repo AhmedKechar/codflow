@@ -24,8 +24,12 @@ import {
   BookOpen,
   Star,
   Gift,
+  Globe,
   ExternalLink,
   Sparkles,
+  CreditCard,
+  MessageSquare,
+  Palette,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SignOutButton } from "@/components/auth/sign-out-button";
@@ -105,6 +109,7 @@ export function Sidebar({ user, brand, storeDomain, onSignOut, stockAlertCount, 
             ].filter(Boolean) as { href: string; label: string; icon: any }[],
           },
           canSee("reviews:read") && { href: "/reviews", label: nav.sidebar.reviews || "Reviews", icon: Star },
+          canSee("messaging:read") && { href: "/messaging", label: nav.sidebar.messaging || "Messages", icon: MessageSquare },
         ].filter(Boolean) as NavItem[],
       },
       {
@@ -119,6 +124,7 @@ export function Sidebar({ user, brand, storeDomain, onSignOut, stockAlertCount, 
               canSee("product_groups:read") && { href: "/product-groups", label: nav.sidebar.categories || "Categories", icon: FolderOpen },
               { href: "/products/stock", label: nav.sidebar.stock_management || "Stock", icon: Package },
               canSee("offers:read") && { href: "/offers", label: nav.sidebar.offers || "العروض", icon: Gift },
+              canSee("discounts:read") && { href: "/discounts", label: nav.sidebar.discounts || "أكواد الخصم", icon: Tag },
             ].filter(Boolean) as { href: string; label: string; icon: any }[],
           },
           canSee("delivery:read") && {
@@ -146,7 +152,24 @@ export function Sidebar({ user, brand, storeDomain, onSignOut, stockAlertCount, 
           // it fast; label intentionally user-friendly ("AI Agents") instead
           // of the protocol name.
           canSee("mcp:view") && { href: "/mcp", label: nav.sidebar.mcp ?? "AI Agents", icon: Sparkles },
+          // AI Assistant — conversational AI chat interface
+          canSee("ai_credits:read") && { href: "/ai", label: nav.sidebar.ai_assistant ?? "AI Assistant", icon: Sparkles },
+          canSee("custom_domains:read") && { href: "/store/domains", label: nav.sidebar.custom_domains ?? "Custom Domains", icon: Globe },
+          role === "admin" && { href: "/settings", label: nav.sidebar.settings, icon: Settings },
           { href: "/api", label: nav.sidebar.api_reference || "API Reference", icon: BookOpen, external: true },
+        ].filter(Boolean) as NavItem[],
+      },
+      {
+        title: nav.sidebar.store || "Store",
+        items: [
+          canSee("settings:view") && { href: "/store/theme", label: nav.sidebar.theme_selector ?? "Theme", icon: Palette },
+          canSee("settings:view") && { href: "/store/gift-cards", label: nav.sidebar.gift_cards ?? "Gift Cards", icon: Gift },
+        ].filter(Boolean) as NavItem[],
+      },
+      {
+        title: nav.sidebar.subscriptions || "Subscriptions",
+        items: [
+          canSee("subscription:read") && { href: "/billing", label: nav.sidebar.billing || "الفواتير", icon: CreditCard },
         ].filter(Boolean) as NavItem[],
       },
     ].filter(group => group.items.length > 0);

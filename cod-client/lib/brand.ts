@@ -52,7 +52,7 @@ export async function getStoreDomain(): Promise<string | null> {
     const store = await db.select({ domain: stores.domain }).from(stores).get();
     if (store?.domain) return store.domain;
     // Local dev fallback — Astro storefront runs on 4321
-    const appUrl = env.NEXT_PUBLIC_APP_URL ?? env.APP_URL ?? "";
+    const appUrl = env.NEXT_PUBLIC_APP_URL ?? "";
     if (appUrl.includes("localhost")) return "localhost:4321";
     return null;
   } catch {

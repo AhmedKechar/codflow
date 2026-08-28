@@ -15,6 +15,8 @@ import {
   Command,
   Sun,
   Moon,
+  RefreshCw,
+  Coins,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SignOutButton } from "@/components/auth/sign-out-button";
@@ -53,6 +55,8 @@ export function Sidebar({ user, onSignOut }: SidebarProps) {
     { href: "/dashboard", label: nav.dashboard, icon: LayoutDashboard },
     { href: "/plans", label: nav.plans, icon: Crown },
     { href: "/payments", label: nav.payments, icon: CreditCard },
+    { href: "/subscriptions", label: nav.subscriptions, icon: RefreshCw },
+    { href: "/ai-credits", label: nav.ai_credits, icon: Coins },
     { href: "/stores", label: nav.stores, icon: Store },
     { href: "/users", label: nav.users, icon: Users },
     { href: "/provider-keys", label: nav.provider_keys, icon: KeyRound },

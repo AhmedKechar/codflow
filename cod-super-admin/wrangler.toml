@@ -19,7 +19,7 @@ binding = "RATE_LIMIT_KV"
 id = "00000000000000000000000000000000"
 
 [vars]
-NEXT_PUBLIC_APP_URL = "http://localhost:3002"
+NEXT_PUBLIC_APP_URL = "http://localhost:3001"
 NEXT_PUBLIC_WORKER_URL = "http://localhost:8787"
 
 [dev]

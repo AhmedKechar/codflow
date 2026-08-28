@@ -1,8 +1,16 @@
 "use client";
 
-import { DataTable, type TableColumn } from "@/components/ui/data-table";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { DataTable, type TableColumn, type TableAction } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { useConfirm } from "@/components/ui/use-confirm";
 import { useStores } from "@/lib/translations";
+import { deleteStoreAction } from "@/actions/stores";
+import { StoreFormDialog } from "./store-form-dialog";
 
 type StoreRow = {
   store: {
@@ -17,6 +25,10 @@ type StoreRow = {
 
 export function StoresClient({ stores }: { stores: StoreRow[] }) {
   const t = useStores();
+  const router = useRouter();
+  const { confirm, ConfirmDialog } = useConfirm();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editing, setEditing] = useState<StoreRow | null>(null);
 
   const columns: TableColumn<StoreRow>[] = [
     {
@@ -80,19 +92,77 @@ export function StoresClient({ stores }: { stores: StoreRow[] }) {
     },
   ];
 
+  const actions: TableAction<StoreRow>[] = [
+    {
+      label: t.edit,
+      icon: <Pencil className="w-3.5 h-3.5" />,
+      onClick: (row) => {
+        setEditing(row);
+        setDialogOpen(true);
+      },
+    },
+    {
+      label: t.delete,
+      icon: <Trash2 className="w-3.5 h-3.5" />,
+      variant: "destructive",
+      onClick: async (row) => {
+        const ok = await confirm({
+          title: t.confirm_delete,
+          variant: "destructive",
+        });
+        if (!ok) return;
+        try {
+          await deleteStoreAction(row.store.id);
+          toast.success(t.deleted);
+          router.refresh();
+        } catch (err) {
+          toast.error(err instanceof Error ? err.message : t.error);
+        }
+      },
+    },
+  ];
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-black tracking-tight">{t.title}</h1>
-        <p className="text-sm text-muted-foreground mt-1">{t.subtitle}</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-black tracking-tight">{t.title}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t.subtitle}</p>
+        </div>
+        <Button
+          onClick={() => {
+            setEditing(null);
+            setDialogOpen(true);
+          }}
+          className="gap-2"
+        >
+          <Plus className="w-4 h-4" />
+          {t.create}
+        </Button>
       </div>
 
       <DataTable
         data={stores}
         columns={columns}
+        actions={actions}
         searchPlaceholder={t.search}
         emptyMessage={t.no_stores}
       />
+
+      <StoreFormDialog
+        open={dialogOpen}
+        onOpenChange={(o) => {
+          setDialogOpen(o);
+          if (!o) setEditing(null);
+        }}
+        store={editing ? {
+          id: editing.store.id,
+          name: editing.store.name,
+          domain: editing.store.domain,
+          status: editing.store.status,
+        } : null}
+      />
+      {ConfirmDialog}
     </div>
   );
 }

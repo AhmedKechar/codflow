@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { apiClient, ApiClientError } from "@/lib/api-client";
 import { getDb } from "@/db";
-import { getUserApiKey, requirePermission } from "@/lib/auth";
+import { getUserApiKey, requirePermission, getUserStoreId } from "@/lib/auth";
 import { SCOPES } from "@/../cod-shared/rbac/scopes";
 import {
   getDriverPayments as getDriverPaymentsQuery,
@@ -73,7 +73,8 @@ export async function getDriverPayments(driverId: string): Promise<DriverPayment
   await requirePermission(SCOPES.DELIVERY_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  const rows = await getDriverPaymentsQuery(db, driverId);
+  const storeId = await getUserStoreId();
+  const rows = await getDriverPaymentsQuery(db, storeId, driverId);
   return rows as unknown as DriverPayment[];
 }
 
@@ -84,6 +85,7 @@ export async function getPendingSettlementOrders(driverId: string): Promise<Orde
   await requirePermission(SCOPES.DELIVERY_READ);
   const { env } = await getCloudflareContext({ async: true });
   const db = getDb(env.DB);
-  const rows = await getPendingSettlementOrdersQuery(db, driverId);
+  const storeId = await getUserStoreId();
+  const rows = await getPendingSettlementOrdersQuery(db, storeId, driverId);
   return rows as unknown as Order[];
 }

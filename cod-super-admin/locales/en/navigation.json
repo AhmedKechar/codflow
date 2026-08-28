@@ -2,6 +2,8 @@
   "dashboard": "Dashboard",
   "plans": "Plans",
   "payments": "Payments",
+  "subscriptions": "Subscriptions",
+  "ai_credits": "AI Credits",
   "stores": "Stores",
   "users": "Users",
   "provider_keys": "Provider Keys",

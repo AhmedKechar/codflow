@@ -4,6 +4,7 @@
     "title": "Store Settings",
     "general_title": "General",
     "general_subtitle": "Basic store information and visibility",
+    "theme_title": "Theme",
     "name_label": "Store Name",
     "name_placeholder": "e.g. My Store",
     "lang_label": "Store Language",

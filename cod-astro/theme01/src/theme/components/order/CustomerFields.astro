@@ -2,14 +2,28 @@
 import Select from "@/theme/components/ui/Select.astro";
 import { Icon } from "astro-icon/components";
 import { WILAYAS } from "@/core/data/wilayas";
+import type { OrderFormConfig } from "@/core/api/types";
 
 interface Props {
   content: any;
   fieldErrors: any;
   isRTL: boolean;
+  orderFormConfig?: OrderFormConfig | null;
 }
 
-const { content, fieldErrors, isRTL } = Astro.props;
+const { content, fieldErrors, isRTL, orderFormConfig } = Astro.props;
+
+const cfg = {
+  showName:        orderFormConfig?.showName        ?? true,
+  showPhone:       orderFormConfig?.showPhone       ?? true,
+  showEmail:       orderFormConfig?.showEmail       ?? false,
+  showAddress:     orderFormConfig?.showAddress     ?? true,
+  showWilaya:      orderFormConfig?.showWilaya      ?? true,
+  showCommune:     orderFormConfig?.showCommune     ?? true,
+  showDeliveryType: orderFormConfig?.showDeliveryType ?? true,
+  showNotes:       orderFormConfig?.showNotes       ?? false,
+  showQuantity:    orderFormConfig?.showQuantity     ?? true,
+};
 ---
 
 <div class="space-y-5 pt-2">
@@ -19,7 +33,7 @@ const { content, fieldErrors, isRTL } = Astro.props;
     <div class="h-px flex-1 bg-black/[.05]"></div>
   </div>
 
-  <!-- Name -->
+  {cfg.showName && (
   <div>
     <label for="f-name" class="form-label">
       {content.formNameLabel} <span class="text-red-400">*</span>
@@ -34,8 +48,9 @@ const { content, fieldErrors, isRTL } = Astro.props;
       <p class="text-[0.75rem] text-red-500 font-bold mt-2 ps-1">{fieldErrors.customerName[0]}</p>
     )}
   </div>
+  )}
 
-  <!-- Phone -->
+  {cfg.showPhone && (
   <div>
     <label for="f-phone" class="form-label">
       {content.formPhoneLabel} <span class="text-red-400">*</span>
@@ -51,8 +66,22 @@ const { content, fieldErrors, isRTL } = Astro.props;
       <p class="text-[0.75rem] text-red-500 font-bold mt-2 ps-1">{fieldErrors.phone[0]}</p>
     )}
   </div>
+  )}
 
-  <!-- Wilaya - ALWAYS SHOWN -->
+  {cfg.showEmail && (
+  <div>
+    <label for="f-email" class="form-label">{content.formEmailLabel ?? "البريد الإلكتروني"}</label>
+    <input
+      id="f-email" type="email" name="email"
+      autocomplete="email"
+      placeholder={content.formEmailPlaceholder ?? "بريدك الإلكتروني"}
+      dir="ltr"
+      class="form-input"
+    />
+  </div>
+  )}
+
+  {cfg.showWilaya && (
   <div class="mb-1">
     <Select
       id="f-wilaya"
@@ -72,8 +101,9 @@ const { content, fieldErrors, isRTL } = Astro.props;
       <p class="text-[0.75rem] text-red-500 font-bold mt-2 ps-1">{fieldErrors.wilayaId[0]}</p>
     )}
   </div>
+  )}
 
-  <!-- Commune - ALWAYS SHOWN -->
+  {cfg.showCommune && (
   <div class="mb-1">
     <Select
       id="f-commune"
@@ -91,8 +121,9 @@ const { content, fieldErrors, isRTL } = Astro.props;
       <p class="text-[0.75rem] text-red-500 font-bold mt-2 ps-1">{fieldErrors.communeId[0]}</p>
     )}
   </div>
+  )}
 
-  <!-- Delivery type -->
+  {cfg.showDeliveryType && (
   <div>
     <fieldset>
       <legend class="form-label">{content.formDeliveryLabel}</legend>
@@ -119,8 +150,9 @@ const { content, fieldErrors, isRTL } = Astro.props;
       </div>
     </fieldset>
   </div>
+  )}
 
-  <!-- Address - CONDITIONAL: Only shown for home delivery -->
+  {cfg.showAddress && (
   <div id="address-field-container">
     <label for="f-address" class="form-label">{content.formAddressLabel}</label>
     <input
@@ -130,8 +162,9 @@ const { content, fieldErrors, isRTL } = Astro.props;
       class="form-input"
     />
   </div>
+  )}
 
-  <!-- Notes -->
+  {cfg.showNotes && (
   <div>
     <label for="f-notes" class="form-label">{content.formNotesLabel}</label>
     <textarea
@@ -140,4 +173,5 @@ const { content, fieldErrors, isRTL } = Astro.props;
       class="form-input"
     ></textarea>
   </div>
+  )}
 </div>

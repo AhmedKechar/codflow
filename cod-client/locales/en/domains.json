@@ -1,0 +1,60 @@
+{
+  "page_title": "Custom Domains",
+  "page_subtitle": "Manage your store's custom domains",
+  "search_placeholder": "Search domains...",
+  "filters": {
+    "status": "Status"
+  },
+  "status": {
+    "pending": "Pending",
+    "verifying": "Verifying",
+    "active": "Active",
+    "failed": "Failed",
+    "expired": "Expired"
+  },
+  "ssl": {
+    "pending": "SSL Pending",
+    "active": "SSL Active",
+    "failed": "SSL Failed"
+  },
+  "table": {
+    "domain": "Domain",
+    "status": "Status",
+    "ssl": "SSL",
+    "added": "Added"
+  },
+  "actions": {
+    "add": "Add Domain",
+    "edit": "Edit",
+    "delete": "Delete",
+    "verify": "Verify",
+    "verify_confirm": "Are you sure you want to verify this domain?"
+  },
+  "form": {
+    "add_domain": "Add Custom Domain",
+    "domain": "Domain Name",
+    "domain_hint": "Enter the domain you want to connect to your store.",
+    "dns_instructions": "DNS Setup Instructions",
+    "dns_description": "Add the following DNS record to your domain provider:",
+    "cancel": "Cancel",
+    "add": "Add Domain"
+  },
+  "empty": {
+    "title": "No custom domains",
+    "description": "Add your first custom domain to get started."
+  },
+  "delete_dialog": {
+    "title": "Delete Domain",
+    "description": "Are you sure you want to delete this domain? This action cannot be undone.",
+    "cancel": "Cancel",
+    "confirm": "Delete"
+  },
+  "toast": {
+    "created": "Domain added successfully",
+    "updated": "Domain updated successfully",
+    "deleted": "Domain deleted successfully",
+    "verified": "Domain verified successfully",
+    "verifying": "Verifying domain...",
+    "error": "An error occurred, please try again"
+  }
+}

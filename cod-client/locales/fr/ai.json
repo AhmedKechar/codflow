@@ -1,0 +1,11 @@
+{
+  "page_title": "Assistant IA",
+  "page_subtitle": "Posez des questions sur votre boutique, vos commandes, vos clients et plus encore.",
+  "empty_title": "Comment puis-je vous aider aujourd'hui ?",
+  "empty_description": "Demandez-moi n'importe quoi sur votre boutique — commandes, produits, clients, livraison ou stock.",
+  "input_placeholder": "Tapez votre message...",
+  "new_chat": "Nouvelle conversation",
+  "thinking": "Réflexion...",
+  "error_prefix": "Erreur :",
+  "credits_remaining": "crédits restants"
+}

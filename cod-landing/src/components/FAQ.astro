@@ -1,0 +1,104 @@
+---
+interface Props {
+  lang?: string;
+}
+
+const { lang = 'ar' } = Astro.props;
+
+const faq = {
+  ar: [
+    {
+      question: 'كيف أبدأ استخدام CodFlow؟',
+      answer: 'ببساطة أنشئ حساباً مجانياً، ثم أضف منتجاتك وابدأ في استقبال الطلبات. لا حاجة لبرمجة أو خبرة تقنية.',
+    },
+    {
+      question: 'هل يمكنني قبول الدفع عند الاستلام؟',
+      answer: 'نعم! CodFlow مصمم خصيصاً للسوق الجزائري مع دعم كامل للدفع عند الاستلام (COD) مع شركات التوصيل المحلية.',
+    },
+    {
+      question: 'كم تكلفة الشحن؟',
+      answer: 'تكلفة الشحن تعتمد على شركة التوصيل والولاية. CodFlow يحسب الرسوم تلقائياً ويعتمد أسعار الشركة.',
+    },
+    {
+      question: 'هل يمكنني إدارة فريق؟',
+      answer: 'نعم! يمكنك إضافة أعضاء الفريق مع صلاحيات مختلفة (مدير، محرر، مشاهد) للتحكم في الوصول.',
+    },
+    {
+      question: 'هل البيانات آمنة؟',
+      answer: 'نعم، جميع البيانات مشفرة ومحفوظة على خوادم آمنة في الجزائر. نلتزم بمعايير الأمان الدولية.',
+    },
+  ],
+  en: [
+    {
+      question: 'How do I start using CodFlow?',
+      answer: 'Simply create a free account, add your products, and start receiving orders. No coding or technical experience needed.',
+    },
+    {
+      question: 'Can I accept cash on delivery?',
+      answer: 'Yes! CodFlow is designed specifically for the Algerian market with full COD support with local delivery companies.',
+    },
+    {
+      question: 'How much does shipping cost?',
+      answer: 'Shipping costs depend on the delivery company and wilaya. CodFlow calculates fees automatically based on company rates.',
+    },
+    {
+      question: 'Can I manage a team?',
+      answer: 'Yes! You can add team members with different permissions (admin, editor, viewer) to control access.',
+    },
+    {
+      question: 'Is my data secure?',
+      answer: 'Yes, all data is encrypted and stored on secure servers in Algeria. We comply with international security standards.',
+    },
+  ],
+  fr: [
+    {
+      question: 'Comment commencer à utiliser CodFlow?',
+      answer: 'Créez simplement un compte gratuit, ajoutez vos produits et commencez à recevoir des commandes. Aucune compétence technique requise.',
+    },
+    {
+      question: 'Puis-je accepter le paiement à la livraison?',
+      answer: 'Oui! CodFlow est conçu spécifiquement pour le marché algérien avec un support complet du paiement à la livraison.',
+    },
+    {
+      question: 'Combien coûte la livraison?',
+      answer: 'Les frais de livraison dépendent du transporteur et de la wilaya. CodFlow calcule les frais automatiquement.',
+    },
+    {
+      question: 'Puis-je gérer une équipe?',
+      answer: 'Oui! Vous pouvez ajouter des membres avec différentes permissions (admin, éditeur, spectateur).',
+    },
+    {
+      question: 'Mes données sont-elles sécurisées?',
+      answer: 'Oui, toutes les données sont chiffrées et stockées sur des serveurs sécurisés en Algérie.',
+    },
+  ],
+};
+
+const items = faq[lang as keyof typeof faq] ?? faq.ar;
+---
+
+<section id="faq" class="py-20 bg-white/50">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl sm:text-4xl font-black text-gray-900 mb-4">
+        {lang === 'ar' ? 'الأسئلة الشائعة' : lang === 'fr' ? 'Questions Fréquentes' : 'Frequently Asked Questions'}
+      </h2>
+    </div>
+
+    <div class="space-y-4">
+      {items.map((item, index) => (
+        <details class="glass-card rounded-2xl overflow-hidden group">
+          <summary class="px-6 py-4 cursor-pointer font-semibold text-gray-900 hover:text-primary-600 transition-colors list-none flex items-center justify-between">
+            {item.question}
+            <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </summary>
+          <div class="px-6 pb-4 text-gray-600 leading-relaxed">
+            {item.answer}
+          </div>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>

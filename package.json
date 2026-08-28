@@ -15,5 +15,8 @@
   "overrides": {
     "vite": "^8.2.2",
     "sharp": "file:vendor/sharp-stub"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^4.0.50"
   }
 }

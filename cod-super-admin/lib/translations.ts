@@ -9,6 +9,8 @@ import arUsers from "@/locales/ar/users.json";
 import arProviderKeys from "@/locales/ar/provider-keys.json";
 import arAuth from "@/locales/ar/auth.json";
 import arCommon from "@/locales/ar/common.json";
+import arSubscriptions from "@/locales/ar/subscriptions.json";
+import arAiCredits from "@/locales/ar/ai-credits.json";
 
 import enNavigation from "@/locales/en/navigation.json";
 import enDashboard from "@/locales/en/dashboard.json";
@@ -19,6 +21,8 @@ import enUsers from "@/locales/en/users.json";
 import enProviderKeys from "@/locales/en/provider-keys.json";
 import enAuth from "@/locales/en/auth.json";
 import enCommon from "@/locales/en/common.json";
+import enSubscriptions from "@/locales/en/subscriptions.json";
+import enAiCredits from "@/locales/en/ai-credits.json";
 
 import frNavigation from "@/locales/fr/navigation.json";
 import frDashboard from "@/locales/fr/dashboard.json";
@@ -29,6 +33,8 @@ import frUsers from "@/locales/fr/users.json";
 import frProviderKeys from "@/locales/fr/provider-keys.json";
 import frAuth from "@/locales/fr/auth.json";
 import frCommon from "@/locales/fr/common.json";
+import frSubscriptions from "@/locales/fr/subscriptions.json";
+import frAiCredits from "@/locales/fr/ai-credits.json";
 
 import { useLanguage } from "./i18n-context";
 
@@ -43,6 +49,8 @@ export const allTranslations = {
     providerKeys: arProviderKeys,
     auth: arAuth,
     common: arCommon,
+    subscriptions: arSubscriptions,
+    aiCredits: arAiCredits,
   },
   en: {
     navigation: enNavigation,
@@ -54,6 +62,8 @@ export const allTranslations = {
     providerKeys: enProviderKeys,
     auth: enAuth,
     common: enCommon,
+    subscriptions: enSubscriptions,
+    aiCredits: enAiCredits,
   },
   fr: {
     navigation: frNavigation,
@@ -65,6 +75,8 @@ export const allTranslations = {
     providerKeys: frProviderKeys,
     auth: frAuth,
     common: frCommon,
+    subscriptions: frSubscriptions,
+    aiCredits: frAiCredits,
   },
 };
 
@@ -84,6 +96,8 @@ export const useUsers = () => useTranslations().users;
 export const useProviderKeys = () => useTranslations().providerKeys;
 export const useAuth = () => useTranslations().auth;
 export const useCommon = () => useTranslations().common;
+export const useSubscriptions = () => useTranslations().subscriptions;
+export const useAiCredits = () => useTranslations().aiCredits;
 
 export function t(
   section: TranslationKey,

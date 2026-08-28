@@ -1,0 +1,50 @@
+{
+  "page_title": "Commandes abandonnées",
+  "page_subtitle": "Suivre et gérer les commandes abandonnées",
+  "search_placeholder": "Rechercher par nom ou numéro de téléphone...",
+  "stats": {
+    "abandoned": "Abandonnées",
+    "converted": "Converties",
+    "conversion_rate": "Taux de conversion",
+    "lost_revenue": "Revenus perdus"
+  },
+  "filters": {
+    "status": "Statut"
+  },
+  "status": {
+    "all": "Tous les statuts",
+    "pending": "En attente",
+    "abandoned": "Abandonnée",
+    "contacted": "Contactée",
+    "converted": "Convertie"
+  },
+  "table": {
+    "customer": "Client",
+    "phone": "Téléphone",
+    "location": "Emplacement",
+    "product": "Produit",
+    "price": "Prix",
+    "status": "Statut",
+    "date": "Date"
+  },
+  "actions": {
+    "mark_contacted": "Marquer contactée",
+    "mark_converted": "Marquer convertie",
+    "delete": "Supprimer"
+  },
+  "empty": {
+    "title": "Aucune commande abandonnée",
+    "description": "Les commandes abandonnées par les clients apparaîtront ici."
+  },
+  "delete_dialog": {
+    "title": "Supprimer la commande",
+    "description": "Êtes-vous sûr de vouloir supprimer cette commande abandonnée ? Cette action est irréversible.",
+    "cancel": "Annuler",
+    "confirm": "Supprimer"
+  },
+  "toast": {
+    "status_updated": "Statut mis à jour avec succès",
+    "deleted": "Commande supprimée avec succès",
+    "error": "Une erreur s'est produite, veuillez réessayer"
+  }
+}

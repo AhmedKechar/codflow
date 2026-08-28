@@ -6,8 +6,8 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getDb } from "@/db";
-import { userScopes, users } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { userScopes, users, storeMembers, stores } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
 import { sendEmail } from "@/lib/email";
 import { ALL_SCOPES, SCOPES } from "../../cod-shared/rbac/scopes";
 import {
@@ -310,6 +310,40 @@ export async function getUserScopes(): Promise<string[]> {
     return records.map((r) => r.scope);
   } catch {
     return [];
+  }
+}
+
+export async function getUserStoreId(): Promise<string> {
+  const user = await getUser();
+  if (!user) throw new UnauthorizedError("يجب تسجيل الدخول أولاً");
+
+  try {
+    const { env } = await getCloudflareContext({ async: true });
+    const db = getDb(env.DB);
+    
+    // For admin/super_admin users, try to get the first store they're a member of
+    const member = await db
+      .select({ storeId: storeMembers.storeId })
+      .from(storeMembers)
+      .where(and(eq(storeMembers.userId, user.id), eq(storeMembers.status, "active")))
+      .limit(1)
+      .get();
+    
+    if (member) return member.storeId;
+    
+    // Fallback: if no store_members record, get the first store in the DB
+    const firstStore = await db
+      .select({ id: stores.id })
+      .from(stores)
+      .limit(1)
+      .get();
+    
+    if (firstStore) return firstStore.id;
+    
+    throw new Error("No store found for this user");
+  } catch (error) {
+    if (error instanceof UnauthorizedError) throw error;
+    throw new Error("Failed to determine store ID");
   }
 }
 

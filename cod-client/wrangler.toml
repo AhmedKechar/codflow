@@ -45,6 +45,8 @@ NEXT_PUBLIC_APP_URL = "http://localhost:3001"
 #   Local: http://localhost:8787
 #   Prod:  https://api.yourdomain.com
 NEXT_PUBLIC_WORKER_URL = "http://localhost:8787"
+# Store ID for local development (from D1 database)
+STORE_ID = "store-local-dev"
 # BETTER_AUTH_SECRET is a secret — set it via:
 #   wrangler secret put BETTER_AUTH_SECRET
 

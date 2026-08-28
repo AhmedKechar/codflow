@@ -1,6 +1,6 @@
 ---
 import { actions } from "astro:actions";
-import type { Product, ProductVariant, Offer } from "@/core/api/types";
+import type { Product, ProductVariant, Offer, OrderFormConfig } from "@/core/api/types";
 import type { StoreFrontContent } from "@/theme/config/content";
 import { Icon } from "astro-icon/components";
 
@@ -21,9 +21,13 @@ interface Props {
   offers: Offer[];
   defaultVariantId: string | null;
   isOutOfStock?: boolean;
+  orderFormConfig?: OrderFormConfig | null;
 }
 
-const { product, content, fieldErrors, serverError, basePrice, defaultVariant, cur, isRTL, offers, defaultVariantId, isOutOfStock = false } = Astro.props;
+const { product, content, fieldErrors, serverError, basePrice, defaultVariant, cur, isRTL, offers, defaultVariantId, isOutOfStock = false, orderFormConfig } = Astro.props;
+
+const summaryDisplay = orderFormConfig?.summaryDisplay ?? "open";
+const submitText = orderFormConfig?.submitButtonText || null;
 
 const comparePrice = defaultVariant?.compareAtPrice ?? product.compareAtPrice ?? null;
 ---
@@ -86,6 +90,7 @@ const comparePrice = defaultVariant?.compareAtPrice ?? product.compareAtPrice ??
       content={content}
       fieldErrors={fieldErrors}
       isRTL={isRTL}
+      orderFormConfig={orderFormConfig}
     />
 
     <OrderSummary
@@ -94,6 +99,7 @@ const comparePrice = defaultVariant?.compareAtPrice ?? product.compareAtPrice ??
       cur={cur}
       offers={offers}
       content={content}
+      summaryDisplay={summaryDisplay}
     />
 
     <!-- Submit -->
@@ -106,7 +112,7 @@ const comparePrice = defaultVariant?.compareAtPrice ?? product.compareAtPrice ??
       id="submit-btn"
       disabled={isOutOfStock || undefined}
     >
-      {isOutOfStock ? content.outOfStock : content.formSubmit}
+      {isOutOfStock ? content.outOfStock : (submitText || content.formSubmit)}
     </button>
 
     <p class="text-center text-[0.8125rem] font-bold px-4" style="color: var(--clr-text-2)">

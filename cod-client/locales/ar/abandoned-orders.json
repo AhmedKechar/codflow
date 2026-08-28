@@ -1,0 +1,50 @@
+{
+  "page_title": "الطلبيات المتروكة",
+  "page_subtitle": "تتبع وإدارة الطلبيات التي تم التخلي عنها",
+  "search_placeholder": "البحث بالاسم أو رقم الهاتف...",
+  "stats": {
+    "abandoned": "متروكة",
+    "converted": "تم التحويل",
+    "conversion_rate": "معدل التحويل",
+    "lost_revenue": "الإيرادات المفقودة"
+  },
+  "filters": {
+    "status": "الحالة"
+  },
+  "status": {
+    "all": "جميع الحالات",
+    "pending": "قيد الانتظار",
+    "abandoned": "متروكة",
+    "contacted": "تم الاتصال",
+    "converted": "تم التحويل"
+  },
+  "table": {
+    "customer": "العميل",
+    "phone": "الهاتف",
+    "location": "الموقع",
+    "product": "المنتج",
+    "price": "السعر",
+    "status": "الحالة",
+    "date": "التاريخ"
+  },
+  "actions": {
+    "mark_contacted": "تم الاتصال",
+    "mark_converted": "تم التحويل",
+    "delete": "حذف"
+  },
+  "empty": {
+    "title": "لا توجد طلبيات متروكة",
+    "description": "ستظهر هنا الطلبيات التي تم التخلي عنها من العملاء."
+  },
+  "delete_dialog": {
+    "title": "حذف الطلبية",
+    "description": "هل أنت متأكد من حذف هذه الطلبية المتروكة؟ لا يمكن التراجع عن هذا الإجراء.",
+    "cancel": "إلغاء",
+    "confirm": "حذف"
+  },
+  "toast": {
+    "status_updated": "تم تحديث الحالة بنجاح",
+    "deleted": "تم حذف الطلبية بنجاح",
+    "error": "حدث خطأ، يرجى المحاولة مرة أخرى"
+  }
+}
