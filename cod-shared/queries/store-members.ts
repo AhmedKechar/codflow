@@ -65,7 +65,7 @@ export async function getStoreMemberById(db: AppDb, memberId: string) {
 
 /** Check if a user is a member of a store */
 export async function isStoreMember(db: AppDb, storeId: string, userId: string) {
-  return db.select().from(storeMembers)
+  return db.select({ id: storeMembers.id, userId: storeMembers.userId }).from(storeMembers)
     .where(and(
       eq(storeMembers.storeId, storeId),
       eq(storeMembers.userId, userId),

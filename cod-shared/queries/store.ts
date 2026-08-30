@@ -11,7 +11,7 @@ import {
   isNull,
   desc,
   sql,
-  getTableColumns,
+  type SQL,
   lte,
   gte,
   or,
@@ -79,7 +79,7 @@ export async function getStoreProducts(
   storeId: string,
   params: { featured?: boolean; categoryId?: string; limit?: number },
 ) {
-  const conditions: any[] = [
+  const conditions: SQL[] = [
     eq(products.storeId, storeId),
     eq(products.showInStore, true),
     eq(products.status, "ACTIVE"),
@@ -92,7 +92,35 @@ export async function getStoreProducts(
 
   const rows = await db
     .select({
-      ...getTableColumns(products),
+      id: products.id,
+      storeId: products.storeId,
+      name: products.name,
+      description: products.description,
+      handle: products.handle,
+      currency: products.currency,
+      price: products.price,
+      compareAtPrice: products.compareAtPrice,
+      costPrice: products.costPrice,
+      type: products.type,
+      hasVariants: products.hasVariants,
+      variantOptions: products.variantOptions,
+      sku: products.sku,
+      inventory: products.inventory,
+      trackInventory: products.trackInventory,
+      lowStockThreshold: products.lowStockThreshold,
+      categoryId: products.categoryId,
+      tags: products.tags,
+      visibility: products.visibility,
+      status: products.status,
+      showInStore: products.showInStore,
+      storeFeatured: products.storeFeatured,
+      deletedAt: products.deletedAt,
+      publishedAt: products.publishedAt,
+      shippingProfileId: products.shippingProfileId,
+      barcode: products.barcode,
+      weightKg: products.weightKg,
+      createdAt: products.createdAt,
+      updatedAt: products.updatedAt,
       avgRating: sql<number | null>`(SELECT ROUND(AVG(r.rating), 1) FROM reviews r WHERE r.product_id = products.id AND r.status = 'approved')`,
       reviewCount: sql<number>`COALESCE((SELECT COUNT(*) FROM reviews r WHERE r.product_id = products.id AND r.status = 'approved'), 0)`,
     })
@@ -951,7 +979,12 @@ export async function findOrderForReview(
 }
 
 export async function getExistingReviewByOrder(db: AppDb, storeId: string, orderId: string) {
-  return db.select().from(reviews).where(and(eq(reviews.orderId, orderId), eq(reviews.storeId, storeId))).get();
+  return db.select({
+    id: reviews.id,
+    orderId: reviews.orderId,
+    productId: reviews.productId,
+    status: reviews.status,
+  }).from(reviews).where(and(eq(reviews.orderId, orderId), eq(reviews.storeId, storeId))).get();
 }
 
 export async function createReview(

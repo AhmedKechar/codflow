@@ -5,6 +5,7 @@ import type { AppDb } from "../db/client";
 export interface VariantOption {
   name: string;
   values: { value: string; hexColor?: string | null }[];
+  displayMode?: "color-circle" | "color-frame" | "color-text" | "text" | null;
 }
 
 export interface ProductFilters {
@@ -37,6 +38,15 @@ export interface CreateProductData {
   showInStore: boolean;
   storeFeatured: boolean;
   shippingProfileId?: string | null;
+  barcode?: string | null;
+  weightKg?: number | null;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  metaKeywords?: string | null;
+  shippingMethod?: "carrier" | "custom" | "free" | null;
+  shippingOfficePrice?: number | null;
+  shippingHomePrice?: number | null;
+  externalUrl?: string | null;
 }
 
 export interface UpdateProductData {
@@ -60,6 +70,15 @@ export interface UpdateProductData {
   showInStore?: boolean;
   storeFeatured?: boolean;
   shippingProfileId?: string | null;
+  barcode?: string | null;
+  weightKg?: number | null;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  metaKeywords?: string | null;
+  shippingMethod?: "carrier" | "custom" | "free" | null;
+  shippingOfficePrice?: number | null;
+  shippingHomePrice?: number | null;
+  externalUrl?: string | null;
 }
 
 function toHandle(name: string, id: string) {
@@ -120,7 +139,35 @@ export async function getAllProducts(db: AppDb, storeId: string, filters?: Produ
   }
 
   const rows = await db
-    .select()
+    .select({
+      id: products.id,
+      storeId: products.storeId,
+      name: products.name,
+      description: products.description,
+      handle: products.handle,
+      price: products.price,
+      compareAtPrice: products.compareAtPrice,
+      costPrice: products.costPrice,
+      type: products.type,
+      hasVariants: products.hasVariants,
+      variantOptions: products.variantOptions,
+      sku: products.sku,
+      inventory: products.inventory,
+      trackInventory: products.trackInventory,
+      lowStockThreshold: products.lowStockThreshold,
+      categoryId: products.categoryId,
+      tags: products.tags,
+      visibility: products.visibility,
+      status: products.status,
+      showInStore: products.showInStore,
+      storeFeatured: products.storeFeatured,
+      deletedAt: products.deletedAt,
+      shippingProfileId: products.shippingProfileId,
+      barcode: products.barcode,
+      weightKg: products.weightKg,
+      createdAt: products.createdAt,
+      updatedAt: products.updatedAt,
+    })
     .from(products)
     .where(conditions.length ? and(...conditions) : undefined)
     .limit(filters?.limit ?? 50)
@@ -183,6 +230,15 @@ export async function createProduct(db: AppDb, storeId: string, data: CreateProd
     showInStore: data.showInStore,
     storeFeatured: data.storeFeatured,
     shippingProfileId: data.shippingProfileId ?? null,
+    barcode: data.barcode ?? null,
+    weightKg: data.weightKg ?? null,
+    metaTitle: data.metaTitle ?? null,
+    metaDescription: data.metaDescription ?? null,
+    metaKeywords: data.metaKeywords ?? null,
+    shippingMethod: data.shippingMethod ?? null,
+    shippingOfficePrice: data.shippingOfficePrice ?? null,
+    shippingHomePrice: data.shippingHomePrice ?? null,
+    externalUrl: data.externalUrl ?? null,
     deletedAt: null,
     publishedAt: data.status === "ACTIVE" ? now : null,
     createdAt: now,
@@ -218,6 +274,15 @@ export async function updateProduct(db: AppDb, storeId: string, productId: strin
   if (data.showInStore !== undefined) updates.showInStore = data.showInStore;
   if (data.storeFeatured !== undefined) updates.storeFeatured = data.storeFeatured;
   if (data.shippingProfileId !== undefined) updates.shippingProfileId = data.shippingProfileId ?? null;
+  if (data.barcode !== undefined) updates.barcode = data.barcode ?? null;
+  if (data.weightKg !== undefined) updates.weightKg = data.weightKg ?? null;
+  if (data.metaTitle !== undefined) updates.metaTitle = data.metaTitle ?? null;
+  if (data.metaDescription !== undefined) updates.metaDescription = data.metaDescription ?? null;
+  if (data.metaKeywords !== undefined) updates.metaKeywords = data.metaKeywords ?? null;
+  if (data.shippingMethod !== undefined) updates.shippingMethod = data.shippingMethod ?? null;
+  if (data.shippingOfficePrice !== undefined) updates.shippingOfficePrice = data.shippingOfficePrice ?? null;
+  if (data.shippingHomePrice !== undefined) updates.shippingHomePrice = data.shippingHomePrice ?? null;
+  if (data.externalUrl !== undefined) updates.externalUrl = data.externalUrl ?? null;
 
   await db.update(products).set(updates).where(and(eq(products.id, productId), eq(products.storeId, storeId)));
   return buildProductDetail(db, storeId, productId);

@@ -117,7 +117,13 @@ export async function getDriverById(db: AppDb, storeId: string, driverId: string
     .get();
 
   const recentOrders = await db
-    .select()
+    .select({
+      id: orders.id,
+      orderNumber: orders.orderNumber,
+      price: orders.price,
+      status: orders.status,
+      createdAt: orders.createdAt,
+    })
     .from(orders)
     .where(and(eq(orders.storeId, storeId), eq(orders.driverId, driverId)))
     .orderBy(desc(orders.updatedAt))

@@ -28,7 +28,6 @@ import {
   like,
   or,
   sql,
-  getTableColumns,
   aliasedTable,
 } from "drizzle-orm";
 
@@ -68,7 +67,27 @@ export async function getAllOrders(db: AppDb, storeId: string, filters: OrderFil
 
   return db
     .select({
-      ...getTableColumns(orders),
+      id: orders.id,
+      storeId: orders.storeId,
+      orderNumber: orders.orderNumber,
+      customerId: orders.customerId,
+      customerName: orders.customerName,
+      phone: orders.phone,
+      wilayaId: orders.wilayaId,
+      communeId: orders.communeId,
+      price: orders.price,
+      status: orders.status,
+      orderType: orders.orderType,
+      deliveryMethod: orders.deliveryMethod,
+      driverId: orders.driverId,
+      companyId: orders.companyId,
+      deliveryType: orders.deliveryType,
+      deliveryFee: orders.deliveryFee,
+      driverFee: orders.driverFee,
+      codAmount: orders.codAmount,
+      trackingNumber: orders.trackingNumber,
+      createdAt: orders.createdAt,
+      updatedAt: orders.updatedAt,
       wilaya: wilayas.nameAr,
       commune: communes.nameAr,
       driverName: sql<
@@ -292,7 +311,15 @@ export async function updateOrderStatus(
 ) {
   const now = new Date().toISOString();
 
-  const order = await db.select().from(orders).where(and(eq(orders.id, orderId), eq(orders.storeId, storeId))).get();
+  const order = await db.select({
+    id: orders.id,
+    status: orders.status,
+    price: orders.price,
+    customerId: orders.customerId,
+    driverId: orders.driverId,
+    driverFee: orders.driverFee,
+    codAmount: orders.codAmount,
+  }).from(orders).where(and(eq(orders.id, orderId), eq(orders.storeId, storeId))).get();
 
   await db
     .update(orders)
@@ -706,7 +733,16 @@ export async function clearOrderTracking(db: AppDb, storeId: string, orderId: st
 export async function deleteOrder(db: AppDb, storeId: string, orderId: string) {
   const now = new Date().toISOString();
   
-  const order = await db.select().from(orders).where(and(eq(orders.id, orderId), eq(orders.storeId, storeId))).get();
+  const order = await db.select({
+    id: orders.id,
+    status: orders.status,
+    price: orders.price,
+    customerId: orders.customerId,
+    driverId: orders.driverId,
+    driverFee: orders.driverFee,
+    codAmount: orders.codAmount,
+    deliveryMethod: orders.deliveryMethod,
+  }).from(orders).where(and(eq(orders.id, orderId), eq(orders.storeId, storeId))).get();
 
   // Get order products to restore inventory
   const orderProductsList = await db
@@ -848,7 +884,15 @@ export async function updateOrderStatusWebhook(
 ): Promise<{ updated: boolean }> {
   const now = new Date().toISOString();
 
-  const order = await db.select().from(orders).where(and(eq(orders.id, orderId), eq(orders.storeId, storeId))).get();
+  const order = await db.select({
+    id: orders.id,
+    status: orders.status,
+    price: orders.price,
+    customerId: orders.customerId,
+    driverId: orders.driverId,
+    driverFee: orders.driverFee,
+    codAmount: orders.codAmount,
+  }).from(orders).where(and(eq(orders.id, orderId), eq(orders.storeId, storeId))).get();
 
   if (!order) return { updated: false };
 

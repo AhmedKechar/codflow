@@ -92,7 +92,12 @@ export async function updateWebhookEvent(
 
 export async function getOrderByTracking(db: AppDb, storeId: string, trackingNumber: string) {
   return await db
-    .select()
+    .select({
+      id: orders.id,
+      status: orders.status,
+      storeId: orders.storeId,
+      wilayaId: orders.wilayaId,
+    })
     .from(orders)
     .where(and(eq(orders.storeId, storeId), eq(orders.trackingNumber, trackingNumber)))
     .get();
@@ -100,7 +105,12 @@ export async function getOrderByTracking(db: AppDb, storeId: string, trackingNum
 
 export async function getOrderByReference(db: AppDb, storeId: string, reference: string) {
   return await db
-    .select()
+    .select({
+      id: orders.id,
+      status: orders.status,
+      storeId: orders.storeId,
+      wilayaId: orders.wilayaId,
+    })
     .from(orders)
     .where(and(eq(orders.storeId, storeId), eq(orders.orderNumber, reference)))
     .get();

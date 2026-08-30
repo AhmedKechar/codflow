@@ -110,7 +110,14 @@ export async function getCustomerById(db: AppDb, storeId: string, customerId: st
   }
 
   const recentOrders = await db
-    .select()
+    .select({
+      id: orders.id,
+      orderNumber: orders.orderNumber,
+      price: orders.price,
+      status: orders.status,
+      deliveryMethod: orders.deliveryMethod,
+      createdAt: orders.createdAt,
+    })
     .from(orders)
     .where(and(eq(orders.customerId, customerId), eq(orders.storeId, storeId)))
     .orderBy(desc(orders.createdAt))
