@@ -44,6 +44,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FilterChip } from "@/components/ui/filter-chip";
 import { FilterResultCount } from "@/components/ui/filter-result-count";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
 import type { Order, OrderStatus, Driver, DeliveryCompany, StopDesk } from "@/types";
 import { SCOPES } from "@/../cod-shared/rbac/scopes";
 
@@ -663,13 +664,19 @@ export function OrdersTable({
   const [deliveryFilter, setDeliveryFilter] = useState("all");
   const [wilayaFilter, setWilayaFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
+    from: undefined,
+    to: undefined,
+  });
 
   const hasActiveFilter =
     search.trim() !== "" ||
     statusFilter !== "all" ||
     deliveryFilter !== "all" ||
     wilayaFilter !== "all" ||
-    typeFilter !== "all";
+    typeFilter !== "all" ||
+    dateRange.from !== undefined ||
+    dateRange.to !== undefined;
 
   // Unique wilayas derived from all orders (not filtered) for the dropdown
   const uniqueWilayas = useMemo(
@@ -711,8 +718,22 @@ export function OrdersTable({
       result = result.filter((o) => o.orderType === typeFilter);
     }
 
+    // Date range filter
+    if (dateRange.from || dateRange.to) {
+      result = result.filter((o) => {
+        const orderDate = new Date(o.createdAt);
+        if (dateRange.from && orderDate < dateRange.from) return false;
+        if (dateRange.to) {
+          const toEnd = new Date(dateRange.to);
+          toEnd.setHours(23, 59, 59, 999);
+          if (orderDate > toEnd) return false;
+        }
+        return true;
+      });
+    }
+
     return result;
-  }, [orders, search, statusFilter, deliveryFilter, wilayaFilter, typeFilter]);
+  }, [orders, search, statusFilter, deliveryFilter, wilayaFilter, typeFilter, dateRange]);
 
   function clearFilters() {
     setSearch("");
@@ -720,6 +741,7 @@ export function OrdersTable({
     setDeliveryFilter("all");
     setWilayaFilter("all");
     setTypeFilter("all");
+    setDateRange({ from: undefined, to: undefined });
   }
 
   function handleRefresh() {
@@ -996,6 +1018,13 @@ export function OrdersTable({
             </SelectContent>
           </Select>
         )}
+
+        {/* Date range filter */}
+        <DateRangePicker
+          value={dateRange}
+          onChange={(range) => setDateRange(range ?? { from: undefined, to: undefined })}
+          className="w-full sm:w-auto"
+        />
 
         {/* Clear filters */}
         {hasActiveFilter && (
