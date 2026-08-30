@@ -42,6 +42,8 @@ import { fetchCompanyStopDesks } from "@/actions/delivery-companies";
 import { useConfirm } from "@/components/ui/use-confirm";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Checkbox } from "@/components/ui/checkbox";
+import { FilterChip } from "@/components/ui/filter-chip";
+import { FilterResultCount } from "@/components/ui/filter-result-count";
 import type { Order, OrderStatus, Driver, DeliveryCompany, StopDesk } from "@/types";
 import { SCOPES } from "@/../cod-shared/rbac/scopes";
 
@@ -724,6 +726,21 @@ export function OrdersTable({
     router.refresh();
   }
 
+  // Compute stat counts for filter chips
+  const statsMap = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const order of orders) {
+      counts[order.status] = (counts[order.status] ?? 0) + 1;
+    }
+    return counts;
+  }, [orders]);
+
+  const statChips = [
+    { status: "new" as OrderStatus, label: t.status?.new ?? "جديد", count: statsMap["new"] ?? 0, color: "bg-blue-500" },
+    { status: "delivered" as OrderStatus, label: t.status?.delivered ?? "تم التسليم", count: statsMap["delivered"] ?? 0, color: "bg-green-500" },
+    { status: "returned" as OrderStatus, label: t.status?.returned ?? "مرتجعات", count: statsMap["returned"] ?? 0, color: "bg-orange-500" },
+  ];
+
   // ── Column definitions ────────────────────────────────────────────────────
   const columns: TableColumn<Order>[] = [
     {
@@ -861,6 +878,29 @@ export function OrdersTable({
 
   return (
     <div className="space-y-4">
+      {/* ── Stat filter chips ────────────────────────────────────────────────── */}
+      <div className="flex flex-wrap items-center gap-2">
+        {statChips.map((chip) => (
+          <FilterChip
+            key={chip.status}
+            label={chip.label}
+            count={chip.count}
+            active={statusFilter === chip.status}
+            onClick={() => setStatusFilter(statusFilter === chip.status ? "all" : chip.status)}
+            variant="status"
+            statusColor={chip.color}
+          />
+        ))}
+      </div>
+
+      {/* ── Filter result count ──────────────────────────────────────────────── */}
+      {hasActiveFilter && (
+        <FilterResultCount
+          count={filtered.length}
+          total={orders.length}
+        />
+      )}
+
       {/* ── Filter bar ─────────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row gap-2.5 flex-wrap">
         {/* Search */}
