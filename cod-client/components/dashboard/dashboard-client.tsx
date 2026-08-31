@@ -99,7 +99,7 @@ export function DashboardClient({ statusStats }: DashboardClientProps) {
   };
 
   return (
-    <div className="space-y-8 pb-12 pt-4">
+    <div className="space-y-6 pb-8">
       <PageHeader title={nav.sidebar.dashboard} />
 
       {/* 5 stat cards */}
