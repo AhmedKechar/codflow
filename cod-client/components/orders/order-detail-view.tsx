@@ -845,6 +845,16 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
                   </div>
                 )}
 
+                {/* Full tracking page link */}
+                {canTrackLive && (
+                  <Link href={`/orders/${initialOrder.id}/tracking`}>
+                    <Button variant="ghost" size="sm" className="w-full text-xs text-muted-foreground gap-2">
+                      <Package size={12} />
+                      عرض التتبع الكامل
+                    </Button>
+                  </Link>
+                )}
+
                 {/* Add Remark */}
                 {canAddRemark && (
                   <div className="space-y-2">
