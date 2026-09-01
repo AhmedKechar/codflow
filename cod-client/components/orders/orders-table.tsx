@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition, useMemo, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Eye, Package, MapPin, MoreHorizontal, Truck, Building2,
   Check, Search, X, Star, Zap, Trash2, Filter,
@@ -658,17 +658,33 @@ export function OrdersTable({
   const common = useCommon();
   const { dir } = useLanguage();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  // ── Filter state ──────────────────────────────────────────────────────────
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [deliveryFilter, setDeliveryFilter] = useState("all");
-  const [wilayaFilter, setWilayaFilter] = useState("all");
-  const [typeFilter, setTypeFilter] = useState("all");
+  // ── Filter state (synced with URL) ──────────────────────────────────────
+  const [search, setSearch] = useState(searchParams.get("q") ?? "");
+  const [statusFilter, setStatusFilter] = useState(searchParams.get("status") ?? "all");
+  const [deliveryFilter, setDeliveryFilter] = useState(searchParams.get("delivery") ?? "all");
+  const [wilayaFilter, setWilayaFilter] = useState(searchParams.get("wilaya") ?? "all");
+  const [typeFilter, setTypeFilter] = useState(searchParams.get("type") ?? "all");
   const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
-    from: undefined,
-    to: undefined,
+    from: searchParams.get("from") ? new Date(searchParams.get("from")!) : undefined,
+    to: searchParams.get("to") ? new Date(searchParams.get("to")!) : undefined,
   });
+
+  // Sync filters to URL
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (search) params.set("q", search);
+    if (statusFilter !== "all") params.set("status", statusFilter);
+    if (deliveryFilter !== "all") params.set("delivery", deliveryFilter);
+    if (wilayaFilter !== "all") params.set("wilaya", wilayaFilter);
+    if (typeFilter !== "all") params.set("type", typeFilter);
+    if (dateRange.from) params.set("from", dateRange.from.toISOString());
+    if (dateRange.to) params.set("to", dateRange.to.toISOString());
+
+    const qs = params.toString();
+    router.replace(`/orders${qs ? `?${qs}` : ""}`, { scroll: false });
+  }, [search, statusFilter, deliveryFilter, wilayaFilter, typeFilter, dateRange, router]);
 
   const hasActiveFilter =
     search.trim() !== "" ||
