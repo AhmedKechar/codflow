@@ -21,8 +21,9 @@ import { NotFoundError, BusinessLogicError, ValidationError, ExternalApiError } 
 import { ERROR_CODES } from "../../../../cod-shared/errors/codes";
 import { DEFERRED_LABEL_MARKER } from "./dispatch";
 import { upsertCarrierTracking } from "../../../../cod-shared/queries/carrier-tracking";
-import { mapNoestCarrierStatus } from "../webhooks/noest-status-mapper";
-import { mapEcotrackCarrierStatus } from "../webhooks/ecotrack-status-mapper";
+import { mapNoestCarrierStatus, mapNoestEventKey, shouldAutoUpdateNoestStatus } from "../webhooks/noest-status-mapper";
+import { mapEcotrackCarrierStatus, mapEcotrackStatus, shouldAutoUpdateEcotrackStatus } from "../webhooks/ecotrack-status-mapper";
+import type { OrderStatus } from "../../../../cod-shared/db/schema";
 
 /**
  * PATCH /orders/:id/update-shipment
@@ -432,32 +433,41 @@ export async function getShipmentTracking(c: Context<AppContext>) {
   const events = await provider.getTrackingInfo(order.trackingNumber);
 
   // Save tracking events to carrier_tracking table
+  let latestCarrierStatus: string | null = null;
+  let latestOrderStatus: OrderStatus | null = null;
+  let latestEventKey: string | null = null;
+
   if (Array.isArray(events) && events.length > 0) {
     const carrierCode = company.code;
     for (const event of events) {
       // Map carrier status to our 6-status model based on carrier type
       let carrierStatus: string | null = null;
+      let orderStatus: OrderStatus | null = null;
+      const eventKey = event.activity;
+
       if (isEcotrackCompany(carrierCode)) {
-        carrierStatus = mapEcotrackCarrierStatus(event.activity);
+        carrierStatus = mapEcotrackCarrierStatus(eventKey);
+        orderStatus = mapEcotrackStatus(eventKey);
       } else if (carrierCode === "noest") {
-        carrierStatus = mapNoestCarrierStatus(event.activity);
+        carrierStatus = mapNoestCarrierStatus(eventKey);
+        orderStatus = mapNoestEventKey(eventKey);
       } else if (carrierCode === "yalidine") {
         // Yalidine uses French status strings — map to carrier status
-        const status = (event.activity ?? "").toLowerCase();
-        if (status.includes("livr")) carrierStatus = "delivered";
-        else if (status.includes("retour")) carrierStatus = "returned";
-        else if (status.includes("livraison")) carrierStatus = "with_driver";
-        else if (status.includes("transit")) carrierStatus = "in_transit";
-        else if (status.includes("tri") || status.includes("hub")) carrierStatus = "at_office";
-        else carrierStatus = "received";
+        const status = (eventKey ?? "").toLowerCase();
+        if (status.includes("livr")) { carrierStatus = "delivered"; orderStatus = "delivered"; }
+        else if (status.includes("retour")) { carrierStatus = "returned"; orderStatus = "returned"; }
+        else if (status.includes("livraison")) { carrierStatus = "with_driver"; orderStatus = "shipped"; }
+        else if (status.includes("transit")) { carrierStatus = "in_transit"; orderStatus = "shipped"; }
+        else if (status.includes("tri") || status.includes("hub")) { carrierStatus = "at_office"; orderStatus = "shipped"; }
+        else { carrierStatus = "received"; orderStatus = "confirmed"; }
       } else if (carrierCode === "zr_express") {
         // ZR Express uses state names
-        const state = (event.activity ?? "").toLowerCase();
-        if (state.includes("deliver")) carrierStatus = "delivered";
-        else if (state.includes("return")) carrierStatus = "returned";
-        else if (state.includes("driver") || state.includes("out")) carrierStatus = "with_driver";
-        else if (state.includes("transit") || state.includes("hub")) carrierStatus = "in_transit";
-        else carrierStatus = "received";
+        const state = (eventKey ?? "").toLowerCase();
+        if (state.includes("deliver")) { carrierStatus = "delivered"; orderStatus = "delivered"; }
+        else if (state.includes("return")) { carrierStatus = "returned"; orderStatus = "returned"; }
+        else if (state.includes("driver") || state.includes("out")) { carrierStatus = "with_driver"; orderStatus = "shipped"; }
+        else if (state.includes("transit") || state.includes("hub")) { carrierStatus = "in_transit"; orderStatus = "shipped"; }
+        else { carrierStatus = "received"; orderStatus = "confirmed"; }
       }
 
       await upsertCarrierTracking(db, {
@@ -466,12 +476,54 @@ export async function getShipmentTracking(c: Context<AppContext>) {
         companyId: company.id,
         trackingNumber: order.trackingNumber,
         status: carrierStatus ?? "received",
-        statusRaw: event.activity ?? undefined,
+        statusRaw: eventKey ?? undefined,
         statusAr: event.description ?? undefined,
         location: undefined,
         eventTime: event.date ?? new Date().toISOString(),
         rawData: JSON.stringify(event),
       });
+
+      // Track the latest event for potential auto-update
+      if (event.date) {
+        latestCarrierStatus = carrierStatus;
+        latestOrderStatus = orderStatus;
+        latestEventKey = eventKey;
+      }
+    }
+  }
+
+  // Auto-update order status from pull tracking (with regression guard)
+  if (latestOrderStatus && latestEventKey) {
+    const carrierCode = company.code;
+    let shouldUpdate = false;
+
+    if (isEcotrackCompany(carrierCode)) {
+      shouldUpdate = shouldAutoUpdateEcotrackStatus(latestEventKey);
+    } else if (carrierCode === "noest") {
+      shouldUpdate = shouldAutoUpdateNoestStatus(latestEventKey);
+    } else {
+      // For Yalidine/ZR, always update (they have webhooks for most updates)
+      shouldUpdate = true;
+    }
+
+    if (shouldUpdate) {
+      // Regression guard: only update if new status is "ahead" of current
+      const STATUS_RANK: Record<string, number> = {
+        "new": 0, "confirmed": 1, "unreachable": 2, "busy": 2, "postponed": 2,
+        "shipped": 3, "delivered": 4, "cancelled": 5, "fake": 5, "duplicate": 5, "returned": 5,
+      };
+      const currentRank = STATUS_RANK[order.status] ?? 0;
+      const newRank = STATUS_RANK[latestOrderStatus] ?? 0;
+
+      // Allow update if new status is higher rank, or same rank (for idempotency)
+      // But never go backward (e.g., delivered → shipped)
+      if (newRank >= currentRank && latestOrderStatus !== order.status) {
+        const dispatchUser = c.get("user");
+        await queries.updateOrderStatus(db, storeId, order.id, latestOrderStatus, dispatchUser?.id, dispatchUser?.name ?? undefined);
+        await logActivity(db, dispatchUser, ACTIONS.ORDER_STATUS_CHANGED, {
+          type: "order", id: order.id, label: order.orderNumber,
+        }, { from: order.status, to: latestOrderStatus, source: "pull_tracking" });
+      }
     }
   }
 
