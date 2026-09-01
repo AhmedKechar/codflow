@@ -32,6 +32,7 @@ import { mapZrStateName, parseCustomMapping } from "./zr-status-mapper";
 import { mapYalidineStatus } from "./yalidine-status-mapper";
 import { ValidationError, ExternalApiError } from "@/lib/errors/classes";
 import { ERROR_CODES } from "../../../../cod-shared/errors/codes";
+import { upsertCarrierTracking } from "../../../../cod-shared/queries/carrier-tracking";
 
 /** Guard: carrier mappers return admin-configured strings — verify before use. */
 function isOrderStatus(value: string): value is (typeof ORDER_STATUSES)[number] {
@@ -199,6 +200,33 @@ export async function handleZrWebhook(c: Context<AppContext>) {
       newStatus,
       "webhook:zr_express"
     );
+
+    // Save tracking event to carrier_tracking table
+    if (trackingNumber && resolvedOrder.companyId) {
+      const state = data.state as Record<string, unknown> | undefined;
+      const stateName = (state?.name as string | undefined) ?? eventType;
+      // Map ZR state to carrier status
+      let carrierStatus = "received";
+      const stateLower = stateName?.toLowerCase() ?? "";
+      if (stateLower.includes("deliver")) carrierStatus = "delivered";
+      else if (stateLower.includes("return")) carrierStatus = "returned";
+      else if (stateLower.includes("driver") || stateLower.includes("out")) carrierStatus = "with_driver";
+      else if (stateLower.includes("transit") || stateLower.includes("hub")) carrierStatus = "in_transit";
+
+      await upsertCarrierTracking({
+        db,
+        orderId: resolvedOrder.id,
+        storeId,
+        companyId: resolvedOrder.companyId,
+        trackingNumber,
+        status: carrierStatus,
+        statusRaw: stateName,
+        statusAr: null,
+        location: null,
+        eventTime: payload.occurredAt ?? now,
+        rawData: rawBody,
+      });
+    }
 
     if (updated && shouldTriggerCapiPurchase(newStatus, resolvedOrder.wilayaId)) {
       if (!c.env.CAPI_WORKFLOW) {
@@ -408,6 +436,32 @@ export async function handleYalidineWebhook(c: Context<AppContext>) {
         nextStatus,
         "webhook:yalidine"
       );
+
+      // Save tracking event to carrier_tracking table
+      if (tracking && order.companyId) {
+        // Map Yalidine status to carrier status
+        const statusLower = (statusStr ?? "").toLowerCase();
+        let carrierStatus = "received";
+        if (statusLower.includes("livr")) carrierStatus = "delivered";
+        else if (statusLower.includes("retour")) carrierStatus = "returned";
+        else if (statusLower.includes("livraison")) carrierStatus = "with_driver";
+        else if (statusLower.includes("transit")) carrierStatus = "in_transit";
+        else if (statusLower.includes("tri") || statusLower.includes("hub")) carrierStatus = "at_office";
+
+        await upsertCarrierTracking({
+          db,
+          orderId: order.id,
+          storeId,
+          companyId: order.companyId,
+          trackingNumber: tracking,
+          status: carrierStatus,
+          statusRaw: statusStr,
+          statusAr: null,
+          location: null,
+          eventTime: event.occurred_at ?? now,
+          rawData: JSON.stringify(event),
+        });
+      }
 
       if (updated && shouldTriggerCapiPurchase(nextStatus, order.wilayaId)) {
         if (!c.env.CAPI_WORKFLOW) {

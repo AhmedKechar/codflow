@@ -20,6 +20,9 @@ import { setShipmentValidated, getShipmentByOrder, logApiCall } from "@/endpoint
 import { NotFoundError, BusinessLogicError, ValidationError, ExternalApiError } from "@/lib/errors/classes";
 import { ERROR_CODES } from "../../../../cod-shared/errors/codes";
 import { DEFERRED_LABEL_MARKER } from "./dispatch";
+import { upsertCarrierTracking } from "../../../../cod-shared/queries/carrier-tracking";
+import { mapNoestCarrierStatus } from "../webhooks/noest-status-mapper";
+import { mapEcotrackCarrierStatus } from "../webhooks/ecotrack-status-mapper";
 
 /**
  * PATCH /orders/:id/update-shipment
@@ -427,6 +430,51 @@ export async function getShipmentTracking(c: Context<AppContext>) {
   }
 
   const events = await provider.getTrackingInfo(order.trackingNumber);
+
+  // Save tracking events to carrier_tracking table
+  if (Array.isArray(events) && events.length > 0) {
+    const carrierCode = company.code;
+    for (const event of events) {
+      // Map carrier status to our 6-status model based on carrier type
+      let carrierStatus: string | null = null;
+      if (isEcotrackCompany(carrierCode)) {
+        carrierStatus = mapEcotrackCarrierStatus(event.activity);
+      } else if (carrierCode === "noest") {
+        carrierStatus = mapNoestCarrierStatus(event.activity);
+      } else if (carrierCode === "yalidine") {
+        // Yalidine uses French status strings — map to carrier status
+        const status = (event.activity ?? "").toLowerCase();
+        if (status.includes("livr")) carrierStatus = "delivered";
+        else if (status.includes("retour")) carrierStatus = "returned";
+        else if (status.includes("livraison")) carrierStatus = "with_driver";
+        else if (status.includes("transit")) carrierStatus = "in_transit";
+        else if (status.includes("tri") || status.includes("hub")) carrierStatus = "at_office";
+        else carrierStatus = "received";
+      } else if (carrierCode === "zr_express") {
+        // ZR Express uses state names
+        const state = (event.activity ?? "").toLowerCase();
+        if (state.includes("deliver")) carrierStatus = "delivered";
+        else if (state.includes("return")) carrierStatus = "returned";
+        else if (state.includes("driver") || state.includes("out")) carrierStatus = "with_driver";
+        else if (state.includes("transit") || state.includes("hub")) carrierStatus = "in_transit";
+        else carrierStatus = "received";
+      }
+
+      await upsertCarrierTracking(db, {
+        orderId: order.id,
+        storeId,
+        companyId: company.id,
+        trackingNumber: order.trackingNumber,
+        status: carrierStatus ?? "received",
+        statusRaw: event.activity ?? undefined,
+        statusAr: event.description ?? undefined,
+        location: undefined,
+        eventTime: event.date ?? new Date().toISOString(),
+        rawData: JSON.stringify(event),
+      });
+    }
+  }
+
   return c.json({ success: true, data: events }, 200);
 }
 
