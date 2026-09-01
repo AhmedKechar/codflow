@@ -27,13 +27,13 @@ const badges = [
 ];
 ---
 
-<footer class="mt-8 border-t border-black/[0.04] pb-16 sm:pb-4" style="background: var(--clr-surface)">
+<footer class="mt-8 border-t border-border pb-16 sm:pb-4" style="background: var(--clr-surface-alt)">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
     <div class="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8">
       {/* Brand Column */}
       {showBrand && (
       <div class="md:col-span-4 space-y-3">
-        <a href="/" class="flex items-center gap-3 active:scale-95 transition-transform">
+        <a href="/" class="flex items-center gap-3">
           {config.logoUrl ? (
             <Image
               src={config.logoUrl}
@@ -46,10 +46,10 @@ const badges = [
               loading="lazy"
             />
           ) : (
-            <span class="text-xl font-black uppercase tracking-tighter" style="color: var(--clr-primary)">{config.name}</span>
+            <span class="text-xl font-semibold tracking-tight text-text-main">{config.name}</span>
           )}
         </a>
-        <p class="text-[0.8125rem] sm:text-[0.875rem] font-medium leading-relaxed max-w-sm" style="color: var(--clr-text-2)">
+        <p class="text-sm font-normal leading-relaxed max-w-sm text-text-muted">
           {content?.footerAbout}
         </p>
         {showSocials && socials.length > 0 && (
@@ -66,10 +66,10 @@ const badges = [
       {showLinks && (
       <div class={showBrand ? "md:col-span-8 grid grid-cols-2 sm:grid-cols-3 gap-6" : "md:col-span-12 grid grid-cols-2 sm:grid-cols-3 gap-6"}>
         <div>
-          <h3 class="text-[0.6875rem] sm:text-[0.75rem] font-black uppercase tracking-widest mb-3 sm:mb-4" style="color: var(--clr-text)">
+          <h3 class="text-xs font-semibold uppercase tracking-widest mb-4 text-text-main">
             {content?.footerQuickLinks}
           </h3>
-          <ul class="space-y-2.5">
+          <ul class="space-y-3">
             {[
               { label: content?.navHome, href: "/" },
               { label: content?.navProducts, href: "/products" },
@@ -77,7 +77,7 @@ const badges = [
               { label: content?.navBestSellers, href: "/products" },
             ].map((link) => (
               <li>
-                <a href={link.href} class="text-[0.8125rem] sm:text-[0.875rem] font-bold transition-all hover:text-primary" style="color: var(--clr-text-2)">
+                <a href={link.href} class="text-sm font-normal transition-colors hover:text-primary text-text-muted">
                   {link.label}
                 </a>
               </li>
@@ -86,17 +86,17 @@ const badges = [
         </div>
 
         <div>
-          <h3 class="text-[0.6875rem] sm:text-[0.75rem] font-black uppercase tracking-widest mb-3 sm:mb-4" style="color: var(--clr-text)">
+          <h3 class="text-xs font-semibold uppercase tracking-widest mb-4 text-text-main">
             {content?.footerSupport}
           </h3>
-          <ul class="space-y-2.5">
+          <ul class="space-y-3">
             {[
               { label: content?.footerShipping },
               { label: content?.footerReturns },
               { label: content?.navContact },
             ].map((link) => (
               <li>
-                <span class="text-[0.8125rem] sm:text-[0.875rem] font-bold transition-all cursor-pointer" style="color: var(--clr-text-2)">
+                <span class="text-sm font-normal transition-colors cursor-pointer text-text-muted hover:text-primary">
                   {link.label}
                 </span>
               </li>
@@ -105,18 +105,18 @@ const badges = [
         </div>
 
         <div class="col-span-2 sm:col-span-1">
-          <h3 class="text-[0.6875rem] sm:text-[0.75rem] font-black uppercase tracking-widest mb-3 sm:mb-4" style="color: var(--clr-text)">
+          <h3 class="text-xs font-semibold uppercase tracking-widest mb-4 text-text-main">
             {content?.trust1Title}
           </h3>
-          <div class="space-y-2.5">
+          <div class="space-y-3">
             {badges.map((b) => (
-              <div class="flex items-center gap-2.5 group">
-                <div class="w-8 h-8 sm:w-9 sm:h-9 shrink-0 rounded-xl flex items-center justify-center bg-black/[0.02] border border-black/[0.04] text-primary">
+              <div class="flex items-center gap-3 group">
+                <div class="w-9 h-9 shrink-0 rounded-lg flex items-center justify-center bg-surface border border-border text-primary">
                   <Icon name={b.icon} class="w-4 h-4" />
                 </div>
                 <div class="min-w-0">
-                  <p class="text-[0.6875rem] sm:text-[0.6875rem] font-black leading-tight" style="color: var(--clr-text)">{b.title}</p>
-                  <p class="text-[0.5625rem] sm:text-[0.625rem] font-bold" style="color: var(--clr-text-2)">{b.sub}</p>
+                  <p class="text-xs font-semibold leading-tight text-text-main">{b.title}</p>
+                  <p class="text-[0.75rem] font-normal text-text-muted">{b.sub}</p>
                 </div>
               </div>
             ))}
@@ -127,8 +127,8 @@ const badges = [
     </div>
 
     {/* Bottom Bar */}
-    <div class="border-t border-black/[0.04] mt-6 sm:mt-8 pt-4 sm:pt-5 text-center">
-      <p class="text-[0.6875rem] sm:text-[0.75rem] font-bold" style="color: var(--clr-text-2)">
+    <div class="border-t border-border mt-8 pt-5 text-center">
+      <p class="text-xs font-normal text-text-muted">
         &copy; {year} {config.name}. {content?.footerRights}
       </p>
     </div>

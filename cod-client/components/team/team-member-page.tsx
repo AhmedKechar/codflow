@@ -41,13 +41,13 @@ interface TeamMemberPageProps {
 const PAGE_SIZE = 30;
 
 const ENTITY_CONFIG: Record<string, { icon: React.ReactNode; color: string; bgColor: string }> = {
-  order:    { icon: <Package className="w-3.5 h-3.5" />,      color: "text-blue-600",    bgColor: "bg-blue-500/10 border-blue-500/20" },
-  customer: { icon: <Users className="w-3.5 h-3.5" />,        color: "text-purple-600",  bgColor: "bg-purple-500/10 border-purple-500/20" },
-  driver:   { icon: <Truck className="w-3.5 h-3.5" />,        color: "text-emerald-600", bgColor: "bg-emerald-500/10 border-emerald-500/20" },
-  product:  { icon: <ShoppingBag className="w-3.5 h-3.5" />,  color: "text-orange-600",  bgColor: "bg-orange-500/10 border-orange-500/20" },
-  stock:    { icon: <Boxes className="w-3.5 h-3.5" />,        color: "text-cyan-600",    bgColor: "bg-cyan-500/10 border-cyan-500/20" },
-  user:     { icon: <UserCog className="w-3.5 h-3.5" />,      color: "text-rose-600",    bgColor: "bg-rose-500/10 border-rose-500/20" },
-  review:   { icon: <Star className="w-3.5 h-3.5" />,         color: "text-amber-600",   bgColor: "bg-amber-500/10 border-amber-500/20" },
+  order:    { icon: <Package className="w-3.5 h-3.5" />,      color: "text-muted-foreground", bgColor: "bg-muted/60 border-transparent" },
+  customer: { icon: <Users className="w-3.5 h-3.5" />,        color: "text-muted-foreground", bgColor: "bg-muted/60 border-transparent" },
+  driver:   { icon: <Truck className="w-3.5 h-3.5" />,        color: "text-muted-foreground", bgColor: "bg-muted/60 border-transparent" },
+  product:  { icon: <ShoppingBag className="w-3.5 h-3.5" />,  color: "text-muted-foreground", bgColor: "bg-muted/60 border-transparent" },
+  stock:    { icon: <Boxes className="w-3.5 h-3.5" />,        color: "text-muted-foreground", bgColor: "bg-muted/60 border-transparent" },
+  user:     { icon: <UserCog className="w-3.5 h-3.5" />,      color: "text-muted-foreground", bgColor: "bg-muted/60 border-transparent" },
+  review:   { icon: <Star className="w-3.5 h-3.5" />,         color: "text-muted-foreground", bgColor: "bg-muted/60 border-transparent" },
 };
 
 export function TeamMemberPage({ user, initialLogs, isAdmin }: TeamMemberPageProps) {
@@ -124,7 +124,7 @@ export function TeamMemberPage({ user, initialLogs, isAdmin }: TeamMemberPagePro
     }
     if (action === "user.role_changed" && meta.role) {
       return (
-        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-yellow-500/10 text-yellow-700">
+        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-muted/60 text-muted-foreground">
           {(common.roles as any)[meta.role as string] ?? String(meta.role)}
         </span>
       );
@@ -220,7 +220,7 @@ export function TeamMemberPage({ user, initialLogs, isAdmin }: TeamMemberPagePro
       render: (value) => (
         <div className="flex flex-col gap-0.5">
           <span className="text-[11px] font-bold text-foreground flex items-center gap-1">
-            <Clock size={10} className="text-primary/40" />
+            <Clock size={10} className="text-muted-foreground/40" />
             {formatRelativeTime(value, timeLocale)}
           </span>
           <span className="text-[10px] font-bold text-muted-foreground/40 tabular-nums" dir="ltr">
@@ -246,34 +246,32 @@ export function TeamMemberPage({ user, initialLogs, isAdmin }: TeamMemberPagePro
       <div className="flex items-center justify-between gap-4">
         <Link
           href="/team"
-          className="group inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-border/40 bg-white/50 dark:bg-muted/20 text-muted-foreground hover:text-foreground transition-all shadow-sm active:scale-95"
+          className="group inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-lg border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
         >
           <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
         </Link>
         
-        <div className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-primary/5 border border-primary/10 rounded-xl">
-          <Activity className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary" />
-          <p className="text-[9px] sm:text-[11px] font-black uppercase tracking-widest text-primary/80">
+        <div className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-muted border border-border rounded-lg w-fit">
+          <Activity className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-muted-foreground" />
+          <p className="text-[9px] sm:text-[11px] font-black uppercase tracking-widest text-muted-foreground">
             {logs.length} {(t as any).activity_log?.stats?.actions ?? "Activities"}
           </p>
         </div>
       </div>
 
-      {/* Hero Glass Card */}
-      <div className="group relative glass-card rounded-2xl sm:rounded-3xl border-border/30 overflow-hidden shadow-sm transition-all duration-500 hover:shadow-premium">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[40%] bg-primary/5 blur-[80px] pointer-events-none transition-opacity opacity-0 group-hover:opacity-100 duration-700" />
-        
+      {/* Hero Card */}
+      <div className="rounded-xl sm:rounded-2xl border border-border bg-card overflow-hidden">
         <div className="relative z-10 p-5 sm:p-8">
           <div className="flex items-start gap-4 sm:gap-6 flex-1 min-w-0">
             <div className="relative shrink-0">
               <div className={cn(
-                "w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-[1.5rem] flex items-center justify-center text-white text-xl sm:text-2xl font-black shadow-inner group-hover:scale-105 transition-transform duration-500",
-                user.role === "admin" ? "bg-primary" : "bg-muted text-muted-foreground/40"
+                "w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-[1.5rem] flex items-center justify-center text-white text-xl sm:text-2xl font-black",
+                user.role === "admin" ? "bg-foreground" : "bg-muted text-muted-foreground/40"
               )}>
-                {user.role === "admin" ? <Crown className="w-8 h-8 sm:w-10 sm:h-10 text-white" /> : <UserIcon className="w-8 h-8 sm:w-10 sm:h-10" />}
+                {user.role === "admin" ? <Crown className="w-8 h-8 sm:w-10 sm:h-10 text-background" /> : <UserIcon className="w-8 h-8 sm:w-10 sm:h-10" />}
               </div>
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 sm:w-7 sm:h-7 bg-background rounded-xl flex items-center justify-center border border-border/50 shadow-sm">
-                <User size={12} className="sm:size-14 text-primary/70" />
+              <div className="absolute -bottom-1 -right-1 w-6 h-6 sm:w-7 sm:h-7 bg-background rounded-lg flex items-center justify-center border border-border">
+                <User size={12} className="sm:size-14 text-muted-foreground" />
               </div>
             </div>
             
@@ -284,7 +282,7 @@ export function TeamMemberPage({ user, initialLogs, isAdmin }: TeamMemberPagePro
                 </h1>
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 mt-1.5">
                   <div className="flex items-center gap-1.5 text-[11px] sm:text-xs font-bold text-muted-foreground/70" dir="ltr">
-                    <Mail size={12} className="text-primary/40" />
+                    <Mail size={12} className="text-muted-foreground/50" />
                     {user.email}
                   </div>
                 </div>
@@ -294,40 +292,40 @@ export function TeamMemberPage({ user, initialLogs, isAdmin }: TeamMemberPagePro
                     className={cn(
                       "text-[9px] sm:text-[10px] font-black uppercase tracking-widest py-0 h-5 border-none",
                       user.role === "admin"
-                        ? "bg-yellow-500/10 text-yellow-700"
+                        ? "bg-muted text-foreground"
                         : "bg-muted/50 text-muted-foreground/70",
                     )}
                   >
                     {(common.roles as any)[user.role] ?? user.role}
                   </Badge>
-                  <StatusBadge status={user.status} className="py-0.5 px-2 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest border shadow-sm" />
+                  <StatusBadge status={user.status} />
                 </div>
               </div>
             </div>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-6 pt-6 border-t border-border/10">
-            <div className="bg-muted/20 border border-border/10 rounded-xl p-3 sm:p-4 transition-all hover:bg-primary/[0.02] hover:border-primary/10 shadow-sm">
+            <div className="bg-muted/30 border border-border rounded-lg p-3 sm:p-4 transition-colors hover:bg-muted/50">
               <p className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-1 flex items-center gap-1.5">
-                <CalendarDays className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-primary/50" />
+                <CalendarDays className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-muted-foreground/60" />
                 Joined
               </p>
               <p className="text-sm sm:text-base font-black text-foreground font-display leading-none">
                 {formatDate(user.createdAt)}
               </p>
             </div>
-            <div className="bg-muted/20 border border-border/10 rounded-xl p-3 sm:p-4 transition-all hover:bg-primary/[0.02] hover:border-primary/10 shadow-sm">
+            <div className="bg-muted/30 border border-border rounded-lg p-3 sm:p-4 transition-colors hover:bg-muted/50">
               <p className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-1 flex items-center gap-1.5">
-                <Shield className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-primary/50" />
+                <Shield className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-muted-foreground/60" />
                 Scopes
               </p>
               <p className="text-sm sm:text-base font-black text-foreground font-display leading-none tabular-nums">
                 {Array.isArray(user.scopes) ? user.scopes.length : 0}
               </p>
             </div>
-            <div className="hidden sm:block bg-muted/20 border border-border/10 rounded-xl p-3 sm:p-4 transition-all hover:bg-primary/[0.02] hover:border-primary/10 shadow-sm">
+            <div className="hidden sm:block bg-muted/30 border border-border rounded-lg p-3 sm:p-4 transition-colors hover:bg-muted/50">
               <p className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-1 flex items-center gap-1.5">
-                <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-rose-500/50" />
+                <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-muted-foreground/60" />
                 Active
               </p>
               <p className="text-sm sm:text-base font-black text-foreground font-display leading-none truncate">
@@ -438,7 +436,7 @@ export function TeamMemberPage({ user, initialLogs, isAdmin }: TeamMemberPagePro
             onClick={loadMore}
             disabled={loadingMore}
             variant="outline"
-            className="h-10 rounded-xl border-border/60 font-black text-[11px] uppercase tracking-widest hover:bg-primary/5 hover:border-primary/20 transition-all active:scale-95"
+            className="h-10 rounded-lg border-border font-black text-[11px] uppercase tracking-widest hover:bg-muted hover:border-border"
           >
             {loadingMore ? (
               <>

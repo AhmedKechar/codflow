@@ -82,7 +82,7 @@ export function AbandonedTable({ orders, isLoading, onRefresh }: AbandonedTableP
 
   if (isLoading) {
     return (
-      <div className="glass-card rounded-2xl overflow-hidden">
+      <div className="rounded-lg border border-border bg-card overflow-hidden">
         <div className="p-6 space-y-4">
           {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="flex items-center gap-4 animate-pulse">
@@ -101,7 +101,7 @@ export function AbandonedTable({ orders, isLoading, onRefresh }: AbandonedTableP
 
   if (orders.length === 0) {
     return (
-      <div className="glass-card rounded-2xl p-12 text-center">
+      <div className="rounded-lg border border-border bg-card p-12 text-center">
         <Package size={48} className="mx-auto text-muted-foreground/30 mb-4" />
         <h3 className="text-lg font-semibold text-foreground mb-2">
           {t.empty?.title ?? "No abandoned orders"}
@@ -115,7 +115,7 @@ export function AbandonedTable({ orders, isLoading, onRefresh }: AbandonedTableP
 
   return (
     <>
-      <div className="glass-card rounded-2xl overflow-hidden">
+      <div className="rounded-lg border border-border bg-card overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>

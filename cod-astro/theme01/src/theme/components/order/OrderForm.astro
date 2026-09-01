@@ -33,27 +33,24 @@ const comparePrice = defaultVariant?.compareAtPrice ?? product.compareAtPrice ??
 ---
 
 <!-- Order form card -->
-<div class="card !border-none !shadow-lg sm:!border sm:!shadow-md" id="order-section">
+<div class="card" id="order-section">
   <!-- Card header -->
-  <div
-    class="px-6 py-5 border-b border-black/[.03]"
-    style="background: color-mix(in srgb, var(--clr-primary) 4%, white)"
-  >
+  <div class="px-6 py-5 border-b border-[var(--clr-border)]">
     <div class="flex items-center gap-3">
-       <div class="w-10 h-10 rounded-2xl flex items-center justify-center shadow-sm" style="background: var(--clr-surface); color: var(--clr-primary)">
+       <div class="w-10 h-10 rounded-lg flex items-center justify-center bg-[var(--clr-surface-alt)]" style="color: var(--clr-primary)">
           <Icon name="heroicons:shopping-bag" class="w-5 h-5" />
        </div>
        <div>
-          <h2 class="font-black text-[1rem] leading-tight" style="color: var(--clr-text)">
+          <h2 class="font-semibold text-lg leading-tight" style="color: var(--clr-text)">
             {content.formTitle}
           </h2>
-          <p class="text-[0.75rem] font-bold uppercase tracking-widest mt-0.5" style="color: var(--clr-text-2)">{content.orderCtaSubtext}</p>
+          <p class="text-xs font-medium uppercase tracking-[0.05em] mt-1" style="color: var(--clr-text-2)">{content.orderCtaSubtext}</p>
        </div>
     </div>
   </div>
 
   {serverError && (
-    <div class="mx-6 mt-6 p-4 bg-red-50 border border-red-100 rounded-[1.25rem] text-[0.875rem] font-bold text-red-600 flex items-start gap-3">
+    <div class="mx-6 mt-6 p-4 rounded-lg border bg-[var(--clr-error-bg)] border-[var(--clr-error)] text-sm font-medium text-[var(--clr-error)] flex items-start gap-3">
       <Icon name="heroicons:exclamation-triangle" class="w-5 h-5 shrink-0" />
       <p>{serverError}</p>
     </div>
@@ -106,7 +103,7 @@ const comparePrice = defaultVariant?.compareAtPrice ?? product.compareAtPrice ??
     <button
       type="submit"
       class:list={[
-        "btn-primary !h-[4rem] !text-[1.125rem]",
+        "btn-primary",
         isOutOfStock && "!bg-[var(--clr-disabled)] cursor-not-allowed"
       ]}
       id="submit-btn"
@@ -115,7 +112,7 @@ const comparePrice = defaultVariant?.compareAtPrice ?? product.compareAtPrice ??
       {isOutOfStock ? content.outOfStock : (submitText || content.formSubmit)}
     </button>
 
-    <p class="text-center text-[0.8125rem] font-bold px-4" style="color: var(--clr-text-2)">
+    <p class="text-center text-sm font-medium px-4" style="color: var(--clr-text-2)">
       {content.formConfirmNote}
     </p>
   </form>

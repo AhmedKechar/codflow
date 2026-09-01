@@ -42,14 +42,14 @@ export const ORDER_STATUSES = [
   "new",
   "confirmed",
   "unreachable",
-  "preparing",
-  "ready",
-  "assigned",
-  "dispatched",
-  "out_for_delivery",
+  "busy",
+  "postponed",
+  "shipped",
   "delivered",
-  "returned",
   "cancelled",
+  "fake",
+  "duplicate",
+  "returned",
 ] as const;
 
 export type OrderStatus = typeof ORDER_STATUSES[number];
@@ -91,7 +91,42 @@ export const bulkDispatchSchema = z.object({
 
 export type BulkDispatchInput = z.infer<typeof bulkDispatchSchema>;
 
+/**
+ * PATCH /orders/:id — Edit an existing order after creation.
+ * All fields optional; only changed fields are applied.
+ */
+export const updateOrderSchema = z.object({
+  customerName: z.string().min(1).optional(),
+  phone: z.string().regex(/^0[5-7]\d{8}$/, "Invalid Algerian phone number").optional(),
+  wilayaId: z.number().int().min(1).max(58).optional(),
+  communeId: z.string().optional(),
+  address: z.string().optional(),
+  price: z.number().min(0).optional(),
+  deliveryFee: z.number().min(0).optional(),
+  deliveryType: z.enum(["home", "stop_desk"]).optional(),
+  stationCode: z.string().optional(),
+  notes: z.string().optional(),
+  weight: z.number().min(0).optional(),
+  isFragile: z.boolean().optional(),
+  products: z.array(
+    z.object({
+      productId: z.string().min(1),
+      productName: z.string(),
+      variantId: z.string().min(1).nullish(),
+      variantLabel: z.string().nullish(),
+      quantity: z.number().int().positive(),
+      pricePerUnit: z.number().positive(),
+      lineTotal: z.number().positive(),
+    })
+  ).min(1, "At least one product is required").optional(),
+}).superRefine((data, ctx) => {
+  if (data.deliveryType === "home" && data.address !== undefined && !data.address?.trim()) {
+    ctx.addIssue({ code: "custom", path: ["address"], message: "Address is required for home delivery" });
+  }
+});
+
 export type CreateOrderInput = z.infer<typeof createOrderSchema>;
+export type UpdateOrderInput = z.infer<typeof updateOrderSchema>;
 export type UpdateOrderStatusInput = z.infer<typeof updateOrderStatusSchema>;
 export type AssignDriverInput = z.infer<typeof assignDriverSchema>;
 export type OrderFiltersInput = z.infer<typeof orderFiltersSchema>;

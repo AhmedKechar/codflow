@@ -23,15 +23,14 @@ const showViewAll = allProducts.length > 8;
 {heroProducts.length > 0 ? (
   <section class="max-w-5xl mx-auto px-5 py-8">
     <div class="flex items-center justify-between mb-6">
-      <h2 class="text-xl font-black tracking-tight" style="color: var(--clr-text)">
+      <h2 class="text-xl sm:text-2xl font-semibold tracking-tight text-text-main">
         {featured.length ? content.featuredSection : content.allProductsSection}
       </h2>
       {showViewAll && (
         <a
           href="/products"
           data-astro-prefetch="hover"
-          class="text-[0.875rem] font-black transition-all active:opacity-60"
-          style="color: var(--clr-primary)"
+          class="text-[0.875rem] font-medium transition-colors hover:text-primary text-primary"
           aria-label={`${content.viewAllCta} - ${featured.length ? content.featuredSection : content.allProductsSection}`}
         >
           {content.viewAllCta}
@@ -54,8 +53,7 @@ const showViewAll = allProducts.length > 8;
         <a
           href="/products"
           data-astro-prefetch="hover"
-          class="inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-black text-[1rem] border-2 active:scale-95 transition-all shadow-md"
-          style="background: var(--clr-surface); border-color: var(--clr-primary); color: var(--clr-primary)"
+          class="inline-flex items-center gap-2 px-8 py-3.5 rounded-lg font-semibold text-[0.9375rem] border border-primary text-primary transition-colors hover:bg-primary hover:text-white"
           aria-label={`${content.viewAllCta} - Browse all ${allProducts.length} products`}
         >
           {content.viewAllCta}
@@ -65,10 +63,10 @@ const showViewAll = allProducts.length > 8;
   </section>
 ) : (
   <section class="max-w-5xl mx-auto px-5 py-24 text-center">
-    <div class="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 text-primary" style="background: var(--clr-surface-alt)">
+    <div class="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 text-text-muted bg-surface-alt">
       <Icon name="heroicons:shopping-bag" class="w-10 h-10" />
     </div>
-    <h2 class="text-2xl font-black mb-2" style="color: var(--clr-text)">{content.emptyStoreTitle}</h2>
-    <p class="font-bold" style="color: var(--clr-text-2)">{content.emptyStoreSub}</p>
+    <h2 class="text-2xl font-semibold mb-2 text-text-main">{content.emptyStoreTitle}</h2>
+    <p class="font-normal text-text-muted">{content.emptyStoreSub}</p>
   </section>
 )}

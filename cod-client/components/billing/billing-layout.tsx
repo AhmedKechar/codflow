@@ -71,7 +71,7 @@ export function BillingLayout({ activeTab, children }: Props) {
 
   return (
     <div className="space-y-5 sm:space-y-6">
-      <div className="flex overflow-x-auto gap-1 p-1 bg-muted/30 rounded-xl border border-border/40">
+      <div className="flex overflow-x-auto gap-1 p-1 bg-muted/30 rounded-lg border border-border">
         {TABS.map((tab) => {
           const isActive = tab.id === activeTab;
           const Icon = tab.icon;
@@ -83,8 +83,8 @@ export function BillingLayout({ activeTab, children }: Props) {
               className={cn(
                 "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all duration-200",
                 isActive
-                  ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
-                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                  ? "bg-card text-foreground border border-border shadow-sm"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground border border-transparent"
               )}
             >
               <Icon className="w-3.5 h-3.5" />

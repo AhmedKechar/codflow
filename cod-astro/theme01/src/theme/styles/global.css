@@ -22,14 +22,14 @@
 
   --font-body: var(--font-body), "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
 
-  --radius-card: var(--radius-card, 1.25rem);
-  --radius-input: var(--radius-input, 1rem);
-  --radius-btn: var(--radius-btn, 1rem);
+  --radius-card: var(--radius-card, 0.75rem);   /* 12px Dawn */
+  --radius-input: var(--radius-input, 0.5rem);  /* 8px Dawn  */
+  --radius-btn: var(--radius-btn, 0.5rem);      /* 8px Dawn  */
 
   --shadow-sm: var(--shadow-sm, 0 1px 2px rgba(0,0,0,.04));
-  --shadow-md: var(--shadow-md, 0 4px 12px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.03));
+  --shadow-md: var(--shadow-md, 0 2px 12px rgba(0,0,0,.08));
   --shadow-lg: var(--shadow-lg, 0 12px 24px rgba(0,0,0,.08), 0 4px 8px rgba(0,0,0,.04));
-  --shadow-primary: var(--shadow-primary, 0 8px 24px color-mix(in srgb, var(--clr-primary) 25%, transparent));
+  --shadow-primary: var(--shadow-primary, 0 2px 12px color-mix(in srgb, var(--clr-primary) 18%, transparent));
 
   --animate-spring: cubic-bezier(0.175, 0.885, 0.32, 1.1);
 }
@@ -73,20 +73,21 @@
  * to ensure ≥4.5:1 ratio before deployment.
  */
 :root {
-  /* Static UI tokens — not managed from the dashboard */
+  /* Static UI tokens — not managed from the dashboard. Dawn neutral palette. */
   --clr-surface: #ffffff;
-  --clr-border: rgba(0, 0, 0, 0.06);
-  --clr-text: #0f172a;
-  --clr-text-2: #64748b;
+  --clr-border: #e5e5e5;
+  --clr-text: #111111;
+  --clr-text-2: #6d7175;
+  --clr-input-border: #d1d5d9;
   
   /* Semantic tokens for consistent theming */
-  --clr-success: #047857;
-  --clr-disabled: #94a3b8;
-  --clr-error: #ef4444;
+  --clr-success: #0a7a4b;
+  --clr-disabled: #b3b3b3;
+  --clr-error: #bf0711;
   --clr-error-bg: #fef2f2;
-  --clr-nav-bg: rgba(255, 255, 255, 0.9);
-  --clr-surface-alt: #f9fafb;
-  --clr-overlay: rgba(0, 0, 0, 0.45);
+  --clr-nav-bg: rgba(255, 255, 255, 0.95);
+  --clr-surface-alt: #f7f7f7;
+  --clr-overlay: rgba(0, 0, 0, 0.4);
   --overlay-dark: rgba(0, 0, 0, 0.7);
 
   /* App safe areas */
@@ -130,10 +131,9 @@ body {
   color: white;
   text-align: center;
   padding: calc(0.5rem + var(--safe-top)) 1.25rem 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -147,30 +147,25 @@ body {
 
 /* ── Hero Backgrounds ────────────────────────────────────────────────────── */
 .hero-bg-subtle {
-  background-color: #f6f5f3; /* Warm, premium neutral */
+  background-color: var(--clr-surface-alt); /* Dawn neutral section band */
   position: relative;
 }
 .hero-bg-subtle::before {
   content: "";
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(circle at 70% 30%, color-mix(in srgb, var(--clr-primary) 8%, transparent) 0%, transparent 60%);
+  background-image: radial-gradient(circle at 70% 30%, color-mix(in srgb, var(--clr-primary) 5%, transparent) 0%, transparent 60%);
   pointer-events: none;
 }
 .hero-bg-subtle::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-  opacity: 0.02;
-  pointer-events: none;
+  content: none; /* no noise overlay in Dawn */
 }
 
 /* ── Cards ───────────────────────────────────────────────────────────────── */
 .card {
   background: var(--clr-surface);
   border-radius: var(--radius-card);
-  box-shadow: var(--shadow-md);
+  box-shadow: none; /* Dawn: hairline, no elevation by default */
   border: 1px solid var(--clr-border);
   overflow: hidden;
 }
@@ -178,42 +173,43 @@ body {
 /* ── Form controls ───────────────────────────────────────────────────────── */
 .form-label {
   display: block;
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: 0.8125rem;
+  font-weight: 600;
   color: var(--clr-text);
   margin-bottom: 0.5rem;
-  padding-inline: 0.25rem;
+  padding-inline: 0;
 }
 
 .form-input {
   width: 100%;
-  height: 3.5rem;
-  padding-inline: 1.125rem;
+  min-height: 2.75rem;
+  padding-inline: 0.875rem;
   background: var(--clr-surface);
-  border: 1.5px solid var(--clr-border);
+  border: 1px solid var(--clr-input-border);
   border-radius: var(--radius-input);
   font-family: var(--font-body);
-  font-weight: 600;
-  font-size: 0.9375rem;
+  font-weight: 400;
+  font-size: 0.875rem;
   color: var(--clr-text);
-  transition: all 0.2s var(--animate-spring);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
   appearance: none;
   -webkit-appearance: none;
 }
+.form-input::placeholder { color: var(--clr-text-2); }
 .form-input:focus {
   outline: none;
   border-color: var(--clr-primary);
   background: var(--clr-surface);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--clr-primary) 10%, transparent);
-  transform: translateY(-1px);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--clr-primary) 12%, transparent);
+  transform: none;
 }
 .form-input.error {
-  border-color: var(--clr-error, #ef4444);
+  border-color: var(--clr-error, #bf0711);
   background: var(--clr-error-bg, #fef2f2);
 }
 textarea.form-input {
   height: auto;
-  padding-block: 1rem;
+  padding-block: 0.75rem;
   resize: none;
 }
 
@@ -223,23 +219,24 @@ textarea.form-input {
   align-items: center;
   justify-content: center;
   gap: 0.625rem;
-  padding-inline: 1.75rem;
-  height: 3.5rem;
+  padding-inline: 1.5rem;
+  min-height: 3rem;
   border-radius: var(--radius-btn);
   background: var(--clr-primary);
   color: white;
   font-family: var(--font-body);
-  font-weight: 800;
-  font-size: 1rem;
+  font-weight: 600;
+  font-size: 0.9375rem;
   border: none;
   cursor: pointer;
-  transition: all 0.2s var(--animate-spring);
-  box-shadow: var(--shadow-primary);
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+  box-shadow: none;
   width: 100%;
   position: relative;
   overflow: hidden;
 }
-.btn-primary:active { transform: scale(0.96); opacity: 0.9; }
+.btn-primary:hover { opacity: 0.92; }
+.btn-primary:active { opacity: 0.85; }
 .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
 /* ── Gallery ─────────────────────────────────────────────────────────────── */
@@ -276,9 +273,7 @@ textarea.form-input {
   inset-inline-start: 0;
   inset-inline-end: 0;
   z-index: 45;
-  background: var(--clr-nav-bg);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
+  background: var(--clr-surface);
   border-top: 1px solid var(--clr-border);
   padding-bottom: var(--safe-bottom);
   display: grid;
@@ -313,11 +308,13 @@ textarea.form-input {
 
 /* ── Product card ────────────────────────────────────────────────────────── */
 .product-card {
-  box-shadow: 0 2px 12px rgba(0,0,0,.06), 0 1px 4px rgba(0,0,0,.03);
-  transition: box-shadow 0.3s cubic-bezier(0.4,0,0.2,1), transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  border: 1px solid var(--clr-border);
+  box-shadow: none;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 .product-card:hover {
-  box-shadow: 0 8px 24px rgba(0,0,0,.10), 0 4px 8px rgba(0,0,0,.05);
+  box-shadow: 0 2px 12px rgba(0,0,0,.08);
+  transform: translateY(-1px);
 }
 
 /* ── Scrollbar hide util ─────────────────────────────────────────────────── */

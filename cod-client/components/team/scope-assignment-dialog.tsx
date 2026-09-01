@@ -98,11 +98,11 @@ export function ScopeAssignmentDialog({ open, onClose, user, onSuccess }: Props)
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-2xl p-0 overflow-hidden border-border/30 glass-card rounded-3xl">
+      <DialogContent className="sm:max-w-2xl p-0 overflow-hidden border-border rounded-xl">
         <DialogHeader className="p-6 sm:p-8 border-b border-border/10 bg-muted/5">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 shadow-inner">
-              <Shield className="w-5 h-5 text-primary" />
+            <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
+              <Shield className="w-5 h-5 text-muted-foreground" />
             </div>
             <div>
               <DialogTitle className="text-xl font-black text-foreground tracking-tight font-display uppercase">
@@ -126,7 +126,7 @@ export function ScopeAssignmentDialog({ open, onClose, user, onSuccess }: Props)
             {Object.entries(SCOPE_CATEGORIES).map(([key, category]) => (
               <div key={key} className="space-y-4">
                 <div className="flex items-center gap-2 pb-2 border-b border-border/5">
-                  <div className="w-1.5 h-4 bg-primary/20 rounded-full" />
+                  <div className="w-1.5 h-4 bg-muted-foreground/40 rounded-full" />
                   <h3 className="font-black text-xs uppercase tracking-widest text-foreground/60">{t.scope_categories[key as keyof typeof t.scope_categories] ?? category.label}</h3>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -141,7 +141,7 @@ export function ScopeAssignmentDialog({ open, onClose, user, onSuccess }: Props)
                         className={cn(
                           "group flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer active:scale-[0.98]",
                           checked 
-                            ? "bg-primary/[0.03] border-primary/20" 
+                            ? "bg-muted/40 border-border" 
                             : "bg-muted/20 border-border/40 hover:bg-muted/40"
                         )}
                       >
@@ -195,14 +195,14 @@ export function ScopeAssignmentDialog({ open, onClose, user, onSuccess }: Props)
               type="button" 
               variant="outline" 
               onClick={onClose}
-              className="flex-1 sm:flex-none h-11 px-6 rounded-xl border-border/40 bg-white/50 dark:bg-muted/20 font-black text-[10px] sm:text-[11px] uppercase tracking-widest transition-all active:scale-95"
+              className="flex-1 sm:flex-none h-11 px-6 rounded-lg border-border font-black text-[10px] sm:text-[11px] uppercase tracking-widest"
             >
               {t.scope_dialog.cancel}
             </Button>
             <Button 
               onClick={handleSave} 
               disabled={loading || !hasChanges}
-              className="flex-1 sm:flex-none h-11 px-8 rounded-xl bg-primary text-primary-foreground font-black text-[10px] sm:text-[11px] uppercase tracking-widest shadow-lg shadow-primary/10 hover:shadow-primary/20 transition-all active:scale-95 disabled:opacity-50"
+              className="flex-1 sm:flex-none h-11 px-8 rounded-lg bg-primary text-primary-foreground font-black text-[10px] sm:text-[11px] uppercase tracking-widest disabled:opacity-50"
             >
               {loading ? "..." : <><Save className="w-3.5 h-3.5 me-2" /> {t.scope_dialog.save_changes}</>}
             </Button>

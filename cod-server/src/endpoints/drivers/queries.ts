@@ -30,9 +30,10 @@ type Database = ReturnType<typeof getDb>;
 
 /**
  * Delete a driver.
- * Throws if the driver has active (assigned / out_for_delivery) orders.
+ * Throws if the driver has active (assigned but not yet shipped/delivered) orders.
  */
 export async function deleteDriver(db: Database, storeId: string, driverId: string) {
+  const terminalStatuses = ["delivered", "cancelled", "returned", "fake", "duplicate"];
   const activeOrders = await db
     .select({ count: count() })
     .from(orders)
@@ -40,7 +41,13 @@ export async function deleteDriver(db: Database, storeId: string, driverId: stri
       and(
         eq(orders.storeId, storeId),
         eq(orders.driverId, driverId),
-        or(eq(orders.status, "assigned"), eq(orders.status, "out_for_delivery")),
+        or(
+          eq(orders.status, "new"),
+          eq(orders.status, "confirmed"),
+          eq(orders.status, "unreachable"),
+          eq(orders.status, "busy"),
+          eq(orders.status, "postponed"),
+        ),
       ),
     )
     .get();

@@ -43,22 +43,21 @@ const gridClassNames = `grid ${mobileCols} sm:grid-cols-3 ${desktopCols}`;
   <section id="best-sellers" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
       <div>
-        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tighter" style="color: var(--clr-text)">
+        <h2 class="text-2xl sm:text-3xl font-semibold tracking-tight text-text-main">
           {content.bestSellersSection}
         </h2>
-        <p class="text-sm sm:text-base font-bold mt-3 opacity-60" style="color: var(--clr-text)">
+        <p class="text-sm sm:text-base font-normal mt-3 text-text-muted">
           {content.bestSellersSub}
         </p>
       </div>
       {showViewAll && (
         <a
           href="/products"
-          class="inline-flex items-center gap-2 text-[1rem] font-black transition-all hover:text-primary group"
-          style="color: var(--clr-text)"
+          class="inline-flex items-center gap-2 text-sm font-semibold transition-colors hover:text-primary group text-text-main"
           aria-label={`${content.viewAllCta} - ${content.bestSellersSection}`}
         >
           {content.viewAllCta}
-          <Icon name="heroicons:arrow-right" class="w-5 h-5 transition-transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1" />
+          <Icon name="heroicons:arrow-right" class="w-4 h-4 transition-transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1" />
         </a>
       )}
     </div>

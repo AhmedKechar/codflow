@@ -60,7 +60,7 @@ export function useConfirm() {
           </div>
           <DialogTitle>{state.title}</DialogTitle>
           {state.description && (
-            <p className="text-sm text-muted-foreground mt-1 font-medium">
+            <p className="text-sm text-muted-foreground mt-1 font-normal">
               {state.description}
             </p>
           )}

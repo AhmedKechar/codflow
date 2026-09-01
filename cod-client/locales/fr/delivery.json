@@ -118,6 +118,7 @@
     "rate_card_default": "Par défaut",
     "rate_card_wilayas_configured": "wilayas configurées",
     "rate_card_no_profiles": "Aucun profil d'expédition — créez-en un dans Tarifs d'expédition",
+    "logistics_label": "Véhicule et rémunération",
     "notes_label": "Notes",
     "notes_placeholder": "Notes optionnelles...",
     "cancel": "Annuler",

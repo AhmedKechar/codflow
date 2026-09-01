@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Loader2 } from "lucide-react";
 import { useThemes } from "@/lib/translations";
 import { getMyStore, type StoreConfig } from "@/actions/stores";
+import { ContextualSaveBar } from "@/components/ui/contextual-save-bar";
 import { ThemeSelector } from "@/components/themes/theme-selector";
 import { SiteBuilderEditor } from "@/components/themes/site-builder";
 import { ProductsEditor } from "@/components/themes/editors/products-editor";
@@ -45,6 +46,9 @@ export function ThemePageContent() {
   const [storeConfig, setStoreConfig] = useState<StoreConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabId>("appearance");
+  const [isDirty, setIsDirty] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const saveRef = useRef<(() => Promise<boolean>) | null>(null);
 
   useEffect(() => {
     getMyStore().then((data) => {
@@ -53,11 +57,30 @@ export function ThemePageContent() {
     });
   }, []);
 
-  const handleThemeChanged = () => {
+  const handleThemeChanged = useCallback(() => {
     getMyStore().then((data) => {
       if (data) setStoreConfig(data);
     });
-  };
+  }, []);
+
+  const handleSave = useCallback(async () => {
+    if (!saveRef.current) return;
+    setIsSaving(true);
+    try {
+      const ok = await saveRef.current();
+      if (ok) {
+        setIsDirty(false);
+        handleThemeChanged();
+      }
+    } finally {
+      setIsSaving(false);
+    }
+  }, [handleThemeChanged]);
+
+  const handleDiscard = useCallback(() => {
+    setIsDirty(false);
+    handleThemeChanged();
+  }, [handleThemeChanged]);
 
   if (loading) {
     return (
@@ -76,6 +99,10 @@ export function ThemePageContent() {
   }
 
   const renderTab = () => {
+    const editorProps = {
+      onDirtyChange: setIsDirty,
+      saveRef,
+    };
     switch (activeTab) {
       case "appearance":
         return (
@@ -89,25 +116,27 @@ export function ThemePageContent() {
             currentShadowIntensity={storeConfig.shadowIntensity}
             currentTrustSeals={storeConfig.trustSeals}
             onThemeChanged={handleThemeChanged}
+            {...editorProps}
           />
         );
       case "homepage":
-        return <SiteBuilderEditor siteJson={storeConfig.siteJson} onSaved={handleThemeChanged} />;
+        return <SiteBuilderEditor siteJson={storeConfig.siteJson} onSaved={handleThemeChanged} {...editorProps} />;
       case "products":
-        return <ProductsEditor siteJson={storeConfig.siteJson} onSaved={handleThemeChanged} />;
+        return <ProductsEditor siteJson={storeConfig.siteJson} onSaved={handleThemeChanged} {...editorProps} />;
       case "product-page":
-        return <ProductPageEditor siteJson={storeConfig.siteJson} onSaved={handleThemeChanged} />;
+        return <ProductPageEditor siteJson={storeConfig.siteJson} onSaved={handleThemeChanged} {...editorProps} />;
       case "order-form":
         return (
           <OrderFormEditor
             currentOrderFormConfig={storeConfig.orderFormConfig}
             onSaved={handleThemeChanged}
+            {...editorProps}
           />
         );
       case "thank-you":
-        return <ThankYouEditor siteJson={storeConfig.siteJson} onSaved={handleThemeChanged} />;
+        return <ThankYouEditor siteJson={storeConfig.siteJson} onSaved={handleThemeChanged} {...editorProps} />;
       case "pages":
-        return <PagesEditor siteJson={storeConfig.siteJson} onSaved={handleThemeChanged} />;
+        return <PagesEditor siteJson={storeConfig.siteJson} onSaved={handleThemeChanged} {...editorProps} />;
       default:
         return (
           <div className="rounded-xl border border-border bg-card p-10 text-center">
@@ -119,6 +148,14 @@ export function ThemePageContent() {
 
   return (
     <div className="space-y-6">
+      <ContextualSaveBar
+        id="theme-settings"
+        hasChanges={isDirty}
+        isSaving={isSaving}
+        onSave={handleSave}
+        onDiscard={handleDiscard}
+      />
+
       <h1 className="hidden md:block text-2xl font-black text-foreground">{t.title}</h1>
 
       {/* Tabs */}

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   Eye, Package, MapPin, MoreHorizontal, Truck, Building2,
   Check, Search, X, Star, Zap, Trash2, Filter,
-  Home, Store,
+  Home, Store, Send,
 } from "lucide-react";
 import { toast } from "sonner";
 import { DataTable, TableColumn } from "@/components/ui/data-table";
@@ -45,21 +45,22 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { FilterChip } from "@/components/ui/filter-chip";
 import { FilterResultCount } from "@/components/ui/filter-result-count";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { BulkDispatchDialog } from "./bulk-dispatch-dialog";
 import type { Order, OrderStatus, Driver, DeliveryCompany, StopDesk } from "@/types";
 import { SCOPES } from "@/../cod-shared/rbac/scopes";
 
 // Statuses the user can manually set via the inline row dropdown.
 // "dispatched" is intentionally excluded — it is set by the dispatch action only.
 const ALL_STATUSES: OrderStatus[] = [
-  "new", "confirmed", "unreachable", "preparing", "ready", "assigned",
-  "out_for_delivery", "delivered", "returned", "cancelled",
+  "new", "confirmed", "unreachable", "busy", "postponed",
+  "shipped", "delivered", "returned", "cancelled", "fake", "duplicate",
 ];
 
 // Statuses available in the filter dropdown — includes "dispatched" so users
 // can filter the list to the carrier-validation queue.
 const FILTER_STATUSES: OrderStatus[] = [
-  "new", "confirmed", "unreachable", "preparing", "ready", "assigned",
-  "dispatched", "out_for_delivery", "delivered", "returned", "cancelled",
+  "new", "confirmed", "unreachable", "busy", "postponed",
+  "shipped", "delivered", "returned", "cancelled", "fake", "duplicate",
 ];
 
 // Provider capability matrix for the dispatch dialog's optional fields.
@@ -545,7 +546,7 @@ function OrderRowActions({
   const isDriverAssigned = !!order.driverId;
   const isCompanyMethod = isDispatched || order.deliveryMethod === "company";
   const isDriverMethod = order.deliveryMethod === "driver" && isDriverAssigned && !isDispatched;
-  const isTerminal = ["out_for_delivery", "delivered", "returned", "cancelled"].includes(order.status);
+  const isTerminal = ["shipped", "delivered", "returned", "cancelled"].includes(order.status);
 
   const showAssign = hasScope(SCOPES.ORDERS_ASSIGN) && !isDispatched && !isCompanyMethod && !isTerminal;
   const showDispatch = hasScope(SCOPES.DELIVERY_DISPATCH) && companies.length > 0 && !isDispatched && !isDriverMethod && !isTerminal;
@@ -735,6 +736,47 @@ export function OrdersTable({
     return result;
   }, [orders, search, statusFilter, deliveryFilter, wilayaFilter, typeFilter, dateRange]);
 
+  // ── Bulk selection state ──────────────────────────────────────────────────
+  const [selectedOrderIds, setSelectedOrderIds] = useState<Set<string>>(new Set());
+  const [bulkDispatchOpen, setBulkDispatchOpen] = useState(false);
+
+  // Statuses eligible for bulk dispatch
+  const BULK_DISPATCH_STATUSES: OrderStatus[] = ["new", "confirmed", "unreachable", "busy", "postponed"];
+
+  // Filtered orders that are eligible for bulk dispatch
+  const dispatchableOrders = useMemo(() => {
+    return filtered.filter((o) =>
+      BULK_DISPATCH_STATUSES.includes(o.status) &&
+      !o.trackingNumber &&
+      !o.driverId
+    );
+  }, [filtered]);
+
+  const selectedDispatchableOrders = useMemo(() => {
+    return dispatchableOrders.filter((o) => selectedOrderIds.has(o.id));
+  }, [dispatchableOrders, selectedOrderIds]);
+
+  function toggleSelectAll() {
+    const allIds = new Set(dispatchableOrders.map((o) => o.id));
+    if (selectedOrderIds.size === dispatchableOrders.length) {
+      setSelectedOrderIds(new Set());
+    } else {
+      setSelectedOrderIds(allIds);
+    }
+  }
+
+  function toggleSelectOrder(id: string) {
+    setSelectedOrderIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }
+
   function clearFilters() {
     setSearch("");
     setStatusFilter("all");
@@ -765,6 +807,25 @@ export function OrdersTable({
 
   // ── Column definitions ────────────────────────────────────────────────────
   const columns: TableColumn<Order>[] = [
+    {
+      key: "_select",
+      label: "",
+      render: (_value, row) => {
+        const isDispatchable =
+          BULK_DISPATCH_STATUSES.includes(row.status) &&
+          !row.trackingNumber &&
+          !row.driverId;
+        return (
+          <Checkbox
+            checked={selectedOrderIds.has(row.id)}
+            onCheckedChange={() => toggleSelectOrder(row.id)}
+            disabled={!isDispatchable}
+            className="data-[state=checked]:bg-primary"
+          />
+        );
+      },
+      className: "w-10",
+    },
     {
       key: "orderNumber",
       label: t.table.order_number,
@@ -1039,6 +1100,32 @@ export function OrdersTable({
         )}
       </div>
 
+      {/* ── Bulk action bar ──────────────────────────────────────────────── */}
+      {selectedOrderIds.size > 0 && (
+        <div className="flex items-center gap-3 p-3 rounded-lg bg-primary/5 border border-primary/20">
+          <div className="flex items-center gap-2">
+            <Checkbox
+              checked={selectedOrderIds.size === dispatchableOrders.length && dispatchableOrders.length > 0}
+              onCheckedChange={toggleSelectAll}
+              className="data-[state=checked]:bg-primary"
+            />
+            <span className="text-sm font-bold">
+              {selectedOrderIds.size} / {dispatchableOrders.length} محدد
+            </span>
+          </div>
+          <div className="flex-1" />
+          <Button
+            size="sm"
+            onClick={() => setBulkDispatchOpen(true)}
+            disabled={selectedDispatchableOrders.length === 0}
+            className="gap-2"
+          >
+            <Send size={14} />
+            إرسال جماعي ({selectedDispatchableOrders.length})
+          </Button>
+        </div>
+      )}
+
       {/* ── Data table (pagination + sort only — search/filter handled above) ─ */}
       <DataTable
         data={filtered}
@@ -1158,6 +1245,18 @@ export function OrdersTable({
               )}
             </div>
           );
+        }}
+      />
+
+      {/* ── Bulk dispatch dialog ────────────────────────────────────────── */}
+      <BulkDispatchDialog
+        open={bulkDispatchOpen}
+        onOpenChange={setBulkDispatchOpen}
+        selectedOrders={selectedDispatchableOrders}
+        companies={companies}
+        onComplete={() => {
+          setSelectedOrderIds(new Set());
+          handleRefresh();
         }}
       />
     </div>

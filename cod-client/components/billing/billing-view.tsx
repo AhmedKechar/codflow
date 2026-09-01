@@ -1,7 +1,8 @@
 "use client";
 
 import { CreditCard, ArrowUpRight, Zap } from "lucide-react";
-import { useBilling } from "@/lib/translations";
+import { useBilling, useNavigation } from "@/lib/translations";
+import { PageHeader } from "@/components/ui/page-header";
 import { BillingLayout } from "@/components/billing/billing-layout";
 import { CurrentPlanCard } from "@/components/billing/current-plan-card";
 import { UsageMeter } from "@/components/billing/usage-meter";
@@ -21,6 +22,7 @@ export function BillingView({
   userScopes,
 }: Props) {
   const t = useBilling();
+  const nav = useNavigation();
   const isTrial = subscription?.status === "trialing";
   const currentPlan = subscription?.plan;
 
@@ -29,14 +31,7 @@ export function BillingView({
       <div className="space-y-5 sm:space-y-6 animate-fade-in">
         <TrialBanner subscription={subscription} />
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-primary/5 border border-primary/10 rounded-xl w-fit">
-            <CreditCard className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary" />
-            <p className="text-[9px] sm:text-[11px] font-black uppercase tracking-widest text-primary/80">
-              {t.title}
-            </p>
-          </div>
-        </div>
+        <PageHeader title={nav.sidebar.billing} />
 
         <div className="grid gap-5 sm:gap-6 grid-cols-1 lg:grid-cols-2">
           <CurrentPlanCard

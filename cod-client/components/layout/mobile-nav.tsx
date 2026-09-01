@@ -26,6 +26,13 @@ import {
   UserCircle,
   ExternalLink,
   Sparkles,
+  Tag,
+  Building2,
+  Workflow,
+  CreditCard,
+  Store,
+  Gift,
+  ShoppingBag,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigation } from "@/lib/translations";
@@ -59,37 +66,51 @@ export function MobileNav({ userScopes = [], role = "staff", brand, storeDomain 
 
   const primaryNav = [
     canSee("dashboard:view") && { href: "/dashboard", label: nav.mobile.home,      icon: LayoutDashboard },
-    canSee("orders:read")    && { href: "/orders",     label: nav.mobile.orders,    icon: Package },
+    canSee("orders:read")    && { href: "/orders",     label: nav.mobile.orders,    icon: ShoppingBag },
     canSee("customers:read") && { href: "/customers",  label: nav.mobile.customers, icon: Users },
   ].filter(Boolean) as { href: string; label: string; icon: any }[];
 
-  const secondaryNav = [
-    canSee("orders:read") && { href: "/orders/abandoned", label: nav.sidebar.orders_abandoned ?? "Abandoned Orders", icon: PackageX },
+  const secondaryNav: any[] = [
     canSee("products:read") && {
       href: "/products",
-      label: nav.mobile.products,
-      icon: Layers,
+      label: nav.sidebar.products,
+      icon: Tag,
       items: [
-        canSee("product_groups:read") && { href: "/product-groups", label: nav.mobile.categories,                              icon: FolderOpen },
-        { href: "/products/stock",  label: nav.sidebar.stock_management || "Stock Management", icon: Package },
+        canSee("product_groups:read") && { href: "/product-groups", label: nav.sidebar.categories || "Categories", icon: FolderOpen },
+        { href: "/products/stock", label: nav.sidebar.stock_management || "Stock", icon: Package },
+        canSee("offers:read") && { href: "/offers", label: nav.sidebar.offers || "Offers", icon: Gift },
+        canSee("discounts:read") && { href: "/discounts", label: nav.sidebar.discounts || "Discount Codes", icon: Tag },
       ].filter(Boolean) as { href: string; label: string; icon: any }[],
     },
-    canSee("reviews:read")   && { href: "/reviews",  label: nav.mobile.reviews || "Reviews",              icon: Star },
-    role === "admin"         && { href: "/team",     label: nav.mobile.team,                              icon: Shield },
-    role === "admin"         && { href: "/settings", label: nav.mobile.settings,                          icon: Settings },
+    canSee("delivery:read") && {
+      href: "/delivery/drivers",
+      label: nav.sidebar.delivery,
+      icon: Truck,
+      items: [
+        { href: "/delivery/drivers", label: nav.sidebar.delivery_drivers ?? "Drivers", icon: Truck },
+        { href: "/delivery/companies", label: nav.sidebar.delivery_companies ?? "Companies", icon: Building2 },
+        { href: "/delivery/shipping-profiles", label: nav.sidebar.delivery_shipping ?? "Shipping", icon: Package },
+      ],
+    },
+    canSee("messaging:read") && { href: "/messaging", label: nav.sidebar.messaging || "Automation", icon: Workflow },
+    canSee("reviews:read") && { href: "/reviews", label: nav.sidebar.reviews || "Reviews", icon: Star },
+    { divider: true },
+    canSee("settings:view") && { href: "/store/theme", label: nav.sidebar.theme_selector ?? "Store", icon: Store },
+    canSee("subscription:read") && { href: "/billing", label: nav.sidebar.billing || "Billing", icon: CreditCard },
+    canSee("ai_credits:read") && { href: "/ai", label: nav.sidebar.ai_assistant ?? "AI Assistant", icon: Sparkles },
+    { divider: true },
+    role === "admin" && { href: "/team", label: nav.sidebar.team, icon: Shield },
+    role === "admin" && { href: "/settings", label: nav.sidebar.settings, icon: Settings },
     { href: "/profile", label: nav.mobile.profile || "Profile", icon: UserCircle },
-    // AI Agents sits just above API Reference on mobile, mirroring the sidebar
-    // grouping where it's the last "user-facing" item before developer-facing
-    // links.
-    canSee("mcp:view")       && { href: "/mcp",      label: nav.sidebar.mcp ?? "AI Agents",              icon: Sparkles },
     { href: "/api", label: nav.sidebar.api_reference || "API Reference", icon: BookOpen, external: true },
-  ].filter(Boolean) as any[];
+  ].filter(Boolean);
 
   useEffect(() => {
     if (!menuOpen) {
       setOpenSubmenu(null);
     } else {
       secondaryNav.forEach((item: any) => {
+        if (item.divider || item.external) return;
         if (item.items) {
           const isAnySubActive = item.items.some(
             (subItem: any) => pathname === subItem.href || pathname.startsWith(subItem.href + "/")
@@ -104,25 +125,12 @@ export function MobileNav({ userScopes = [], role = "staff", brand, storeDomain 
 
   return (
     <>
-      {/* Top Bar - Glass Style */}
-      <div className="md:hidden flex items-center justify-between h-[64px] px-5 border-b bg-background/60 backdrop-blur-xl border-border/30 shrink-0 sticky top-0 z-40">
+      {/* Top Bar */}
+      <div className="md:hidden flex items-center justify-between h-[64px] px-5 border-b bg-card border-border shrink-0 sticky top-0 z-40">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-primary shadow-lg shadow-primary/20 overflow-hidden">
-            {brand?.logoUrl ? (
-              <img
-                src={brand.logoUrl}
-                alt={brand.brandName}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <Command className="text-primary-foreground size-5" />
-            )}
-          </div>
-          <div>
-            <p className="font-bold text-[14px] leading-tight text-foreground tracking-tight">
-              {brand?.brandName ?? nav.company.name}
-            </p>
-          </div>
+          <span className="text-[18px] font-bold tracking-wide text-foreground" style={{ fontFamily: "var(--font-latin), var(--font-cairo), sans-serif" }}>
+            COD FLOW
+          </span>
         </div>
         
         {/* Theme & Language Toggles */}
@@ -130,13 +138,13 @@ export function MobileNav({ userScopes = [], role = "staff", brand, storeDomain 
           <div className="flex items-center gap-2">
             <button
               onClick={() => setLocale(locale === "ar" ? "en" : "ar")}
-              className="flex items-center justify-center w-9 h-9 rounded-xl bg-muted/50 hover:bg-muted transition-all active:scale-95"
+              className="flex items-center justify-center w-9 h-9 rounded-md text-muted-foreground hover:bg-muted transition-colors"
             >
               <Globe size={18} className="text-foreground" strokeWidth={2.5} />
             </button>
             <button
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="flex items-center justify-center w-9 h-9 rounded-xl bg-muted/50 hover:bg-muted transition-all active:scale-95"
+              className="flex items-center justify-center w-9 h-9 rounded-md text-muted-foreground hover:bg-muted transition-colors"
             >
               {theme === "dark" ? (
                 <Sun size={18} className="text-foreground" strokeWidth={2.5} />
@@ -148,8 +156,8 @@ export function MobileNav({ userScopes = [], role = "staff", brand, storeDomain 
         )}
       </div>
 
-      {/* Bottom Navigation - Floating Glass Bar */}
-      <nav className="md:hidden fixed bottom-4 inset-x-4 z-50 bg-background/70 backdrop-blur-2xl border border-white/20 dark:border-white/5 rounded-3xl safe-area-inset-bottom shadow-[0_8px_32px_0_rgba(0,0,0,0.2)] overflow-hidden">
+      {/* Bottom Navigation */}
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-card border-t border-border safe-area-inset-bottom overflow-hidden">
         <div className={`grid h-[64px]`} style={{ gridTemplateColumns: `repeat(${primaryNav.length + 1}, minmax(0, 1fr))` }}>
             {primaryNav.map(({ href, label, icon: Icon }) => {
               const isActive = pathname === href || pathname.startsWith(href + "/");
@@ -208,17 +216,37 @@ export function MobileNav({ userScopes = [], role = "staff", brand, storeDomain 
           </div>
         </nav>
 
-      {/* Secondary Menu Overlay - Full Screen Glass Blur */}
+      {/* Secondary Menu Overlay */}
       {menuOpen && (
         <>
           <div
-            className="md:hidden fixed inset-0 bg-background/20 backdrop-blur-md z-40 animate-in fade-in duration-300"
+            className="md:hidden fixed inset-0 bg-black/40 z-40 animate-in fade-in duration-300"
             onClick={() => setMenuOpen(false)}
           />
           <div className="md:hidden fixed bottom-[92px] inset-x-4 z-50 animate-in slide-in-from-bottom-6 duration-400 ease-out">
-            <div className="bg-card/90 backdrop-blur-3xl border border-white/20 dark:border-white/10 rounded-3xl shadow-2xl overflow-hidden p-2">
+            <div className="bg-card border border-border rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.12)] overflow-hidden p-2">
               <div className="space-y-1">
-                {secondaryNav.map((item: any) => {
+                {storeDomain && (
+                  <a
+                    href={`https://${storeDomain}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-4 px-4 py-3.5 rounded-md transition-colors text-foreground hover:bg-muted"
+                  >
+                    <div className="w-9 h-9 rounded-md flex items-center justify-center shrink-0 transition-colors bg-muted text-muted-foreground">
+                      <ExternalLink size={18} strokeWidth={2.5} />
+                    </div>
+                    <span className="text-[14px] font-bold flex-1 text-start tracking-tight">
+                      {nav.sidebar.store || "Visit Store"}
+                    </span>
+                    <ExternalLink size={14} className="text-muted-foreground" />
+                  </a>
+                )}
+                {secondaryNav.map((item: any, idx: number) => {
+                  if (item.divider) {
+                    return <div key={`divider-${idx}`} className="h-px bg-border my-2" />;
+                  }
+
                   const hasSubmenu = "items" in item;
                   const isAnySubItemActive = hasSubmenu && item.items.some(
                     (subItem: any) => pathname === subItem.href || pathname.startsWith(subItem.href + "/")
@@ -229,8 +257,8 @@ export function MobileNav({ userScopes = [], role = "staff", brand, storeDomain 
                     const isParentActive = pathname === item.href || pathname.startsWith(item.href + "/");
                     isActive = isParentActive && !isAnySubItemActive;
                   } else {
-                    isActive = hasSubmenu 
-                      ? isAnySubItemActive 
+                    isActive = hasSubmenu
+                      ? isAnySubItemActive
                       : pathname === item.href || pathname.startsWith(item.href + "/");
                   }
 
@@ -247,14 +275,14 @@ export function MobileNav({ userScopes = [], role = "staff", brand, storeDomain 
                             rel="noopener noreferrer"
                             onClick={() => !hasSubmenu && setMenuOpen(false)}
                             className={cn(
-                              "flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all w-full active:scale-[0.98]",
+                              "flex items-center gap-4 px-4 py-3.5 rounded-md transition-colors w-full",
                               isActive
-                                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                                : "text-foreground hover:bg-muted/50"
+                                ? "bg-primary text-primary-foreground"
+                                : "text-foreground hover:bg-muted"
                             )}
                           >
                             <div className={cn(
-                              "w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors",
+                              "w-9 h-9 rounded-md flex items-center justify-center shrink-0 transition-colors",
                               isActive ? "bg-white/20 text-white" : "bg-muted text-muted-foreground"
                             )}>
                               <Icon size={18} strokeWidth={2.5} />
@@ -266,14 +294,14 @@ export function MobileNav({ userScopes = [], role = "staff", brand, storeDomain 
                             href={item.href}
                             onClick={() => !hasSubmenu && setMenuOpen(false)}
                             className={cn(
-                              "flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all w-full active:scale-[0.98]",
+                              "flex items-center gap-4 px-4 py-3.5 rounded-md transition-colors w-full",
                               isActive
-                                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                                : "text-foreground hover:bg-muted/50"
+                                ? "bg-primary text-primary-foreground"
+                                : "text-foreground hover:bg-muted"
                             )}
                           >
                             <div className={cn(
-                              "w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors",
+                              "w-9 h-9 rounded-md flex items-center justify-center shrink-0 transition-colors",
                               isActive ? "bg-white/20 text-white" : "bg-muted text-muted-foreground"
                             )}>
                               <Icon size={18} strokeWidth={2.5} />
@@ -289,21 +317,21 @@ export function MobileNav({ userScopes = [], role = "staff", brand, storeDomain 
                               setOpenSubmenu(isExpanded ? null : item.label);
                             }}
                             className={cn(
-                              "absolute end-3 w-10 h-10 flex items-center justify-center rounded-xl transition-all",
-                              isExpanded 
-                                ? "bg-white/20 text-white" 
-                                : isActive 
-                                  ? "text-white/60 hover:bg-white/10" 
-                                  : "text-muted-foreground hover:bg-muted/80",
+                              "absolute end-3 w-10 h-10 flex items-center justify-center rounded-md transition-colors",
+                              isExpanded
+                                ? "bg-white/20 text-white"
+                                : isActive
+                                  ? "text-white/60 hover:bg-white/10"
+                                  : "text-muted-foreground hover:bg-muted",
                               !isActive && isExpanded && "bg-primary/10 text-primary"
                             )}
                           >
-                            <ChevronDown 
-                              size={18} 
+                            <ChevronDown
+                              size={18}
                               className={cn(
                                 "transition-transform duration-300",
                                 isExpanded ? "rotate-180" : ""
-                              )} 
+                              )}
                             />
                           </button>
                         )}
@@ -319,15 +347,15 @@ export function MobileNav({ userScopes = [], role = "staff", brand, storeDomain 
                                 href={subItem.href}
                                 onClick={() => setMenuOpen(false)}
                                 className={cn(
-                                  "flex items-center gap-4 px-4 py-3 rounded-xl transition-all active:scale-[0.97]",
+                                  "flex items-center gap-4 px-4 py-3 rounded-md transition-colors",
                                   isSubActive
-                                    ? "bg-primary/10 text-primary font-bold shadow-sm"
-                                    : "text-muted-foreground hover:bg-muted/30"
+                                    ? "bg-primary/10 text-primary font-semibold"
+                                    : "text-muted-foreground hover:bg-muted"
                                 )}
                               >
                                 <div className={cn(
-                                  "w-8 h-8 rounded-lg flex items-center justify-center shrink-0",
-                                  isSubActive ? "bg-primary/20 text-primary" : "bg-transparent text-muted-foreground/40"
+                                  "w-8 h-8 rounded-md flex items-center justify-center shrink-0",
+                                  isSubActive ? "bg-primary/10 text-primary" : "bg-transparent text-muted-foreground/40"
                                 )}>
                                   <SubIcon size={16} strokeWidth={2.5} />
                                 </div>

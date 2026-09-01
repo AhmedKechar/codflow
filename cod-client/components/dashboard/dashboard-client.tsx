@@ -70,7 +70,7 @@ export function DashboardClient({ statusStats }: DashboardClientProps) {
       icon: Package,
       iconBg: "bg-amber-50",
       iconColor: "text-amber-600",
-      statuses: ["confirmed", "preparing", "ready"],
+      statuses: ["confirmed", "busy", "postponed"],
     },
     {
       key: "delivered",

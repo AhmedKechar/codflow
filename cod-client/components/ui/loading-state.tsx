@@ -24,7 +24,7 @@ export function LoadingState({ message, className }: LoadingStateProps) {
         className
       )}
     >
-      <Loader2 size={32} className="text-primary animate-spin mb-4" />
+      <Loader2 size={28} className="text-muted-foreground animate-spin mb-4" />
       {message && (
         <p className="text-sm text-muted-foreground">{message}</p>
       )}

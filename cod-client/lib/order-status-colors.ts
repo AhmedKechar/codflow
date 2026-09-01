@@ -26,35 +26,23 @@ export const ORDER_STATUS_CONFIG: Record<OrderStatus, StatusConfig> = {
     dotClass: "bg-gray-500",
     badgeClass: "bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-950 dark:text-gray-300 dark:border-gray-800",
   },
-  preparing: {
-    label: "Preparing",
-    labelAr: "قيد التحضير",
+  busy: {
+    label: "Busy",
+    labelAr: "مشغول",
     dotClass: "bg-amber-500",
     badgeClass: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800",
   },
-  ready: {
-    label: "Ready",
-    labelAr: "جاهز",
-    dotClass: "bg-yellow-500",
-    badgeClass: "bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-950 dark:text-yellow-300 dark:border-yellow-800",
-  },
-  assigned: {
-    label: "Assigned",
-    labelAr: "تم التعيين",
+  postponed: {
+    label: "Postponed",
+    labelAr: "مؤجل",
     dotClass: "bg-purple-500",
     badgeClass: "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950 dark:text-purple-300 dark:border-purple-800",
   },
-  dispatched: {
-    label: "Dispatched",
-    labelAr: "تم الإرسال",
-    dotClass: "bg-violet-500",
-    badgeClass: "bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-950 dark:text-violet-300 dark:border-violet-800",
-  },
-  out_for_delivery: {
-    label: "Out for Delivery",
-    labelAr: "خرج للتسليم",
-    dotClass: "bg-cyan-500",
-    badgeClass: "bg-cyan-50 text-cyan-700 border-cyan-200 dark:bg-cyan-950 dark:text-cyan-300 dark:border-cyan-800",
+  shipped: {
+    label: "Shipped",
+    labelAr: "تم الشحن",
+    dotClass: "bg-teal-500",
+    badgeClass: "bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-950 dark:text-teal-300 dark:border-teal-800",
   },
   delivered: {
     label: "Delivered",
@@ -73,6 +61,18 @@ export const ORDER_STATUS_CONFIG: Record<OrderStatus, StatusConfig> = {
     labelAr: "ملغي",
     dotClass: "bg-red-500",
     badgeClass: "bg-red-50 text-red-700 border-red-200 dark:bg-red-950 dark:text-red-300 dark:border-red-800",
+  },
+  fake: {
+    label: "Fake",
+    labelAr: "مزيف",
+    dotClass: "bg-darkred",
+    badgeClass: "bg-red-50 text-darkred border-red-200 dark:bg-red-950 dark:text-red-300 dark:border-red-800",
+  },
+  duplicate: {
+    label: "Duplicate",
+    labelAr: "مكرر",
+    dotClass: "bg-slate-500",
+    badgeClass: "bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-950 dark:text-slate-300 dark:border-slate-800",
   },
 };
 

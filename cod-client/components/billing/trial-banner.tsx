@@ -42,7 +42,7 @@ export function TrialBanner({ subscription }: Props) {
         <Button
           variant="default"
           size="xs"
-          className="bg-amber-600 text-white hover:bg-amber-700 shadow-sm"
+          className="bg-foreground text-background hover:bg-foreground/90"
           onClick={() => router.push("/billing/upgrade")}
         >
           <ArrowUpRight className="w-3 h-3 me-1" />

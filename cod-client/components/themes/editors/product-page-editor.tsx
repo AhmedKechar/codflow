@@ -1,17 +1,16 @@
 "use client";
 
+import { useEffect } from "react";
 import { Eye } from "lucide-react";
 import { useThemes } from "@/lib/translations";
-import {
-  PanelCard,
-  ToggleRow,
-  SiteBuilderSaveBar,
-} from "@/components/themes/builder-ui";
+import { PanelCard, ToggleRow } from "@/components/themes/builder-ui";
 import { useSiteBuilder } from "@/components/themes/site-builder-state";
 
 interface Props {
   siteJson: string | null;
   onSaved?: () => void;
+  onDirtyChange?: (dirty: boolean) => void;
+  saveRef?: React.MutableRefObject<(() => Promise<boolean>) | null>;
 }
 
 const FIELDS = [
@@ -23,15 +22,23 @@ const FIELDS = [
   { key: "showTrustSeals", labelKey: "productpage_trust_seals" },
 ] as const;
 
-export function ProductPageEditor({ siteJson, onSaved }: Props) {
+export function ProductPageEditor({ siteJson, onSaved, onDirtyChange, saveRef }: Props) {
   const t = useThemes();
   const { site, update, dirty, saving, save } = useSiteBuilder(siteJson);
 
-  const handleSave = async () => {
-    const ok = await save();
-    if (ok) onSaved?.();
-    return ok;
-  };
+  useEffect(() => {
+    onDirtyChange?.(dirty);
+  }, [dirty, onDirtyChange]);
+
+  useEffect(() => {
+    if (saveRef) {
+      saveRef.current = async () => {
+        const ok = await save();
+        if (ok) onSaved?.();
+        return ok;
+      };
+    }
+  });
 
   return (
     <div className="space-y-6">
@@ -57,8 +64,6 @@ export function ProductPageEditor({ siteJson, onSaved }: Props) {
           ))}
         </div>
       </PanelCard>
-
-      <SiteBuilderSaveBar dirty={dirty} saving={saving} onSave={handleSave} />
     </div>
   );
 }

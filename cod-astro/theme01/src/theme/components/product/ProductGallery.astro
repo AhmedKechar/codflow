@@ -17,7 +17,7 @@ const { product, hasDiscount, discountPct, isRTL, content } = Astro.props;
 
 <div class="relative">
   <!-- Mobile scroll-snap gallery -->
-  <div class="gallery-track sm:rounded-[2rem] aspect-square lg:aspect-[4/5]" id="gallery">
+  <div class="gallery-track rounded-[var(--radius-card)] aspect-square lg:aspect-[4/5]" id="gallery">
     {product.images.length > 0 ? product.images.map((img, idx) => (
       <div class="gallery-slide" data-image-id={img.id}>
         {idx === 0 ? (
@@ -61,7 +61,7 @@ const { product, hasDiscount, discountPct, isRTL, content } = Astro.props;
   <!-- Badges on gallery -->
   <div class="absolute top-4 start-4 flex flex-col gap-2">
     {hasDiscount && (
-      <span class="bg-red-600 text-white text-xs font-black px-2.5 py-1.5 rounded-lg shadow-md tracking-tight">
+      <span class="bg-primary text-white text-xs font-semibold px-3 py-1 rounded-full">
         -{discountPct}%
       </span>
     )}
@@ -93,8 +93,8 @@ const { product, hasDiscount, discountPct, isRTL, content } = Astro.props;
           <button
             type="button"
             class:list={[
-              "shrink-0 w-20 h-20 rounded-2xl overflow-hidden border-2 transition-all gallery-thumb active:scale-90",
-              i === 0 ? "border-[var(--clr-primary)] shadow-md" : "border-transparent opacity-60 hover:opacity-100",
+              "shrink-0 w-20 h-20 rounded-lg overflow-hidden border transition-all gallery-thumb active:scale-90",
+              i === 0 ? "border-[var(--clr-primary)]" : "border-[var(--clr-border)] opacity-60 hover:opacity-100",
             ]}
             data-index={i}
           >

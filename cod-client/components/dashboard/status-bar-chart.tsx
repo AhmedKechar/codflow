@@ -24,14 +24,14 @@ const CHART_COLORS: Record<OrderStatus, string> = {
   new: "#3b82f6",
   confirmed: "#6366f1",
   unreachable: "#6b7280",
-  preparing: "#f59e0b",
-  ready: "#eab308",
-  assigned: "#a855f7",
-  dispatched: "#8b5cf6",
-  out_for_delivery: "#06b6d4",
+  busy: "#f59e0b",
+  postponed: "#a855f7",
+  shipped: "#14b8a6",
   delivered: "#22c55e",
   returned: "#f97316",
   cancelled: "#ef4444",
+  fake: "#8b0000",
+  duplicate: "#64748b",
 };
 
 interface CustomTooltipProps {

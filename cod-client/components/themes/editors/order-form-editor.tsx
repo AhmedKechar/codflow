@@ -1,21 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ClipboardList } from "lucide-react";
-import { toast } from "sonner";
 import { useThemes } from "@/lib/translations";
 import { updateThemeColors } from "@/actions/themes";
 import type { OrderFormConfig } from "@/actions/stores";
-import {
-  PanelCard,
-  ToggleRow,
-  TextInput,
-  SiteBuilderSaveBar,
-} from "@/components/themes/builder-ui";
+import { PanelCard, ToggleRow, TextInput } from "@/components/themes/builder-ui";
 
 interface Props {
   currentOrderFormConfig?: OrderFormConfig | null;
   onSaved?: () => void;
+  onDirtyChange?: (dirty: boolean) => void;
+  saveRef?: React.MutableRefObject<(() => Promise<boolean>) | null>;
 }
 
 const FIELD_LABEL_KEYS = [
@@ -30,7 +26,7 @@ const FIELD_LABEL_KEYS = [
   { key: "showQuantity", labelKey: "orderform_quantity" },
 ] as const;
 
-export function OrderFormEditor({ currentOrderFormConfig, onSaved }: Props) {
+export function OrderFormEditor({ currentOrderFormConfig, onSaved, onDirtyChange, saveRef }: Props) {
   const t = useThemes();
   const [orderForm, setOrderForm] = useState<OrderFormConfig>({
     showName: currentOrderFormConfig?.showName ?? true,
@@ -67,6 +63,16 @@ export function OrderFormEditor({ currentOrderFormConfig, onSaved }: Props) {
       setSaving(false);
     }
   };
+
+  useEffect(() => {
+    onDirtyChange?.(dirty);
+  }, [dirty, onDirtyChange]);
+
+  useEffect(() => {
+    if (saveRef) {
+      saveRef.current = handleSave;
+    }
+  });
 
   return (
     <div className="space-y-6">
@@ -134,8 +140,6 @@ export function OrderFormEditor({ currentOrderFormConfig, onSaved }: Props) {
           </div>
         </div>
       </PanelCard>
-
-      <SiteBuilderSaveBar dirty={dirty} saving={saving} onSave={handleSave} />
     </div>
   );
 }

@@ -360,7 +360,7 @@ export async function handleYalidineWebhook(c: Context<AppContext>) {
       }
       const nextStatus: OrderStatus = mappedStatus;
 
-      // "Tentative échouée" — stays out_for_delivery, only increments attempts
+      // "Tentative échouée" — stays shipped, only increments attempts
       if (incrementAttempts) {
         if (tracking) {
           const order = await getOrderByTracking(db, storeId, tracking);

@@ -1,15 +1,17 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Gift, Plus, RefreshCw } from "lucide-react";
+import { Plus, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useGiftCards } from "@/lib/translations";
+import { useGiftCards, useNavigation } from "@/lib/translations";
 import { Button } from "@/components/ui/button";
 import { GiftCardList } from "@/components/gift-cards/gift-card-list";
 import { getGiftCards, type GiftCard } from "@/actions/gift-cards";
+import { PageHeader } from "@/components/ui/page-header";
 
 export function GiftCardsView() {
   const t = useGiftCards();
+  const nav = useNavigation();
   const router = useRouter();
   const [cards, setCards] = useState<GiftCard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -31,29 +33,22 @@ export function GiftCardsView() {
   }, [fetchData]);
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">
-            {t.page_title ?? "Gift Cards"}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {t.page_subtitle ?? "Manage your gift cards"}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={fetchData} disabled={isLoading}>
-            <RefreshCw size={16} className={isLoading ? "animate-spin" : ""} />
-          </Button>
-          <Button
-            size="sm"
-            onClick={() => router.push("/store/gift-cards/new")}
-          >
-            <Plus size={16} className="mr-2" />
-            {t.actions?.create ?? "Create Gift Card"}
-          </Button>
-        </div>
-      </div>
+    <div className="space-y-6 animate-fade-in">
+      <PageHeader
+        title={nav.sidebar.gift_cards}
+        primaryAction={{
+          label: t.actions?.create ?? "Create Gift Card",
+          onClick: () => router.push("/store/gift-cards/new"),
+          icon: <Plus className="w-4 h-4" />,
+        }}
+        secondaryActions={[
+          {
+            label: "Refresh",
+            onClick: fetchData,
+            icon: <RefreshCw size={14} className={isLoading ? "animate-spin" : ""} />,
+          },
+        ]}
+      />
 
       <GiftCardList cards={cards} isLoading={isLoading} onRefresh={fetchData} />
     </div>

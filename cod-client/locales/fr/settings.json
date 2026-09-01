@@ -76,7 +76,9 @@
     "api_key_copied": "Copié !",
     "api_key_reveal": "Afficher",
     "api_key_hide": "Masquer",
-    "api_key_missing": "Clé API non disponible. Elle apparaîtra ici après votre prochain redéploiement."
+    "api_key_missing": "Clé API non disponible. Elle apparaîtra ici après votre prochain redéploiement.",
+    "mcp_title": "MCP",
+    "mcp_subtitle": "Agents IA et connexions Model Context Protocol"
   },
   "shipping": {
     "title": "Tarifs de livraison",

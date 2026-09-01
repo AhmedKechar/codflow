@@ -16,7 +16,7 @@ export function DriversViewSkeleton() {
       </div>
 
       {/* Table Skeleton (Desktop) */}
-      <div className="hidden sm:block border rounded-2xl overflow-hidden glass-card">
+      <div className="hidden sm:block border rounded-lg overflow-hidden bg-card">
         <div className="bg-muted/30 p-4 border-b">
           <div className="grid grid-cols-4 gap-4">
             <Skeleton className="h-4 w-20" />
@@ -41,9 +41,9 @@ export function DriversViewSkeleton() {
       {/* Mobile Card Skeleton */}
       <div className="sm:hidden space-y-3">
         {[...Array(3)].map((_, i) => (
-          <div key={i} className="glass-card rounded-2xl p-5 space-y-5">
+          <div key={i} className="bg-card rounded-lg p-5 space-y-5">
             <div className="flex items-start gap-4">
-              <Skeleton className="h-12 w-12 rounded-2xl" />
+              <Skeleton className="h-12 w-12 rounded-lg" />
               <div className="flex-1 space-y-2">
                 <div className="flex justify-between">
                   <Skeleton className="h-5 w-32" />
@@ -54,10 +54,10 @@ export function DriversViewSkeleton() {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2.5">
-              <Skeleton className="h-14 rounded-2xl" />
-              <Skeleton className="h-14 rounded-2xl" />
+              <Skeleton className="h-14 rounded-lg" />
+              <Skeleton className="h-14 rounded-lg" />
             </div>
-            <Skeleton className="h-11 w-full rounded-2xl" />
+            <Skeleton className="h-11 w-full rounded-lg" />
           </div>
         ))}
       </div>

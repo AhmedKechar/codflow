@@ -80,7 +80,7 @@ export function DeliveryTable({
       label: t.table?.status ?? "Status",
       sortable: true,
       isStatus: true,
-      render: (value) => <StatusBadge status={value} className="py-1 px-3 rounded-full text-[10px] font-black uppercase tracking-widest border shadow-sm" />,
+      render: (value) => <StatusBadge status={value} className="py-1 px-3 rounded-full text-[10px] font-semibold uppercase tracking-widest border shadow-sm" />,
     },
     {
       key: "compensationWilayaCount",
@@ -142,7 +142,7 @@ export function DeliveryTable({
       ? [
           {
             label: t.actions?.delete ?? "Delete",
-            icon: <Trash2 className="w-4 h-4 text-rose-500" />,
+            icon: <Trash2 className="w-4 h-4 text-destructive" />,
             onClick: onDelete,
             variant: "destructive" as const,
             disabled: (driver: Driver) => (driverOrdersMap[driver.id]?.length ?? 0) > 0,
@@ -189,7 +189,7 @@ export function DeliveryTable({
               <div className="flex items-start gap-4">
                 {/* Avatar with User icon */}
                 <div className="relative shrink-0">
-                  <Avatar className="h-12 w-12 rounded-2xl bg-primary/10 text-primary border-none ring-1 ring-primary/15 shadow-sm">
+                  <Avatar className="h-12 w-12 rounded-lg bg-primary/10 text-primary border-none ring-1 ring-primary/15 shadow-sm">
                     <AvatarFallback className="bg-transparent">
                       <User className="w-4.5 h-4.5 opacity-40" />
                     </AvatarFallback>
@@ -199,16 +199,16 @@ export function DeliveryTable({
                 {/* Identity info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
-                    <p className="font-black text-[16px] text-foreground tracking-tight leading-normal truncate pb-0.5">
+                    <p className="font-semibold text-[16px] text-foreground tracking-tight leading-normal truncate pb-0.5">
                       {fullName}
                     </p>
                     <div className="shrink-0 -mt-1 -me-1 flex items-center gap-1.5">
                       {(onEdit || onDelete || onAssignOrders || onCompensations) && (
                         <DropdownMenu>
-                          <DropdownMenuTrigger render={<button className="w-8 h-8 rounded-full bg-muted/30 hover:bg-primary/10 flex items-center justify-center text-muted-foreground/60 hover:text-primary transition-all active:scale-90" />}>
+                          <DropdownMenuTrigger render={<button className="w-8 h-8 rounded-md bg-muted hover:bg-muted-foreground/10 flex items-center justify-center text-muted-foreground hover:text-foreground transition-all" />}>
                             <MoreHorizontal className="w-4 h-4" />
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align={dir === "rtl" ? "start" : "end"} className="glass-card rounded-2xl">
+                          <DropdownMenuContent align={dir === "rtl" ? "start" : "end"} className="bg-card rounded-lg">
                             {onAssignOrders && (
                               <DropdownMenuItem onClick={() => onAssignOrders(driver)} className="text-[11px] font-bold uppercase tracking-wider py-2.5">
                                 <Package className="w-3.5 h-3.5 me-2" />{t.actions?.assign_orders ?? "Assign"}
@@ -228,7 +228,7 @@ export function DeliveryTable({
                               <DropdownMenuItem
                                 onClick={() => onDelete(driver)}
                                 disabled={(driverOrdersMap[driver.id]?.length ?? 0) > 0}
-                                className="!text-rose-500 text-[11px] font-bold uppercase tracking-wider py-2.5"
+                                className="!text-destructive text-[11px] font-bold uppercase tracking-wider py-2.5"
                               >
                                 <Trash2 className="w-3.5 h-3.5 me-2" />{t.actions?.delete ?? "Delete"}
                               </DropdownMenuItem>
@@ -247,7 +247,7 @@ export function DeliveryTable({
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                       <StatusBadge status={driver.status} className="h-5 px-2 rounded-lg text-[9px] font-black uppercase tracking-widest border-none shadow-none ring-1 ring-inset" />
+                       <StatusBadge status={driver.status} className="h-5 px-2 rounded-lg text-[9px] font-semibold uppercase tracking-widest border-none shadow-none ring-1 ring-inset" />
                     </div>
                   </div>
                 </div>
@@ -255,25 +255,25 @@ export function DeliveryTable({
 
               {/* Info Grid: Modern app-like pills */}
               <div className="grid grid-cols-2 gap-2.5">
-                <div className="bg-muted/30 rounded-2xl p-3 flex items-center gap-3 border border-border/5 transition-colors group-hover:bg-muted/40">
+                <div className="bg-muted/30 rounded-lg p-3 flex items-center gap-3 border border-border/20 transition-colors group-hover:bg-muted/40">
                   <div className="w-8 h-8 rounded-xl bg-primary/5 flex items-center justify-center shrink-0">
                     <Truck className="w-4 h-4 text-primary/40" />
                   </div>
                   <div className="flex flex-col min-w-0">
                     <span className="text-[8px] font-bold uppercase tracking-[0.1em] text-muted-foreground/40 leading-none mb-1">Vehicle</span>
-                    <span className="text-[11px] font-black text-foreground truncate uppercase">
+                    <span className="text-[11px] font-semibold text-foreground truncate uppercase">
                       {t.vehicle_type?.[driver.vehicleType as "motorcycle" | "car" | "van"] ?? driver.vehicleType ?? "—"}
                     </span>
                   </div>
                 </div>
 
-                <div className="bg-muted/30 rounded-2xl p-3 flex items-center gap-3 border border-border/5 transition-colors group-hover:bg-muted/40">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-500/5 flex items-center justify-center shrink-0">
-                    <Package className="w-4 h-4 text-emerald-500/40" />
+                <div className="bg-muted/30 rounded-lg p-3 flex items-center gap-3 border border-border/20 transition-colors group-hover:bg-muted/40">
+                  <div className="w-8 h-8 rounded-xl bg-success/5 flex items-center justify-center shrink-0">
+                    <Package className="w-4 h-4 text-success/40" />
                   </div>
                   <div className="flex flex-col min-w-0">
                     <span className="text-[8px] font-bold uppercase tracking-[0.1em] text-muted-foreground/40 leading-none mb-1">Wilayas</span>
-                    <span className="text-[11px] font-black text-foreground truncate">
+                    <span className="text-[11px] font-semibold text-foreground truncate">
                       {driver.compensationWilayaCount ?? 0}
                     </span>
                   </div>
@@ -284,7 +284,7 @@ export function DeliveryTable({
               <div className="pt-1">
                 <Button 
                   onClick={() => onView?.(driver)} 
-                  className="w-full h-11 rounded-2xl bg-white dark:bg-muted/30 border border-border/10 text-foreground font-black text-[11px] uppercase tracking-widest shadow-sm hover:bg-muted/50 active:scale-[0.98] transition-all"
+                  className="w-full h-11 rounded-lg bg-card border border-border/40 text-foreground font-semibold text-[11px] uppercase tracking-widest shadow-sm hover:bg-muted/50 active:scale-[0.98] transition-all"
                 >
                   {t.actions?.view ?? "View Profile"}
                 </Button>

@@ -15,6 +15,7 @@ import { logActivity, ACTIONS } from "@/lib/activity";
 import { NotFoundError, BusinessLogicError, ValidationError } from "@/lib/errors/classes";
 import { ERROR_CODES, ERROR_CATEGORIES } from "../../../../cod-shared/errors/codes";
 import { shouldTriggerCapiPurchase } from "@/workflows/capi-helpers";
+import { sendStatusNotification } from "@/services/notifications";
 
 /**
  * PATCH /orders/:id/status
@@ -42,19 +43,19 @@ export async function updateStatus(c: Context<AppContext>) {
     throw new NotFoundError("Order", orderId);
   }
 
-  // Guard: enforce valid forward transitions — prevents backward moves and invalid jumps
+  // Guard: enforce valid transitions
   const ALLOWED_TRANSITIONS: Record<string, string[]> = {
-    new:              ["confirmed", "unreachable", "cancelled"],
-    confirmed:        ["preparing", "unreachable", "cancelled"],
-    unreachable:      ["confirmed", "cancelled"],
-    preparing:        ["ready", "cancelled"],
-    ready:            ["out_for_delivery", "dispatched", "cancelled"],
-    assigned:         ["out_for_delivery", "dispatched", "cancelled"],
-    dispatched:       ["out_for_delivery", "cancelled"],
-    out_for_delivery: ["delivered", "returned"],
-    delivered:        [],
-    returned:         [],
-    cancelled:        [],
+    new:       ["confirmed", "unreachable", "busy", "cancelled", "fake", "duplicate"],
+    confirmed: ["unreachable", "busy", "shipped", "cancelled", "fake", "duplicate"],
+    unreachable: ["confirmed", "busy", "cancelled", "fake", "duplicate"],
+    busy:      ["confirmed", "unreachable", "cancelled", "fake", "duplicate"],
+    postponed: ["confirmed", "shipped", "cancelled", "fake", "duplicate"],
+    shipped:   ["delivered", "returned", "cancelled"],
+    delivered: ["returned"],
+    returned:  ["confirmed", "cancelled"],
+    cancelled: ["confirmed", "new"],
+    fake:      ["confirmed", "new"],
+    duplicate: ["confirmed", "new"],
   };
 
   const allowed = ALLOWED_TRANSITIONS[order.status] ?? [];
@@ -75,6 +76,11 @@ export async function updateStatus(c: Context<AppContext>) {
   const user = c.get("user");
 
   await queries.updateOrderStatus(db, storeId, orderId, validated.status, user?.id, user?.name ?? undefined);
+
+  // Send notification to customer fire-and-forget — never block the status response.
+  void sendStatusNotification(db, orderId, validated.status as any, storeId).catch((err) =>
+    console.error("[notification] send failed:", err?.message)
+  );
 
   // Fire CAPI Purchase Workflow fire-and-forget — never block the status response.
   if (shouldTriggerCapiPurchase(validated.status, order.wilayaId)) {
@@ -144,8 +150,8 @@ export async function assignDriver(c: Context<AppContext>) {
     );
   }
 
-  // Can't re-assign driver once the package is already out or completed.
-  const lockedStatuses = ["out_for_delivery", "delivered", "returned", "cancelled"];
+  // Can't assign driver once the order is shipped, completed, or terminal.
+  const lockedStatuses = ["shipped", "delivered", "returned", "cancelled"];
   if (lockedStatuses.includes(order.status)) {
     throw new BusinessLogicError(
       `Cannot assign a driver — order is already "${order.status}".`,
@@ -183,12 +189,12 @@ export async function assignDriver(c: Context<AppContext>) {
  *
  * Remove the driver currently assigned to an order. Clears driverId and
  * driverFee, resets deliveryMethod to "unassigned", and rolls the status
- * back from "assigned" → "ready" when applicable.
+ * back to "confirmed" when applicable.
  *
  * Rejected when:
  *  - order doesn't exist
  *  - order has no driver assigned
- *  - order has already progressed past dispatch (out_for_delivery,
+ *  - order has already progressed past dispatch (shipped,
  *    delivered, returned, cancelled) — at that point clearing the driver
  *    would erase payroll/handoff history.
  */
@@ -214,7 +220,7 @@ export async function unassignDriver(c: Context<AppContext>) {
     );
   }
 
-  const lockedStatuses = ["out_for_delivery", "delivered", "returned", "cancelled"];
+  const lockedStatuses = ["shipped", "delivered", "returned", "cancelled"];
   if (lockedStatuses.includes(order.status)) {
     throw new BusinessLogicError(
       `Cannot unassign driver — order is already "${order.status}".`,

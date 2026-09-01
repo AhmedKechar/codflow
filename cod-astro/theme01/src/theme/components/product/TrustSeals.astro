@@ -66,8 +66,8 @@ const activeSeals = seals.filter(s => trustSeals?.[s.key]);
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 0.75rem;
-    border: 1px solid color-mix(in srgb, var(--seal-primary) 15%, transparent);
-    background: color-mix(in srgb, var(--seal-primary) 3%, transparent);
+    border: 1px solid var(--clr-border);
+    background: var(--clr-surface);
     border-radius: var(--seal-radius);
     font-size: 0.875rem;
     line-height: 1.25rem;
@@ -79,7 +79,7 @@ const activeSeals = seals.filter(s => trustSeals?.[s.key]);
     color: var(--seal-primary);
   }
   .trust-seal-label {
-    color: var(--seal-primary);
+    color: var(--clr-text);
     font-weight: 500;
   }
 </style>

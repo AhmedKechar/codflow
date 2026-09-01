@@ -131,6 +131,16 @@
   "pages_announcement": "شريط الإعلان",
   "pages_announcement_hint": "الشريط الترويجي أعلى المتجر",
   "pages_announcement_bar": "إظهار شريط الإعلان",
+  "design_style": "نمط التصميم",
+  "design_style_hint": "اختر قالباً أو خصّص يدوياً",
+  "border_radius": "استدارة الحواف",
+  "shadow": "الظل",
+  "border_radius_rounded": "دائري",
+  "border_radius_sharp": "حاد",
+  "border_radius_minimal": "بسيط",
+  "shadow_soft": "خفيف",
+  "shadow_medium": "متوسط",
+  "shadow_strong": "قوي",
   "themes": {
     "theme01": {
       "name": "كلاسيكي",

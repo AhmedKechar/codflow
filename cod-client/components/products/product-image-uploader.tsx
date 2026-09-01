@@ -4,6 +4,7 @@ import { useRef, useState, useCallback } from "react";
 import { UploadCloud, X, ImageIcon, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getPresignedUploadUrl, reorderProductImages } from "@/actions/products";
+import { useProducts } from "@/lib/translations";
 import { toast } from "sonner";
 import type { ProductImage } from "@/types";
 
@@ -49,6 +50,7 @@ export function ProductImageUploader({
   maxImages = 8,
 }: ProductImageUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const t = useProducts();
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [reordering, setReordering] = useState(false);
@@ -65,7 +67,7 @@ export function ProductImageUploader({
   async function handleFiles(files: FileList | File[]) {
     const arr = Array.from(files).filter((f) => ACCEPTED.includes(f.type));
     if (!arr.length) {
-      toast.error("Only JPG, PNG, WebP and GIF images are allowed.");
+      toast.error(t.form.uploader_only_format ?? "Only JPG, PNG, WebP and GIF images are allowed.");
       return;
     }
     const toUpload = arr.slice(0, maxImages - totalImages);
@@ -73,7 +75,7 @@ export function ProductImageUploader({
     try {
       for (const file of toUpload) {
         if (file.size > MAX_MB * 1024 * 1024) {
-          toast.error(`${file.name} exceeds ${MAX_MB} MB limit.`);
+          toast.error((t.form.uploader_exceeds ?? "{name} exceeds {max} MB limit.").replace("{name}", file.name).replace("{max}", String(MAX_MB)));
           continue;
         }
         const { presignedUrl, key, publicUrl } = await getPresignedUploadUrl(file.type);
@@ -86,7 +88,7 @@ export function ProductImageUploader({
         onPendingAdd({ clientId: crypto.randomUUID(), key, url: publicUrl, file });
       }
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Upload failed. Please try again.");
+      toast.error(e instanceof Error ? e.message : (t.form.uploader_failed ?? "Upload failed. Please try again."));
     } finally {
       setUploading(false);
     }
@@ -172,7 +174,7 @@ export function ProductImageUploader({
                     disabled={disabled || reordering}
                     onClick={() => moveImage(index, -1)}
                     className="absolute start-1 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center text-white transition-colors disabled:opacity-30"
-                    aria-label="Move earlier"
+                    aria-label={t.form.uploader_move_earlier ?? "Move earlier"}
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
@@ -185,7 +187,7 @@ export function ProductImageUploader({
                     disabled={disabled || reordering}
                     onClick={() => moveImage(index, 1)}
                     className="absolute end-1 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center text-white transition-colors disabled:opacity-30"
-                    aria-label="Move later"
+                    aria-label={t.form.uploader_move_later ?? "Move later"}
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
@@ -234,13 +236,19 @@ export function ProductImageUploader({
           )}
           <div className="text-center">
             <p className="text-sm font-bold text-foreground">
-              {uploading ? "Uploading…" : dragging ? "Drop images here" : "Click or drag images here"}
+              {uploading
+                ? (t.form.uploader_uploading ?? "Uploading…")
+                : dragging
+                  ? (t.form.uploader_dropping ?? "Drop images here")
+                  : (t.form.uploader_drop_hint ?? "Click or drag images here")}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              JPG, PNG, WebP, GIF · max {MAX_MB} MB · up to {maxImages - totalImages} more
+              {(t.form.uploader_formats_max ?? "JPG, PNG, WebP, GIF · max {max} MB · up to {n} more")
+                .replace("{max}", String(MAX_MB))
+                .replace("{n}", String(maxImages - totalImages))}
             </p>
             {allImages.length > 1 && (
-              <p className="text-[10px] text-muted-foreground/60 mt-1">Hover images to reorder with arrows</p>
+              <p className="text-[10px] text-muted-foreground/60 mt-1">{t.form.uploader_reorder_hint ?? "Hover images to reorder with arrows"}</p>
             )}
           </div>
           <input
@@ -258,7 +266,7 @@ export function ProductImageUploader({
       {!canAddMore && (
         <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1.5">
           <ImageIcon className="w-3.5 h-3.5" />
-          Maximum {maxImages} images reached
+          {(t.form.uploader_max_reached ?? "Maximum {max} images reached").replace("{max}", String(maxImages))}
         </p>
       )}
     </div>

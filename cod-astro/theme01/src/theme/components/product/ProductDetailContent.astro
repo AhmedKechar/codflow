@@ -52,7 +52,7 @@ const isLowStock   = product.trackInventory && product.inventory > 0 && product.
 const lowStockText = content.lowStock.replace("{n}", String(product.inventory));
 
 const HEX = /^#[0-9a-fA-F]{3,8}$/;
-const primaryColor = HEX.test(config.primaryColor) ? config.primaryColor : "#7c3aed";
+const primaryColor = HEX.test(config.primaryColor) ? config.primaryColor : "#202020";
 const accentColor  = HEX.test(config.accentColor)  ? config.accentColor  : "#f59e0b";
 const borderRadius = config.borderRadius ?? "rounded";
 
@@ -97,8 +97,8 @@ const jsonLd = getProductJsonLd(product, basePrice);
 <!-- Dynamic data Island (Deferred) -->
 {pp.showShipping && <ShippingIsland server:defer />}
 
-<div class="max-w-5xl mx-auto px-0 sm:px-5 py-0 sm:py-8">
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-12">
+<div class="max-w-6xl mx-auto px-0 sm:px-5 py-0 sm:py-8">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-10">
 
     <!-- ── LEFT: Images ── -->
     <div>
@@ -173,7 +173,7 @@ const jsonLd = getProductJsonLd(product, basePrice);
 
 <!-- Reviews section (Deferred Server Island) -->
 {pp.showReviews && config.reviewsEnabled && (
-  <div class="max-w-5xl mx-auto px-5 pb-12">
+  <div class="max-w-6xl mx-auto px-5 pb-12">
     <ReviewsIsland productId={product.id} content={content} server:defer>
       <!-- Skeleton fallback while loading -->
       <div slot="fallback" class="animate-pulse space-y-8 mt-12 pt-10" style="border-top: 1px solid var(--clr-border)">
@@ -181,10 +181,10 @@ const jsonLd = getProductJsonLd(product, basePrice);
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
           <div class="space-y-4">
             {[1,2,3].map(() => (
-              <div class="h-32 rounded-2xl" style="background: var(--clr-surface-alt); border: 1px solid var(--clr-border)"></div>
+              <div class="h-32 rounded-[var(--radius-card)]" style="background: var(--clr-surface-alt); border: 1px solid var(--clr-border)"></div>
             ))}
           </div>
-          <div class="h-64 rounded-2xl" style="background: var(--clr-surface-alt); border: 1px solid var(--clr-border)"></div>
+          <div class="h-64 rounded-[var(--radius-card)]" style="background: var(--clr-surface-alt); border: 1px solid var(--clr-border)"></div>
         </div>
       </div>
     </ReviewsIsland>

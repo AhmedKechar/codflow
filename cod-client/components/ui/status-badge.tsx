@@ -9,28 +9,27 @@ const STATUS_VAR_KEY: Record<string, string> = {
   new:              "new",
   confirmed:        "confirmed",
   unreachable:      "unreachable",
-  preparing:        "preparing",
-  ready:            "ready",
-  assigned:         "assigned",
-  dispatched:       "dispatched",
-  out_for_delivery: "out",
+  busy:             "busy",
+  postponed:        "postponed",
+  shipped:          "shipped",
   delivered:        "delivered",
   returned:         "returned",
   cancelled:        "cancelled",
+  fake:             "fake",
+  duplicate:        "duplicate",
   // Driver statuses
   available:        "delivered",
   active:           "delivered",
-  busy:             "out",
   inactive:         "cancelled",
   offline:          "cancelled",
   // Product / user statuses
   suspended:        "returned",
   out_of_stock:     "returned",
-  low_stock:        "out",
+  low_stock:        "postponed",
   discontinued:     "cancelled",
   // Product catalog statuses (uppercase)
   ACTIVE:           "delivered",
-  DRAFT:            "preparing",
+  DRAFT:            "confirmed",
   ARCHIVED:         "cancelled",
 };
 
@@ -56,7 +55,7 @@ export function StatusBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border whitespace-nowrap shadow-sm",
+        "inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[13px] font-semibold border whitespace-nowrap transition-colors",
         className
       )}
       style={{
@@ -66,12 +65,10 @@ export function StatusBadge({
       }}
     >
       {showDot && (
-        <span className="relative flex h-1.5 w-1.5 shrink-0">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
-                style={{ backgroundColor: `var(--status-dot-${varKey})` }} />
-          <span className="relative inline-flex rounded-full h-1.5 w-1.5"
-                style={{ backgroundColor: `var(--status-dot-${varKey})` }} />
-        </span>
+        <span
+          className="inline-flex h-1.5 w-1.5 shrink-0 rounded-full"
+          style={{ backgroundColor: `var(--status-dot-${varKey})` }}
+        />
       )}
       {displayLabel}
     </span>

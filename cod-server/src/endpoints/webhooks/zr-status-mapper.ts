@@ -19,9 +19,9 @@
 // Only state names confirmed or mentioned in ZR Express documentation.
 // Keys are lowercased for case-insensitive lookup.
 const ZR_DEFAULT_STATE_MAP: Record<string, string> = {
-  "out for delivery": "out_for_delivery", // confirmed in example payload
-  "in transit":       "assigned",         // mentioned in docs description
-  "at hub":           "assigned",         // mentioned in docs description
+  "out for delivery": "shipped",   // confirmed in example payload
+  "in transit":       "shipped",   // mentioned in docs description
+  "at hub":           "shipped",   // mentioned in docs description
 };
 
 /**

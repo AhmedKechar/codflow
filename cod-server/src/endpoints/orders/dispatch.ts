@@ -191,7 +191,7 @@ export async function dispatchToCompany(c: Context<AppContext>) {
     await queries.updateOrderTracking(db, storeId, order.id, result.trackingNumber);
 
     const dispatchUser = c.get("user");
-    const PRE_DISPATCH_STATUSES = ["new", "confirmed", "unreachable", "preparing", "ready", "assigned", "dispatched"];
+    const PRE_DISPATCH_STATUSES = ["new", "confirmed", "unreachable", "busy", "postponed"];
 
     await logApiCall(db, {
       companyId: company.id,
@@ -206,7 +206,7 @@ export async function dispatchToCompany(c: Context<AppContext>) {
     });
 
     if (company.autoValidate) {
-      // Auto-validate path: call valid/order immediately, advance to out_for_delivery.
+      // Auto-validate path: call valid/order immediately, advance to delivered.
       const validateEndpoint: Record<string, string> = {
         noest: "/api/public/valid/order",
         zr_express: "(auto)",
@@ -244,12 +244,12 @@ export async function dispatchToCompany(c: Context<AppContext>) {
         console.warn(`[dispatch] validate failed order=${orderId} via ${company.code}:`, validateMsg);
       }
       if (PRE_DISPATCH_STATUSES.includes(order.status)) {
-        await queries.updateOrderStatus(db, storeId, order.id, "out_for_delivery", dispatchUser?.id, dispatchUser?.name ?? undefined);
+        await queries.updateOrderStatus(db, storeId, order.id, "shipped", dispatchUser?.id, dispatchUser?.name ?? undefined);
       }
     } else {
       // Manual-validate path: parcel created at carrier, waits for team to validate.
       if (PRE_DISPATCH_STATUSES.includes(order.status)) {
-        await queries.updateOrderStatus(db, storeId, order.id, "dispatched", dispatchUser?.id, dispatchUser?.name ?? undefined);
+        await queries.updateOrderStatus(db, storeId, order.id, "shipped", dispatchUser?.id, dispatchUser?.name ?? undefined);
       }
     }
 
@@ -295,9 +295,9 @@ export async function validateShipmentManually(c: Context<AppContext>) {
   const order = await queries.getOrderById(db, storeId, orderId);
   if (!order) throw new NotFoundError("Order", orderId);
 
-  if (order.status !== "dispatched") {
+  if (order.status !== "shipped") {
     throw new BusinessLogicError(
-      `Order is not in dispatched state — current status: ${order.status}`,
+      `Order is not in shipped state — current status: ${order.status}`,
       ERROR_CODES.INVALID_STATUS_TRANSITION,
       { orderId, currentStatus: order.status }
     );
@@ -345,7 +345,7 @@ export async function validateShipmentManually(c: Context<AppContext>) {
         await setShipmentValidated(db, shipment.id, true);
       }
 
-      await queries.updateOrderStatus(db, storeId, orderId, "out_for_delivery",
+      await queries.updateOrderStatus(db, storeId, orderId, "shipped",
         c.get("user")?.id, c.get("user")?.name ?? undefined);
 
       await logApiCall(db, {
@@ -364,7 +364,7 @@ export async function validateShipmentManually(c: Context<AppContext>) {
         type: "order", id: orderId, label: order.orderNumber,
       }, { companyName: company.name, trackingNumber: order.trackingNumber, action: "validated" });
 
-      return c.json({ success: true, message: "Shipment validated — order is now out for delivery" }, 200);
+      return c.json({ success: true, message: "Shipment validated — order is now delivered" }, 200);
     }
 
     return c.json({ success: false, message: "Validation returned false" }, 400);
@@ -525,7 +525,7 @@ export async function bulkDispatch(c: Context<AppContext>) {
 
   // Process each result — create shipment records, update orders.
   const actor = c.get("user");
-  const PRE_DISPATCH_STATUSES = ["new", "confirmed", "unreachable", "preparing", "ready", "assigned", "dispatched"];
+    const PRE_DISPATCH_STATUSES = ["new", "confirmed", "unreachable", "busy", "postponed"];
   const validateEndpointMap: Record<string, string> = {
     noest: "/api/public/valid/order",
     zr_express: "(auto)",
@@ -584,11 +584,11 @@ export async function bulkDispatch(c: Context<AppContext>) {
           }
 
           if (validated && PRE_DISPATCH_STATUSES.includes(order.status)) {
-            await queries.updateOrderStatus(db, storeId, order.id, "out_for_delivery", actor?.id, actor?.name ?? undefined);
+            await queries.updateOrderStatus(db, storeId, order.id, "shipped", actor?.id, actor?.name ?? undefined);
           }
         } else {
           if (PRE_DISPATCH_STATUSES.includes(order.status)) {
-            await queries.updateOrderStatus(db, storeId, order.id, "dispatched", actor?.id, actor?.name ?? undefined);
+            await queries.updateOrderStatus(db, storeId, order.id, "shipped", actor?.id, actor?.name ?? undefined);
           }
         }
 

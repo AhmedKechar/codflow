@@ -327,7 +327,7 @@ export function OffersTable({
             </div>
 
             {/* Offer name */}
-            <p className="text-[15px] font-black text-foreground tracking-tight leading-snug truncate">
+            <p className="text-[15px] font-semibold text-foreground tracking-tight leading-snug truncate">
               {offer.name}
             </p>
 
@@ -341,9 +341,9 @@ export function OffersTable({
             </p>
 
             {/* Trigger product + variant */}
-            <div className="flex items-baseline justify-between gap-2 pt-1 pb-2.5 border-b border-border/10">
+            <div className="flex items-baseline justify-between gap-2 pt-1 pb-2.5 border-b border-border/40">
               <div className="flex-1 min-w-0">
-                <p className="text-[14px] font-black text-foreground tracking-tight leading-snug truncate">
+                <p className="text-[14px] font-semibold text-foreground tracking-tight leading-snug truncate">
                   {offer.triggerProduct?.name ?? "—"}
                 </p>
                 <p className="text-[11px] font-semibold text-muted-foreground/60 mt-0.5 truncate">
@@ -356,12 +356,12 @@ export function OffersTable({
             {/* Reward section */}
             {offer.discountType === "free_shipping" ? (
               <div className="flex items-center gap-2">
-                <Gift className="w-3 h-3 text-emerald-500/40 shrink-0" />
+                <Gift className="w-3 h-3 text-success/40 shrink-0" />
                 <DiscountTypeBadge type="free_shipping" />
               </div>
             ) : (
               <div className="flex items-center gap-1.5 min-w-0">
-                <Gift className="w-3 h-3 text-emerald-500/40 shrink-0" />
+                <Gift className="w-3 h-3 text-success/40 shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-[11px] font-semibold text-muted-foreground truncate">
                     {offer.rewardProduct?.name ?? "—"}
@@ -377,9 +377,9 @@ export function OffersTable({
 
             {/* Schedule strip */}
             {(offer.startsAt || offer.endsAt) && (
-              <div className="flex items-center gap-2 px-2.5 py-2 rounded-xl bg-muted/40 border border-border/5">
+              <div className="flex items-center gap-2 px-2.5 py-2 rounded-xl bg-muted/40 border border-border/20">
                 <CalendarDays size={11} className="text-muted-foreground/60 shrink-0" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 shrink-0">
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/50 shrink-0">
                   {t.table.schedule}
                 </span>
                 <span

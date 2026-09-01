@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import {
   ChevronDown,
   ChevronUp,
@@ -19,19 +20,14 @@ import {
   type HomeSectionId,
   type SocialPlatform,
 } from "cod-shared/site-builder";
-import {
-  PanelCard,
-  ToggleRow,
-  Stepper,
-  TextInput,
-  inputCls,
-  SiteBuilderSaveBar,
-} from "@/components/themes/builder-ui";
+import { PanelCard, ToggleRow, Stepper, TextInput, inputCls } from "@/components/themes/builder-ui";
 import { useSiteBuilder } from "@/components/themes/site-builder-state";
 
 interface SiteBuilderEditorProps {
   siteJson: string | null;
   onSaved?: () => void;
+  onDirtyChange?: (dirty: boolean) => void;
+  saveRef?: React.MutableRefObject<(() => Promise<boolean>) | null>;
 }
 
 type SectionLabelKey =
@@ -65,9 +61,23 @@ const PLATFORMS: SocialPlatform[] = [
   "telegram",
 ];
 
-export function SiteBuilderEditor({ siteJson, onSaved }: SiteBuilderEditorProps) {
+export function SiteBuilderEditor({ siteJson, onSaved, onDirtyChange, saveRef }: SiteBuilderEditorProps) {
   const t = useThemes();
   const { site, update, dirty, saving, save } = useSiteBuilder(siteJson);
+
+  useEffect(() => {
+    onDirtyChange?.(dirty);
+  }, [dirty, onDirtyChange]);
+
+  useEffect(() => {
+    if (saveRef) {
+      saveRef.current = async () => {
+        const ok = await save();
+        if (ok) onSaved?.();
+        return ok;
+      };
+    }
+  });
 
   const move = (index: number, dir: -1 | 1) => {
     const sections = site.home.sections.map((s) => ({ ...s }));
@@ -101,12 +111,6 @@ export function SiteBuilderEditor({ siteJson, onSaved }: SiteBuilderEditorProps)
     changeSocials([...site.socials, { platform, url: "https://" }]);
   };
 
-  const handleSave = async () => {
-    const ok = await save();
-    if (ok) onSaved?.();
-    return ok;
-  };
-
   return (
     <div className="space-y-6">
       <div>
@@ -122,7 +126,6 @@ export function SiteBuilderEditor({ siteJson, onSaved }: SiteBuilderEditorProps)
       >
         <div className="space-y-2">
           {site.home.sections.map((section, index) => {
-            const SectionIcon = section.enabled ? Eye : EyeOff;
             const sectionLabelKey: SectionLabelKey =
               SECTION_KEYS.find((k) => k.id === section.id)?.key ?? "section_hero";
             return (
@@ -130,7 +133,6 @@ export function SiteBuilderEditor({ siteJson, onSaved }: SiteBuilderEditorProps)
                 key={section.id}
                 className="flex items-center gap-3 rounded-lg border border-border px-3 py-2.5"
               >
-                <SectionIcon size={16} className="shrink-0 text-muted-foreground" />
                 <span className="flex-1 text-sm font-semibold text-foreground">
                   {t[sectionLabelKey]}
                 </span>
@@ -138,9 +140,9 @@ export function SiteBuilderEditor({ siteJson, onSaved }: SiteBuilderEditorProps)
                   type="button"
                   onClick={() => toggleSection(section.id)}
                   title={section.enabled ? t.hidden : t.visible}
-                  className="rounded-lg border border-border px-2 py-1 text-[10px] font-bold capitalize text-muted-foreground transition-colors hover:bg-muted"
+                  className="rounded-lg border border-border p-1.5 text-muted-foreground transition-colors hover:bg-muted"
                 >
-                  {section.enabled ? t.visible : t.hidden}
+                  {section.enabled ? <Eye size={14} /> : <EyeOff size={14} />}
                 </button>
                 <div className="flex items-center gap-1">
                   <button
@@ -325,13 +327,6 @@ export function SiteBuilderEditor({ siteJson, onSaved }: SiteBuilderEditorProps)
           </button>
         </div>
       </PanelCard>
-
-      {/* Save bar */}
-      <SiteBuilderSaveBar
-        dirty={dirty}
-        saving={saving}
-        onSave={handleSave}
-      />
     </div>
   );
 }

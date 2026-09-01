@@ -118,6 +118,7 @@
     "rate_card_default": "افتراضي",
     "rate_card_wilayas_configured": "ولاية محددة",
     "rate_card_no_profiles": "لا توجد ملفات شحن — أنشئ واحداً في أسعار التوصيل",
+    "logistics_label": "المركبة والتعويضات",
     "notes_label": "ملاحظات",
     "notes_placeholder": "ملاحظات اختيارية...",
     "cancel": "إلغاء",

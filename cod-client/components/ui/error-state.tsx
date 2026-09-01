@@ -20,13 +20,13 @@ export function ErrorState({ message, retry, className }: ErrorStateProps) {
         className
       )}
     >
-      <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-4">
-        <AlertCircle size={28} className="text-red-600 dark:text-red-400" />
+      <div className="w-12 h-12 bg-destructive/10 rounded-full flex items-center justify-center mb-4">
+        <AlertCircle size={24} className="text-destructive" />
       </div>
-      <h3 className="text-lg font-bold text-foreground mb-2">{common.error_occurred}</h3>
-      <p className="text-sm text-muted-foreground mb-6 max-w-sm">{message}</p>
+      <h3 className="text-base font-semibold text-foreground mb-2">{common.error_occurred}</h3>
+      <p className="text-[13px] text-muted-foreground mb-6 max-w-sm">{message}</p>
       {retry && (
-        <Button onClick={retry} variant="outline" className="h-11">
+        <Button onClick={retry} variant="outline">
           {common.retry}
         </Button>
       )}

@@ -6,14 +6,14 @@ export type OrderStatus =
   | "new"
   | "confirmed"
   | "unreachable"
-  | "preparing"
-  | "ready"
-  | "assigned"
-  | "dispatched"
-  | "out_for_delivery"
+  | "busy"
+  | "postponed"
+  | "shipped"
   | "delivered"
   | "returned"
-  | "cancelled";
+  | "cancelled"
+  | "fake"
+  | "duplicate";
 
 export type OrderType = "online" | "offline";
 

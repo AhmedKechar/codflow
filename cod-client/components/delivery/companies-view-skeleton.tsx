@@ -14,11 +14,11 @@ export function CompaniesViewSkeleton() {
       {/* Grid skeleton */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="glass-card rounded-2xl border-border/30 overflow-hidden p-5 space-y-4">
+          <div key={i} className="bg-card rounded-lg border-border overflow-hidden p-5 space-y-4">
             {/* Top row: logo + info */}
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">
-                <Skeleton className="w-12 h-12 rounded-2xl" />
+                <Skeleton className="w-12 h-12 rounded-lg" />
                 <div className="space-y-2">
                   <Skeleton className="h-5 w-24" />
                   <Skeleton className="h-4 w-20 rounded-full" />
@@ -35,7 +35,7 @@ export function CompaniesViewSkeleton() {
             </div>
 
             {/* Tap to connect border */}
-            <div className="pt-3 border-t border-border/10">
+            <div className="pt-3 border-t border-border/40">
               <Skeleton className="h-3 w-24" />
             </div>
           </div>

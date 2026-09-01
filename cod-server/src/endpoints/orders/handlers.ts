@@ -315,6 +315,53 @@ export async function returnOrderProduct(c: Context<AppContext>) {
 }
 
 /**
+ * PATCH /orders/:id
+ * Edit an existing order after creation. Only editable in non-terminal statuses.
+ */
+export async function updateOrder(c: Context<AppContext>) {
+  const db = getDb(c.env.DB);
+  const storeId = c.get("storeId")!;
+  const orderId = c.req.param("id");
+
+  if (!orderId) {
+    throw new ValidationError("Order ID is required", ERROR_CODES.REQUIRED_FIELD_MISSING);
+  }
+
+  const bodyData: any = (c.req as any).valid?.("json");
+  const validated: validation.UpdateOrderInput =
+    bodyData ?? validation.updateOrderSchema.parse(await c.req.json());
+
+  const user = c.get("user");
+
+  try {
+    const updated = await queries.updateOrder(db, orderId, storeId, validated);
+
+    if (!updated) {
+      throw new NotFoundError("Order", orderId);
+    }
+
+    await logActivity(db, user, ACTIONS.ORDER_UPDATED, {
+      type: "order", id: orderId, label: updated.orderNumber,
+    }, { changes: Object.keys(validated) });
+
+    return c.json({
+      success: true,
+      data: updated,
+      message: "Order updated successfully",
+    }, 200);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes("not found")) {
+      throw new NotFoundError("Order", orderId);
+    }
+    if (msg.includes("Cannot edit")) {
+      throw new BusinessLogicError(msg, ERROR_CODES.INVALID_STATUS_TRANSITION, { orderId });
+    }
+    throw new ValidationError(msg, ERROR_CODES.VALIDATION_FAILED);
+  }
+}
+
+/**
  * DELETE /orders/:id
  * Permanently delete the order: restore tracked inventory, adjust customer
  * counters, then remove the order with its lines, shipments, and cascaded

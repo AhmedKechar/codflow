@@ -155,7 +155,7 @@ export function orderRow(overrides: Record<string, unknown> = {}): Record<string
     address: "Rue des Lilas",
     price: 2500,
     notes: null,
-    status: "ready",
+    status: "confirmed",
     order_type: "online",
     delivery_method: "driver",
     driver_id: null,

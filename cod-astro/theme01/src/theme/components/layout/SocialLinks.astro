@@ -34,7 +34,7 @@ const ICONS: Record<SocialPlatform, string> = {
           href={s.url}
           target="_blank"
           rel="noopener noreferrer nofollow"
-          class={`flex items-center justify-center rounded-full bg-black/[0.04] border border-black/[0.06] text-primary transition-all hover:bg-primary hover:text-white hover:scale-105 active:scale-95 ${itemClass}`}
+          class={`flex items-center justify-center rounded-lg bg-surface border border-border text-text-muted transition-colors hover:text-primary hover:border-border ${itemClass}`}
           aria-label={`${s.platform}`}
         >
           <Icon name={icon} class={iconClass} />

@@ -97,11 +97,11 @@ export function MessageList({ whatsappMessages, smsMessages }: MessageListProps)
       isTitle: true,
       render: (value, row) => (
         <div className="flex items-center gap-2.5">
-          <div className="relative w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center border border-primary/20 shadow-sm shrink-0">
+          <div className="relative w-8 h-8 bg-muted rounded-lg flex items-center justify-center border border-border shrink-0">
             {row.channel === "whatsapp" ? (
               <MessageSquare className="w-4 h-4 text-green-600" />
             ) : (
-              <Smartphone className="w-4 h-4 text-primary" />
+              <Smartphone className="w-4 h-4 text-muted-foreground" />
             )}
           </div>
           <div className="min-w-0">
@@ -139,7 +139,7 @@ export function MessageList({ whatsappMessages, smsMessages }: MessageListProps)
       isStatus: true,
       render: (value) => (
         <StatusBadge
-          status={value === "failed" ? "cancelled" : value === "delivered" ? "delivered" : value === "sent" ? "confirmed" : value === "read" ? "out_for_delivery" : "new"}
+          status={value === "failed" ? "cancelled" : value === "delivered" ? "delivered" : value === "sent" ? "confirmed" : value === "read" ? "shipped" : "new"}
           label={t.status[value as keyof typeof t.status] ?? value}
         />
       ),
@@ -151,8 +151,8 @@ export function MessageList({ whatsappMessages, smsMessages }: MessageListProps)
         <span className={cn(
           "inline-flex items-center gap-1.5 text-xs font-bold px-2 py-1 rounded-lg",
           row.channel === "whatsapp"
-            ? "bg-green-500/10 text-green-600"
-            : "bg-primary/10 text-primary",
+            ? "bg-muted text-muted-foreground"
+            : "bg-muted text-muted-foreground",
         )}>
           {row.channel === "whatsapp" ? <MessageSquare size={11} /> : <Smartphone size={11} />}
           {t.channel[row.channel ?? "sms"]}
@@ -178,7 +178,7 @@ export function MessageList({ whatsappMessages, smsMessages }: MessageListProps)
       <div className="flex flex-col sm:flex-row gap-2.5 flex-wrap">
         <div className="relative flex-1 min-w-48 group">
           <Search className={cn(
-            "absolute top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60 transition-colors group-focus-within:text-primary",
+            "absolute top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60 transition-colors group-focus-within:text-foreground",
             dir === "rtl" ? "right-3.5" : "left-3.5",
           )} />
           <Input
@@ -296,8 +296,8 @@ export function MessageList({ whatsappMessages, smsMessages }: MessageListProps)
                 <span className={cn(
                   "inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-md",
                   message.channel === "whatsapp"
-                    ? "bg-green-500/10 text-green-600"
-                    : "bg-primary/10 text-primary",
+                    ? "bg-muted text-muted-foreground"
+                    : "bg-muted text-muted-foreground",
                 )}>
                   {message.channel === "whatsapp" ? <MessageSquare size={10} /> : <Smartphone size={10} />}
                   {t.channel[message.channel ?? "sms"]}

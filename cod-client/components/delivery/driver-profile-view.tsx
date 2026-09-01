@@ -35,7 +35,7 @@ export function DriverProfileView({ driver, activeOrders, deliveredOrders, userS
       {/* Premium Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-1">
-          <h1 className="text-3xl md:text-4xl font-black text-foreground tracking-tighter font-display">
+          <h1 className="text-3xl md:text-4xl font-semibold text-foreground tracking-tighter font-display">
             {fullName}
           </h1>
           <p className="text-sm text-muted-foreground/80 font-medium">{t.driver_profile?.subtitle ?? "Logistics personnel profile & performance"}</p>
@@ -44,7 +44,7 @@ export function DriverProfileView({ driver, activeOrders, deliveredOrders, userS
         <div className="flex items-center gap-3 flex-wrap">
           <Link
             href={`/delivery/drivers/${driver.id}/compensations`}
-            className="inline-flex items-center gap-2 h-12 px-5 rounded-2xl border border-primary/20 bg-primary/5 text-primary font-black text-[11px] uppercase tracking-widest hover:bg-primary/10 hover:border-primary/30 transition-all active:scale-95"
+            className="inline-flex items-center gap-2 h-12 px-5 rounded-lg border border-primary/20 bg-primary/5 text-primary font-semibold text-[11px] uppercase tracking-widest hover:bg-primary/10 hover:border-primary/30 transition-all active:scale-95"
           >
             <Coins size={16} />
             {(t.compensations as unknown as Record<string, string>)?.title ?? "Pay Grid"}
@@ -58,7 +58,7 @@ export function DriverProfileView({ driver, activeOrders, deliveredOrders, userS
           <ProtectedAction userScopes={userScopes} requiredScope={SCOPES.DELIVERY_MANAGE}>
             <Link
               href={`/delivery/drivers/${driver.id}/edit`}
-              className="inline-flex items-center gap-2 h-12 px-5 rounded-2xl bg-primary text-primary-foreground font-black text-[11px] uppercase tracking-widest shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all active:scale-95"
+              className="inline-flex items-center gap-2 h-12 px-5 rounded-lg bg-primary text-primary-foreground font-semibold text-[11px] uppercase tracking-widest hover:shadow-sm transition-all active:scale-95"
             >
               <Edit size={16} />
               {t.actions?.edit ?? "Edit Profile"}
@@ -66,7 +66,7 @@ export function DriverProfileView({ driver, activeOrders, deliveredOrders, userS
           </ProtectedAction>
           <Link
             href="/delivery"
-            className="group inline-flex items-center justify-center w-12 h-12 rounded-2xl border border-border/40 bg-white/50 dark:bg-muted/20 text-muted-foreground hover:text-foreground transition-all"
+            className="group inline-flex items-center justify-center w-12 h-12 rounded-lg border border-border bg-card text-muted-foreground hover:text-foreground transition-all"
           >
             <ArrowLeft size={16} />
           </Link>
@@ -74,28 +74,26 @@ export function DriverProfileView({ driver, activeOrders, deliveredOrders, userS
       </div>
 
       {/* Profile Info Glass Card */}
-      <div className="group relative glass-card rounded-[2.5rem] border-border/30 overflow-hidden shadow-sm transition-all duration-500 hover:shadow-premium">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[40%] bg-primary/5 blur-[80px] pointer-events-none transition-opacity opacity-0 group-hover:opacity-100 duration-700" />
-        
-        <div className="relative z-10 p-6 md:p-8">
+      <div className="group relative bg-card rounded-lg border-border overflow-hidden shadow-sm transition-all duration-500 hover:shadow-sm">
+        <div className="p-6 md:p-8">
           <div className="flex flex-col lg:flex-row gap-6">
             <div className="flex flex-col items-center lg:items-start lg:flex-row gap-6 flex-1">
               <div className="relative group/avatar shrink-0">
-                <div className="w-24 h-24 bg-primary rounded-[2rem] flex items-center justify-center text-primary-foreground font-black text-3xl shadow-xl shadow-primary/20 transition-transform group-hover/avatar:scale-105 duration-500">
+                <div className="w-24 h-24 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-semibold text-3xl transition-transform group-hover/avatar:scale-105 duration-500">
                   {initials}
                 </div>
-                <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-background rounded-xl flex items-center justify-center border border-border/50 shadow-md">
+                <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-background rounded-xl flex items-center justify-center border border-border shadow-md">
                   <UserCheck size={16} className="text-primary" />
                 </div>
               </div>
               
               <div className="space-y-4 min-w-0 text-center lg:text-left">
                 <div>
-                  <h2 dir="rtl" className="text-2xl md:text-3xl font-black text-foreground tracking-tight font-display mb-2">{fullName}</h2>
+                  <h2 dir="rtl" className="text-2xl md:text-3xl font-semibold text-foreground tracking-tight font-display mb-2">{fullName}</h2>
                   <div className="flex items-center justify-center lg:justify-start gap-3 flex-wrap">
-                    <StatusBadge status={driver.status} className="py-1.5 px-4 rounded-full text-[10px] font-black uppercase tracking-widest border shadow-sm" />
+                    <StatusBadge status={driver.status} className="py-1.5 px-4 rounded-full text-[10px] font-semibold uppercase tracking-widest border shadow-sm" />
                     {driver.vehicleType && (
-                      <div className="flex items-center gap-2 px-3 py-1 bg-muted/30 border border-border/20 rounded-xl text-[10px] font-black uppercase tracking-wider text-muted-foreground/80">
+                      <div className="flex items-center gap-2 px-3 py-1 bg-muted/30 border border-border rounded-xl text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80">
                         <Truck size={12} className="text-primary/60" />
                         <span dir="rtl">{t.vehicle_type?.[driver.vehicleType] ?? driver.vehicleType}</span>
                       </div>
@@ -104,7 +102,7 @@ export function DriverProfileView({ driver, activeOrders, deliveredOrders, userS
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-                  <div className="flex items-center gap-2 text-sm font-bold text-foreground bg-muted/20 px-3 py-2 rounded-xl border border-border/10">
+                  <div className="flex items-center gap-2 text-sm font-bold text-foreground bg-muted/20 px-3 py-2 rounded-xl border border-border/40">
                     <Phone size={14} className="text-primary/60" />
                     <span dir="ltr">{driver.phone}</span>
                     {driver.phone2 && <span className="opacity-30 mx-1">/</span>}
@@ -125,26 +123,26 @@ export function DriverProfileView({ driver, activeOrders, deliveredOrders, userS
             </div>
 
             <div className="grid grid-cols-2 lg:grid-cols-1 gap-3 shrink-0 lg:w-56 w-full">
-              <div className="bg-muted/20 border border-border/10 rounded-2xl p-4 transition-all hover:bg-primary/[0.02] hover:border-primary/10">
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-1 flex items-center gap-1.5">
+              <div className="bg-muted/20 border border-border/40 rounded-lg p-4 transition-all hover:bg-primary/5 hover:border-primary/10">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60 mb-1 flex items-center gap-1.5">
                   <Package size={12} className="text-primary/50" />
                   Active
                 </p>
-                <p className="text-2xl font-black text-foreground font-display tabular-nums leading-none">{activeOrders.length}</p>
+                <p className="text-2xl font-semibold text-foreground font-display tabular-nums leading-none">{activeOrders.length}</p>
               </div>
-              <div className="bg-muted/20 border border-border/10 rounded-2xl p-4 transition-all hover:bg-primary/[0.02] hover:border-primary/10">
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-1 flex items-center gap-1.5">
-                  <Star size={12} className="text-amber-500/50" />
+              <div className="bg-muted/20 border border-border/40 rounded-lg p-4 transition-all hover:bg-primary/5 hover:border-primary/10">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60 mb-1 flex items-center gap-1.5">
+                  <Star size={12} className="text-warning/50" />
                   Delivered
                 </p>
-                <p className="text-2xl font-black text-foreground font-display tabular-nums leading-none">{driver.totalDelivered}</p>
+                <p className="text-2xl font-semibold text-foreground font-display tabular-nums leading-none">{driver.totalDelivered}</p>
               </div>
-              <div className="col-span-2 lg:col-span-1 bg-primary/5 border border-primary/10 rounded-2xl p-4 transition-all hover:bg-primary/10 hover:border-primary/20">
-                <p className="text-[10px] font-black uppercase tracking-widest text-primary/60 mb-1 flex items-center gap-1.5">
+              <div className="col-span-2 lg:col-span-1 bg-primary/5 border border-primary/10 rounded-lg p-4 transition-all hover:bg-primary/10 hover:border-primary/20">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-primary/60 mb-1 flex items-center gap-1.5">
                   <TrendingUp size={12} className="text-primary" />
                   Total Earnings
                 </p>
-                <p className="text-2xl font-black text-primary font-display tabular-nums leading-none">
+                <p className="text-2xl font-semibold text-primary font-display tabular-nums leading-none">
                   {formatPrice(driver.totalEarnings, common.currency.symbol)}
                 </p>
               </div>
@@ -169,28 +167,28 @@ export function DriverProfileView({ driver, activeOrders, deliveredOrders, userS
             <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
               <Package size={16} className="text-primary" />
             </div>
-            <h2 className="text-lg font-black text-foreground tracking-tight font-display">
+            <h2 className="text-lg font-semibold text-foreground tracking-tight font-display">
               Active Shipments
               <span className="text-muted-foreground/40 ml-2 font-mono text-sm">({activeOrders.length})</span>
             </h2>
           </div>
           
-          <div className="glass-card rounded-[2.5rem] border-border/30 overflow-hidden shadow-sm">
+          <div className="bg-card rounded-lg border-border overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-border/10 bg-muted/10">
-                    <th className="px-6 md:px-8 py-4 text-start text-[10px] font-black text-muted-foreground uppercase tracking-[0.15em]">Order</th>
-                    <th className="px-6 md:px-8 py-4 text-start text-[10px] font-black text-muted-foreground uppercase tracking-[0.15em]">Status</th>
-                    <th className="px-6 md:px-8 py-4 text-end text-[10px] font-black text-muted-foreground uppercase tracking-[0.15em]">Valuation</th>
+                  <tr className="border-b border-border/40 bg-muted/10">
+                    <th className="px-6 md:px-8 py-4 text-start text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.15em]">Order</th>
+                    <th className="px-6 md:px-8 py-4 text-start text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.15em]">Status</th>
+                    <th className="px-6 md:px-8 py-4 text-end text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.15em]">Valuation</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border/5">
+                <tbody className="divide-y divide-border/20">
                   {activeOrders.map((order) => (
-                    <tr key={order.id} className="group hover:bg-white/40 dark:hover:bg-primary/5 transition-all duration-300">
+                    <tr key={order.id} className="group hover:bg-muted/40 transition-all duration-300">
                       <td className="px-6 md:px-8 py-5">
                         <div className="flex items-center gap-3">
-                          <Link href={`/orders/${order.id}`} className="font-mono text-[11px] font-black text-primary hover:underline flex items-center gap-1">
+                          <Link href={`/orders/${order.id}`} className="font-mono text-[11px] font-semibold text-primary hover:underline flex items-center gap-1">
                             #{order.orderNumber}
                           </Link>
                           <span className="opacity-10 hidden sm:inline">/</span>
@@ -201,7 +199,7 @@ export function DriverProfileView({ driver, activeOrders, deliveredOrders, userS
                         <OrderStatusBadge status={order.status} />
                       </td>
                       <td className="px-6 md:px-8 py-5 text-end">
-                        <span className="text-sm font-black text-foreground tabular-nums tracking-tighter">
+                        <span className="text-sm font-semibold text-foreground tabular-nums tracking-tighter">
                           {formatPrice(order.price, common.currency.symbol)}
                         </span>
                       </td>
@@ -215,11 +213,11 @@ export function DriverProfileView({ driver, activeOrders, deliveredOrders, userS
       )}
 
       {allOrders.length === 0 && (
-        <div className="glass-card rounded-[2.5rem] border-border/20 py-24 text-center space-y-4">
-          <div className="w-16 h-16 bg-muted/30 rounded-[1.5rem] flex items-center justify-center mx-auto opacity-20">
+        <div className="bg-card rounded-lg border-border py-24 text-center space-y-4">
+          <div className="w-16 h-16 bg-muted/30 rounded-lg flex items-center justify-center mx-auto opacity-20">
             <Clock size={32} />
           </div>
-          <p className="text-xs font-black uppercase tracking-widest text-muted-foreground/40">
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/40">
             No active or delivered orders
           </p>
         </div>

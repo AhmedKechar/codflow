@@ -18,24 +18,22 @@ import { getDb } from "@/db";
  * sale from creation through delivery or return.
  *
  * ─── Status lifecycle ────────────────────────────────────────────────────────
- * new → confirmed → preparing → ready → [assigned|dispatched] → out_for_delivery
- *                                                                      ↓
- *                                                            delivered | returned
+ * new → confirmed → busy/postponed → shipped → delivered | returned
  * Any status → cancelled (except delivered/returned/cancelled)
  * unreachable ↔ confirmed (customer unreachable, retry later)
  *
  * ALLOWED_TRANSITIONS (enforced by updateOrderStatus):
- *   new:              confirmed, unreachable, cancelled
- *   confirmed:        preparing, unreachable, cancelled
- *   unreachable:      confirmed, cancelled
- *   preparing:        ready, cancelled
- *   ready:            out_for_delivery, dispatched, cancelled
- *   assigned:         out_for_delivery, dispatched, cancelled
- *   dispatched:       out_for_delivery, cancelled
- *   out_for_delivery: delivered, returned
- *   delivered:        [] (terminal)
- *   returned:         [] (terminal)
- *   cancelled:        [] (terminal)
+ *   new:              confirmed, unreachable, busy, cancelled, fake, duplicate
+ *   confirmed:        unreachable, busy, shipped, cancelled, fake, duplicate
+ *   unreachable:      confirmed, busy, cancelled, fake, duplicate
+ *   busy:             confirmed, unreachable, cancelled, fake, duplicate
+ *   postponed:        confirmed, shipped, cancelled, fake, duplicate
+ *   shipped:          delivered, returned, cancelled
+ *   delivered:        returned
+ *   returned:         confirmed, cancelled
+ *   cancelled:        confirmed, new
+ *   fake:             confirmed, new
+ *   duplicate:        confirmed, new
  *
  * ─── Delivery methods (mutually exclusive) ───────────────────────────────────
  *   driver  → assign a driver via assignDriverToOrder
@@ -62,7 +60,7 @@ export const getOrderTools = (db: ReturnType<typeof getDb>, storeId: string) => 
       "Search and filter orders. Returns orders ordered newest-first. " +
       "Each order includes status, customerName, phone, wilaya, price, deliveryFee, codAmount, " +
       "driverName, trackingNumber, orderNumber, and hasReview flag. " +
-      "Optional filters: status (new|confirmed|unreachable|preparing|ready|assigned|dispatched|out_for_delivery|delivered|returned|cancelled), " +
+      "Optional filters: status (new|confirmed|unreachable|busy|postponed|shipped|delivered|cancelled|fake|duplicate|returned), " +
       "wilayaId (integer 1-58), search (matches orderNumber, customerName, or phone), " +
       "limit (1-100, default 50), offset (default 0).",
     inputSchema: z.object({}).passthrough(), // Layer 1: Permissive input
@@ -323,17 +321,19 @@ export const getOrderTools = (db: ReturnType<typeof getDb>, storeId: string) => 
     description:
       "Updates an order's status. Enforces valid transitions — invalid moves are rejected with the allowed next statuses. " +
       "Required: orderId (UUID), status (target status). " +
-      "Valid statuses: new, confirmed, unreachable, preparing, ready, assigned, dispatched, out_for_delivery, delivered, returned, cancelled. " +
+      "Valid statuses: new, confirmed, unreachable, busy, postponed, shipped, delivered, cancelled, fake, duplicate, returned. " +
       "Transition rules: " +
-      "new → confirmed|unreachable|cancelled. " +
-      "confirmed → preparing|unreachable|cancelled. " +
-      "unreachable → confirmed|cancelled. " +
-      "preparing → ready|cancelled. " +
-      "ready → out_for_delivery|dispatched|cancelled. " +
-      "assigned → out_for_delivery|dispatched|cancelled. " +
-      "dispatched → out_for_delivery|cancelled. " +
-      "out_for_delivery → delivered|returned. " +
-      "delivered/returned/cancelled → terminal (no further transitions). " +
+      "new → confirmed|unreachable|busy|cancelled|fake|duplicate. " +
+      "confirmed → unreachable|busy|shipped|cancelled|fake|duplicate. " +
+      "unreachable → confirmed|busy|cancelled|fake|duplicate. " +
+      "busy → confirmed|unreachable|cancelled|fake|duplicate. " +
+      "postponed → confirmed|shipped|cancelled|fake|duplicate. " +
+      "shipped → delivered|returned|cancelled. " +
+      "delivered → returned. " +
+      "returned → confirmed|cancelled. " +
+      "cancelled → confirmed|new. " +
+      "fake → confirmed|new. " +
+      "duplicate → confirmed|new. " +
       "Setting cancelled or returned automatically restores inventory for tracked products.",
     inputSchema: z.object({}).passthrough(), // Layer 1: Permissive input
     execute: async (args) => {
@@ -360,17 +360,17 @@ export const getOrderTools = (db: ReturnType<typeof getDb>, storeId: string) => 
 
         // Enforce transition table — same logic as the REST handler
         const ALLOWED_TRANSITIONS: Record<string, string[]> = {
-          new:              ["confirmed", "unreachable", "cancelled"],
-          confirmed:        ["preparing", "unreachable", "cancelled"],
-          unreachable:      ["confirmed", "cancelled"],
-          preparing:        ["ready", "cancelled"],
-          ready:            ["out_for_delivery", "dispatched", "cancelled"],
-          assigned:         ["out_for_delivery", "dispatched", "cancelled"],
-          dispatched:       ["out_for_delivery", "cancelled"],
-          out_for_delivery: ["delivered", "returned"],
-          delivered:        [],
-          returned:         [],
-          cancelled:        [],
+          new:              ["confirmed", "unreachable", "busy", "cancelled", "fake", "duplicate"],
+          confirmed:        ["unreachable", "busy", "shipped", "cancelled", "fake", "duplicate"],
+          unreachable:      ["confirmed", "busy", "cancelled", "fake", "duplicate"],
+          busy:             ["confirmed", "unreachable", "cancelled", "fake", "duplicate"],
+          postponed:        ["confirmed", "shipped", "cancelled", "fake", "duplicate"],
+          shipped:          ["delivered", "returned", "cancelled"],
+          delivered:        ["returned"],
+          returned:         ["confirmed", "cancelled"],
+          cancelled:        ["confirmed", "new"],
+          fake:             ["confirmed", "new"],
+          duplicate:        ["confirmed", "new"],
         };
 
         const allowed = ALLOWED_TRANSITIONS[order.status] ?? [];
@@ -400,9 +400,8 @@ export const getOrderTools = (db: ReturnType<typeof getDb>, storeId: string) => 
       "Assigns a driver to an order for manual delivery. " +
       "Required: orderId (UUID), driverId (UUID). " +
       "Blocked if: order already has a tracking number (dispatched to a carrier), " +
-      "order deliveryMethod is 'company', or order is in a locked status (out_for_delivery, delivered, returned, cancelled). " +
-      "Automatically sets status to 'assigned' if order was in new/preparing/ready. " +
-      "Driver fee is auto-resolved from the driver's compensation table for the order's wilaya.",
+      "order deliveryMethod is 'company', or order is in a locked status (shipped, delivered, returned, cancelled). " +
+      "Sets deliveryMethod to 'driver' and resolves driver fee from the compensation table.",
     inputSchema: z.object({}).passthrough(), // Layer 1: Permissive input
     execute: async (args) => {
       const validationSchema = z.object({
@@ -438,7 +437,7 @@ export const getOrderTools = (db: ReturnType<typeof getDb>, storeId: string) => 
             error: `Order "${order.orderNumber}" is assigned to a delivery company. Remove the company assignment first.`,
           };
         }
-        const lockedStatuses = ["out_for_delivery", "delivered", "returned", "cancelled"];
+        const lockedStatuses = ["shipped", "delivered", "returned", "cancelled", "fake", "duplicate"];
         if (lockedStatuses.includes(order.status)) {
           return {
             success: false,
@@ -471,8 +470,7 @@ export const getOrderTools = (db: ReturnType<typeof getDb>, storeId: string) => 
     description:
       "Removes the currently assigned driver from an order. " +
       "Required: orderId (UUID). " +
-      "Blocked if: order has no driver, or order is in a locked status (out_for_delivery, delivered, returned, cancelled). " +
-      "If order was 'assigned', status rolls back to 'ready' automatically.",
+      "Blocked if: order has no driver, or order is in a locked status (shipped, delivered, returned, cancelled).",
     inputSchema: z.object({}).passthrough(), // Layer 1: Permissive input
     execute: async (args) => {
       const validationSchema = z.object({
@@ -497,7 +495,7 @@ export const getOrderTools = (db: ReturnType<typeof getDb>, storeId: string) => 
         if (!order.driverId) {
           return { success: false, error: `Order "${order.orderNumber}" has no driver assigned.` };
         }
-        const lockedStatuses = ["out_for_delivery", "delivered", "returned", "cancelled"];
+        const lockedStatuses = ["shipped", "delivered", "returned", "cancelled", "fake", "duplicate"];
         if (lockedStatuses.includes(order.status)) {
           return {
             success: false,
@@ -509,7 +507,7 @@ export const getOrderTools = (db: ReturnType<typeof getDb>, storeId: string) => 
 
         return {
           success: true,
-          message: `Driver unassigned from order "${order.orderNumber}"${order.status === "assigned" ? " — status rolled back to 'ready'" : ""}`,
+          message: `Driver unassigned from order "${order.orderNumber}"`,
         };
       } catch (error: any) {
         return { success: false, error: `Failed to unassign driver: ${error.message}` };

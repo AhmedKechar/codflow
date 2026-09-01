@@ -22,6 +22,7 @@ interface RequestOptions {
   headers?: Record<string, string>;
   timeout?: number;
   retries?: number;
+  silent?: boolean;
 }
 
 /**
@@ -68,6 +69,7 @@ async function makeRequest<T>(
     headers = {},
     timeout = API_CONFIG.timeout,
     retries = API_CONFIG.retries,
+    silent = false,
   } = options;
 
   // Get the runtime worker URL from Cloudflare bindings
@@ -135,22 +137,15 @@ async function makeRequest<T>(
     } catch (error) {
       lastError = error as Error;
       
-      // Log detailed error for debugging
-      if (error instanceof ApiClientError) {
-        console.error('[API Client Error]', {
-          endpoint,
-          status: error.status,
-          code: error.code,
-          category: error.category,
-          context: error.context,
-          message: error.message,
-        });
-      } else {
-        // Network errors or other unexpected errors
-        console.error('[API Client Error]', {
-          endpoint,
-          error: error instanceof Error ? error.message : String(error),
-        });
+      if (!silent) {
+        if (error instanceof ApiClientError) {
+          console.error(
+            `[API Client Error] ${endpoint} — ${error.status} ${error.code}: ${error.message}`,
+          );
+        } else {
+          const msg = error instanceof Error ? error.message : String(error);
+          console.error(`[API Client Error] ${endpoint} — ${msg}`);
+        }
       }
       
       // Don't retry on client errors (4xx) or the last attempt
@@ -182,6 +177,12 @@ export const apiClient = {
    */
   get: <T>(endpoint: string, apiKey: string, options?: Omit<RequestOptions, 'method' | 'body'>) =>
     makeRequest<T>(endpoint, apiKey, { ...options, method: 'GET' }),
+
+  /**
+   * GET request (silent — no console.error on failure)
+   */
+  getSilent: <T>(endpoint: string, apiKey: string, options?: Omit<RequestOptions, 'method' | 'body'>) =>
+    makeRequest<T>(endpoint, apiKey, { ...options, method: 'GET', silent: true }),
 
   /**
    * POST request

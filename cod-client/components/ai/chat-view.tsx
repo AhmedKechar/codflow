@@ -237,9 +237,8 @@ export function ChatView() {
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border/40">
         <div className="flex items-center gap-3">
-          <div className="relative w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group">
-            <div className="absolute inset-0 bg-primary/5 rounded-xl blur-xl group-hover:bg-primary/10 transition-all" />
-            <Sparkles size={16} className="text-primary relative z-10 group-hover:scale-110 transition-transform" />
+          <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center shrink-0">
+            <Sparkles size={16} className="text-muted-foreground" />
           </div>
           <div>
             <h1 className="text-lg font-black text-foreground tracking-tight">
@@ -283,9 +282,8 @@ export function ChatView() {
       <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 scrollbar-none">
         {isEmpty ? (
           <div className="flex flex-col items-center justify-center h-full space-y-6 animate-fade-in">
-            <div className="relative w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
-              <div className="absolute inset-0 bg-primary/5 rounded-2xl blur-xl" />
-              <Bot size={28} className="text-primary relative z-10" />
+            <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center">
+              <Bot size={28} className="text-muted-foreground" />
             </div>
             <div className="text-center space-y-1">
               <p className="text-lg font-black text-foreground/80">
@@ -303,15 +301,13 @@ export function ChatView() {
                     onClick={() => handleSuggestedPrompt(prompt.message)}
                     disabled={isStreaming}
                     className={cn(
-                      "flex items-center gap-2 px-4 py-3 rounded-xl border border-border/40",
+                      "flex items-center gap-2 px-4 py-3 rounded-lg border border-border",
                       "bg-card hover:bg-muted/30 text-start text-[13px] font-medium",
-                      "text-foreground/80 hover:text-foreground transition-all",
-                      "hover:border-primary/30 hover:shadow-sm",
+                      "text-foreground/80 hover:text-foreground transition-colors",
                       "disabled:opacity-50 disabled:cursor-not-allowed",
-                      "active:scale-[0.98]",
                     )}
                   >
-                    <Sparkles size={14} className="text-primary/60 shrink-0" />
+                    <Sparkles size={14} className="text-muted-foreground/60 shrink-0" />
                     <span className="truncate">{getPromptLabel(prompt)}</span>
                   </button>
                 ))}
@@ -327,7 +323,7 @@ export function ChatView() {
       </div>
 
       {/* Input Area */}
-      <div className="px-4 py-3 border-t border-border/40 bg-background/80 backdrop-blur-sm">
+      <div className="px-4 py-3 border-t border-border bg-card">
         <form onSubmit={handleSubmit} className="flex items-end gap-2">
           <div className="flex-1 relative">
             <textarea
@@ -339,10 +335,10 @@ export function ChatView() {
               disabled={isStreaming}
               rows={1}
               className={cn(
-                "w-full resize-none rounded-xl border border-border/40 bg-background/60",
+                "w-full resize-none rounded-lg border border-border bg-muted",
                 "px-4 py-3 text-[14px] text-foreground placeholder:text-muted-foreground/40",
-                "focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50",
-                "transition-all disabled:opacity-50",
+                "focus:outline-none focus:ring-2 focus:ring-ring/40",
+                "disabled:opacity-50",
                 "min-h-[48px] max-h-[160px]",
               )}
             />
@@ -350,7 +346,7 @@ export function ChatView() {
           <Button
             type="submit"
             disabled={!inputValue.trim() || isStreaming}
-            className="h-12 w-12 rounded-xl shrink-0 shadow-md"
+            className="h-12 w-12 rounded-lg shrink-0"
           >
             {isStreaming ? (
               <Loader2 size={18} className="animate-spin" />

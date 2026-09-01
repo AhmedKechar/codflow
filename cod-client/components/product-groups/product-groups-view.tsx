@@ -2,13 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { showErrorToast, showSuccessToast } from "@/lib/errors/toast";
 import { useErrorLocale } from "@/lib/errors/use-locale";
-import { useProductGroups, useCommon } from "@/lib/translations";
+import { useProductGroups, useCommon, useNavigation } from "@/lib/translations";
 import { useConfirm } from "@/components/ui/use-confirm";
 import { ProductGroupsTable } from "./product-groups-table";
 import { deleteProductGroup } from "@/actions/product-groups";
+import { PageHeader } from "@/components/ui/page-header";
 import type { ProductCategory } from "@/types";
 
 interface Props {
@@ -19,6 +19,7 @@ export function ProductGroupsView({ groups }: Props) {
   const router = useRouter();
   const t = useProductGroups();
   const common = useCommon();
+  const nav = useNavigation();
   const locale = useErrorLocale();
   const { confirm: confirmDialog, ConfirmDialog } = useConfirm();
 
@@ -39,20 +40,15 @@ export function ProductGroupsView({ groups }: Props) {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        <p className="text-[10px] sm:text-xs font-bold text-muted-foreground/60 uppercase tracking-widest">
-          {groups.length} {t.groups_count}
-        </p>
-        <Button
-          size="sm"
-          className="h-9 sm:h-10 rounded-xl bg-primary text-primary-foreground font-black text-[10px] sm:text-[11px] uppercase tracking-widest shadow-lg shadow-primary/10 hover:shadow-primary/20 active:scale-95 transition-all px-4 sm:px-6"
-          onClick={() => router.push("/product-groups/new")}
-        >
-          <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 me-1.5 sm:me-2" />
-          {t.add_group}
-        </Button>
-      </div>
+    <div className="space-y-6 animate-fade-in">
+      <PageHeader
+        title={nav.sidebar.categories}
+        primaryAction={{
+          label: t.add_group,
+          onClick: () => router.push("/product-groups/new"),
+          icon: <Plus className="w-4 h-4" />,
+        }}
+      />
 
       <ProductGroupsTable
         groups={groups}

@@ -20,31 +20,31 @@ function fmt(n: number) {
 }
 ---
 
-<div class:list={[isDesktop ? "hidden lg:block" : "lg:hidden", "mb-8"]}>
-  <h1 class:list={[isDesktop ? "text-3xl" : "text-2xl", "font-black leading-tight mb-3 tracking-tight"]} style="color: var(--clr-text)">
+<div class:list={[isDesktop ? "hidden lg:block" : "lg:hidden", "mb-6"]}>
+  <h1 class:list={[isDesktop ? "text-2xl" : "text-2xl", "font-semibold leading-tight mb-3 tracking-tight"]} style="color: var(--clr-text)">
     {product.name}
   </h1>
   
   {product.description && (
-    <p class:list={[isDesktop ? "text-[1.0625rem] mb-6" : "text-[0.9375rem] mb-4", "font-medium leading-relaxed"]} style="color: var(--clr-text-2)">
+    <p class:list={[isDesktop ? "text-[1.0625rem] mb-6" : "text-[0.9375rem] mb-4", "font-normal leading-relaxed"]} style="color: var(--clr-text-2)">
       {product.description}
     </p>
   )}
 
   <div class="flex items-baseline gap-4">
-    <span class:list={[isDesktop ? "text-4xl" : "text-3xl", "font-black"]} style="color: var(--clr-primary)" id={isDesktop ? "price-display-desktop" : "price-display-mobile"}>
-      {fmt(basePrice)} <span class:list={[isDesktop ? "text-2xl" : "text-lg", "font-bold"]}>{cur}</span>
+    <span class:list={[isDesktop ? "text-xl" : "text-xl", "font-semibold"]} style="color: var(--clr-text)" id={isDesktop ? "price-display-desktop" : "price-display-mobile"}>
+      {fmt(basePrice)} <span class:list={[isDesktop ? "text-base" : "text-base", "font-medium"]}>{cur}</span>
     </span>
     {hasDiscount && (
-      <span class:list={[isDesktop ? "text-xl" : "text-base", "line-through font-semibold"]} style="color: var(--clr-text-2)">
+      <span class:list={[isDesktop ? "text-base" : "text-base", "line-through font-normal"]} style="color: var(--clr-text-2)">
         {fmt(comparePrice!)} {cur}
       </span>
     )}
   </div>
 
   {!isDesktop && isLowStock && (
-    <div class="mt-4 inline-flex items-center gap-2 bg-orange-50 text-orange-600 px-3 py-1.5 rounded-xl text-[0.8125rem] font-bold border border-orange-100">
-      <Icon name="heroicons:exclamation-triangle" class="w-4 h-4 shrink-0" />
+    <div class="mt-4 inline-flex items-center gap-2 bg-[var(--clr-surface-alt)] text-text-main px-3 py-1.5 rounded-full text-[0.8125rem] font-medium border border-border">
+      <Icon name="heroicons:exclamation-triangle" class="w-4 h-4 shrink-0" style="color: var(--clr-text-2)" />
       {lowStockText}
     </div>
   )}

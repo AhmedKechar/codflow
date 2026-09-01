@@ -140,7 +140,7 @@ export function DomainList({
 
   if (isLoading) {
     return (
-      <div className="bg-white/40 dark:bg-white/5 backdrop-blur-xl border border-border/60 rounded-2xl overflow-hidden">
+      <div className="rounded-xl border border-border bg-card overflow-hidden">
         <div className="p-6 space-y-4">
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="flex items-center gap-4 animate-pulse">
@@ -159,7 +159,7 @@ export function DomainList({
 
   if (domains.length === 0) {
     return (
-      <div className="bg-white/40 dark:bg-white/5 backdrop-blur-xl border border-border/60 rounded-2xl p-12 text-center">
+      <div className="rounded-xl border border-border bg-card p-12 text-center">
         <Globe
           size={48}
           className="mx-auto text-muted-foreground/30 mb-4"
@@ -198,7 +198,7 @@ export function DomainList({
         )}
       </div>
 
-      <div className="bg-white/40 dark:bg-white/5 backdrop-blur-xl border border-border/60 rounded-2xl overflow-hidden">
+      <div className="rounded-xl border border-border bg-card overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
@@ -227,8 +227,8 @@ export function DomainList({
                 <TableRow key={domain.id}>
                   <TableCell>
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                        <Globe size={14} className="text-primary" />
+                      <div className="w-8 h-8 rounded-full bg-muted/60 flex items-center justify-center">
+                        <Globe size={14} className="text-muted-foreground" />
                       </div>
                       <span className="font-mono font-medium text-sm">
                         {domain.domain}

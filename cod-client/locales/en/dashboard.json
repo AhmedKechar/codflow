@@ -27,26 +27,29 @@
   },
   "order_statuses": {
     "new": "New",
-    "preparing": "Preparing",
-    "ready": "Ready",
-    "assigned": "Assigned",
-    "out_for_delivery": "Out for Delivery",
+    "confirmed": "Confirmed",
+    "unreachable": "Unreachable",
+    "busy": "Busy",
+    "postponed": "Postponed",
+    "shipped": "Shipped",
     "delivered": "Delivered",
     "returned": "Returned",
-    "cancelled": "Cancelled"
+    "cancelled": "Cancelled",
+    "fake": "Fake",
+    "duplicate": "Duplicate"
   },
   "status_tooltips": {
     "total_orders": "Total number of orders across all statuses",
     "new": "Order just received, awaiting review and confirmation",
     "confirmed": "Order confirmed by the team, ready to be prepared",
     "unreachable": "Customer could not be reached for order confirmation",
-    "preparing": "Order is being picked and packed for delivery",
-    "ready": "Order is packed and waiting to be picked up or dispatched",
-    "assigned": "A driver has been assigned to pick up and deliver this order",
-    "dispatched": "Order has been handed off to a delivery company",
-    "out_for_delivery": "Order is on its way and will be delivered soon",
+    "busy": "Customer is busy, will try again later",
+    "postponed": "Delivery postponed to a later date",
+    "shipped": "Order has been shipped and is in transit",
     "delivered": "Order was successfully delivered to the customer",
     "returned": "Customer refused or returned the order at the door",
-    "cancelled": "Order was cancelled and will not be processed"
+    "cancelled": "Order was cancelled and will not be processed",
+    "fake": "Order identified as fake or fraudulent",
+    "duplicate": "Order is a duplicate entry"
   }
 }

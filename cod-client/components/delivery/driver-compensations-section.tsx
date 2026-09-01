@@ -146,7 +146,7 @@ export function DriverCompensationsSection({
               <Coins size={16} className="text-primary" />
             </div>
             <div className="min-w-0">
-              <h2 className="text-base font-black text-foreground tracking-tight leading-tight truncate">
+              <h2 className="text-base font-semibold text-foreground tracking-tight leading-tight truncate">
                 {t.compensations?.title ?? "Wilaya Pay Grid"}
               </h2>
               <p className="text-[11px] font-bold text-muted-foreground/60 mt-0.5 truncate">
@@ -161,7 +161,7 @@ export function DriverCompensationsSection({
               size="sm"
               onClick={startAdd}
               disabled={!canAdd || editing === "new" || isPending}
-              className="h-10 rounded-xl px-4 font-black text-[11px] uppercase tracking-widest shadow-md shadow-primary/10 active:scale-95 transition-all shrink-0"
+              className="h-10 rounded-xl px-4 font-semibold text-[11px] uppercase tracking-widest active:scale-95 transition-all shrink-0"
             >
               <Plus size={13} className="me-1.5" />
               {t.compensations?.add_button ?? "Add rate"}
@@ -172,22 +172,22 @@ export function DriverCompensationsSection({
         {/* Summary strip ------------------------------------------------- */}
         {sorted.length > 0 && (
           <div className="grid grid-cols-2 gap-3">
-            <div className="glass-card rounded-2xl border-border/20 p-3.5">
-              <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40 flex items-center gap-1.5">
+            <div className="bg-card rounded-lg border-border p-3.5">
+              <p className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground/40 flex items-center gap-1.5">
                 <MapPin size={9} className="text-primary/40" />
                 {t.compensations?.total_rates ?? "rates"}
               </p>
-              <p className="text-xl font-black text-foreground tabular-nums mt-1 leading-none">
+              <p className="text-xl font-semibold text-foreground tabular-nums mt-1 leading-none">
                 {sorted.length}
                 <span className="text-muted-foreground/30 text-xs font-bold ms-2">/ 58</span>
               </p>
             </div>
-            <div className="glass-card rounded-2xl border-primary/10 p-3.5 bg-primary/[0.02]">
-              <p className="text-[9px] font-black uppercase tracking-widest text-primary/50 flex items-center gap-1.5">
+            <div className="bg-card rounded-lg border-primary/10 p-3.5 bg-primary/5">
+              <p className="text-[9px] font-semibold uppercase tracking-widest text-primary/50 flex items-center gap-1.5">
                 <Coins size={9} />
                 {t.compensations?.total_fee_sum ?? "Total"}
               </p>
-              <p className="text-xl font-black text-primary tabular-nums mt-1 leading-none">
+              <p className="text-xl font-semibold text-primary tabular-nums mt-1 leading-none">
                 {formatPrice(totalFee, common.currency.symbol)}
               </p>
             </div>
@@ -198,11 +198,11 @@ export function DriverCompensationsSection({
         {editing === "new" && (
           <form
             onSubmit={save}
-            className="glass-card rounded-2xl border-primary/20 bg-primary/[0.03] p-4 space-y-3 animate-fade-in"
+            className="bg-card rounded-lg border-primary/20 bg-primary/5 p-4 space-y-3 animate-fade-in"
           >
             <div className="grid grid-cols-1 sm:grid-cols-[1fr_180px] gap-3">
               <div className="space-y-1.5">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
+                <Label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
                   {t.compensations?.wilaya_label ?? "Wilaya"}
                 </Label>
                 <Select
@@ -229,7 +229,7 @@ export function DriverCompensationsSection({
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
+                <Label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
                   {t.compensations?.fee_label ?? "Fee"}
                 </Label>
                 <div className="relative">
@@ -242,9 +242,9 @@ export function DriverCompensationsSection({
                     placeholder="0"
                     value={draft.fee}
                     onChange={(e) => setDraft((d) => ({ ...d, fee: e.target.value }))}
-                    className="h-11 rounded-xl bg-card border-border font-black tabular-nums pe-12"
+                    className="h-11 rounded-xl bg-card border-border font-semibold tabular-nums pe-12"
                   />
-                  <span className="absolute end-3 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
+                  <span className="absolute end-3 top-1/2 -translate-y-1/2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/40">
                     {common.currency.symbol}
                   </span>
                 </div>
@@ -258,7 +258,7 @@ export function DriverCompensationsSection({
                 size="sm"
                 onClick={cancelEdit}
                 disabled={isPending}
-                className="h-10 rounded-xl px-4 text-[11px] font-black uppercase tracking-widest"
+                className="h-10 rounded-xl px-4 text-[11px] font-semibold uppercase tracking-widest"
               >
                 <X size={13} className="me-1" />
                 {t.compensations?.cancel ?? "Cancel"}
@@ -267,7 +267,7 @@ export function DriverCompensationsSection({
                 type="submit"
                 size="sm"
                 disabled={isPending || draft.wilayaId == null || draft.fee === ""}
-                className="h-10 rounded-xl px-5 text-[11px] font-black uppercase tracking-widest shadow-md shadow-primary/10 active:scale-95"
+                className="h-10 rounded-xl px-5 text-[11px] font-semibold uppercase tracking-widest active:scale-95"
               >
                 <Check size={13} className="me-1" />
                 {isPending ? t.compensations?.saving ?? "Saving…" : t.compensations?.save ?? "Save"}
@@ -278,12 +278,12 @@ export function DriverCompensationsSection({
 
         {/* Empty state --------------------------------------------------- */}
         {sorted.length === 0 && editing !== "new" && (
-          <div className="glass-card rounded-2xl border-dashed border-border/40 p-8 text-center space-y-3">
-            <div className="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center mx-auto">
-              <Info size={20} className="text-amber-500" />
+          <div className="bg-card rounded-lg border-dashed border-border p-8 text-center space-y-3">
+            <div className="w-12 h-12 bg-warning/10 rounded-lg flex items-center justify-center mx-auto">
+              <Info size={20} className="text-warning" />
             </div>
             <div>
-              <p className="text-sm font-black text-foreground tracking-tight">
+              <p className="text-sm font-semibold text-foreground tracking-tight">
                 {t.compensations?.empty_title ?? "No wilaya rates yet"}
               </p>
               <p className="text-[12px] text-muted-foreground/60 font-medium mt-1.5 leading-relaxed max-w-sm mx-auto">
@@ -296,7 +296,7 @@ export function DriverCompensationsSection({
                 size="sm"
                 onClick={startAdd}
                 disabled={!canAdd}
-                className="h-11 rounded-xl px-5 text-[11px] font-black uppercase tracking-widest shadow-md shadow-primary/10 active:scale-95"
+                className="h-11 rounded-xl px-5 text-[11px] font-semibold uppercase tracking-widest active:scale-95"
               >
                 <Plus size={13} className="me-1.5" />
                 {t.compensations?.add_button ?? "Add rate"}
@@ -307,25 +307,25 @@ export function DriverCompensationsSection({
 
         {/* Rates list ---------------------------------------------------- */}
         {sorted.length > 0 && (
-          <div className="glass-card rounded-2xl border-border/30 overflow-hidden">
-            <ul className="divide-y divide-border/10">
+          <div className="bg-card rounded-lg border-border overflow-hidden">
+            <ul className="divide-y divide-border/40">
               {sorted.map((row) => {
                 const lbl = wilayaLabel(row.wilayaId);
                 const isEditing = editing === row.wilayaId;
 
                 if (isEditing) {
                   return (
-                    <li key={row.wilayaId} className="bg-primary/[0.03] p-4">
+                    <li key={row.wilayaId} className="bg-primary/5 p-4">
                       <form
                         onSubmit={save}
                         className="flex flex-col sm:flex-row sm:items-end gap-3"
                       >
                         <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary font-mono text-xs font-black flex items-center justify-center shrink-0 tabular-nums">
+                          <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary font-mono text-xs font-semibold flex items-center justify-center shrink-0 tabular-nums">
                             {String(row.wilayaId).padStart(2, "0")}
                           </div>
                           <div className="min-w-0">
-                            <p dir="rtl" className="text-sm font-black text-foreground leading-tight truncate">{lbl.ar}</p>
+                            <p dir="rtl" className="text-sm font-semibold text-foreground leading-tight truncate">{lbl.ar}</p>
                             <p className="text-[10px] font-bold uppercase tracking-tight text-muted-foreground/50 mt-0.5 truncate">{lbl.fr}</p>
                           </div>
                         </div>
@@ -340,9 +340,9 @@ export function DriverCompensationsSection({
                               autoFocus
                               value={draft.fee}
                               onChange={(e) => setDraft((d) => ({ ...d, fee: e.target.value }))}
-                              className="h-10 rounded-xl bg-card border-border font-black tabular-nums pe-10"
+                              className="h-10 rounded-xl bg-card border-border font-semibold tabular-nums pe-10"
                             />
-                            <span className="absolute end-3 top-1/2 -translate-y-1/2 text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">
+                            <span className="absolute end-3 top-1/2 -translate-y-1/2 text-[9px] font-semibold uppercase tracking-widest text-muted-foreground/40">
                               {common.currency.symbol}
                             </span>
                           </div>
@@ -375,17 +375,17 @@ export function DriverCompensationsSection({
                     key={row.wilayaId}
                     className="group flex items-center gap-3 p-3.5 hover:bg-muted/20 transition-colors"
                   >
-                    <div className="w-10 h-10 rounded-xl bg-muted/40 text-muted-foreground/50 group-hover:bg-primary/10 group-hover:text-primary font-mono text-xs font-black flex items-center justify-center shrink-0 tabular-nums transition-colors">
+                    <div className="w-10 h-10 rounded-xl bg-muted/40 text-muted-foreground/50 group-hover:bg-primary/10 group-hover:text-primary font-mono text-xs font-semibold flex items-center justify-center shrink-0 tabular-nums transition-colors">
                       {String(row.wilayaId).padStart(2, "0")}
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <p dir="rtl" className="text-sm font-black text-foreground leading-tight truncate">{lbl.ar}</p>
+                      <p dir="rtl" className="text-sm font-semibold text-foreground leading-tight truncate">{lbl.ar}</p>
                       <p className="text-[10px] font-bold uppercase tracking-tight text-muted-foreground/50 mt-0.5 truncate">{lbl.fr}</p>
                     </div>
 
                     <div className="shrink-0 text-end">
-                      <p className="text-sm font-black text-primary tabular-nums leading-none">
+                      <p className="text-sm font-semibold text-primary tabular-nums leading-none">
                         {formatPrice(row.feePerDelivery, common.currency.symbol)}
                       </p>
                       <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/40 mt-1">
@@ -413,7 +413,7 @@ export function DriverCompensationsSection({
                           onClick={() => handleDelete(row)}
                           disabled={isPending || editing !== null}
                           aria-label={t.compensations?.delete ?? "Delete"}
-                          className="h-9 w-9 rounded-xl text-muted-foreground/40 hover:text-rose-500 hover:bg-rose-500/10 active:scale-90"
+                          className="h-9 w-9 rounded-xl text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 active:scale-90"
                         >
                           <Trash2 size={13} />
                         </Button>

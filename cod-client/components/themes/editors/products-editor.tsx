@@ -1,21 +1,19 @@
 "use client";
 
+import { useEffect } from "react";
 import { Package, SlidersHorizontal, ListFilter } from "lucide-react";
 import { useThemes } from "@/lib/translations";
-import {
-  PanelCard,
-  ToggleRow,
-  Stepper,
-  SiteBuilderSaveBar,
-} from "@/components/themes/builder-ui";
+import { PanelCard, ToggleRow, Stepper } from "@/components/themes/builder-ui";
 import { useSiteBuilder } from "@/components/themes/site-builder-state";
 
 interface Props {
   siteJson: string | null;
   onSaved?: () => void;
+  onDirtyChange?: (dirty: boolean) => void;
+  saveRef?: React.MutableRefObject<(() => Promise<boolean>) | null>;
 }
 
-export function ProductsEditor({ siteJson, onSaved }: Props) {
+export function ProductsEditor({ siteJson, onSaved, onDirtyChange, saveRef }: Props) {
   const t = useThemes();
   const { site, update, dirty, saving, save } = useSiteBuilder(siteJson);
 
@@ -23,11 +21,19 @@ export function ProductsEditor({ siteJson, onSaved }: Props) {
     patch: Partial<typeof site.products>
   ) => update((p) => ({ ...p, products: { ...p.products, ...patch } }));
 
-  const handleSave = async () => {
-    const ok = await save();
-    if (ok) onSaved?.();
-    return ok;
-  };
+  useEffect(() => {
+    onDirtyChange?.(dirty);
+  }, [dirty, onDirtyChange]);
+
+  useEffect(() => {
+    if (saveRef) {
+      saveRef.current = async () => {
+        const ok = await save();
+        if (ok) onSaved?.();
+        return ok;
+      };
+    }
+  });
 
   return (
     <div className="space-y-6">
@@ -91,8 +97,6 @@ export function ProductsEditor({ siteJson, onSaved }: Props) {
           onChange={(v) => update((p) => ({ ...p, pages: { ...p.pages, showCategoryPages: v } }))}
         />
       </PanelCard>
-
-      <SiteBuilderSaveBar dirty={dirty} saving={saving} onSave={handleSave} />
     </div>
   );
 }

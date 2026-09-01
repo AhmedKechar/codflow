@@ -2,6 +2,7 @@ import { z } from "zod";
 
 const variantOptionSchema = z.object({
   name: z.string().min(1),
+  displayMode: z.enum(["color-circle", "color-frame", "color-text", "text"]).optional().nullable(),
   values: z.array(z.object({
     value: z.string().min(1),
     hexColor: z.string().optional().nullable(),
@@ -30,6 +31,15 @@ export const createProductSchema = z.object({
   showInStore: z.boolean().default(true),
   storeFeatured: z.boolean().default(false),
   shippingProfileId: z.string().optional().nullable(),
+  barcode: z.string().optional().nullable(),
+  weightKg: z.number().min(0).optional().nullable(),
+  metaTitle: z.string().optional().nullable(),
+  metaDescription: z.string().optional().nullable(),
+  metaKeywords: z.string().optional().nullable(),
+  shippingMethod: z.enum(["carrier", "custom", "free"]).optional().nullable(),
+  shippingOfficePrice: z.number().int().min(0).optional().nullable(),
+  shippingHomePrice: z.number().int().min(0).optional().nullable(),
+  externalUrl: z.string().url().optional().nullable(),
 }).superRefine((data, ctx) => {
   if (!data.hasVariants && !data.sku) {
     ctx.addIssue({
@@ -61,6 +71,15 @@ export const updateProductSchema = z.object({
   showInStore: z.boolean().optional(),
   storeFeatured: z.boolean().optional(),
   shippingProfileId: z.string().optional().nullable(),
+  barcode: z.string().optional().nullable(),
+  weightKg: z.number().min(0).optional().nullable(),
+  metaTitle: z.string().optional().nullable(),
+  metaDescription: z.string().optional().nullable(),
+  metaKeywords: z.string().optional().nullable(),
+  shippingMethod: z.enum(["carrier", "custom", "free"]).optional().nullable(),
+  shippingOfficePrice: z.number().int().min(0).optional().nullable(),
+  shippingHomePrice: z.number().int().min(0).optional().nullable(),
+  externalUrl: z.string().url().optional().nullable(),
 });
 
 export const updateStatusSchema = z.object({

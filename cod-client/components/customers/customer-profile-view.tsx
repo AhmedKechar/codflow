@@ -143,28 +143,27 @@ export function CustomerProfileView({
         <div className="hidden lg:flex items-center gap-3">
           <Button
             variant="outline"
-            className="h-10 px-5 rounded-xl border-border bg-white/50 dark:bg-muted/20 text-foreground font-black text-[11px] uppercase tracking-widest hover:bg-muted transition-all active:scale-95"
+            className="h-10 px-5 rounded-md border-border bg-card text-foreground hover:bg-muted transition-all active:scale-95"
             onClick={() => router.push(`/customers/${customer.id}/edit`)}
           >
             <Edit size={14} className="me-2" /> {t.actions.edit}
           </Button>
           <Link href="/orders/new">
-            <Button className="h-10 px-5 rounded-xl bg-primary text-primary-foreground font-black text-[11px] uppercase tracking-widest shadow-lg shadow-primary/10 hover:shadow-primary/20 transition-all active:scale-95">
+            <Button className="h-10 px-5 rounded-md bg-primary text-primary-foreground">
               <Plus size={14} className="me-2" /> {t.profile.new_order}
             </Button>
           </Link>
         </div>
         <Link
           href="/customers"
-          className="group inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-border/40 bg-white/50 dark:bg-muted/20 text-muted-foreground hover:text-foreground transition-all shadow-sm active:scale-95"
+          className="group inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-md border border-border bg-card text-muted-foreground hover:text-foreground transition-all active:scale-95"
         >
           <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
         </Link>
       </div>
 
       {/* Hero Glass Card */}
-      <div className="group relative glass-card rounded-2xl sm:rounded-3xl border-border/30 overflow-hidden shadow-sm transition-all duration-500 hover:shadow-premium">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[40%] bg-primary/5 blur-[80px] pointer-events-none transition-opacity opacity-0 group-hover:opacity-100 duration-700" />
+      <div className="group relative bg-card border border-border rounded-lg overflow-hidden">
 
         <div className="relative z-10 p-5 sm:p-8">
           <div className="flex flex-col lg:flex-row gap-6 sm:gap-8">
@@ -181,7 +180,7 @@ export function CustomerProfileView({
                     <div className="min-w-0">
                       <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40 mb-0.5">{t.profile.phone}</p>
                       <div className="flex items-center gap-1.5">
-                        <Phone size={11} className="text-primary/40 shrink-0" />
+                        <Phone size={11} className="text-muted-foreground/60 shrink-0" />
                         <span className="text-[12px] sm:text-[13px] font-bold text-foreground" dir="ltr">{customer.phone}</span>
                       </div>
                     </div>
@@ -191,7 +190,7 @@ export function CustomerProfileView({
                       <div className="min-w-0">
                         <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40 mb-0.5">{t.form.phone2_label}</p>
                         <div className="flex items-center gap-1.5">
-                          <Phone size={11} className="text-primary/40 shrink-0" />
+                          <Phone size={11} className="text-muted-foreground/60 shrink-0" />
                           <span className="text-[12px] sm:text-[13px] font-bold text-foreground" dir="ltr">{customer.phone2}</span>
                         </div>
                       </div>
@@ -202,7 +201,7 @@ export function CustomerProfileView({
                       <div className="min-w-0">
                         <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40 mb-0.5">{t.profile.wilaya}</p>
                         <div className="flex items-center gap-1.5">
-                          <MapPin size={11} className="text-primary/40 shrink-0" />
+                          <MapPin size={11} className="text-muted-foreground/60 shrink-0" />
                           <span className="text-[12px] sm:text-[13px] font-bold text-foreground truncate">{customer.wilaya}</span>
                         </div>
                       </div>
@@ -213,7 +212,7 @@ export function CustomerProfileView({
                       <div className="min-w-0">
                         <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40 mb-0.5">{t.profile.commune}</p>
                         <div className="flex items-center gap-1.5">
-                          <MapPin size={11} className="text-primary/40 shrink-0" />
+                          <MapPin size={11} className="text-muted-foreground/60 shrink-0" />
                           <span className="text-[12px] sm:text-[13px] font-bold text-foreground truncate">{customer.commune}</span>
                         </div>
                       </div>
@@ -224,7 +223,7 @@ export function CustomerProfileView({
                       <div className="col-span-2 min-w-0">
                         <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40 mb-0.5">{t.profile.address}</p>
                         <div className="flex items-start gap-1.5">
-                          <MapPin size={11} className="text-primary/40 shrink-0 mt-0.5" />
+                          <MapPin size={11} className="text-muted-foreground/60 shrink-0 mt-0.5" />
                           <span className="text-[12px] sm:text-[13px] font-bold text-foreground leading-snug">{customer.address}</span>
                         </div>
                       </div>
@@ -263,27 +262,27 @@ export function CustomerProfileView({
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-2.5 sm:gap-3 shrink-0 lg:w-56">
-              <div className="bg-muted/20 border border-border/10 rounded-xl p-3 sm:p-4 transition-all hover:bg-primary/[0.02] hover:border-primary/10 shadow-sm text-center lg:text-start">
+              <div className="bg-muted/50 border border-border rounded-lg p-3 sm:p-4 transition-all hover:bg-muted text-center lg:text-start">
                 <p className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-1 flex items-center justify-center lg:justify-start gap-1.5">
-                  <Package className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-primary/50" />
+                  <Package className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-muted-foreground/60" />
                   {t.table.orders}
                 </p>
                 <p className="text-lg sm:text-2xl font-black text-foreground font-display tabular-nums leading-none">
                   {customer.totalOrders || 0}
                 </p>
               </div>
-              <div className="bg-muted/20 border border-border/10 rounded-xl p-3 sm:p-4 transition-all hover:bg-primary/[0.02] hover:border-primary/10 shadow-sm text-center lg:text-start">
+              <div className="bg-muted/50 border border-border rounded-lg p-3 sm:p-4 transition-all hover:bg-muted text-center lg:text-start">
                 <p className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-1 flex items-center justify-center lg:justify-start gap-1.5">
-                  <TrendingUp className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-primary/50" />
+                  <TrendingUp className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-muted-foreground/60" />
                   {t.profile.total_spent}
                 </p>
-                <p className="text-lg sm:text-2xl font-black text-primary font-display tabular-nums leading-none">
+                <p className="text-lg sm:text-2xl font-black text-foreground font-display tabular-nums leading-none">
                   {formatPrice(customer.totalSpent)}
                 </p>
               </div>
-              <div className="bg-muted/20 border border-border/10 rounded-xl p-3 sm:p-4 transition-all hover:bg-primary/[0.02] hover:border-primary/10 shadow-sm text-center lg:text-start">
+              <div className="bg-muted/50 border border-border rounded-lg p-3 sm:p-4 transition-all hover:bg-muted text-center lg:text-start">
                 <p className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-1 flex items-center justify-center lg:justify-start gap-1.5">
-                  <TrendingUp className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-rose-500/50" />
+                  <TrendingUp className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-destructive/60" />
                   {t.profile.return_rate}
                 </p>
                 <p
@@ -293,7 +292,7 @@ export function CustomerProfileView({
                       returnRate > 10
                         ? "var(--status-returned-text)"
                         : returnRate > 0
-                          ? "var(--status-ready-text)"
+                          ? "var(--status-busy-text)"
                           : "var(--status-delivered-text)",
                   }}
                 >
@@ -309,22 +308,22 @@ export function CustomerProfileView({
       <div className="space-y-4">
         <Tabs defaultValue="orders" className="w-full">
           <div className="flex items-center justify-between px-1 mb-4">
-            <TabsList className="bg-muted/30 border border-border/20 p-1 rounded-xl h-11">
+            <TabsList className="bg-muted/50 border border-border p-1 rounded-lg h-10">
               <TabsTrigger
                 value="orders"
-                className="flex items-center gap-2 px-4 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-primary data-[state=active]:text-primary dark:data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-black text-[10px] uppercase tracking-widest transition-all"
+                className="flex items-center gap-2 px-4 rounded-md data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm font-bold text-[10px] uppercase tracking-wider transition-all"
               >
                 <Package size={14} />
                 {t.profile.order_history}
               </TabsTrigger>
               <TabsTrigger
                 value="segments"
-                className="flex items-center gap-2 px-4 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-primary data-[state=active]:text-primary dark:data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-black text-[10px] uppercase tracking-widest transition-all"
+                className="flex items-center gap-2 px-4 rounded-md data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm font-bold text-[10px] uppercase tracking-wider transition-all"
               >
                 <Layers size={14} />
                 {t.segments.tab}
                 {segmentCount > 0 && (
-                  <span className="text-[9px] font-black bg-primary/10 text-primary px-1.5 py-0.5 rounded-full tabular-nums">
+                  <span className="text-[9px] font-black bg-muted text-muted-foreground px-1.5 py-0.5 rounded-full tabular-nums">
                     {segmentCount}
                   </span>
                 )}
@@ -334,11 +333,11 @@ export function CustomerProfileView({
 
           {/* Orders Tab */}
           <TabsContent value="orders" className="mt-0 animate-fade-in-up">
-            <div className="glass-card rounded-2xl sm:rounded-3xl border-border/30 overflow-hidden shadow-sm">
+            <div className="bg-card border border-border rounded-lg overflow-hidden">
               <div className="overflow-x-auto no-scrollbar">
                 {orders.length === 0 ? (
                   <div className="py-20 text-center space-y-4 px-6">
-                    <div className="w-14 h-14 bg-muted/30 rounded-2xl flex items-center justify-center mx-auto opacity-20">
+                    <div className="w-14 h-14 bg-muted rounded-lg flex items-center justify-center mx-auto opacity-20">
                       <Package size={28} />
                     </div>
                     <p className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-muted-foreground/40 max-w-xs mx-auto">
@@ -360,7 +359,7 @@ export function CustomerProfileView({
                             </p>
                           </div>
                           <div className="flex flex-col items-end gap-1.5 shrink-0">
-                            <span className="text-sm font-black text-primary tabular-nums">
+                            <span className="text-sm font-black text-foreground tabular-nums">
                               {formatPrice(order.price)}
                             </span>
                             <OrderStatusBadge status={order.status} className="scale-90 origin-right" />
@@ -372,8 +371,8 @@ export function CustomerProfileView({
                     {/* Desktop table */}
                     <div className="hidden sm:block min-w-[500px]">
                       <table className="w-full text-sm">
-                        <thead className="bg-muted/10">
-                          <tr className="border-b border-border/10">
+                        <thead className="bg-muted/50">
+                          <tr className="border-b border-border">
                             <th className="px-6 py-4 text-start text-[9px] sm:text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">
                               <div className="flex items-center gap-2"><Hash size={12} /> {t.profile.order_number}</div>
                             </th>
@@ -390,14 +389,14 @@ export function CustomerProfileView({
                         </thead>
                         <tbody className="divide-y divide-border/5">
                           {orders.map((order) => (
-                            <tr key={order.id} className="group hover:bg-white/40 dark:hover:bg-primary/[0.02] transition-all duration-300">
+                            <tr key={order.id} className="group hover:bg-muted/50 transition-colors">
                               <td className="px-6 py-4">
-                                <p className="font-black text-sm text-foreground tracking-tight group-hover:text-primary transition-colors">
+                                <p className="font-black text-sm text-foreground tracking-tight group-hover:text-foreground transition-colors">
                                   {order.orderNumber}
                                 </p>
                               </td>
                               <td className="px-6 py-4 text-center">
-                                <span className="text-sm font-black text-primary tabular-nums">{formatPrice(order.price)}</span>
+                                <span className="text-sm font-black text-foreground tabular-nums">{formatPrice(order.price)}</span>
                               </td>
                               <td className="px-6 py-4 text-center">
                                 <OrderStatusBadge status={order.status} className="scale-90" />
@@ -421,17 +420,17 @@ export function CustomerProfileView({
           {/* Segments Tab */}
           <TabsContent value="segments" className="mt-0 animate-fade-in-up space-y-4">
             {/* Groups Card */}
-            <div className="glass-card rounded-2xl sm:rounded-3xl border-border/30 overflow-hidden shadow-sm">
-              <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-border/10 bg-muted/5">
+            <div className="bg-card border border-border rounded-lg overflow-hidden">
+              <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-border bg-muted/50">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                    <Layers className="w-4 h-4 text-primary" />
+                  <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                    <Layers className="w-4 h-4 text-muted-foreground" />
                   </div>
                   <span className="text-sm font-black uppercase tracking-widest text-foreground/70">
                     {t.segments.groups_title}
                   </span>
                   {assignedGroups.length > 0 && (
-                    <span className="text-[10px] font-black text-primary/60 bg-primary/5 px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] font-black text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
                       {assignedGroups.length}
                     </span>
                   )}
@@ -440,7 +439,7 @@ export function CustomerProfileView({
                   <Button
                     size="sm"
                     onClick={() => { setShowAddGroup(!showAddGroup); setGroupSearch(""); }}
-                    className="h-8 rounded-xl bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-widest gap-1.5 shadow-sm shadow-primary/10 active:scale-95 transition-all px-3"
+                    className="h-8 rounded-md bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-widest gap-1.5 px-3"
                   >
                     <UserPlus className="w-3 h-3" />
                     {t.segments.add_group}
@@ -457,7 +456,7 @@ export function CustomerProfileView({
                       value={groupSearch}
                       onChange={(e) => setGroupSearch(e.target.value)}
                       placeholder={t.segments.search_group}
-                      className="w-full h-9 ps-9 pe-3 rounded-xl bg-muted/30 border border-border/30 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                      className="w-full h-9 ps-9 pe-3 rounded-md bg-card border border-border text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/40 transition-all"
                     />
                   </div>
                   <div className="max-h-44 overflow-y-auto space-y-1">
@@ -478,7 +477,7 @@ export function CustomerProfileView({
                           <button
                             onClick={() => handleAddGroup(group)}
                             disabled={actionLoading === `add-group-${group.id}`}
-                            className="w-7 h-7 rounded-lg bg-primary/10 hover:bg-primary text-primary hover:text-primary-foreground flex items-center justify-center transition-all active:scale-90 shrink-0 disabled:opacity-50"
+                            className="w-7 h-7 rounded-md bg-muted text-muted-foreground hover:bg-accent flex items-center justify-center transition-all active:scale-90 shrink-0 disabled:opacity-50"
                           >
                             <Plus className="w-3 h-3" />
                           </button>
@@ -523,17 +522,17 @@ export function CustomerProfileView({
             </div>
 
             {/* Tags Card */}
-            <div className="glass-card rounded-2xl sm:rounded-3xl border-border/30 overflow-hidden shadow-sm">
-              <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-border/10 bg-muted/5">
+            <div className="bg-card border border-border rounded-lg overflow-hidden">
+              <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-border bg-muted/50">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                    <Tag className="w-4 h-4 text-primary" />
+                  <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                    <Tag className="w-4 h-4 text-muted-foreground" />
                   </div>
                   <span className="text-sm font-black uppercase tracking-widest text-foreground/70">
                     {t.segments.tags_title}
                   </span>
                   {assignedTags.length > 0 && (
-                    <span className="text-[10px] font-black text-primary/60 bg-primary/5 px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] font-black text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
                       {assignedTags.length}
                     </span>
                   )}
@@ -542,7 +541,7 @@ export function CustomerProfileView({
                   <Button
                     size="sm"
                     onClick={() => { setShowAddTag(!showAddTag); setTagSearch(""); }}
-                    className="h-8 rounded-xl bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-widest gap-1.5 shadow-sm shadow-primary/10 active:scale-95 transition-all px-3"
+                    className="h-8 rounded-md bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-widest gap-1.5 px-3"
                   >
                     <Plus className="w-3 h-3" />
                     {t.segments.add_tag}
@@ -559,7 +558,7 @@ export function CustomerProfileView({
                       value={tagSearch}
                       onChange={(e) => setTagSearch(e.target.value)}
                       placeholder={t.segments.search_tag}
-                      className="w-full h-9 ps-9 pe-3 rounded-xl bg-muted/30 border border-border/30 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                      className="w-full h-9 ps-9 pe-3 rounded-md bg-card border border-border text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/40 transition-all"
                     />
                   </div>
                   <div className="max-h-44 overflow-y-auto flex flex-wrap gap-2 py-1">
@@ -620,17 +619,17 @@ export function CustomerProfileView({
 
       {/* Floating Mobile Action Bar */}
       <div className="fixed bottom-[88px] inset-x-4 z-40 lg:hidden animate-in slide-in-from-bottom-8 duration-500">
-        <div className="glass-card border-white/20 dark:border-white/5 rounded-[2rem] p-2.5 sm:p-3 shadow-2xl flex items-center gap-2.5 sm:gap-3">
+        <div className="bg-card border border-border rounded-xl p-2.5 sm:p-3 shadow-lg flex items-center gap-2.5 sm:gap-3">
           <Button
             variant="outline"
             onClick={() => router.push(`/customers/${customer.id}/edit`)}
-            className="flex-1 h-12 sm:h-14 rounded-2xl border-border/40 bg-white/50 dark:bg-muted/20 text-foreground font-black text-[10px] sm:text-[11px] uppercase tracking-widest active:scale-95"
+            className="flex-1 h-12 sm:h-14 rounded-lg border-border bg-card text-foreground active:scale-95"
           >
             <Edit size={16} className="me-2" />
             {t.actions.edit}
           </Button>
           <Link href="/orders/new" className="flex-1">
-            <Button className="w-full h-12 sm:h-14 rounded-2xl bg-primary text-primary-foreground font-black text-[10px] sm:text-[11px] uppercase tracking-widest shadow-lg shadow-primary/20 active:scale-95">
+            <Button className="w-full h-12 sm:h-14 rounded-lg bg-primary text-primary-foreground active:scale-95">
               <Plus size={16} className="me-2" />
               {t.profile.new_order}
             </Button>

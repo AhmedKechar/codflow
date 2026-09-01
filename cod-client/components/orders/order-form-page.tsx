@@ -2,9 +2,7 @@
 
 import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { ArrowLeft, ShoppingBag, CheckCircle2, Package, Home, Landmark, User, DollarSign, Info, Save, X, AlertCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ShoppingBag, Package, Home, Landmark, User, Info } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { OrderCustomerSection } from "./order-customer-section";
@@ -20,6 +18,10 @@ import { useLanguage } from "@/lib/i18n-context";
 import { createOrderFormSchema, type OrderFormErrors } from "@/validations/orders";
 import { formatPrice } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { FormSection as Section } from "@/components/ui/form-section";
+import { ContextualSaveBar } from "@/components/ui/contextual-save-bar";
+import { FormHeader } from "@/components/ui/form-header";
+import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
 
 interface Props {
   customers: Customer[];
@@ -34,9 +36,12 @@ export function OrderFormPage({ customers, products, shippingRules, wilayas }: P
   const common = useCommon();
   const { locale } = useLanguage();
   const [isPending, startTransition] = useTransition();
+  const isEdit = false;
   const [errors, setErrors] = useState<OrderFormErrors>({});
+  const { isDirty, markDirty, resetDirty } = useUnsavedChanges();
 
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [customerMode, setCustomerMode] = useState<"existing" | "new">("existing");
   const [customerName, setCustomerName] = useState("");
   const [phone, setPhone] = useState("");
   const [wilayaId, setWilayaId] = useState<number | null>(null);
@@ -238,6 +243,7 @@ export function OrderFormPage({ customers, products, shippingRules, wilayas }: P
           })),
         });
         toast.success(t.form.success_add);
+        resetDirty();
         router.push("/orders");
       } catch (error) {
         toast.error(
@@ -248,33 +254,19 @@ export function OrderFormPage({ customers, products, shippingRules, wilayas }: P
   }
 
   return (
-    <div className="max-w-5xl mx-auto pb-48 md:pb-12 space-y-5 sm:space-y-6 animate-fade-in">
-      {/* Header & Back Action */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center justify-end gap-2.5 sm:gap-3 w-full sm:w-auto order-last sm:order-first">
-          <div className="hidden lg:flex items-center gap-3">
-            <Button 
-              onClick={handleSave} 
-              disabled={isPending} 
-              className="h-10 px-6 rounded-xl font-black text-[11px] uppercase tracking-widest bg-primary text-primary-foreground shadow-lg shadow-primary/10 hover:shadow-primary/20 transition-all active:scale-95"
-            >
-              {isPending ? "..." : <><Save size={14} className="me-2" /> {t.form.form_save_create}</>}
-            </Button>
-          </div>
-          <Link
-            href="/orders"
-            className="group inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-border/40 bg-white/50 dark:bg-muted/20 text-muted-foreground hover:text-foreground transition-all shadow-sm active:scale-95"
-          >
-            <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-          </Link>
-        </div>
+    <div className="max-w-7xl mx-auto pb-16 space-y-6 animate-fade-in">
+      <FormHeader backHref="/orders" title={isEdit ? (t.form.title_edit ?? "Edit Order") : (t.form.title_add ?? "New Order")} />
+      <ContextualSaveBar
+        hasChanges={isDirty}
+        isSaving={isPending}
+        onSave={handleSave}
+        onCancel={() => router.push("/orders")}
+        onDiscard={() => router.push("/orders")}
+      />
 
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
-        {/* Left: Customer info + Delivery + Notes */}
-        <div className="lg:col-span-7 space-y-6 sm:space-y-8">
-          
+      <div className="flex items-start gap-6">
+        {/* Main column */}
+        <div className="flex-1 min-w-0 space-y-6">
           <Section title={t.detail.customer_info} icon={<User size={18} />}>
             <OrderCustomerSection
               customers={customers}
@@ -291,65 +283,79 @@ export function OrderFormPage({ customers, products, shippingRules, wilayas }: P
               deliveryType={deliveryType}
               onCustomerSelect={handleCustomerSelect}
               onCustomerClear={handleCustomerClear}
-              onCustomerNameChange={setCustomerName}
-              onPhoneChange={setPhone}
-              onWilayaChange={(id, nameAr) => { setWilayaId(id); setWilayaNameAr(nameAr); }}
-              onCommuneChange={setCommune}
-              onAddressChange={setAddress}
+              customerMode={customerMode}
+              onCustomerModeChange={setCustomerMode}
+              onCustomerNameChange={(v) => { setCustomerName(v); markDirty(); }}
+              onPhoneChange={(v) => { setPhone(v); markDirty(); }}
+              onWilayaChange={(id, nameAr) => { setWilayaId(id); setWilayaNameAr(nameAr); markDirty(); }}
+              onCommuneChange={(v) => { setCommune(v); markDirty(); }}
+              onAddressChange={(v) => { setAddress(v); markDirty(); }}
             />
           </Section>
 
+          <Section title={t.form.products_section} icon={<ShoppingBag size={18} />}>
+            <OrderProductSelector
+              selectedProducts={selectedProducts}
+              onChange={setSelectedProducts}
+              availableProducts={products}
+              productVariants={productVariants}
+            />
+          </Section>
+        </div>
+
+        {/* Sidebar */}
+        <div className="w-[320px] shrink-0 space-y-6">
           <Section title={t.form.delivery_section} icon={<Package size={18} />}>
             <div className="space-y-6">
               <div className="space-y-3">
-                <Label className="text-[9px] sm:text-[10px] font-black text-muted-foreground/70 uppercase tracking-widest ml-1">
+                <Label className="text-sm font-semibold text-foreground ml-1">
                   {t.form.delivery_type_label}
                 </Label>
                 <div className="flex gap-3">
                   <button
                     onClick={() => setDeliveryType("home")}
                     className={cn(
-                      "flex-1 flex flex-col items-center justify-center gap-2 py-4 rounded-xl border transition-all active:scale-[0.98]",
+                      "flex-1 flex flex-col items-center justify-center gap-2 py-4 rounded-md border transition-colors",
                       deliveryType === "home"
-                        ? "bg-primary/[0.03] border-primary/30 text-primary shadow-sm"
-                        : "bg-muted/20 border-border/40 text-muted-foreground hover:bg-muted/40"
+                        ? "border-primary bg-primary/5 text-primary"
+                        : "border-border bg-muted/20 text-muted-foreground hover:bg-muted"
                     )}
                   >
                     <Home size={18} />
-                    <span className="text-[10px] font-black uppercase tracking-widest">{t.form.delivery_type_home}</span>
+                    <span className="text-sm font-semibold">{t.form.delivery_type_home}</span>
                   </button>
                   <button
                     onClick={() => setDeliveryType("stop_desk")}
                     className={cn(
-                      "flex-1 flex flex-col items-center justify-center gap-2 py-4 rounded-xl border transition-all active:scale-[0.98]",
+                      "flex-1 flex flex-col items-center justify-center gap-2 py-4 rounded-md border transition-colors",
                       deliveryType === "stop_desk"
-                        ? "bg-primary/[0.03] border-primary/30 text-primary shadow-sm"
-                        : "bg-muted/20 border-border/40 text-muted-foreground hover:bg-muted/40"
+                        ? "border-primary bg-primary/5 text-primary"
+                        : "border-border bg-muted/20 text-muted-foreground hover:bg-muted"
                     )}
                   >
                     <Landmark size={18} />
-                    <span className="text-[10px] font-black uppercase tracking-widest">{t.form.delivery_type_desk}</span>
+                    <span className="text-sm font-semibold">{t.form.delivery_type_desk}</span>
                   </button>
                 </div>
               </div>
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between ml-1">
-                  <Label className="text-[9px] sm:text-[10px] font-black text-muted-foreground/70 uppercase tracking-widest">
+                  <Label className="text-xs font-semibold text-muted-foreground">
                     {t.form.delivery_fee_label}
                   </Label>
                   {feeAutoFilled && (
-                    <span className="text-[8px] sm:text-[9px] font-black text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full uppercase tracking-widest animate-pulse">
+                    <span className="text-[11px] font-medium text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-md">
                       {productShippingRules.length > 0 ? "Product Rate" : "Matched"}
                     </span>
                   )}
                   {deliveryModeUnavailable && (
-                    <span className="text-[8px] sm:text-[9px] font-black text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full uppercase tracking-widest">
+                    <span className="text-[11px] font-medium text-amber-600 bg-amber-50 dark:bg-amber-500/10 px-2 py-0.5 rounded-md">
                       Not configured
                     </span>
                   )}
                   {loadingProductRules && (
-                    <span className="text-[8px] sm:text-[9px] font-black text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded-full uppercase tracking-widest">
+                    <span className="text-[11px] font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-md">
                       Loading...
                     </span>
                   )}
@@ -364,9 +370,9 @@ export function OrderFormPage({ customers, products, shippingRules, wilayas }: P
                       setFeeAutoFilled(false);
                     }}
                     placeholder="0"
-                    className="h-11 sm:h-12 bg-muted/20 border-border/40 rounded-xl sm:rounded-2xl px-4 text-sm font-bold focus:ring-primary/20 focus:border-primary/30 transition-all pe-16 tabular-nums shadow-inner"
+                    className="h-11 bg-card border-border rounded-md pe-16 text-sm font-medium tabular-nums"
                   />
-                  <span className="absolute end-4 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground font-black uppercase tracking-widest">
+                  <span className="absolute end-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
                     {common.currency.symbol}
                   </span>
                 </div>
@@ -375,119 +381,45 @@ export function OrderFormPage({ customers, products, shippingRules, wilayas }: P
           </Section>
 
           <Section title={t.detail.notes} icon={<Info size={18} />}>
-            <OrderNotesSection notes={notes} onNotesChange={setNotes} />
-          </Section>
-        </div>
-
-        {/* Right: Products + Submit summary */}
-        <div className="lg:col-span-5 space-y-6 sm:space-y-8 lg:sticky lg:top-6">
-          <Section title={t.form.products_section} icon={<ShoppingBag size={18} />}>
-            <OrderProductSelector
-              selectedProducts={selectedProducts}
-              onChange={setSelectedProducts}
-              availableProducts={products}
-              productVariants={productVariants}
-            />
+            <OrderNotesSection notes={notes} onNotesChange={(v) => { setNotes(v); markDirty(); }} />
           </Section>
 
-          <div className="glass-card rounded-2xl sm:rounded-3xl border-border/30 overflow-hidden shadow-md">
-            <div className="p-6 sm:p-8 space-y-6">
+          <div className="rounded-lg border border-border bg-card overflow-hidden">
+            <div className="p-6 space-y-6">
               <div className="space-y-3">
-                <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
+                <div className="flex items-center justify-between text-sm font-medium text-muted-foreground">
                   <span>{t.form.products_section}</span>
-                  <span className="tabular-nums">{formatPrice(subtotal, common.currency.symbol)}</span>
+                  <span className="tabular-nums font-semibold text-foreground">{formatPrice(subtotal, common.currency.symbol)}</span>
                 </div>
                 {deliveryFee > 0 && (
-                  <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
+                  <div className="flex items-center justify-between text-sm font-medium text-muted-foreground">
                     <span>{t.form.delivery_fee_label}</span>
-                    <span className="tabular-nums">{formatPrice(deliveryFee, common.currency.symbol)}</span>
+                    <span className="tabular-nums font-semibold text-foreground">{formatPrice(deliveryFee, common.currency.symbol)}</span>
                   </div>
                 )}
-                <div className="pt-4 border-t border-border/10 flex items-center justify-between">
+                <div className="pt-4 border-t border-border/60 flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-primary/60">{t.form.order_total}</p>
+                    <p className="text-xs font-semibold text-muted-foreground">{t.form.order_total}</p>
                     <p className={cn(
-                      "text-2xl sm:text-3xl font-black tracking-tight tabular-nums transition-colors font-display",
-                      totalPrice > 0 ? "text-foreground" : "text-muted-foreground/30"
+                      "text-2xl font-bold tracking-tight tabular-nums",
+                      totalPrice > 0 ? "text-foreground" : "text-muted-foreground"
                     )}>
                       {formatPrice(totalPrice, common.currency.symbol)}
                     </p>
                   </div>
                   {selectedProducts.length > 0 && (
-                    <div className="bg-primary/5 border border-primary/10 rounded-xl px-3 py-2 flex flex-col items-center min-w-16">
-                      <span className="text-lg font-black text-primary tabular-nums leading-tight">{selectedProducts.length}</span>
-                      <span className="text-[8px] font-black text-primary/60 uppercase tracking-widest">Items</span>
+                    <div className="bg-muted rounded-md px-3 py-2 flex flex-col items-center min-w-16">
+                      <span className="text-lg font-semibold text-foreground tabular-nums leading-tight">{selectedProducts.length}</span>
+                      <span className="text-[10px] font-semibold text-muted-foreground">{t.form.items_count}</span>
                     </div>
                   )}
                 </div>
-              </div>
-
-              <div className="hidden md:flex flex-col gap-3">
-                <Button
-                  onClick={handleSave}
-                  disabled={isPending}
-                  className="w-full h-12 rounded-xl sm:rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all active:scale-95"
-                >
-                  <ShoppingBag size={16} className="me-2" />
-                  {isPending ? "..." : t.form.save}
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => router.push("/orders")}
-                  disabled={isPending}
-                  className="w-full h-11 rounded-xl text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                >
-                  {t.form.cancel}
-                </Button>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Floating Mobile Action Bar */}
-      <div className="fixed bottom-[88px] inset-x-4 z-40 lg:hidden animate-in slide-in-from-bottom-8 duration-500">
-        <div className="glass-card border-white/20 dark:border-white/5 rounded-[2rem] p-2.5 sm:p-3 shadow-2xl flex items-center gap-2.5 sm:gap-3">
-          <Button
-            variant="outline"
-            onClick={() => router.push("/orders")}
-            disabled={isPending}
-            className="flex-none w-12 h-12 sm:w-14 sm:h-14 rounded-2xl border-border/40 bg-white/50 dark:bg-muted/20 text-muted-foreground transition-all active:scale-90 shadow-sm"
-          >
-            <X size={20} />
-          </Button>
-          <Button
-            onClick={handleSave}
-            disabled={isPending}
-            className="flex-1 h-12 sm:h-14 rounded-2xl font-black text-[10px] sm:text-[11px] uppercase tracking-widest bg-primary text-primary-foreground shadow-lg shadow-primary/20 active:scale-95 flex flex-col justify-center items-center gap-0.5"
-          >
-            {isPending ? "..." : (
-              <>
-                <span className="flex items-center gap-1.5"><Save size={16} /> {t.form.save}</span>
-                <span className="text-[9px] opacity-70 tracking-normal font-mono">{formatPrice(totalPrice, common.currency.symbol)}</span>
-              </>
-            )}
-          </Button>
-        </div>
-      </div>
     </div>
   );
 }
 
-function Section({ title, children, icon }: { title: string; children: React.ReactNode; icon?: React.ReactNode }) {
-  return (
-    <div className="glass-card rounded-2xl sm:rounded-[2rem] border-border/30 overflow-hidden shadow-sm">
-      <div className="flex items-center gap-3 px-6 py-4 sm:px-8 sm:py-5 border-b border-border/10 bg-muted/5">
-        {icon && (
-          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 shadow-inner">
-            <div className="text-primary scale-90 sm:scale-100">{icon}</div>
-          </div>
-        )}
-        <h2 className="text-base sm:text-lg font-black text-foreground tracking-tight font-display uppercase">{title}</h2>
-      </div>
-      <div className="p-6 sm:p-8">
-        {children}
-      </div>
-    </div>
-  );
-}

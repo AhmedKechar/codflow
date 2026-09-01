@@ -444,14 +444,14 @@ export const orders = sqliteTable("orders", {
       "new",
       "confirmed",
       "unreachable",
-      "preparing",
-      "ready",
-      "assigned",
-      "dispatched",
-      "out_for_delivery",
+      "busy",
+      "postponed",
+      "shipped",
       "delivered",
-      "returned",
       "cancelled",
+      "fake",
+      "duplicate",
+      "returned",
     ],
   }).notNull().default("new"),
   orderType: text("order_type", { enum: ["online", "offline"] })
@@ -533,6 +533,11 @@ export const orders = sqliteTable("orders", {
   ipAddress: text("ip_address"),
   /** User-Agent at placement — sent as client_user_agent in CAPI event. */
   userAgent: text("user_agent"),
+  carrierStatus: text("carrier_status", {
+    enum: ["none", "received", "in_transit", "at_office", "with_driver", "delivered", "returned"],
+  }).notNull().default("none"),
+  postponedUntil: text("postponed_until"),
+  customerIp: text("customer_ip"),
 
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),
@@ -579,14 +584,14 @@ export const orderStatusHistory = sqliteTable("order_status_history", {
       "new",
       "confirmed",
       "unreachable",
-      "preparing",
-      "ready",
-      "assigned",
-      "dispatched",
-      "out_for_delivery",
+      "busy",
+      "postponed",
+      "shipped",
       "delivered",
-      "returned",
       "cancelled",
+      "fake",
+      "duplicate",
+      "returned",
     ],
   }).notNull(),
   timestamp: text("timestamp").notNull(),
@@ -656,6 +661,17 @@ export const products = sqliteTable("products", {
    */
   shippingProfileId: text("shipping_profile_id")
     .references(() => shippingProfiles.id, { onDelete: "set null" }),
+  barcode: text("barcode"),
+  weightKg: real("weight_kg"),
+  metaTitle: text("meta_title"),
+  metaDescription: text("meta_description"),
+  metaKeywords: text("meta_keywords"),
+  shippingMethod: text("shipping_method", { enum: ["carrier", "custom", "free"] }),
+  /** Fixed office (stop-desk) delivery price in DZD, applied to all wilayas for this product only. */
+  shippingOfficePrice: integer("shipping_office_price"),
+  /** Fixed home delivery price in DZD, applied to all wilayas for this product only. */
+  shippingHomePrice: integer("shipping_home_price"),
+  externalUrl: text("external_url"),
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),
 });
@@ -1785,4 +1801,62 @@ export const automationWorkflows = sqliteTable("automation_workflows", {
   updatedAt: text("updated_at").notNull().default(sql`datetime('now')`),
 }, (t) => ({
   storeIdx: index("idx_automation_workflows_store").on(t.storeId),
+}));
+
+// ─── Carrier Tracking ────────────────────────────────────────────────────────
+// Tracks carrier status updates per order (read-only from merchant perspective)
+export const carrierTracking = sqliteTable("carrier_tracking", {
+  id: text("id").primaryKey(),
+  orderId: text("order_id").notNull().references(() => orders.id, { onDelete: "cascade" }),
+  storeId: text("store_id").notNull().references(() => stores.id, { onDelete: "cascade" }),
+  companyId: text("company_id").notNull().references(() => deliveryCompanies.id),
+  trackingNumber: text("tracking_number").notNull().unique(),
+  status: text("status", {
+    enum: ["received", "in_transit", "at_office", "with_driver", "delivered", "returned"],
+  }).notNull(),
+  statusRaw: text("status_raw"),
+  statusAr: text("status_ar"),
+  location: text("location"),
+  eventTime: text("event_time").notNull(),
+  rawData: text("raw_data"),
+  createdAt: text("created_at").notNull().default(sql`(datetime('now'))`),
+}, (t) => ({
+  orderIdx: index("idx_carrier_tracking_order").on(t.orderId),
+  storeIdx: index("idx_carrier_tracking_store").on(t.storeId),
+  storeOrderIdx: index("idx_carrier_tracking_store_order").on(t.storeId, t.orderId),
+}));
+
+// ─── Notification Settings ───────────────────────────────────────────────────
+// Per-store, per-status notification configuration
+export const notificationSettings = sqliteTable("notification_settings", {
+  id: text("id").primaryKey(),
+  storeId: text("store_id").notNull().references(() => stores.id, { onDelete: "cascade" }),
+  orderStatus: text("order_status", {
+    enum: ["new", "confirmed", "unreachable", "busy", "postponed", "shipped", "delivered", "cancelled", "fake", "duplicate", "returned"],
+  }).notNull(),
+  channel: text("channel", { enum: ["whatsapp", "sms", "both"] }).notNull().default("both"),
+  enabled: integer("enabled", { mode: "boolean" }).notNull().default(true),
+  templateWhatsapp: text("template_whatsapp"),
+  templateSms: text("template_sms"),
+  createdAt: text("created_at").notNull().default(sql`(datetime('now'))`),
+  updatedAt: text("updated_at").notNull().default(sql`(datetime('now'))`),
+}, (t) => ({
+  storeStatusUnique: uniqueIndex("notification_settings_store_status_unique").on(t.storeId, t.orderStatus),
+  storeIdx: index("idx_notification_settings_store").on(t.storeId),
+}));
+
+// ─── Blocked IPs ─────────────────────────────────────────────────────────────
+// Tracks blocked IP addresses per store (for fake order prevention)
+export const blockedIps = sqliteTable("blocked_ips", {
+  id: text("id").primaryKey(),
+  storeId: text("store_id").notNull().references(() => stores.id, { onDelete: "cascade" }),
+  ipAddress: text("ip_address").notNull(),
+  reason: text("reason"),
+  customerId: text("customer_id").references(() => customers.id, { onDelete: "set null" }),
+  createdAt: text("created_at").notNull().default(sql`(datetime('now'))`),
+  expiresAt: text("expires_at"),
+}, (t) => ({
+  storeIpUnique: uniqueIndex("blocked_ips_store_ip_unique").on(t.storeId, t.ipAddress),
+  storeIdx: index("idx_blocked_ips_store").on(t.storeId),
+  addressIdx: index("idx_blocked_ips_address").on(t.ipAddress),
 }));

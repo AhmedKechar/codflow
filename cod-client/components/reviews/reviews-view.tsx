@@ -11,7 +11,8 @@ import { useConfirm } from "@/components/ui/use-confirm";
 import { updateReviewStatus, deleteReview } from "@/actions/reviews";
 import { ProtectedAction } from "@/components/rbac/ProtectedAction";
 import { SCOPES } from "@/../cod-shared/rbac/scopes";
-import { useReviews } from "@/lib/translations";
+import { useReviews, useNavigation } from "@/lib/translations";
+import { PageHeader } from "@/components/ui/page-header";
 import type { Review } from "@/actions/reviews";
 import { cn } from "@/lib/utils";
 
@@ -55,6 +56,7 @@ export function ReviewsView({
   limit,
 }: Props) {
   const t = useReviews();
+  const nav = useNavigation();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const { confirm: confirmDialog, ConfirmDialog } = useConfirm();
@@ -139,41 +141,28 @@ export function ReviewsView({
   return (
     <div className="space-y-4 sm:space-y-6 animate-fade-in">
 
-      {/* ── Header row ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-primary/5 border border-primary/10 rounded-xl w-fit">
-          <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary fill-primary" />
-          <p className="text-[9px] sm:text-[11px] font-black uppercase tracking-widest text-primary/80">
-            {t.total.replace("{n}", String(total))}
-          </p>
-          {pendingCount > 0 && (
-            <span className="ms-1 bg-amber-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full">
-              {t.new_badge.replace("{n}", String(pendingCount))}
-            </span>
-          )}
-        </div>
+      <PageHeader title={nav.sidebar.reviews} />
 
-        {/* Filter tabs — horizontally scrollable on mobile */}
-        <div className="overflow-x-auto scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0">
-          <div className="flex gap-1 p-1 bg-muted/50 rounded-xl border border-border/50 w-max sm:w-auto min-w-full sm:min-w-0">
-            {STATUS_FILTERS.map((s) => (
-              <button
-                key={s}
-                onClick={() => router.push(buildUrl(s, 1))}
-                className={cn(
-                  "shrink-0 px-3 py-2 sm:py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all",
-                  currentStatus === s
-                    ? "bg-background shadow-sm text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {filterLabels[s]}
-                {s === "pending" && pendingCount > 0 && (
-                  <span className="ms-1 text-amber-500">({pendingCount})</span>
-                )}
-              </button>
-            ))}
-          </div>
+      {/* ── Filter tabs ── */}
+      <div className="overflow-x-auto scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0">
+        <div className="flex gap-1 p-1 bg-muted/50 rounded-xl border border-border/50 w-max sm:w-auto min-w-full sm:min-w-0">
+          {STATUS_FILTERS.map((s) => (
+            <button
+              key={s}
+              onClick={() => router.push(buildUrl(s, 1))}
+              className={cn(
+                "shrink-0 px-3 py-2 sm:py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all",
+                currentStatus === s
+                  ? "bg-background shadow-sm text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {filterLabels[s]}
+              {s === "pending" && pendingCount > 0 && (
+                <span className="ms-1 text-muted-foreground">({pendingCount})</span>
+              )}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -189,18 +178,13 @@ export function ReviewsView({
           {reviews.map((review) => (
             <div
               key={review.id}
-              className={cn(
-                "bg-card border rounded-2xl overflow-hidden transition-all",
-                review.status === "pending"
-                  ? "border-amber-200/60 bg-amber-50/30 dark:border-amber-900/40 dark:bg-amber-950/10"
-                  : "border-border/60"
-              )}
+              className="bg-card border border-border rounded-xl overflow-hidden"
             >
               {/* Card body */}
               <div className="flex flex-col sm:flex-row sm:items-start gap-4 p-4 sm:p-5">
                 {/* Left: reviewer info */}
                 <div className="flex items-start gap-3 min-w-0 flex-1">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center font-black text-sm text-primary shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center font-black text-sm text-muted-foreground shrink-0">
                     {review.customerName.trim().charAt(0).toUpperCase()}
                   </div>
 
@@ -217,11 +201,7 @@ export function ReviewsView({
                             ? "destructive"
                             : "secondary"
                         }
-                        className={cn(
-                          "text-[9px] font-black px-2 py-0.5 rounded-full",
-                          review.status === "pending" &&
-                            "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-400 dark:border-amber-900"
-                        )}
+                        className="text-[9px] font-black px-2 py-0.5 rounded-full"
                       >
                         {statusBadgeLabel[review.status] ?? review.status}
                       </Badge>
@@ -261,7 +241,7 @@ export function ReviewsView({
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-8 px-3 rounded-xl text-[10px] font-black text-emerald-600 border-emerald-200 hover:bg-emerald-50 hover:border-emerald-300 dark:text-emerald-400 dark:border-emerald-900 dark:hover:bg-emerald-950"
+                        className="h-8 px-3 rounded-md text-[10px] font-black text-foreground"
                         onClick={() => handleApprove(review)}
                         disabled={isPending}
                       >
@@ -273,7 +253,7 @@ export function ReviewsView({
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-8 px-3 rounded-xl text-[10px] font-black text-orange-600 border-orange-200 hover:bg-orange-50 hover:border-orange-300 dark:text-orange-400 dark:border-orange-900 dark:hover:bg-orange-950"
+                        className="h-8 px-3 rounded-md text-[10px] font-black text-foreground"
                         onClick={() => handleReject(review)}
                         disabled={isPending}
                       >
@@ -284,7 +264,7 @@ export function ReviewsView({
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="h-8 px-3 rounded-xl text-[10px] font-black text-destructive hover:bg-destructive/10"
+                      className="h-8 px-3 rounded-md text-[10px] font-black text-destructive hover:bg-destructive/10"
                       onClick={() => handleDelete(review)}
                       disabled={isPending}
                     >
@@ -302,7 +282,7 @@ export function ReviewsView({
                     <button
                       onClick={() => handleApprove(review)}
                       disabled={isPending}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-3 text-[11px] font-black text-emerald-600 active:bg-emerald-50/50 dark:active:bg-emerald-950/30 transition-colors disabled:opacity-40"
+                      className="flex-1 flex items-center justify-center gap-1.5 py-3 text-[11px] font-black text-foreground hover:bg-muted active:bg-muted transition-colors disabled:opacity-40"
                     >
                       <CheckCircle className="w-4 h-4" />
                       {t.action_approve}
@@ -315,7 +295,7 @@ export function ReviewsView({
                     <button
                       onClick={() => handleReject(review)}
                       disabled={isPending}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-3 text-[11px] font-black text-orange-600 active:bg-orange-50/50 dark:active:bg-orange-950/30 transition-colors disabled:opacity-40"
+                      className="flex-1 flex items-center justify-center gap-1.5 py-3 text-[11px] font-black text-foreground hover:bg-muted active:bg-muted transition-colors disabled:opacity-40"
                     >
                       <XCircle className="w-4 h-4" />
                       {t.action_reject}
@@ -343,7 +323,7 @@ export function ReviewsView({
           <Button
             size="sm"
             variant="outline"
-            className="h-10 sm:h-8 px-4 sm:px-3 rounded-xl text-[11px] font-black"
+            className="h-10 sm:h-8 px-4 sm:px-3 rounded-md text-[11px] font-black"
             disabled={currentPage <= 1 || isPending}
             onClick={() => router.push(buildUrl(currentStatus, currentPage - 1))}
           >
@@ -358,7 +338,7 @@ export function ReviewsView({
           <Button
             size="sm"
             variant="outline"
-            className="h-10 sm:h-8 px-4 sm:px-3 rounded-xl text-[11px] font-black"
+            className="h-10 sm:h-8 px-4 sm:px-3 rounded-md text-[11px] font-black"
             disabled={currentPage >= totalPages || isPending}
             onClick={() => router.push(buildUrl(currentStatus, currentPage + 1))}
           >

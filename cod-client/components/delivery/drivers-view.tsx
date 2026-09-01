@@ -2,18 +2,16 @@
 
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { ProtectedAction } from "@/components/rbac/ProtectedAction";
-import { SCOPES } from "@/../cod-shared/rbac/scopes";
 import { DeliveryTable } from "./delivery-table";
 import { AssignOrdersDialog } from "./assign-orders-dialog";
-import { useDelivery, useCommon } from "@/lib/translations";
+import { useDelivery, useCommon, useNavigation } from "@/lib/translations";
 import { useConfirm } from "@/components/ui/use-confirm";
 import { deleteDriver } from "@/actions/drivers";
 import { showSuccessToast } from "@/lib/errors/toast";
 import { useErrorLocale } from "@/lib/errors/use-locale";
 import { ErrorModal } from "@/components/errors/error-modal";
 import { useState } from "react";
+import { PageHeader } from "@/components/ui/page-header";
 import type { Driver, Order } from "@/types";
 
 interface Props {
@@ -31,6 +29,7 @@ export function DriversView({
 }: Props) {
   const t = useDelivery();
   const common = useCommon();
+  const nav = useNavigation();
   const router = useRouter();
   const locale = useErrorLocale();
   const { confirm: confirmDialog, ConfirmDialog } = useConfirm();
@@ -55,7 +54,6 @@ export function DriversView({
   async function handleDeleteDriver(driver: Driver) {
     const activeCount = driverOrdersMap[driver.id]?.length ?? 0;
     if (activeCount > 0) {
-      // Show blocking error modal for business logic error
       setErrorState({
         isOpen: true,
         message: t.error_cannot_delete_with_orders,
@@ -77,7 +75,6 @@ export function DriversView({
       showSuccessToast(t.success_deleted, locale);
       router.refresh();
     } catch (error) {
-      // Show error modal for unexpected errors
       setErrorState({
         isOpen: true,
         message: error instanceof Error ? error.message : t.error_delete_failed,
@@ -86,22 +83,15 @@ export function DriversView({
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        <p className="text-[10px] sm:text-xs font-bold text-muted-foreground/60 uppercase tracking-widest">
-          {initialDrivers.length} {t.tabs?.drivers ?? "Drivers"}
-        </p>
-        <ProtectedAction userScopes={userScopes} requiredScope={SCOPES.DELIVERY_MANAGE}>
-          <Button
-            size="sm"
-            className="h-9 sm:h-10 rounded-xl bg-primary text-primary-foreground font-black text-[10px] sm:text-[11px] uppercase tracking-widest shadow-lg shadow-primary/10 hover:shadow-primary/20 active:scale-95 transition-all px-4 sm:px-6"
-            onClick={() => router.push("/delivery/drivers/new")}
-          >
-            <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 me-1.5 sm:me-2" />
-            {t.add_driver}
-          </Button>
-        </ProtectedAction>
-      </div>
+    <div className="space-y-6 animate-fade-in">
+      <PageHeader
+        title={nav.sidebar.delivery_drivers}
+        primaryAction={{
+          label: t.add_driver,
+          onClick: () => router.push("/delivery/drivers/new"),
+          icon: <Plus className="w-4 h-4" />,
+        }}
+      />
 
       <DeliveryTable
         drivers={initialDrivers}

@@ -22,9 +22,9 @@ export function PaymentHistoryView({ payments, userScopes }: Props) {
   return (
     <BillingLayout activeTab="payments">
       <div className="space-y-5 sm:space-y-6 animate-fade-in">
-        <div className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-primary/5 border border-primary/10 rounded-xl w-fit">
-          <Wallet className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary" />
-          <p className="text-[9px] sm:text-[11px] font-black uppercase tracking-widest text-primary/80">
+        <div className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-muted border border-border rounded-lg w-fit">
+          <Wallet className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-muted-foreground" />
+          <p className="text-[9px] sm:text-[11px] font-black uppercase tracking-widest text-muted-foreground">
             {t.payment_history}
           </p>
         </div>

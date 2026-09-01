@@ -22,16 +22,16 @@ type YalidineMapping = {
 };
 
 const YALIDINE_STATUS_MAP: Record<string, YalidineMapping> = {
-  "Sorti en livraison": { status: "out_for_delivery", incrementAttempts: false }, // [*]
-  "Tentative échouée":  { status: "out_for_delivery", incrementAttempts: true  }, // [*] — stays out_for_delivery, increments attempts
-  "Livré":              { status: "delivered",         incrementAttempts: false }, // [+]
-  "En cours de retour": { status: "returned",          incrementAttempts: false }, // [+]
-  "Retour à l'agence":  { status: "returned",          incrementAttempts: false }, // [+]
-  "Retourné":           { status: "returned",          incrementAttempts: false }, // [+]
-  "Annulé":             { status: "cancelled",         incrementAttempts: false }, // [+]
-  "En préparation":     { status: "preparing",         incrementAttempts: false }, // [+]
-  "Ramassé":            { status: "assigned",          incrementAttempts: false }, // [+]
-  "En transit":         { status: "assigned",          incrementAttempts: false }, // [+]
+  "Sorti en livraison": { status: "shipped",    incrementAttempts: false }, // [*]
+  "Tentative échouée":  { status: "shipped",    incrementAttempts: true  }, // [*] — stays shipped, increments attempts
+  "Livré":              { status: "delivered",   incrementAttempts: false }, // [+]
+  "En cours de retour": { status: "returned",    incrementAttempts: false }, // [+]
+  "Retour à l'agence":  { status: "returned",    incrementAttempts: false }, // [+]
+  "Retourné":           { status: "returned",    incrementAttempts: false }, // [+]
+  "Annulé":             { status: "cancelled",   incrementAttempts: false }, // [+]
+  "En préparation":     { status: "confirmed",   incrementAttempts: false }, // [+]
+  "Ramassé":            { status: "shipped",     incrementAttempts: false }, // [+]
+  "En transit":         { status: "shipped",     incrementAttempts: false }, // [+]
 };
 
 /**

@@ -23,8 +23,8 @@ interface Props {
 }
 
 const TYPE_COLOR: Record<DriverPaymentType, string> = {
-  cod_remittance: "text-amber-500",
-  fee_payment: "text-green-500",
+  cod_remittance: "text-warning",
+  fee_payment: "text-success",
   net_settlement: "text-primary",
 };
 
@@ -103,7 +103,7 @@ export function DriverSettlementSection({ driverId, deliveredOrders, userScopes 
     <div className="space-y-3">
       {/* Section header */}
       <div className="flex items-center justify-between ps-1">
-        <h2 className="text-xs font-black text-muted-foreground uppercase tracking-wider">
+        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
           {t.table?.recent_deliveries ?? "Delivered"} · {deliveredOrders.length}
         </h2>
         <button
@@ -117,7 +117,7 @@ export function DriverSettlementSection({ driverId, deliveredOrders, userScopes 
       </div>
 
       {/* ── Main table ─────────────────────────────────────────────── */}
-      <div className="bg-card rounded-2xl border border-border overflow-hidden">
+      <div className="bg-card rounded-lg border border-border overflow-hidden">
         <table className="w-full text-sm">
           <thead className="border-b border-border bg-muted/30">
             <tr>
@@ -140,16 +140,16 @@ export function DriverSettlementSection({ driverId, deliveredOrders, userScopes 
                   </span>
                 </button>
               </th>
-              <th className="px-3 py-3 text-start text-[10px] font-black text-muted-foreground uppercase tracking-wider">
+              <th className="px-3 py-3 text-start text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
                 {t.table?.order ?? "Order"}
               </th>
-              <th className="px-3 py-3 text-end text-[10px] font-black text-muted-foreground uppercase tracking-wider">
+              <th className="px-3 py-3 text-end text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
                 COD
               </th>
-              <th className="px-3 py-3 text-end text-[10px] font-black text-muted-foreground uppercase tracking-wider">
+              <th className="px-3 py-3 text-end text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
                 {t.payments?.fee_badge ?? "Fee"}
               </th>
-              <th className="w-14 px-3 py-3 text-center text-[10px] font-black text-muted-foreground uppercase tracking-wider">
+              <th className="w-14 px-3 py-3 text-center text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
                 ✓
               </th>
             </tr>
@@ -166,7 +166,7 @@ export function DriverSettlementSection({ driverId, deliveredOrders, userScopes 
                 <tr
                   key={order.id}
                   onClick={() => toggle(order.id)}
-                  className={`border-b border-border/40 transition-colors ${
+                  className={`border-b border-border transition-colors ${
                     fullySettled
                       ? "opacity-40 cursor-default"
                       : isSelected
@@ -187,7 +187,7 @@ export function DriverSettlementSection({ driverId, deliveredOrders, userScopes 
 
                   {/* Order info */}
                   <td className="px-3 py-3.5">
-                    <p className="font-black text-sm text-foreground">{order.orderNumber}</p>
+                    <p className="font-semibold text-sm text-foreground">{order.orderNumber}</p>
                     <p className="text-xs text-muted-foreground font-semibold truncate" dir="rtl">
                       {order.customerName} · {order.wilaya}
                     </p>
@@ -196,7 +196,7 @@ export function DriverSettlementSection({ driverId, deliveredOrders, userScopes 
                   {/* COD amount */}
                   <td className="px-3 py-3.5 text-end">
                     <p className={`text-sm font-bold tabular-nums ${
-                      codSettled ? "line-through text-muted-foreground/50" : "text-amber-500"
+                      codSettled ? "line-through text-muted-foreground/50" : "text-warning"
                     }`}>
                       {formatPrice(order.codAmount ?? 0, common.currency.symbol)}
                     </p>
@@ -218,11 +218,11 @@ export function DriverSettlementSection({ driverId, deliveredOrders, userScopes 
                     <div className="flex items-center justify-center gap-1.5">
                       <span
                         title="COD"
-                        className={`w-2 h-2 rounded-full ${codSettled ? "bg-green-500" : "bg-border"}`}
+                        className={`w-2 h-2 rounded-full ${codSettled ? "bg-success" : "bg-border"}`}
                       />
                       <span
                         title="Fee"
-                        className={`w-2 h-2 rounded-full ${feeSettled ? "bg-green-500" : "bg-border"}`}
+                        className={`w-2 h-2 rounded-full ${feeSettled ? "bg-success" : "bg-border"}`}
                       />
                     </div>
                   </td>
@@ -236,7 +236,7 @@ export function DriverSettlementSection({ driverId, deliveredOrders, userScopes 
             <tr>
               <td colSpan={2} className="px-3 py-2.5">
                 {allSettled ? (
-                  <span className="flex items-center gap-1 text-xs font-bold text-green-500">
+                  <span className="flex items-center gap-1 text-xs font-bold text-success">
                     <CheckCircle2 size={11} />
                     {t.payments?.all_settled ?? "All settled"}
                   </span>
@@ -248,14 +248,14 @@ export function DriverSettlementSection({ driverId, deliveredOrders, userScopes 
               </td>
               <td className="px-3 py-2.5 text-end">
                 {totalPendingCod > 0 && (
-                  <p className="text-xs font-black text-amber-500">
+                  <p className="text-xs font-semibold text-warning">
                     {formatPrice(totalPendingCod, common.currency.symbol)}
                   </p>
                 )}
               </td>
               <td className="px-3 py-2.5 text-end">
                 {totalPendingFee > 0 && (
-                  <p className="text-xs font-black text-primary">
+                  <p className="text-xs font-semibold text-primary">
                     {formatPrice(totalPendingFee, common.currency.symbol)}
                   </p>
                 )}
@@ -268,12 +268,12 @@ export function DriverSettlementSection({ driverId, deliveredOrders, userScopes 
 
       {/* ── Action bar (appears on selection) ─────────────────────── */}
       {selectedIds.size > 0 && (
-        <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
+        <div className="bg-card border border-border rounded-lg p-4 space-y-3">
           {/* Financial summary */}
           <div className="grid grid-cols-3 gap-2">
-            <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-2.5 text-center">
+            <div className="bg-warning/10 border border-warning/30 rounded-xl p-2.5 text-center">
               <p className="text-[10px] text-muted-foreground font-semibold">COD</p>
-              <p className="text-sm font-black text-amber-500 tabular-nums">
+              <p className="text-sm font-semibold text-warning tabular-nums">
                 {formatPrice(selectedCod, common.currency.symbol)}
               </p>
             </div>
@@ -281,7 +281,7 @@ export function DriverSettlementSection({ driverId, deliveredOrders, userScopes 
               <p className="text-[10px] text-muted-foreground font-semibold">
                 {t.payments?.fee_badge ?? "Fee"}
               </p>
-              <p className="text-sm font-black text-primary tabular-nums">
+              <p className="text-sm font-semibold text-primary tabular-nums">
                 {formatPrice(selectedFee, common.currency.symbol)}
               </p>
             </div>
@@ -289,7 +289,7 @@ export function DriverSettlementSection({ driverId, deliveredOrders, userScopes 
               <p className="text-[10px] text-muted-foreground font-semibold">
                 {t.payments?.net_label ?? "Net"}
               </p>
-              <p className="text-sm font-black text-foreground tabular-nums">
+              <p className="text-sm font-semibold text-foreground tabular-nums">
                 {formatPrice(selectedNet, common.currency.symbol)}
               </p>
             </div>
@@ -300,7 +300,7 @@ export function DriverSettlementSection({ driverId, deliveredOrders, userScopes 
             <div className="space-y-2">
               {selectedCod > 0 && selectedFee > 0 && (
                 <Button
-                  className="w-full h-11 font-black text-sm bg-primary hover:bg-primary/90 text-primary-foreground"
+                  className="w-full h-11 font-semibold text-sm bg-primary hover:bg-primary/90 text-primary-foreground"
                   onClick={() => settle("net_settlement")}
                   disabled={isPending}
                 >
@@ -315,7 +315,7 @@ export function DriverSettlementSection({ driverId, deliveredOrders, userScopes 
                 {selectedCod > 0 && (
                   <Button
                     variant="outline"
-                    className="h-10 font-bold text-sm border-amber-500/30 bg-amber-500/5 hover:bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                    className="h-10 font-bold text-sm border-amber-500/30 bg-warning/5 hover:bg-warning/10 text-warning dark:text-warning"
                     onClick={() => settle("cod_remittance")}
                     disabled={isPending}
                   >
@@ -326,7 +326,7 @@ export function DriverSettlementSection({ driverId, deliveredOrders, userScopes 
                 {selectedFee > 0 && (
                   <Button
                     variant="outline"
-                    className="h-10 font-bold text-sm border-green-500/30 bg-green-500/5 hover:bg-green-500/10 text-green-600 dark:text-green-400"
+                    className="h-10 font-bold text-sm border-success/30 bg-success/5 hover:bg-success/10 text-success dark:text-success"
                     onClick={() => settle("fee_payment")}
                     disabled={isPending}
                   >
@@ -342,10 +342,10 @@ export function DriverSettlementSection({ driverId, deliveredOrders, userScopes 
 
       {/* ── Payment History (collapsible) ──────────────────────────── */}
       {showHistory && (
-        <div className="bg-card border border-border rounded-2xl overflow-hidden">
+        <div className="bg-card border border-border rounded-lg overflow-hidden">
           <div className="px-4 py-3 border-b border-border bg-muted/30 flex items-center gap-2">
             <History size={13} className="text-muted-foreground" />
-            <h3 className="text-sm font-black text-foreground">
+            <h3 className="text-sm font-semibold text-foreground">
               {t.payments?.tab_history ?? "Payment History"}
             </h3>
           </div>
@@ -369,28 +369,28 @@ export function DriverSettlementSection({ driverId, deliveredOrders, userScopes 
             <table className="w-full text-sm">
               <thead className="border-b border-border bg-muted/20">
                 <tr>
-                  <th className="px-4 py-2.5 text-start text-[10px] font-black text-muted-foreground uppercase tracking-wider">
+                  <th className="px-4 py-2.5 text-start text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
                     {t.payments?.type_label ?? "Type"}
                   </th>
-                  <th className="px-4 py-2.5 text-center text-[10px] font-black text-muted-foreground uppercase tracking-wider">
+                  <th className="px-4 py-2.5 text-center text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
                     {t.payments?.count_label ?? "#"}
                   </th>
-                  <th className="px-4 py-2.5 text-end text-[10px] font-black text-muted-foreground uppercase tracking-wider">
+                  <th className="px-4 py-2.5 text-end text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
                     {t.payments?.amount_label ?? "Amount"}
                   </th>
-                  <th className="px-4 py-2.5 text-start text-[10px] font-black text-muted-foreground uppercase tracking-wider hidden sm:table-cell">
+                  <th className="px-4 py-2.5 text-start text-[10px] font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">
                     {t.payments?.by_label ?? "By"}
                   </th>
-                  <th className="px-4 py-2.5 text-end text-[10px] font-black text-muted-foreground uppercase tracking-wider hidden sm:table-cell">
+                  <th className="px-4 py-2.5 text-end text-[10px] font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">
                     {t.payments?.date_label ?? "Date"}
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {history.map((p) => (
-                  <tr key={p.id} className="border-b border-border/40 hover:bg-muted/20">
+                  <tr key={p.id} className="border-b border-border hover:bg-muted/20">
                     <td className="px-4 py-3">
-                      <span className={`text-xs font-black ${TYPE_COLOR[p.type]}`}>
+                      <span className={`text-xs font-semibold ${TYPE_COLOR[p.type]}`}>
                         {t.payments?.[`type_${p.type}` as keyof typeof t.payments] ?? p.type}
                       </span>
                       {p.notes && (
@@ -400,7 +400,7 @@ export function DriverSettlementSection({ driverId, deliveredOrders, userScopes 
                     <td className="px-4 py-3 text-center text-sm font-bold text-muted-foreground">
                       {p.orderCount}
                     </td>
-                    <td className="px-4 py-3 text-end font-black text-sm text-foreground tabular-nums">
+                    <td className="px-4 py-3 text-end font-semibold text-sm text-foreground tabular-nums">
                       {formatPrice(p.amount, common.currency.symbol)}
                     </td>
                     <td className="px-4 py-3 hidden sm:table-cell">

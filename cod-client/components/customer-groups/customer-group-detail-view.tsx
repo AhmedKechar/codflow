@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Edit, Trash2, UserPlus, UserMinus, Users, Search } from "lucide-react";
+import { Edit, Trash2, UserPlus, UserMinus, Users, Search } from "lucide-react";
 import { formatPrice } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -18,6 +18,7 @@ import { SCOPES } from "@/../cod-shared/rbac/scopes";
 import { formatDate } from "@/lib/format";
 import { generateAvatar } from "@/lib/avatar";
 import type { CustomerGroupWithMembers, CustomerGroupMember, Customer } from "@/types";
+import { PageHeader } from "@/components/ui/page-header";
 
 interface Props {
   group: CustomerGroupWithMembers;
@@ -104,64 +105,42 @@ export function CustomerGroupDetailView({ group, allCustomers, userScopes }: Pro
 
   return (
     <div className="space-y-5 sm:space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => router.back()}
-            className="w-9 h-9 rounded-xl bg-muted/40 hover:bg-primary/10 flex items-center justify-center text-muted-foreground hover:text-primary transition-all active:scale-90"
-          >
-            <ArrowRight className="w-4 h-4" />
-          </button>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl" style={{ backgroundColor: group.color }} />
-            <div>
-              <h1 className="font-black text-lg tracking-tight text-foreground">{group.name}</h1>
-              {group.description && (
-                <p className="text-xs font-bold text-muted-foreground/60 mt-0.5">{group.description}</p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <ProtectedAction userScopes={userScopes} requiredScope={SCOPES.CUSTOMER_GROUPS_MANAGE}>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => router.push(`/customer-groups/${group.id}/edit`)}
-              className="h-9 rounded-xl text-[10px] font-black uppercase tracking-widest gap-1.5"
-            >
-              <Edit className="w-3.5 h-3.5" />
-              {t.actions.edit}
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={handleDeleteGroup}
-              className="h-9 rounded-xl text-[10px] font-black uppercase tracking-widest gap-1.5 text-rose-500 hover:text-rose-500 hover:bg-rose-500/10"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-              {t.actions.delete}
-            </Button>
-          </ProtectedAction>
-        </div>
-      </div>
+      <PageHeader
+        breadcrumbs={[
+          { label: "Customer Groups", href: "/customer-groups" },
+          { label: group.name },
+        ]}
+        secondaryActions={[
+          {
+            label: t.actions.edit,
+            onClick: () => router.push(`/customer-groups/${group.id}/edit`),
+            icon: <Edit className="w-3.5 h-3.5" />,
+          },
+        ]}
+        moreActions={[
+          {
+            label: t.actions.delete,
+            onClick: handleDeleteGroup,
+            icon: <Trash2 className="w-3.5 h-3.5" />,
+            destructive: true,
+          },
+        ]}
+      />
 
       {/* Stats strip */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        <div className="glass-card rounded-2xl border-border/30 p-4 space-y-1">
+        <div className="bg-card border border-border rounded-lg p-4 space-y-1">
           <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">
             {t.table.members}
           </p>
           <div className="flex items-center gap-2">
-            <Users className="w-4 h-4 text-primary/60" />
+            <Users className="w-4 h-4 text-muted-foreground/60" />
             <span className="text-2xl font-black text-foreground tabular-nums">
               {group.memberCount}
             </span>
           </div>
         </div>
-        <div className="glass-card rounded-2xl border-border/30 p-4 space-y-1">
+        <div className="bg-card border border-border rounded-lg p-4 space-y-1">
           <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">
             {t.table.created}
           </p>
@@ -170,15 +149,15 @@ export function CustomerGroupDetailView({ group, allCustomers, userScopes }: Pro
       </div>
 
       {/* Members section */}
-      <div className="glass-card rounded-2xl border-border/30 overflow-hidden shadow-sm">
+      <div className="bg-card border border-border rounded-lg overflow-hidden">
         {/* Members header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border/20">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <div className="flex items-center gap-2">
-            <Users className="w-4 h-4 text-primary/60" />
+            <Users className="w-4 h-4 text-muted-foreground/60" />
             <span className="text-sm font-black uppercase tracking-widest text-foreground/70">
               {t.detail.members}
             </span>
-            <span className="text-[10px] font-black text-primary/60 bg-primary/5 px-2 py-0.5 rounded-full">
+            <span className="text-[10px] font-black text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
               {group.members.length}
             </span>
           </div>
@@ -186,7 +165,7 @@ export function CustomerGroupDetailView({ group, allCustomers, userScopes }: Pro
             <Button
               size="sm"
               onClick={() => setShowAddPanel(!showAddPanel)}
-              className="h-8 rounded-xl bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-widest gap-1.5 shadow-sm shadow-primary/10 active:scale-95 transition-all px-3"
+              className="h-8 rounded-md bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-widest gap-1.5 px-3"
             >
               <UserPlus className="w-3 h-3" />
               {t.detail.add_member}
@@ -196,14 +175,14 @@ export function CustomerGroupDetailView({ group, allCustomers, userScopes }: Pro
 
         {/* Add member panel */}
         {showAddPanel && (
-          <div className="px-5 py-4 border-b border-border/20 bg-primary/2 space-y-3">
+          <div className="px-5 py-4 border-b border-border/20 bg-muted/50 space-y-3">
             <div className="relative">
               <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/40 pointer-events-none" />
               <input
                 value={addSearch}
                 onChange={(e) => setAddSearch(e.target.value)}
                 placeholder={t.detail.search_add}
-                className="w-full h-9 ps-9 pe-3 rounded-xl bg-muted/30 border border-border/30 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                className="w-full h-9 ps-9 pe-3 rounded-md bg-card border border-border text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/40 transition-all"
               />
             </div>
             <div className="max-h-48 overflow-y-auto space-y-1">
@@ -230,7 +209,7 @@ export function CustomerGroupDetailView({ group, allCustomers, userScopes }: Pro
                     <button
                       onClick={() => handleAddMember(customer)}
                       disabled={actionLoading === `add-${customer.id}`}
-                      className="w-7 h-7 rounded-lg bg-primary/10 hover:bg-primary text-primary hover:text-primary-foreground flex items-center justify-center transition-all active:scale-90 shrink-0"
+                      className="w-7 h-7 rounded-md bg-muted text-muted-foreground hover:bg-accent flex items-center justify-center transition-all active:scale-90 shrink-0"
                     >
                       <UserPlus className="w-3 h-3" />
                     </button>
@@ -250,7 +229,7 @@ export function CustomerGroupDetailView({ group, allCustomers, userScopes }: Pro
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={t.detail.search_members}
-                className="w-full h-9 ps-9 pe-3 rounded-xl bg-muted/30 border border-border/30 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                className="w-full h-9 ps-9 pe-3 rounded-md bg-card border border-border text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/40 transition-all"
               />
             </div>
           </div>
@@ -285,14 +264,14 @@ export function CustomerGroupDetailView({ group, allCustomers, userScopes }: Pro
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <div className="text-end hidden sm:block">
-                    <p className="text-xs font-black text-primary tabular-nums">{formatPrice(member.totalSpent)}</p>
+                    <p className="text-xs font-black text-foreground tabular-nums">{formatPrice(member.totalSpent)}</p>
                     <p className="text-[10px] font-bold text-muted-foreground/50">{member.totalOrders} {t.detail.orders_label}</p>
                   </div>
                   <ProtectedAction userScopes={userScopes} requiredScope={SCOPES.CUSTOMER_GROUPS_MANAGE}>
                     <button
                       onClick={() => handleRemoveMember(member)}
                       disabled={actionLoading === `remove-${member.id}`}
-                      className="w-8 h-8 rounded-xl bg-rose-500/5 hover:bg-rose-500/10 text-rose-500/50 hover:text-rose-500 flex items-center justify-center transition-all active:scale-90"
+                      className="w-8 h-8 rounded-lg bg-destructive/5 hover:bg-destructive/10 text-destructive/60 hover:text-destructive flex items-center justify-center transition-all active:scale-90"
                     >
                       <UserMinus className="w-3.5 h-3.5" />
                     </button>

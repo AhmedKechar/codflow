@@ -19,6 +19,7 @@ import {
   communes,
   stockMovements,
   companyShipments,
+  activityLogs,
 } from "../db/schema";
 import type { OrderStatus } from "../db/schema";
 import {
@@ -301,6 +302,220 @@ export async function createOrder(
   return orderData.id;
 }
 
+export async function updateOrder(
+  db: AppDb,
+  orderId: string,
+  storeId: string,
+  data: {
+    customerName?: string;
+    phone?: string;
+    wilayaId?: number;
+    communeId?: string;
+    address?: string;
+    price?: number;
+    deliveryFee?: number;
+    deliveryType?: "home" | "stop_desk";
+    stationCode?: string;
+    notes?: string;
+    weight?: number;
+    isFragile?: boolean;
+    products?: Array<{
+      productId: string;
+      variantId?: string | null;
+      quantity: number;
+      pricePerUnit: number;
+    }>;
+  }
+) {
+  // 1. Verify order exists and belongs to store
+  const existing = await db
+    .select()
+    .from(orders)
+    .where(and(eq(orders.id, orderId), eq(orders.storeId, storeId)))
+    .get();
+
+  if (!existing) {
+    throw new Error("Order not found");
+  }
+
+  // 2. Only allow editing in editable statuses
+  const editableStatuses = ["new", "confirmed", "busy", "unreachable"];
+  if (!editableStatuses.includes(existing.status)) {
+    throw new Error(`Cannot edit order in ${existing.status} status`);
+  }
+
+  const now = new Date().toISOString();
+
+  // 3. If products changed, handle inventory
+  if (data.products && data.products.length > 0) {
+    // Restore old inventory
+    const oldProducts = await db
+      .select({
+        id: orderProducts.id,
+        productId: orderProducts.productId,
+        variantId: orderProducts.variantId,
+        quantity: orderProducts.quantity,
+      })
+      .from(orderProducts)
+      .where(eq(orderProducts.orderId, orderId))
+      .all();
+
+    for (const op of oldProducts) {
+      if (!op.productId) continue;
+
+      const productRow = await db
+        .select({ trackInventory: products.trackInventory })
+        .from(products)
+        .where(eq(products.id, op.productId))
+        .get();
+
+      if (!productRow?.trackInventory) continue;
+
+      if (op.variantId) {
+        const variantRow = await db
+          .select({ inventory: productVariants.inventory })
+          .from(productVariants)
+          .where(eq(productVariants.id, op.variantId))
+          .get();
+
+        const qtyBefore = variantRow?.inventory ?? 0;
+        const qtyAfter = qtyBefore + op.quantity;
+
+        await db
+          .update(productVariants)
+          .set({ inventory: qtyAfter, updatedAt: now })
+          .where(eq(productVariants.id, op.variantId));
+      } else {
+        const productInventoryRow = await db
+          .select({ inventory: products.inventory })
+          .from(products)
+          .where(eq(products.id, op.productId))
+          .get();
+
+        const qtyBefore = productInventoryRow?.inventory ?? 0;
+        const qtyAfter = qtyBefore + op.quantity;
+
+        await db
+          .update(products)
+          .set({ inventory: qtyAfter, updatedAt: now })
+          .where(eq(products.id, op.productId));
+      }
+    }
+
+    // Delete old order products
+    await db
+      .delete(orderProducts)
+      .where(eq(orderProducts.orderId, orderId));
+
+    // Insert new order products
+    for (const item of data.products) {
+      const product = await db
+        .select({ trackInventory: products.trackInventory })
+        .from(products)
+        .where(eq(products.id, item.productId))
+        .get();
+
+      const lineTotal = item.pricePerUnit * item.quantity;
+
+      await db.insert(orderProducts).values({
+        id: crypto.randomUUID(),
+        storeId,
+        orderId,
+        productId: item.productId,
+        productName: "product",
+        variantId: item.variantId ?? null,
+        quantity: item.quantity,
+        pricePerUnit: item.pricePerUnit,
+        lineTotal,
+        returnedQuantity: 0,
+        createdAt: now,
+      });
+
+      // Deduct new inventory
+      if (product?.trackInventory) {
+        if (item.variantId) {
+          const variantRow = await db
+            .select({ inventory: productVariants.inventory })
+            .from(productVariants)
+            .where(eq(productVariants.id, item.variantId))
+            .get();
+
+          const qtyBefore = variantRow?.inventory ?? 0;
+          const qtyAfter = Math.max(0, qtyBefore - item.quantity);
+
+          await db
+            .update(productVariants)
+            .set({ inventory: qtyAfter, updatedAt: now })
+            .where(eq(productVariants.id, item.variantId));
+        } else {
+          const productInventoryRow = await db
+            .select({ inventory: products.inventory })
+            .from(products)
+            .where(eq(products.id, item.productId))
+            .get();
+
+          const qtyBefore = productInventoryRow?.inventory ?? 0;
+          const qtyAfter = Math.max(0, qtyBefore - item.quantity);
+
+          await db
+            .update(products)
+            .set({ inventory: qtyAfter, updatedAt: now })
+            .where(eq(products.id, item.productId));
+        }
+      }
+    }
+  }
+
+  // 4. Build update object
+  const updateData: Record<string, unknown> = { updatedAt: now };
+
+  if (data.customerName !== undefined) updateData.customerName = data.customerName;
+  if (data.phone !== undefined) updateData.phone = data.phone;
+  if (data.wilayaId !== undefined) updateData.wilayaId = data.wilayaId;
+  if (data.communeId !== undefined) updateData.communeId = data.communeId;
+  if (data.address !== undefined) updateData.address = data.address;
+  if (data.price !== undefined) updateData.price = data.price;
+  if (data.deliveryFee !== undefined) updateData.deliveryFee = data.deliveryFee;
+  if (data.deliveryType !== undefined) updateData.deliveryType = data.deliveryType;
+  if (data.stationCode !== undefined) updateData.stationCode = data.stationCode;
+  if (data.notes !== undefined) updateData.notes = data.notes;
+  if (data.weight !== undefined) updateData.weight = data.weight;
+  if (data.isFragile !== undefined) updateData.isFragile = data.isFragile;
+
+  // 5. Recalculate codAmount
+  const price = data.price ?? existing.price;
+  const deliveryFee = data.deliveryFee ?? existing.deliveryFee;
+  updateData.codAmount = price + deliveryFee;
+
+  // 6. Update order
+  await db
+    .update(orders)
+    .set(updateData)
+    .where(eq(orders.id, orderId));
+
+  // 7. Log activity
+  await db.insert(activityLogs).values({
+    id: crypto.randomUUID(),
+    storeId,
+    actorId: "system",
+    actorName: "النظام",
+    actorRole: "admin",
+    action: "order.updated",
+    entityType: "order",
+    entityId: orderId,
+    entityLabel: existing.orderNumber,
+    metadata: JSON.stringify({ changes: Object.keys(updateData) }),
+    createdAt: now,
+  });
+
+  // 8. Return updated order
+  return await db
+    .select()
+    .from(orders)
+    .where(eq(orders.id, orderId))
+    .get();
+}
+
 export async function updateOrderStatus(
   db: AppDb,
   storeId: string,
@@ -351,7 +566,7 @@ export async function updateOrderStatus(
       .where(eq(drivers.id, order.driverId));
   }
 
-  const terminalStatuses = ["cancelled", "returned"];
+  const terminalStatuses = ["cancelled", "returned", "fake", "duplicate"];
   const wasAlreadyTerminal = order ? terminalStatuses.includes(order.status) : false;
 
   if (!wasAlreadyTerminal && (newStatus === "cancelled" || newStatus === "returned")) {
@@ -635,16 +850,12 @@ export async function assignDriver(db: AppDb, storeId: string, orderId: string, 
     }
   }
 
-  const preAssignmentStatuses = ["new", "preparing", "ready"];
-  const shouldSetAssigned = preAssignmentStatuses.includes(order?.status ?? "");
-
   await db
     .update(orders)
     .set({
       driverId,
       driverFee,
       deliveryMethod: "driver",
-      ...(shouldSetAssigned ? { status: "assigned" } : {}),
       updatedAt: now,
     })
     .where(and(eq(orders.id, orderId), eq(orders.storeId, storeId)));
@@ -655,21 +866,12 @@ export async function assignDriver(db: AppDb, storeId: string, orderId: string, 
 export async function unassignDriver(db: AppDb, storeId: string, orderId: string) {
   const now = new Date().toISOString();
 
-  const order = await db
-    .select({ status: orders.status })
-    .from(orders)
-    .where(and(eq(orders.id, orderId), eq(orders.storeId, storeId)))
-    .get();
-
-  const shouldRollbackStatus = order?.status === "assigned";
-
   await db
     .update(orders)
     .set({
       driverId: null,
       driverFee: 0,
       deliveryMethod: "unassigned",
-      ...(shouldRollbackStatus ? { status: "ready" } : {}),
       updatedAt: now,
     })
     .where(and(eq(orders.id, orderId), eq(orders.storeId, storeId)));
@@ -865,14 +1067,15 @@ export async function deleteOrder(db: AppDb, storeId: string, orderId: string) {
 const STATUS_RANK: Record<string, number> = {
   new: 0,
   confirmed: 1,
-  unreachable: 1,
-  preparing: 2,
-  ready: 3,
-  assigned: 4,
-  out_for_delivery: 5,
-  delivered: 6,
-  returned: 6,
-  cancelled: 6,
+  unreachable: 2,
+  busy: 2,
+  postponed: 3,
+  shipped: 4,
+  delivered: 5,
+  returned: 5,
+  cancelled: 5,
+  fake: 5,
+  duplicate: 5,
 };
 
 export async function updateOrderStatusWebhook(

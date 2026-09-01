@@ -11,29 +11,29 @@ const { productId, content } = Astro.props;
 ---
 
 <section class="review-form-section mt-10" id="write-review">
-  <div class="card !border-none !shadow-lg sm:!border sm:!shadow-md">
+  <div class="card">
     <!-- Header -->
     <div
-      class="px-6 py-5 border-b border-black/[.03]"
-      style="background: color-mix(in srgb, var(--clr-primary) 4%, white)"
+      class="px-6 py-5 border-b border-border"
+      style="background: var(--clr-surface)"
     >
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-2xl flex items-center justify-center shadow-sm" style="background: var(--clr-surface); color: var(--clr-primary)">
+        <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: var(--clr-surface-alt); color: var(--clr-primary)">
           <Icon name="heroicons:star" class="w-5 h-5" />
         </div>
-        <h2 class="font-black text-[1rem] leading-tight" style="color: var(--clr-text)">{content.reviewFormTitle}</h2>
+        <h2 class="font-semibold text-base leading-tight" style="color: var(--clr-text)">{content.reviewFormTitle}</h2>
       </div>
     </div>
 
     <!-- Success state (hidden by default) -->
     <div id="review-success" class="hidden p-8 text-center">
       <div
-        class="w-16 h-16 rounded-[1.5rem] flex items-center justify-center mx-auto mb-4 shadow-sm"
-        style="background: color-mix(in srgb, var(--clr-primary) 10%, white); color: var(--clr-primary)"
+        class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+        style="background: var(--clr-surface-alt); color: var(--clr-success)"
       >
         <Icon name="heroicons:check-circle" class="w-8 h-8" />
       </div>
-      <p class="font-black text-[1rem] leading-snug px-4" style="color: var(--clr-text)">{content.reviewFormSuccess}</p>
+      <p class="font-semibold text-base leading-snug px-4" style="color: var(--clr-text)">{content.reviewFormSuccess}</p>
     </div>
 
     <!-- Form -->
@@ -41,7 +41,7 @@ const { productId, content } = Astro.props;
       <input type="hidden" name="productId" value={productId} />
 
       <!-- Error banner -->
-      <div id="review-error" class="hidden p-4 bg-red-50 border border-red-100 rounded-[1.25rem] text-[0.875rem] font-bold text-red-600 flex items-start gap-3">
+      <div id="review-error" class="hidden p-4 rounded-lg text-[0.875rem] font-medium flex items-start gap-3" style="background: var(--clr-error-bg); border: 1px solid color-mix(in srgb, var(--clr-error) 30%, transparent); color: var(--clr-error)">
         <Icon name="heroicons:exclamation-triangle" class="w-5 h-5 shrink-0" />
         <p id="review-error-msg"></p>
       </div>
@@ -71,7 +71,7 @@ const { productId, content } = Astro.props;
           {[1,2,3,4,5].map(n => (
             <button
               type="button"
-              class="star-btn w-10 h-10 rounded-2xl flex items-center justify-center transition-all active:scale-90 border-2 border-transparent"
+              class="star-btn w-10 h-10 rounded-lg flex items-center justify-center transition-all active:scale-90"
               style="background: var(--clr-surface-alt)"
               data-value={n}
               aria-label={content.ariaStarRating.replace("{n}", n.toString()).replace("{s}", n > 1 ? "s" : "")}

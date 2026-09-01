@@ -58,7 +58,7 @@ export function CustomersTable({
       sortable: false,
       render: (value) => (
         <div className="flex items-center gap-2">
-          <Phone className="w-3 h-3 text-primary/40 shrink-0" />
+          <Phone className="w-3 h-3 text-muted-foreground/60 shrink-0" />
           <span className="text-[13px] font-bold text-muted-foreground/70 tabular-nums tracking-wide" dir="ltr">
             {value}
           </span>
@@ -71,7 +71,7 @@ export function CustomersTable({
       sortable: false,
       render: (value) => value ? (
         <div className="flex items-center gap-1.5">
-          <MapPin className="w-3 h-3 text-primary/40 shrink-0" />
+          <MapPin className="w-3 h-3 text-muted-foreground/60 shrink-0" />
           <span className="text-[12px] font-bold text-muted-foreground/70 uppercase tracking-tight">
             {value}
           </span>
@@ -87,8 +87,8 @@ export function CustomersTable({
       sortable: true,
       render: (value) => (
         <div className="flex items-center gap-1.5">
-          <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center">
-            <Package className="w-3 h-3 text-primary/60" />
+          <div className="w-6 h-6 rounded-lg bg-muted flex items-center justify-center">
+            <Package className="w-3 h-3 text-muted-foreground/60" />
           </div>
           <span className="text-sm font-black text-foreground">{value || 0}</span>
         </div>
@@ -99,7 +99,7 @@ export function CustomersTable({
       label: t.table.total_spent,
       sortable: true,
       render: (value) => (
-        <span className="text-sm font-black text-primary">
+        <span className="text-sm font-black text-foreground">
           {value ? `${value} دج` : "0 دج"}
         </span>
       ),
@@ -173,7 +173,7 @@ export function CustomersTable({
           <div className="flex items-start gap-4">
             {/* Avatar Initials */}
             <div className="relative shrink-0">
-              <Avatar className="h-12 w-12 rounded-2xl bg-primary/10 text-primary border-none ring-1 ring-primary/15 shadow-sm">
+              <Avatar className="h-12 w-12 rounded-full bg-muted text-muted-foreground border-none ring-1 ring-border shadow-xs">
                 <AvatarFallback className="bg-transparent">
                   <User className="w-4.5 h-4.5 opacity-40" />
                 </AvatarFallback>
@@ -191,11 +191,11 @@ export function CustomersTable({
                     <DropdownMenu>
                       <DropdownMenuTrigger 
                         disabled={isDeleting}
-                        render={<button className="w-8 h-8 rounded-full bg-muted/30 hover:bg-primary/10 flex items-center justify-center text-muted-foreground/60 hover:text-primary transition-all active:scale-90" />}
+                        render={<button className="w-8 h-8 rounded-md bg-muted/30 hover:bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors active:scale-90" />}
                       >
                         <MoreHorizontal className="w-4 h-4" />
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align={dir === "rtl" ? "start" : "end"} className="glass-card rounded-2xl">
+                      <DropdownMenuContent align={dir === "rtl" ? "start" : "end"} className="rounded-lg">
                         {onView && (
                           <DropdownMenuItem onClick={() => onView(customer)} disabled={isDeleting} className="text-[11px] font-bold uppercase tracking-wider py-2.5">
                             <Eye className="w-3.5 h-3.5 me-2" />{t.actions.view}
@@ -210,10 +210,10 @@ export function CustomersTable({
                           <DropdownMenuItem
                             onClick={() => onDelete(customer)}
                             disabled={(customer.totalOrders || 0) > 0 || isDeleting}
-                            className="!text-rose-500 text-[11px] font-bold uppercase tracking-wider py-2.5"
+                            className="!text-destructive text-[11px] font-bold uppercase tracking-wider py-2.5"
                           >
                             {isDeleting ? (
-                              <div className="w-3.5 h-3.5 me-2 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
+                              <div className="w-3.5 h-3.5 me-2 border-2 border-destructive border-t-transparent rounded-full animate-spin" />
                             ) : (
                               <Trash2 className="w-3.5 h-3.5 me-2" />
                             )}
@@ -235,7 +235,7 @@ export function CustomersTable({
                 </div>
                 {customer.wilaya && (
                   <div className="flex items-center gap-2 text-muted-foreground/50">
-                    <MapPin className="w-3 h-3 shrink-0 text-primary/40" />
+                    <MapPin className="w-3 h-3 shrink-0 text-muted-foreground/60" />
                     <span className="text-[11px] font-black uppercase tracking-tight" dir="rtl">
                       {customer.wilaya}
                     </span>
@@ -247,9 +247,9 @@ export function CustomersTable({
 
           {/* Stats Grid: Modern app-like pills */}
           <div className="grid grid-cols-2 gap-2.5">
-            <div className="bg-muted/30 rounded-2xl p-3 flex flex-col items-center justify-center gap-1.5 border border-border/5 transition-colors group-hover:bg-muted/40">
-              <div className="w-7 h-7 rounded-lg bg-primary/5 flex items-center justify-center shrink-0">
-                <Package className="w-3.5 h-3.5 text-primary/40" />
+            <div className="bg-muted/30 rounded-lg p-3 flex flex-col items-center justify-center gap-1.5 border border-border/5 transition-colors group-hover:bg-muted/40">
+              <div className="w-7 h-7 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                <Package className="w-3.5 h-3.5 text-muted-foreground/60" />
               </div>
               <div className="flex flex-col items-center">
                 <span className="text-[14px] font-black text-foreground tabular-nums leading-none">{customer.totalOrders || 0}</span>
@@ -257,9 +257,9 @@ export function CustomersTable({
               </div>
             </div>
 
-            <div className="bg-muted/30 rounded-2xl p-3 flex flex-col items-center justify-center gap-1.5 border border-border/5 transition-colors group-hover:bg-muted/40">
-              <div className="w-7 h-7 rounded-lg bg-emerald-500/5 flex items-center justify-center shrink-0">
-                <span className="text-[10px] font-black text-emerald-500/40">دج</span>
+            <div className="bg-muted/30 rounded-lg p-3 flex flex-col items-center justify-center gap-1.5 border border-border/5 transition-colors group-hover:bg-muted/40">
+              <div className="w-7 h-7 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                <span className="text-[10px] font-black text-muted-foreground/60">دج</span>
               </div>
               <div className="flex flex-col items-center">
                 <span className="text-[14px] font-black text-foreground tabular-nums leading-none truncate max-w-[80px]">

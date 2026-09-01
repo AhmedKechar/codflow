@@ -66,9 +66,9 @@ export async function updateShipmentInfo(c: Context<AppContext>) {
   // EcoTrack platform (all company codes — ecotrack, packers_ecotrack, etc.) silently returns
   // success=true on validated orders but does NOT apply changes. Tested 2026-04-18 on Packers:
   // update after valid/order → success=true but recipientName unchanged.
-  // Guard: only allow update while status is "dispatched" (= created but not yet validated).
+  // Guard: only allow update while status is "shipped" (= created but not yet validated).
   // This prevents DB desync where our DB would reflect new values but EcoTrack still has old ones.
-  if (isEcotrackCompany(company.code) && order.status !== "dispatched") {
+  if (isEcotrackCompany(company.code) && order.status !== "shipped") {
     throw new BusinessLogicError(
       `EcoTrack orders can only be updated before validation. This order is already validated (status: ${order.status}).`,
       ERROR_CODES.OPERATION_NOT_SUPPORTED,
@@ -174,7 +174,7 @@ export async function updateShipmentInfo(c: Context<AppContext>) {
 /**
  * POST /orders/:id/cancel-shipment
  * Delete/cancel a shipment at the carrier API (before validation only).
- * On success: clears trackingNumber from order, resets status to "ready".
+ * On success: clears trackingNumber from order, resets status to "confirmed".
  * Supported providers: ecotrack (Packers). Others return OPERATION_NOT_SUPPORTED.
  *
  * Uses POST (not DELETE) to avoid routing ambiguity with DELETE /orders/:id.
@@ -231,7 +231,7 @@ export async function cancelShipment(c: Context<AppContext>) {
       durationMs,
     });
 
-    // Clear tracking from order and reset to "ready" so it can be re-dispatched.
+    // Clear tracking from order and reset to "confirmed" so it can be re-dispatched.
     // The old shipment row loses its validated flag; orders.status carries the cancel state.
     const shipment = await getShipmentByOrder(db, orderId);
     if (shipment) await setShipmentValidated(db, shipment.id, false);
@@ -239,9 +239,9 @@ export async function cancelShipment(c: Context<AppContext>) {
     await clearOrderTracking(db, storeId, orderId);
 
     const actor = c.get("user");
-    const PRE_DISPATCH_STATUSES = ["new", "confirmed", "unreachable", "preparing", "ready", "assigned", "dispatched"];
+    const PRE_DISPATCH_STATUSES = ["new", "confirmed", "unreachable", "busy", "postponed"];
     if (PRE_DISPATCH_STATUSES.includes(order.status)) {
-      await queries.updateOrderStatus(db, storeId, orderId, "ready", actor?.id, actor?.name ?? undefined);
+      await queries.updateOrderStatus(db, storeId, orderId, "confirmed", actor?.id, actor?.name ?? undefined);
     }
 
     await logActivity(db, actor, ACTIONS.ORDER_STATUS_CHANGED, {
@@ -249,7 +249,7 @@ export async function cancelShipment(c: Context<AppContext>) {
     }, { action: "cancel_shipment", trackingNumber: order.trackingNumber });
 
     console.info(`[shipment] cancelled order=${orderId} tracking=${order.trackingNumber} via ${company.code}`);
-    return c.json({ success: true, message: "Shipment cancelled — order reset to ready" }, 200);
+    return c.json({ success: true, message: "Shipment cancelled — order reset to confirmed" }, 200);
   } catch (err) {
     const durationMs = Date.now() - startMs;
     const errorMessage = err instanceof Error ? err.message : String(err);

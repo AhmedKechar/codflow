@@ -19,8 +19,8 @@ const ZR_BASE_URL = "https://api.zrexpress.app";
 
 /** Our valid order status strings — used to validate custom mapping keys. */
 const VALID_OUR_STATUSES = new Set([
-  "new", "preparing", "assigned", "out_for_delivery",
-  "delivered", "returned", "cancelled",
+  "new", "confirmed", "unreachable", "busy", "postponed", "shipped",
+  "delivered", "returned", "cancelled", "fake", "duplicate",
 ]);
 
 // ─── ZR Express — Register ────────────────────────────────────────────────────

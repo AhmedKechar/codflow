@@ -18,15 +18,15 @@ const steps = [
 <section
   id="how-it-works"
   class="py-16 sm:py-24"
-  style="background: color-mix(in srgb, var(--clr-primary) 3%, var(--clr-bg))"
+  style="background: var(--clr-surface-alt)"
 >
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <!-- Heading -->
     <div class="max-w-3xl mx-auto text-center mb-16">
-      <h2 class="text-3xl sm:text-4xl font-black tracking-tighter" style="color: var(--clr-text)">
+      <h2 class="text-2xl sm:text-3xl font-semibold tracking-tight text-text-main">
         {content.howItWorksTitle}
       </h2>
-      <p class="text-[1rem] sm:text-lg font-bold mt-4 opacity-50 leading-relaxed" style="color: var(--clr-text)">
+      <p class="text-base sm:text-lg font-normal mt-4 leading-relaxed text-text-muted">
         {content.howItWorksSub}
       </p>
     </div>
@@ -37,24 +37,24 @@ const steps = [
         <div class="flex flex-col items-center text-center group">
           <!-- Icon container -->
           <div
-            class="relative w-20 h-20 flex items-center justify-center transition-all duration-500 group-hover:scale-110 mb-8"
-            style={`background: var(--clr-surface); border-radius: var(--radius-card); box-shadow: var(--shadow-md); border: 1px solid var(--clr-border)`}
+            class="relative w-20 h-20 flex items-center justify-center transition-transform duration-300 group-hover:scale-105 mb-8"
+            style={`background: var(--clr-surface); border-radius: var(--radius-card); border: 1px solid var(--clr-border)`}
           >
             <div class="text-primary">
               <Icon name={step.icon} class="w-7 h-7" />
             </div>
             <span
-              class="absolute -top-3 -end-3 w-9 h-9 flex items-center justify-center text-sm font-black rounded-full text-white shadow-lg"
+              class="absolute -top-3 -end-3 w-8 h-8 flex items-center justify-center text-sm font-semibold rounded-full text-white"
               style="background: var(--clr-primary)"
             >
               {step.num}
             </span>
           </div>
           <div>
-            <h3 class="font-black text-xl mb-3" style="color: var(--clr-text)">
+            <h3 class="font-semibold text-lg mb-3 text-text-main">
               {step.title}
             </h3>
-            <p class="text-[0.9375rem] font-medium leading-relaxed opacity-60 max-w-[280px] mx-auto" style="color: var(--clr-text)">
+            <p class="text-[0.9375rem] font-normal leading-relaxed max-w-[280px] mx-auto text-text-muted">
               {step.sub}
             </p>
           </div>

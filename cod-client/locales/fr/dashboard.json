@@ -27,26 +27,29 @@
   },
   "order_statuses": {
     "new": "Nouveau",
-    "preparing": "En préparation",
-    "ready": "Prêt",
-    "assigned": "Assigné",
-    "out_for_delivery": "En cours de livraison",
+    "confirmed": "Confirmé",
+    "unreachable": "Injoignable",
+    "busy": "Occupé",
+    "postponed": "Reporté",
+    "shipped": "Expédié",
     "delivered": "Livré",
     "returned": "Retourné",
-    "cancelled": "Annulé"
+    "cancelled": "Annulé",
+    "fake": "Faux",
+    "duplicate": "Doublon"
   },
   "status_tooltips": {
     "total_orders": "Nombre total de commandes tous statuts confondus",
     "new": "Commande reçue, en attente de vérification et de confirmation",
     "confirmed": "Commande confirmée par l'équipe, prête à être préparée",
     "unreachable": "Le client n'a pas pu être joint pour confirmer la commande",
-    "preparing": "La commande est en cours de préparation et d'emballage",
-    "ready": "Commande emballée, en attente d'enlèvement ou d'expédition",
-    "assigned": "Un livreur a été assigné pour récupérer et livrer cette commande",
-    "dispatched": "Commande remise à une société de livraison",
-    "out_for_delivery": "Commande en route, livraison imminente",
+    "busy": "Le client est occupé, nouvelle tentative plus tard",
+    "postponed": "Livraison reportée à une date ultérieure",
+    "shipped": "La commande a été expédiée et est en transit",
     "delivered": "Commande livrée avec succès au client",
     "returned": "Le client a refusé ou retourné la commande à la porte",
-    "cancelled": "Commande annulée, ne sera pas traitée"
+    "cancelled": "Commande annulée, ne sera pas traitée",
+    "fake": "Commande identifiée comme fausse ou frauduleuse",
+    "duplicate": "La commande est une entrée en double"
   }
 }

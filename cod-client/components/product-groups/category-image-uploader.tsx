@@ -51,14 +51,14 @@ export function CategoryImageUploader({ value, onChange, disabled }: CategoryIma
   return (
     <div className="space-y-4">
       {value && (
-        <div className="relative group aspect-video max-w-md rounded-xl overflow-hidden border border-border/50 bg-muted shadow-sm">
+        <div className="relative group aspect-video max-w-md rounded-xl overflow-hidden border border-border bg-muted shadow-sm">
           <img src={value} alt="Category" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
             <button
               type="button"
               disabled={disabled}
               onClick={() => onChange(null)}
-              className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center text-white hover:bg-red-600 transition-colors disabled:opacity-50"
+              className="w-10 h-10 rounded-md bg-destructive flex items-center justify-center text-destructive-foreground hover:bg-destructive/90 transition-colors disabled:opacity-50"
             >
               <X className="w-5 h-5" />
             </button>
@@ -79,17 +79,17 @@ export function CategoryImageUploader({ value, onChange, disabled }: CategoryIma
           }}
           onClick={() => !disabled && !uploading && inputRef.current?.click()}
           className={cn(
-            "relative flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed cursor-pointer transition-all duration-200 py-12 px-6",
+            "relative flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed cursor-pointer transition-all duration-200 py-12 px-6",
             dragging
               ? "border-primary bg-primary/5 scale-[1.01]"
-              : "border-border/50 hover:border-primary/50 hover:bg-muted/30",
+              : "border-border hover:border-primary/50 hover:bg-muted/30",
             (disabled || uploading) && "opacity-50 cursor-not-allowed pointer-events-none"
           )}
         >
           {uploading ? (
             <Loader2 className="w-10 h-10 text-primary animate-spin" />
           ) : (
-            <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
+            <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center">
               <UploadCloud className="w-7 h-7 text-primary" />
             </div>
           )}

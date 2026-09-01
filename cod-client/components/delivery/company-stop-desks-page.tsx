@@ -107,11 +107,11 @@ export function CompanyStopDesksPage({ company, wilayas }: Props) {
       isTitle: true,
       render: (value, row) => (
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 rounded-lg bg-primary/5 flex items-center justify-center shrink-0 border border-border/40">
+          <div className="w-9 h-9 rounded-lg bg-primary/5 flex items-center justify-center shrink-0 border border-border">
             <MapPin className="w-4 h-4 text-primary/70" />
           </div>
           <div className="min-w-0">
-            <p className="font-black text-sm tracking-tight truncate">{value}</p>
+            <p className="font-semibold text-sm tracking-tight truncate">{value}</p>
             {row.wilayaId != null && (
               <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest truncate md:hidden">
                 {row.wilayaName}
@@ -153,10 +153,10 @@ export function CompanyStopDesksPage({ company, wilayas }: Props) {
             onClick={(e) => { e.stopPropagation(); handleToggle(row); }}
             disabled={togglingCode === row.code}
             className={cn(
-              "flex items-center gap-1 px-2 py-1 rounded-lg border text-[10px] font-black uppercase tracking-widest transition-all active:scale-95",
+              "flex items-center gap-1 px-2 py-1 rounded-lg border text-[10px] font-semibold uppercase tracking-widest transition-all active:scale-95",
               row.active
-                ? "border-border/30 bg-muted/20 text-muted-foreground hover:bg-rose-500/10 hover:text-rose-500 hover:border-rose-500/20"
-                : "border-emerald-500/20 bg-emerald-500/5 text-emerald-600 hover:bg-emerald-500/15",
+                ? "border-border bg-muted/20 text-muted-foreground hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
+                : "border-success/30 bg-success/5 text-success hover:bg-success/15",
               togglingCode === row.code && "opacity-40 cursor-not-allowed",
             )}
             title={row.active ? (t.stop_desks?.deactivate ?? "Deactivate") : (t.stop_desks?.activate ?? "Activate")}
@@ -195,7 +195,7 @@ export function CompanyStopDesksPage({ company, wilayas }: Props) {
       {/* Back */}
       <button
         onClick={() => router.push(`/delivery/companies/${company.code}`)}
-        className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-muted-foreground/40 hover:text-primary transition-colors group"
+        className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/40 hover:text-primary transition-colors group"
       >
         <ArrowRight
           size={13}
@@ -209,32 +209,32 @@ export function CompanyStopDesksPage({ company, wilayas }: Props) {
 
       {/* Header + Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="sm:col-span-1 glass-card rounded-2xl border-border/30 p-5 flex items-center gap-4">
+        <div className="sm:col-span-1 bg-card rounded-lg border-border p-5 flex items-center gap-4">
           <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
             <MapPin size={18} className="text-primary" />
           </div>
           <div className="min-w-0">
-            <h1 className="text-base font-black text-foreground tracking-tight truncate">{t.stop_desks?.title ?? "Stop Desks"}</h1>
+            <h1 className="text-base font-semibold text-foreground tracking-tight truncate">{t.stop_desks?.title ?? "Stop Desks"}</h1>
             <p className="text-[11px] text-muted-foreground/50 font-bold uppercase tracking-widest mt-0.5 truncate">
               {company.name}
             </p>
           </div>
         </div>
 
-        <div className="glass-card rounded-2xl border-border/30 p-5 flex items-center justify-between">
+        <div className="bg-card rounded-lg border-border p-5 flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">{t.stop_desks?.active_label ?? "Active"}</p>
-            <p className="text-2xl font-black text-emerald-500 mt-1 tabular-nums">{loading ? "—" : activeCount}</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/40">{t.stop_desks?.active_label ?? "Active"}</p>
+            <p className="text-2xl font-semibold text-success mt-1 tabular-nums">{loading ? "—" : activeCount}</p>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
-            <ToggleRight size={18} className="text-emerald-500" />
+          <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
+            <ToggleRight size={18} className="text-success" />
           </div>
         </div>
 
-        <div className="glass-card rounded-2xl border-border/30 p-5 flex items-center justify-between">
+        <div className="bg-card rounded-lg border-border p-5 flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">{t.stop_desks?.total ?? "Total"}</p>
-            <p className="text-2xl font-black text-foreground mt-1 tabular-nums">{loading ? "—" : desks.length}</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/40">{t.stop_desks?.total ?? "Total"}</p>
+            <p className="text-2xl font-semibold text-foreground mt-1 tabular-nums">{loading ? "—" : desks.length}</p>
           </div>
           <div className="w-10 h-10 rounded-xl bg-muted/30 flex items-center justify-center">
             <Building2 size={18} className="text-muted-foreground/40" />
@@ -247,7 +247,7 @@ export function CompanyStopDesksPage({ company, wilayas }: Props) {
         <button
           onClick={load}
           disabled={loading}
-          className="h-9 px-3 rounded-lg border border-border/40 bg-card hover:bg-muted/30 flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-muted-foreground transition-all disabled:opacity-40"
+          className="h-9 px-3 rounded-lg border border-border bg-card hover:bg-muted/30 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground transition-all disabled:opacity-40"
         >
           <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin")} />
           {t.stop_desks?.refresh ?? "Refresh"}

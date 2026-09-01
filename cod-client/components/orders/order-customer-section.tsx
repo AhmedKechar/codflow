@@ -28,8 +28,10 @@ interface OrderCustomerSectionProps {
   loadingCommunes: boolean;
   address: string;
   deliveryType: "home" | "stop_desk";
+  customerMode: "existing" | "new";
   onCustomerSelect: (customer: Customer) => void;
   onCustomerClear: () => void;
+  onCustomerModeChange: (mode: "existing" | "new") => void;
   onCustomerNameChange: (value: string) => void;
   onPhoneChange: (value: string) => void;
   onWilayaChange: (wilayaId: number, nameAr: string) => void;
@@ -37,12 +39,6 @@ interface OrderCustomerSectionProps {
   onAddressChange: (value: string) => void;
 }
 
-/**
- * OrderCustomerSection Component
- *
- * Handles customer information input for order forms.
- * Includes customer search, name, phone, wilaya, commune, and address fields.
- */
 export function OrderCustomerSection({
   customers,
   wilayas,
@@ -56,8 +52,10 @@ export function OrderCustomerSection({
   loadingCommunes,
   address,
   deliveryType,
+  customerMode,
   onCustomerSelect,
   onCustomerClear,
+  onCustomerModeChange,
   onCustomerNameChange,
   onPhoneChange,
   onWilayaChange,
@@ -69,118 +67,70 @@ export function OrderCustomerSection({
 
   return (
     <div className="space-y-4">
-      <h3 className="text-base font-black text-foreground">
-        {t.form.customer_section}
-      </h3>
+      {/* Customer Search / Mode Toggle */}
+      <CustomerSearchSelect
+        customers={customers}
+        selectedCustomer={selectedCustomer}
+        onSelect={onCustomerSelect}
+        onClear={onCustomerClear}
+        mode={customerMode}
+        onModeChange={onCustomerModeChange}
+      />
 
-      {/* Customer Search */}
-      <div className="space-y-2">
-        <Label className="text-sm text-foreground font-bold">
-          {t.form.search_customer}
-        </Label>
-        <CustomerSearchSelect
-          customers={customers}
-          selectedCustomer={selectedCustomer}
-          onSelect={onCustomerSelect}
-          onClear={onCustomerClear}
-        />
-      </div>
+      {/* Manual Input Fields (new mode or when customer is selected but fields are editable) */}
+      {customerMode === "new" && (
+        <>
+          {/* Customer Name */}
+          <div className="space-y-2">
+            <Label className="text-sm text-foreground font-bold">
+              {t.form.customer_name_label}
+            </Label>
+            <Input
+              value={customerName}
+              onChange={(e) => onCustomerNameChange(e.target.value)}
+              placeholder={t.form.customer_name_placeholder}
+              className="h-11 bg-muted border-border text-foreground text-base"
+              dir={dir}
+            />
+          </div>
 
-      {/* Customer Name */}
-      <div className="space-y-2">
-        <Label className="text-sm text-foreground font-bold">
-          {t.form.customer_name_label}
-        </Label>
-        <Input
-          value={customerName}
-          onChange={(e) => onCustomerNameChange(e.target.value)}
-          placeholder={t.form.customer_name_placeholder}
-          className="h-11 bg-muted border-border text-foreground text-base"
-          dir={dir}
-        />
-      </div>
+          {/* Phone */}
+          <div className="space-y-2">
+            <Label className="text-sm text-foreground font-bold">
+              {t.form.phone_label}
+            </Label>
+            <Input
+              value={phone}
+              onChange={(e) => onPhoneChange(e.target.value)}
+              placeholder={t.form.phone_placeholder}
+              className="h-11 bg-muted border-border text-foreground text-base"
+              type="tel"
+            />
+          </div>
+        </>
+      )}
 
-      {/* Phone */}
-      <div className="space-y-2">
-        <Label className="text-sm text-foreground font-bold">
-          {t.form.phone_label}
-        </Label>
-        <Input
-          value={phone}
-          onChange={(e) => onPhoneChange(e.target.value)}
-          placeholder={t.form.phone_placeholder}
-          className="h-11 bg-muted border-border text-foreground text-base"
-          type="tel"
-        />
-      </div>
+      {/* Existing Customer Info (read-only when customer is selected) */}
+      {customerMode === "existing" && selectedCustomer && (
+        <div className="space-y-2">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label className="text-xs text-muted-foreground font-bold">{t.form.customer_name_label}</Label>
+              <div className="h-11 flex items-center px-4 rounded-lg bg-muted/50 border border-border/50">
+                <span className="text-sm font-bold text-foreground">{selectedCustomer.name}</span>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs text-muted-foreground font-bold">{t.form.phone_label}</Label>
+              <div className="h-11 flex items-center px-4 rounded-lg bg-muted/50 border border-border/50">
+                <span className="text-sm font-bold text-foreground" dir="ltr">{selectedCustomer.phone}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
-      {/* Wilaya */}
-      <div className="space-y-2">
-        <Label className="text-sm text-foreground font-bold">
-          {t.form.wilaya_label}
-        </Label>
-        <Select
-          value={wilayaId ? String(wilayaId) : ""}
-          onValueChange={(v) => {
-            if (!v) return;
-            const id = parseInt(v, 10);
-            if (!isNaN(id)) {
-              const w = wilayas.find((x) => x.id === id);
-              if (w) onWilayaChange(w.id, w.nameAr);
-            }
-          }}
-        >
-          <SelectTrigger className="h-11 bg-muted border-border text-foreground font-semibold text-base">
-            {wilayaNameAr ? (
-              <span className="font-bold">{wilayaNameAr}</span>
-            ) : (
-              <span className="text-muted-foreground">{t.form.wilaya_placeholder}</span>
-            )}
-          </SelectTrigger>
-          <SelectContent className="bg-popover border-border max-h-64">
-            {wilayas.length > 0
-              ? wilayas.map((w) => (
-                  <SelectItem key={w.id} value={String(w.id)} className="font-semibold text-base py-3">
-                    {w.nameAr}
-                  </SelectItem>
-                ))
-              : null}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Commune */}
-      <div className="space-y-2">
-        <Label className="text-sm text-foreground font-bold">
-          {t.form.commune_label}
-        </Label>
-        <Select
-          value={commune}
-          onValueChange={(v) => onCommuneChange(v ?? "")}
-          disabled={!wilayaId || loadingCommunes}
-        >
-          <SelectTrigger className="h-11 bg-muted border-border text-foreground font-semibold text-base">
-            {commune ? (
-              <span className="font-bold">
-                {communes.find((c) => c.id === commune)?.nameAr ?? commune}
-              </span>
-            ) : (
-              <span className="text-muted-foreground">
-                {loadingCommunes ? t.form.commune_loading : t.form.commune_placeholder}
-              </span>
-            )}
-          </SelectTrigger>
-          <SelectContent className="bg-popover border-border max-h-64">
-            {communes.map((c) => (
-              <SelectItem key={c.id} value={c.id} className="font-semibold text-base py-3">
-                {c.nameAr}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Address — required for home delivery */}
+      {/* Address — always shown (for both modes) */}
       <div className="space-y-2">
         <Label className="text-sm text-foreground font-bold">
           {deliveryType === "home" ? `${t.form.address_label} *` : t.form.address_label}

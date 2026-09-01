@@ -21,14 +21,14 @@ const secondaryHref = heroConfig?.secondaryCtaHref ?? "#best-sellers";
 
 <section class="hero-bg-subtle overflow-hidden relative -mt-[calc(4.5rem+var(--safe-top))] pt-[calc(4.5rem+var(--safe-top))]">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex items-center justify-center min-h-[500px] sm:min-h-[550px] lg:min-h-[600px]">
+    <div class="flex items-center justify-center min-h-[500px] sm:min-h-[520px] lg:min-h-[560px]">
 
       <div class="flex flex-col justify-center py-16 sm:py-20 lg:py-24 relative z-20 text-center">
         <div class="space-y-6 sm:space-y-8 max-w-2xl mx-auto">
           {/* Eyebrow badge */}
           {eyebrow && (
             <div class="animate-fade-in-up">
-              <span class="inline-flex items-center gap-2 text-[0.75rem] font-black uppercase tracking-[0.2em] px-4 py-1.5 rounded-full bg-white/50 border border-black/[0.04] text-primary backdrop-blur-sm">
+              <span class="inline-flex items-center text-[0.75rem] font-medium uppercase tracking-[0.15em] px-4 py-1.5 text-text-muted">
                 {eyebrow}
               </span>
             </div>
@@ -36,16 +36,14 @@ const secondaryHref = heroConfig?.secondaryCtaHref ?? "#best-sellers";
 
           {/* Headline */}
           <h1
-            class="text-[2.25rem] sm:text-[3.5rem] lg:text-[5rem] font-black leading-[1.1] tracking-tight animate-fade-in-up [animation-delay:100ms] text-balance"
-            style="color: var(--clr-text)"
+            class="text-[2rem] sm:text-[2.75rem] lg:text-[3.75rem] font-semibold leading-[1.1] tracking-tight animate-fade-in-up [animation-delay:100ms] text-balance text-text-main"
           >
             {title}
           </h1>
 
           {/* Subtitle */}
           <p
-            class="text-[1rem] sm:text-lg lg:text-xl font-medium leading-relaxed opacity-80 animate-fade-in-up [animation-delay:200ms] text-pretty max-w-md mx-auto"
-            style="color: var(--clr-text-2)"
+            class="text-base sm:text-lg font-normal leading-relaxed animate-fade-in-up [animation-delay:200ms] text-pretty max-w-md mx-auto text-text-muted"
           >
             {subtitle}
           </p>
@@ -54,15 +52,14 @@ const secondaryHref = heroConfig?.secondaryCtaHref ?? "#best-sellers";
           <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 animate-fade-in-up [animation-delay:300ms]">
             <a
               href={primaryHref}
-              class="btn-primary group !w-full sm:!w-auto !px-10 h-14 sm:h-16 text-base"
+              class="btn-primary group !w-full sm:!w-auto !px-10 h-14 sm:h-14 text-base"
             >
               {primaryLabel}
               <Icon name="heroicons:arrow-right" class="w-5 h-5 transition-transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1" />
             </a>
             <a
               href={secondaryHref}
-              class="inline-flex items-center justify-center px-10 h-14 sm:h-16 font-black text-sm transition-all duration-300 active:scale-95 border-2 border-black/[0.08] hover:bg-white/50 w-full sm:w-auto bg-white/20 backdrop-blur-sm rounded-2xl"
-              style="color: var(--clr-text)"
+              class="inline-flex items-center justify-center px-10 h-14 sm:h-14 text-sm font-semibold transition-colors border border-border bg-surface w-full sm:w-auto text-text-main hover:text-primary"
             >
               {secondaryLabel}
             </a>

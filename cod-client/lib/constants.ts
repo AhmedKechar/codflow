@@ -10,13 +10,16 @@
 // Order Statuses
 export const ORDER_STATUSES = [
   "new",
-  "preparing",
-  "ready",
-  "assigned",
-  "out_for_delivery",
+  "confirmed",
+  "unreachable",
+  "busy",
+  "postponed",
+  "shipped",
   "delivered",
   "returned",
   "cancelled",
+  "fake",
+  "duplicate",
 ] as const;
 
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
@@ -24,13 +27,16 @@ export type OrderStatus = (typeof ORDER_STATUSES)[number];
 // Order Status Colors
 export const ORDER_STATUS_COLORS: Record<OrderStatus, string> = {
   new: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
-  preparing: "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20",
-  ready: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20",
-  assigned: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20",
-  out_for_delivery: "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20",
+  confirmed: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20",
+  unreachable: "bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-500/20",
+  busy: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
+  postponed: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20",
+  shipped: "bg-teal-500/10 text-teal-600 dark:text-teal-400 border-teal-500/20",
   delivered: "bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20",
-  returned: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20",
-  cancelled: "bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-500/20",
+  returned: "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20",
+  cancelled: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20",
+  fake: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20",
+  duplicate: "bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20",
 };
 
 // Vehicle Types

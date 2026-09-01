@@ -1,12 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Plus, Tag } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { ProtectedAction } from "@/components/rbac/ProtectedAction";
-import { SCOPES } from "@/../cod-shared/rbac/scopes";
-import { useDiscounts } from "@/lib/translations";
+import { Plus } from "lucide-react";
+import { useDiscounts, useNavigation } from "@/lib/translations";
 import { DiscountList } from "./discount-list";
+import { PageHeader } from "@/components/ui/page-header";
 import type { DiscountCode } from "@/actions/discount-codes";
 
 interface Props {
@@ -16,6 +14,7 @@ interface Props {
 
 export function DiscountsView({ discounts, userScopes }: Props) {
   const t = useDiscounts();
+  const nav = useNavigation();
   const router = useRouter();
 
   function handleCreate() {
@@ -23,20 +22,15 @@ export function DiscountsView({ discounts, userScopes }: Props) {
   }
 
   return (
-    <div className="space-y-5 sm:space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <p className="text-sm text-muted-foreground">
-            {discounts.length} {t.codes_count}
-          </p>
-        </div>
-        <ProtectedAction requiredScope={SCOPES.DISCOUNTS_MANAGE} userScopes={userScopes}>
-          <Button onClick={handleCreate} className="gap-2">
-            <Plus className="w-4 h-4" />
-            {t.add_code}
-          </Button>
-        </ProtectedAction>
-      </div>
+    <div className="space-y-6 animate-fade-in">
+      <PageHeader
+        title={nav.sidebar.discounts}
+        primaryAction={{
+          label: t.add_code,
+          onClick: handleCreate,
+          icon: <Plus className="w-4 h-4" />,
+        }}
+      />
 
       <DiscountList
         discounts={discounts}

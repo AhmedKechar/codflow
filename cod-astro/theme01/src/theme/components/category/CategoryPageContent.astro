@@ -4,6 +4,7 @@
 // Allows parent page to stream this after layout renders
 import ProductCard from "@/theme/components/product/ProductCard.astro";
 import { fetchProductsRaw, fetchCategoriesRaw } from "@/core/api/client";
+import { Icon } from "astro-icon/components";
 
 interface Props {
   slug: string;
@@ -24,10 +25,19 @@ if (!category) return Astro.redirect("/");
 const products = await fetchProductsRaw({ categoryId: category.id });
 ---
 
-<div class="max-w-5xl mx-auto px-5 py-8">
+<div class="max-w-6xl mx-auto px-5 py-8">
+  <!-- Breadcrumb -->
+  <nav aria-label={content.breadcrumbHome} class="flex items-center gap-1.5 flex-wrap text-sm mb-4" style="color: var(--clr-text-2)">
+    <a href="/" data-astro-prefetch="hover" class="hover:underline" style="color: var(--clr-text-2)">{content.breadcrumbHome}</a>
+    <span aria-hidden="true" class="text-xs">›</span>
+    <a href="/products" data-astro-prefetch="hover" class="hover:underline" style="color: var(--clr-text-2)">{content.allProductsSection}</a>
+    <span aria-hidden="true" class="text-xs">›</span>
+    <span aria-current="page" style="color: var(--clr-text)">{category.name}</span>
+  </nav>
+
   <div class="mb-8">
-    <h1 class="text-3xl font-black tracking-tight" style="color: var(--clr-text)">{category.name}</h1>
-    <p class="text-[0.8125rem] font-bold uppercase tracking-widest mt-1" style="color: var(--clr-text-2)">
+    <h1 class="text-2xl font-semibold tracking-tight" style="color: var(--clr-text)">{category.name}</h1>
+    <p class="text-[0.8125rem] font-medium mt-1" style="color: var(--clr-text-2)">
       {products.length} {content.productCountLabel}
     </p>
     {category.description && (
@@ -37,12 +47,12 @@ const products = await fetchProductsRaw({ categoryId: category.id });
 
   <!-- Sub-categories (siblings) -->
   {categories.length > 1 && (
-    <div class="flex items-center gap-2.5 overflow-x-auto scrollbar-hide pb-4 mb-8 touch-pan-x">
+    <div class="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-4 mb-8 touch-pan-x">
       <a
         href="/products"
         data-astro-prefetch="hover"
-        class="shrink-0 px-5 py-2.5 rounded-2xl text-[0.875rem] font-black border-2 active:scale-95 shadow-sm"
-        style="border-color: var(--clr-border); background: var(--clr-surface); color: var(--clr-text-2)"
+        class="shrink-0 px-4 py-2 rounded-full text-[0.875rem] font-medium transition-colors bg-surface border border-border"
+        style="color: var(--clr-text-2)"
       >
         {content.allLabel}
       </a>
@@ -51,12 +61,12 @@ const products = await fetchProductsRaw({ categoryId: category.id });
           href={`/category/${cat.slug}`}
           data-astro-prefetch="hover"
           class:list={[
-            "shrink-0 px-5 py-2.5 rounded-2xl text-[0.875rem] font-black border-2 transition-all active:scale-95 shadow-sm",
+            "shrink-0 px-4 py-2 rounded-full text-[0.875rem] font-medium transition-colors",
             cat.slug === slug
-              ? "bg-[var(--clr-primary)] border-[var(--clr-primary)] text-white shadow-lg shadow-[var(--clr-primary)]/20 scale-105 mx-1"
-              : "",
+              ? "bg-primary border border-primary text-white"
+              : "bg-surface border border-border",
           ]}
-          style={cat.slug !== slug ? "border-color: var(--clr-border); background: var(--clr-surface); color: var(--clr-text-2)" : ""}
+          style={cat.slug !== slug ? "color: var(--clr-text-2)" : ""}
         >
           {cat.name}
         </a>
@@ -65,7 +75,7 @@ const products = await fetchProductsRaw({ categoryId: category.id });
   )}
 
   {products.length > 0 ? (
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
       {products.map((p, i) => (
         <ProductCard
           product={p}
@@ -77,8 +87,10 @@ const products = await fetchProductsRaw({ categoryId: category.id });
     </div>
   ) : (
     <div class="py-24 text-center">
-      <div class="w-20 h-20 rounded-full flex items-center justify-center text-4xl mx-auto mb-6" style="background: var(--clr-surface-alt)">🔍</div>
-      <h2 class="text-xl font-black mb-2" style="color: var(--clr-text)">
+      <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style="background: var(--clr-surface-alt); color: var(--clr-text-2)">
+        <Icon name="heroicons:shopping-bag" class="w-8 h-8" />
+      </div>
+      <h2 class="text-xl font-semibold mb-2" style="color: var(--clr-text)">
         {content.noProductsTitle}
       </h2>
       <a

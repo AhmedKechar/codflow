@@ -52,11 +52,11 @@ export function ProfileView({ user }: ProfileViewProps) {
     <div className="max-w-2xl mx-auto space-y-6 animate-fade-in">
 
       {/* ── Profile Info Card ────────────────────────────────────────────── */}
-      <div className="glass-card rounded-2xl sm:rounded-3xl border-border/30 overflow-hidden shadow-sm">
+      <div className="rounded-xl sm:rounded-2xl border border-border bg-card overflow-hidden">
         {/* Header */}
         <div className="flex items-center gap-3 px-6 py-4 sm:px-8 sm:py-5 border-b border-border/10 bg-muted/5">
-          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 shadow-inner">
-            <User size={18} className="text-primary" />
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
+            <User size={18} className="text-muted-foreground" />
           </div>
           <div>
             <h2 className="text-base sm:text-lg font-black text-foreground tracking-tight font-display uppercase">
@@ -73,8 +73,7 @@ export function ProfileView({ user }: ProfileViewProps) {
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6">
             {/* Avatar */}
             <div className="relative shrink-0">
-              <div className="absolute inset-0 bg-primary blur-xl opacity-20" />
-              <div className="relative z-10 w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-[22px] sm:text-[28px] font-black text-primary-foreground shadow-lg shadow-primary/20">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl bg-foreground flex items-center justify-center text-[22px] sm:text-[28px] font-black text-background">
                 {initials}
               </div>
               <div className="absolute -bottom-1 -end-1 w-4 h-4 bg-green-500 border-2 border-background rounded-full z-20 shadow-sm" />
@@ -104,11 +103,11 @@ export function ProfileView({ user }: ProfileViewProps) {
       </div>
 
       {/* ── Security Card ─────────────────────────────────────────── */}
-      <div className="glass-card rounded-2xl sm:rounded-3xl border-border/30 overflow-hidden shadow-sm">
+      <div className="rounded-xl sm:rounded-2xl border border-border bg-card overflow-hidden">
         {/* Header */}
         <div className="flex items-center gap-3 px-6 py-4 sm:px-8 sm:py-5 border-b border-border/10 bg-muted/5">
-          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 shadow-inner">
-            <Lock size={18} className="text-primary" />
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
+            <Lock size={18} className="text-muted-foreground" />
           </div>
           <div>
             <h2 className="text-base sm:text-lg font-black text-foreground tracking-tight font-display uppercase">
@@ -129,7 +128,7 @@ export function ProfileView({ user }: ProfileViewProps) {
             onClick={handleRequestPasswordReset}
             disabled={loading}
             variant="outline"
-            className="w-full h-11 sm:h-12 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-[11px] uppercase tracking-widest"
+            className="w-full h-11 sm:h-12 rounded-lg font-black text-[10px] sm:text-[11px] uppercase tracking-widest"
           >
             <Mail size={14} className="me-2" />
             {loading ? "Sending..." : "Reset Password via Email"}
@@ -153,11 +152,11 @@ function Field({
   return (
     <div className="space-y-1">
       <Label className="text-[9px] sm:text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest flex items-center gap-1.5">
-        <span className="text-primary/40">{icon}</span>
+        <span className="text-muted-foreground/60">{icon}</span>
         {label}
       </Label>
       <p
-        className="text-sm font-bold text-foreground bg-muted/30 border border-border/30 rounded-xl px-3 py-2.5 truncate"
+        className="text-sm font-bold text-foreground bg-muted border border-border rounded-lg px-3 py-2.5 truncate"
         dir={dir}
       >
         {value}
@@ -174,7 +173,7 @@ function BadgeField({
   color: "primary" | "green" | "rose";
 }) {
   const colorCls = {
-    primary: "bg-primary/10 text-primary border-primary/20",
+    primary: "bg-muted text-foreground border-border",
     green:   "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
     rose:    "bg-rose-500/10 text-rose-600 border-rose-500/20",
   }[color];

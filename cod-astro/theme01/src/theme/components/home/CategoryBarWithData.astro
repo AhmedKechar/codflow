@@ -22,8 +22,7 @@ const categories = await fetchCategoriesRaw();
       <a
         href="/products"
         data-astro-prefetch="hover"
-        class="shrink-0 px-5 py-2.5 rounded-2xl text-[0.875rem] font-bold border border-black/[.05] active:scale-95 transition-all shadow-sm"
-          style="background: var(--clr-surface); color: var(--clr-text-2)"
+        class="shrink-0 px-5 py-2.5 rounded-lg text-[0.875rem] font-medium border border-border bg-surface text-text-muted transition-colors hover:text-primary"
         aria-label={content.ariaBrowseAllProducts}
       >
         {navProductsLabel}
@@ -32,8 +31,7 @@ const categories = await fetchCategoriesRaw();
         <a
           href={`/category/${cat.slug}`}
           data-astro-prefetch="hover"
-          class="shrink-0 px-5 py-2.5 rounded-2xl text-[0.875rem] font-bold border border-black/[.05] active:scale-95 transition-all shadow-sm"
-          style="background: var(--clr-surface); color: var(--clr-text-2)"
+          class="shrink-0 px-5 py-2.5 rounded-lg text-[0.875rem] font-medium border border-border bg-surface text-text-muted transition-colors hover:text-primary"
           aria-label={content.ariaBrowseCategoryProducts.replace("{category}", cat.name)}
         >
           {cat.name}

@@ -209,8 +209,8 @@ export function CommuneOverridesDrawer({
         side={isRtl ? "left" : "right"}
         className="w-full sm:max-w-xl flex flex-col p-0"
       >
-        <SheetHeader className="px-5 py-4 border-b border-border/10 bg-muted/5">
-          <SheetTitle className="text-[11px] font-black uppercase tracking-widest text-muted-foreground/50">
+        <SheetHeader className="px-5 py-4 border-b border-border/40 bg-muted/5">
+          <SheetTitle className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/50">
             {sp?.communes_drawer_title ?? "Commune overrides"}
           </SheetTitle>
           <div className="flex items-center justify-between gap-3 mt-1">
@@ -218,7 +218,7 @@ export function CommuneOverridesDrawer({
               {displayName}
             </p>
             {overriddenCount > 0 && (
-              <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg bg-primary/10 text-primary border border-primary/20 shrink-0">
+              <span className="text-[10px] font-semibold uppercase tracking-widest px-2.5 py-1 rounded-lg bg-primary/10 text-primary border border-primary/20 shrink-0">
                 {(sp?.commune_overrides_count ?? "{{count}} overridden").replace("{{count}}", String(overriddenCount))}
               </span>
             )}
@@ -228,14 +228,14 @@ export function CommuneOverridesDrawer({
           </SheetDescription>
 
           <div className="mt-3 grid grid-cols-2 gap-2 text-[10px] font-bold">
-            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/20 border border-border/20">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/20 border border-border">
               <Home size={11} className="text-muted-foreground/50" />
               <span className="text-muted-foreground/60 uppercase tracking-widest">{sp?.home_placeholder ?? "Home"}</span>
               <span className="ms-auto tabular-nums text-foreground">
                 {wilayaDefaults.homeEnabled ? `${wilayaDefaults.homePrice}` : "—"}
               </span>
             </div>
-            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/20 border border-border/20">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/20 border border-border">
               <Store size={11} className="text-muted-foreground/50" />
               <span className="text-muted-foreground/60 uppercase tracking-widest">{sp?.desk_placeholder ?? "Desk"}</span>
               <span className="ms-auto tabular-nums text-foreground">
@@ -250,7 +250,7 @@ export function CommuneOverridesDrawer({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={sp?.commune_search_placeholder ?? "Search commune…"}
-              className="h-10 ps-10 bg-muted/20 border-border/30 rounded-xl text-sm font-bold"
+              className="h-10 ps-10 bg-muted/20 border-border rounded-xl text-sm font-bold"
               dir={isRtl ? "rtl" : "ltr"}
             />
           </div>
@@ -258,18 +258,18 @@ export function CommuneOverridesDrawer({
 
         <div className="flex-1 overflow-y-auto">
           {loading ? (
-            <div className="flex items-center justify-center py-20 text-[11px] font-black uppercase tracking-widest text-muted-foreground/40">
+            <div className="flex items-center justify-center py-20 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/40">
               {sp?.communes_loading ?? "Loading communes…"}
             </div>
           ) : filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 opacity-30">
               <Info size={24} className="mb-2" />
-              <p className="text-[10px] font-black uppercase tracking-widest">
+              <p className="text-[10px] font-semibold uppercase tracking-widest">
                 {sp?.communes_empty ?? "No communes"}
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-border/5">
+            <div className="divide-y divide-border/20">
               {filtered.map((c) => {
                 const draft = drafts[c.communeId] ?? {
                   homePrice: "",
@@ -286,7 +286,7 @@ export function CommuneOverridesDrawer({
                 const isDeskOverriddenToggle = draft.stopDeskEnabled != null;
 
                 return (
-                  <div key={c.communeId} className={cn("px-5 py-4 space-y-3", c.hasOverride && "bg-primary/[0.02]")}>
+                  <div key={c.communeId} className={cn("px-5 py-4 space-y-3", c.hasOverride && "bg-primary/5")}>
                     <div className="flex items-center justify-between gap-3">
                       <div className="min-w-0">
                         <p className="font-bold text-[13px] text-foreground truncate" dir="rtl">
@@ -302,14 +302,14 @@ export function CommuneOverridesDrawer({
                           type="button"
                           onClick={() => handleReset(c.communeId)}
                           disabled={saving}
-                          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest bg-muted/30 text-muted-foreground border border-border/30 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/20 transition-all active:scale-95 disabled:opacity-50"
+                          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[9px] font-semibold uppercase tracking-widest bg-muted/30 text-muted-foreground border border-border hover:bg-destructive/10 hover:text-destructive hover:border-destructive/20 transition-all active:scale-95 disabled:opacity-50"
                           title={sp?.commune_reset_override ?? "Reset"}
                         >
                           <RotateCcw size={10} />
                           {sp?.commune_reset_override ?? "Reset"}
                         </button>
                       ) : (
-                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/30 px-2.5 py-1.5">
+                        <span className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground/30 px-2.5 py-1.5">
                           {sp?.commune_inherits ?? "Inherits"}
                         </span>
                       )}
@@ -328,10 +328,10 @@ export function CommuneOverridesDrawer({
                             })
                           }
                           className={cn(
-                            "w-full h-7 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all flex items-center justify-center gap-1.5",
+                            "w-full h-7 rounded-lg text-[9px] font-semibold uppercase tracking-widest border transition-all flex items-center justify-center gap-1.5",
                             homeToggle
                               ? "bg-primary/10 border-primary/20 text-primary"
-                              : "bg-muted/20 border-border/20 text-muted-foreground/40",
+                              : "bg-muted/20 border-border text-muted-foreground/40",
                             isHomeOverriddenToggle && "ring-1 ring-primary/30",
                           )}
                         >
@@ -344,7 +344,7 @@ export function CommuneOverridesDrawer({
                           value={draft.homePrice}
                           onChange={(e) => updateDraft(c.communeId, { homePrice: e.target.value })}
                           placeholder={`${sp?.commune_inherit_placeholder ?? "Inherit"} (${wilayaDefaults.homePrice})`}
-                          className="h-8 bg-muted/30 border-border/30 rounded-lg text-xs font-black text-center tabular-nums"
+                          className="h-8 bg-muted/30 border-border rounded-lg text-xs font-semibold text-center tabular-nums"
                         />
                       </div>
 
@@ -360,10 +360,10 @@ export function CommuneOverridesDrawer({
                             })
                           }
                           className={cn(
-                            "w-full h-7 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all flex items-center justify-center gap-1.5",
+                            "w-full h-7 rounded-lg text-[9px] font-semibold uppercase tracking-widest border transition-all flex items-center justify-center gap-1.5",
                             deskToggle
                               ? "bg-primary/10 border-primary/20 text-primary"
-                              : "bg-muted/20 border-border/20 text-muted-foreground/40",
+                              : "bg-muted/20 border-border text-muted-foreground/40",
                             isDeskOverriddenToggle && "ring-1 ring-primary/30",
                           )}
                         >
@@ -376,7 +376,7 @@ export function CommuneOverridesDrawer({
                           value={draft.stopDeskPrice}
                           onChange={(e) => updateDraft(c.communeId, { stopDeskPrice: e.target.value })}
                           placeholder={`${sp?.commune_inherit_placeholder ?? "Inherit"} (${wilayaDefaults.stopDeskPrice})`}
-                          className="h-8 bg-muted/30 border-border/30 rounded-lg text-xs font-black text-center tabular-nums"
+                          className="h-8 bg-muted/30 border-border rounded-lg text-xs font-semibold text-center tabular-nums"
                         />
                       </div>
                     </div>
@@ -386,7 +386,7 @@ export function CommuneOverridesDrawer({
                         size="sm"
                         onClick={() => handleSave(c.communeId)}
                         disabled={saving}
-                        className="h-8 px-4 rounded-lg font-black text-[10px] uppercase tracking-widest active:scale-95"
+                        className="h-8 px-4 rounded-lg font-semibold text-[10px] uppercase tracking-widest active:scale-95"
                       >
                         {saving ? (sp?.commune_saving ?? "Saving…") : "Save"}
                       </Button>

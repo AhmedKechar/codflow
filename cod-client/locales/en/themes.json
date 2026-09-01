@@ -131,6 +131,16 @@
   "pages_announcement": "Announcement Bar",
   "pages_announcement_hint": "The promo bar at the very top of the store",
   "pages_announcement_bar": "Show announcement bar",
+  "design_style": "Design Style",
+  "design_style_hint": "Choose a preset or customize manually",
+  "border_radius": "Border Radius",
+  "shadow": "Shadow",
+  "border_radius_rounded": "Rounded",
+  "border_radius_sharp": "Sharp",
+  "border_radius_minimal": "Minimal",
+  "shadow_soft": "Soft",
+  "shadow_medium": "Medium",
+  "shadow_strong": "Strong",
   "themes": {
     "theme01": {
       "name": "Classic",

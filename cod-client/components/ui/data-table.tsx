@@ -164,10 +164,10 @@ export function DataTable<T extends Record<string, any>>({
   if (loading) {
     return (
       <div className="space-y-3">
-        <div className="h-10 bg-muted/60 animate-pulse rounded-lg" />
-        <div className="bg-card rounded-xl border border-border/60 overflow-hidden shadow-[0_2px_8px_0_rgb(0_0_0/0.06)]">
+        <div className="h-10 bg-muted/60 animate-pulse rounded-md" />
+        <div className="bg-card rounded-lg border border-border overflow-hidden">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="h-[52px] bg-muted/30 animate-pulse border-b border-border/30 last:border-0" />
+            <div key={i} className="h-[52px] bg-muted/40 animate-pulse border-b border-border/40 last:border-0" />
           ))}
         </div>
       </div>
@@ -190,7 +190,7 @@ export function DataTable<T extends Record<string, any>>({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className={cn(
-                  "bg-card border-border/60 shadow-xs h-10",
+                  "bg-card h-10",
                   dir === "rtl" ? "pr-11" : "pl-11"
                 )}
                 dir={dir}
@@ -206,7 +206,7 @@ export function DataTable<T extends Record<string, any>>({
                 setActiveFilters(prev => ({ ...prev, [filter.key]: value || "" }))
               }
             >
-              <SelectTrigger className="w-full sm:w-48 bg-card border-border/60 shadow-xs h-10">
+              <SelectTrigger className="w-full sm:w-48 bg-card h-10">
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                   <Filter className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
                   <span className="truncate text-[13px] font-medium">
@@ -237,16 +237,15 @@ export function DataTable<T extends Record<string, any>>({
           emptyState ? (
             emptyState
           ) : (
-            <div className="p-14 text-center bg-card rounded-xl border border-border/50 shadow-[0_2px_8px_0_rgb(0_0_0/0.05)]">
-               <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/40">
+            <div className="p-14 text-center bg-card rounded-lg border border-border">
+               <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/50">
                   {emptyMessage}
                </div>
             </div>
           )
         ) : (
           paginatedData.map((row, index) => (
-            <div key={index} className="group relative bg-card rounded-xl border border-border/50 p-5 shadow-[0_2px_6px_0_rgb(0_0_0/0.05)] hover:shadow-[0_4px_16px_0_rgb(0_0_0/0.08)] transition-all duration-200 active:scale-[0.99]">
-               <div className="absolute inset-0 bg-primary/0 group-active:bg-primary/3 rounded-xl transition-colors pointer-events-none" />
+            <div key={index} className="group relative bg-card rounded-lg border border-border p-5 transition-colors">
                
                {renderMobileCard ? (
                  renderMobileCard(row)
@@ -316,16 +315,16 @@ export function DataTable<T extends Record<string, any>>({
       </div>
 
       {/* Desktop Table View (hidden on mobile) */}
-      <div className="hidden md:block glass-card rounded-2xl border-border/30 overflow-hidden shadow-sm">
+      <div className="hidden md:block bg-card rounded-lg border border-border overflow-hidden">
         <div className="overflow-x-auto scrollbar-none">
           <table className="w-full border-collapse" dir={dir}>
             <thead>
-              <tr className="bg-muted/40 border-b border-border/60">
+              <tr className="bg-muted/40 border-b border-border">
                 {columns.map((column) => (
                   <th
                     key={column.key}
                     className={cn(
-                      "h-11 px-5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70 whitespace-nowrap",
+                      "h-11 px-5 text-[13px] font-semibold text-muted-foreground whitespace-nowrap",
                       dir === "rtl" ? "text-right" : "text-left",
                       column.className,
                       column.tabletHidden && "hidden lg:table-cell"
@@ -337,7 +336,7 @@ export function DataTable<T extends Record<string, any>>({
                         onClick={() => handleSort(column.key)}
                       >
                         {column.label}
-                        <span className="text-muted-foreground/30 transition-colors group-hover:text-muted-foreground/60">
+                        <span className="text-muted-foreground/40 transition-colors group-hover:text-muted-foreground/70">
                           {getSortIcon(column.key)}
                         </span>
                       </button>
@@ -348,7 +347,7 @@ export function DataTable<T extends Record<string, any>>({
                 ))}
                 {actions.length > 0 && (
                   <th className={cn(
-                    "h-11 px-5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70 w-16",
+                    "h-11 px-5 text-[13px] font-semibold text-muted-foreground w-16",
                     dir === "rtl" ? "text-left" : "text-right"
                   )}>
                     {common.table.actions}
@@ -366,7 +365,7 @@ export function DataTable<T extends Record<string, any>>({
                     {emptyState ? (
                       <div className="py-10">{emptyState}</div>
                     ) : (
-                      <div className="text-center text-muted-foreground/40 font-semibold uppercase tracking-wider text-[11px] py-10">
+                      <div className="text-center text-muted-foreground/50 font-medium text-[13px] py-10">
                         {emptyMessage}
                       </div>
                     )}
@@ -376,7 +375,7 @@ export function DataTable<T extends Record<string, any>>({
                 paginatedData.map((row, index) => (
                   <tr
                     key={index}
-                    className="border-b border-border/30 last:border-0 hover:bg-muted/25 transition-colors"
+                    className="border-b border-border/40 last:border-0 hover:bg-muted transition-colors"
                   >
                     {columns.map((column) => (
                       <td
@@ -477,10 +476,10 @@ export function DataTable<T extends Record<string, any>>({
               {dir === "rtl" ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
             </Button>
 
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-card rounded-lg border border-border/60 shadow-xs">
-              <span className="text-[11px] font-medium text-muted-foreground/60">{common.table.page}</span>
-              <span className="text-[13px] font-bold text-primary">{currentPage}</span>
-              <span className="text-[11px] font-medium text-muted-foreground/60">{common.table.of} {totalPages}</span>
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-card rounded-md border border-border">
+              <span className="text-xs text-muted-foreground">{common.table.page}</span>
+              <span className="text-sm font-semibold text-foreground tabular-nums">{currentPage}</span>
+              <span className="text-xs text-muted-foreground">{common.table.of} {totalPages}</span>
             </div>
 
             <Button

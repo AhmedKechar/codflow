@@ -142,7 +142,7 @@ export function CompanyCredentialsPage({ providerCode, existingCompany }: Props)
         {/* Back */}
         <button
           onClick={() => router.push(`/delivery/companies/${providerCode}`)}
-          className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-muted-foreground/40 hover:text-primary transition-colors group"
+          className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/40 hover:text-primary transition-colors group"
         >
           <ArrowRight
             size={13}
@@ -156,34 +156,34 @@ export function CompanyCredentialsPage({ providerCode, existingCompany }: Props)
 
         {/* Hero header — matches profile page style */}
         <div className={cn(
-          "glass-card rounded-2xl border-border/30 overflow-hidden",
-          isConnected ? "border-emerald-500/10" : "border-primary/10"
+          "bg-card rounded-lg border-border overflow-hidden",
+          isConnected ? "border-success/20" : "border-primary/10"
         )}>
           <div className={cn(
             "h-[3px]",
             isConnected
-              ? "bg-gradient-to-r from-emerald-500/60 via-emerald-500/20 to-transparent"
-              : "bg-gradient-to-r from-primary/60 via-primary/20 to-transparent"
+              ? "bg-border"
+              : "bg-border"
           )} />
           <div className="p-6 flex items-center gap-5">
             <div className={cn(
-              "w-14 h-14 rounded-2xl flex items-center justify-center shrink-0",
-              isConnected ? "bg-emerald-500/10" : "bg-primary/10"
+              "w-14 h-14 rounded-lg flex items-center justify-center shrink-0",
+              isConnected ? "bg-success/10" : "bg-primary/10"
             )}>
               {isConnected
-                ? <ShieldCheck size={24} className="text-emerald-500" />
+                ? <ShieldCheck size={24} className="text-success" />
                 : <Key size={24} className="text-primary" />}
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3 flex-wrap">
-                <h1 className="text-xl font-black text-foreground tracking-tight">
+                <h1 className="text-xl font-semibold text-foreground tracking-tight">
                   {isConnected ? t.credentials_dialog.title_configure : t.credentials_dialog.title_connect}
                 </h1>
                 <span className={cn(
-                  "inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full border",
+                  "inline-flex items-center gap-1.5 text-[9px] font-semibold uppercase tracking-widest px-2.5 py-1 rounded-full border",
                   isConnected
-                    ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
-                    : "bg-muted/40 text-muted-foreground/50 border-border/30"
+                    ? "bg-success/10 text-success border-success/30"
+                    : "bg-muted/40 text-muted-foreground/50 border-border"
                 )}>
                   {isConnected ? <CheckCircle2 size={8} /> : <Circle size={8} />}
                   {isConnected ? t.providers?.connected ?? "Connected" : t.providers?.not_connected ?? "Not connected"}
@@ -207,14 +207,14 @@ export function CompanyCredentialsPage({ providerCode, existingCompany }: Props)
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
           {/* Form */}
-          <div className="lg:col-span-2 glass-card rounded-2xl border-border/30 p-6 space-y-5">
-            <h2 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50">
+          <div className="lg:col-span-2 bg-card rounded-lg border-border p-6 space-y-5">
+            <h2 className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/50">
               {t.credentials_dialog.api_credentials ?? "API Credentials"}
             </h2>
 
             {/* API Token */}
             <div className="space-y-2">
-              <Label className="text-[11px] font-black text-foreground/70 uppercase tracking-wider">
+              <Label className="text-[11px] font-semibold text-foreground/70 uppercase tracking-wider">
                 {config.tokenLabel ?? (config.requiresEndpoint
                   ? t.credentials_dialog.ecotrack_token
                   : t.credentials_dialog.api_token_label)}
@@ -224,7 +224,7 @@ export function CompanyCredentialsPage({ providerCode, existingCompany }: Props)
                 onChange={(e) => setApiToken(e.target.value)}
                 type="password"
                 placeholder={isConnected ? "••••••••••••••••" : (config.tokenLabel ?? "API Token")}
-                className="h-12 bg-muted/20 border-border/30 rounded-xl px-4 text-sm font-bold font-mono tracking-widest focus:border-primary/30 transition-all"
+                className="h-12 bg-muted/20 border-border rounded-xl px-4 text-sm font-bold font-mono tracking-widest focus:border-primary/30 transition-all"
                 dir="ltr"
                 disabled={busy}
                 autoComplete="off"
@@ -239,7 +239,7 @@ export function CompanyCredentialsPage({ providerCode, existingCompany }: Props)
             {/* User GUID */}
             {config.requiresUserGuid && (
               <div className="space-y-2">
-                <Label className="text-[11px] font-black text-foreground/70 uppercase tracking-wider">
+                <Label className="text-[11px] font-semibold text-foreground/70 uppercase tracking-wider">
                   {config.guidLabel ?? (config.code === "zr_express"
                     ? t.credentials_dialog.tenant_id
                     : t.credentials_dialog.user_guid_label)}
@@ -248,7 +248,7 @@ export function CompanyCredentialsPage({ providerCode, existingCompany }: Props)
                   value={apiUserGuid}
                   onChange={(e) => setApiUserGuid(e.target.value)}
                   placeholder={config.guidLabel ?? "User ID / GUID"}
-                  className="h-12 bg-muted/20 border-border/30 rounded-xl px-4 text-sm font-bold font-mono tracking-wider focus:border-primary/30 transition-all"
+                  className="h-12 bg-muted/20 border-border rounded-xl px-4 text-sm font-bold font-mono tracking-wider focus:border-primary/30 transition-all"
                   dir="ltr"
                   disabled={busy}
                   autoComplete="off"
@@ -264,14 +264,14 @@ export function CompanyCredentialsPage({ providerCode, existingCompany }: Props)
             {/* From Wilaya */}
             {config.requiresFromWilaya && (
               <div className="space-y-2">
-                <Label className="text-[11px] font-black text-foreground/70 uppercase tracking-wider">
+                <Label className="text-[11px] font-semibold text-foreground/70 uppercase tracking-wider">
                   {t.credentials_dialog.from_wilaya_label}
                 </Label>
                 <Input
                   value={fromWilayaName}
                   onChange={(e) => setFromWilayaName(e.target.value)}
                   placeholder={t.credentials_dialog.wilaya_placeholder}
-                  className="h-12 bg-muted/20 border-border/30 rounded-xl px-4 text-sm font-bold focus:border-primary/30 transition-all"
+                  className="h-12 bg-muted/20 border-border rounded-xl px-4 text-sm font-bold focus:border-primary/30 transition-all"
                   dir="ltr"
                   disabled={busy}
                   autoComplete="off"
@@ -285,14 +285,14 @@ export function CompanyCredentialsPage({ providerCode, existingCompany }: Props)
             {/* Endpoint */}
             {config.requiresEndpoint && (
               <div className="space-y-2">
-                <Label className="text-[11px] font-black text-foreground/70 uppercase tracking-wider">
+                <Label className="text-[11px] font-semibold text-foreground/70 uppercase tracking-wider">
                   {config.endpointLabel ?? t.credentials_dialog.ecotrack_endpoint}
                 </Label>
                 <Input
                   value={apiEndpoint}
                   onChange={(e) => setApiEndpoint(e.target.value)}
                   placeholder={config.endpointDefault ?? "https://"}
-                  className="h-12 bg-muted/20 border-border/30 rounded-xl px-4 text-sm font-bold font-mono tracking-wider focus:border-primary/30 transition-all"
+                  className="h-12 bg-muted/20 border-border rounded-xl px-4 text-sm font-bold font-mono tracking-wider focus:border-primary/30 transition-all"
                   dir="ltr"
                   disabled={busy}
                   autoComplete="off"
@@ -310,14 +310,14 @@ export function CompanyCredentialsPage({ providerCode, existingCompany }: Props)
           <div className="lg:col-span-1 flex flex-col gap-4">
 
             {/* Save / Cancel */}
-            <div className="glass-card rounded-2xl border-border/30 p-5 space-y-3">
-              <h2 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 mb-1">
+            <div className="bg-card rounded-lg border-border p-5 space-y-3">
+              <h2 className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/50 mb-1">
                 {t.credentials_dialog.actions ?? "Actions"}
               </h2>
               <Button
                 onClick={handleSave}
                 disabled={busy}
-                className="w-full h-12 rounded-xl font-black text-[11px] uppercase tracking-[0.2em]"
+                className="w-full h-12 rounded-xl font-semibold text-[11px] uppercase tracking-[0.2em]"
               >
                 {loading
                   ? t.credentials_dialog.saving
@@ -329,7 +329,7 @@ export function CompanyCredentialsPage({ providerCode, existingCompany }: Props)
                 variant="outline"
                 onClick={() => router.push(`/delivery/companies/${providerCode}`)}
                 disabled={busy}
-                className="w-full h-12 rounded-xl border-border/30 font-black text-[11px] uppercase tracking-widest"
+                className="w-full h-12 rounded-xl border-border font-semibold text-[11px] uppercase tracking-widest"
               >
                 {t.credentials_dialog.cancel}
               </Button>
@@ -339,7 +339,7 @@ export function CompanyCredentialsPage({ providerCode, existingCompany }: Props)
                   variant="ghost"
                   onClick={handleDisconnect}
                   disabled={busy}
-                  className="w-full h-12 rounded-xl text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 font-black text-[11px] uppercase tracking-widest"
+                  className="w-full h-12 rounded-xl text-destructive hover:text-destructive hover:bg-destructive/10 font-semibold text-[11px] uppercase tracking-widest"
                 >
                   <Trash2 size={13} className="me-2" />
                   {disconnecting ? t.credentials_dialog.saving : t.credentials_dialog.disconnect}
@@ -348,10 +348,10 @@ export function CompanyCredentialsPage({ providerCode, existingCompany }: Props)
             </div>
 
             {/* Security note */}
-            <div className="glass-card rounded-2xl border-border/30 p-5 space-y-2">
+            <div className="bg-card rounded-lg border-border p-5 space-y-2">
               <div className="flex items-center gap-2 mb-2">
                 <ShieldCheck size={14} className="text-primary/50 shrink-0" />
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50">{t.credentials_dialog.security ?? "Security"}</p>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/50">{t.credentials_dialog.security ?? "Security"}</p>
               </div>
               <p className="text-[11px] font-medium text-muted-foreground/50 leading-relaxed">
                 {t.credentials_dialog.security_note ?? "Credentials are stored encrypted and never returned by the API. Re-enter them each time you update."}

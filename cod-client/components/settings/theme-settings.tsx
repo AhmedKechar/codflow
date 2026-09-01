@@ -11,9 +11,7 @@ import {
   Headphones,
   Award,
   Banknote,
-  Loader2,
   Check,
-  ChevronRight,
 } from "lucide-react";
 import { useThemes } from "@/lib/translations";
 import type {
@@ -22,7 +20,6 @@ import type {
   OrderFormConfig,
 } from "@/actions/stores";
 import { Section, ColorField, FieldRow, inputCls } from "./shared-fields";
-import { updateThemeColors } from "@/actions/themes";
 import { AVAILABLE_THEMES, type ThemeInfo } from "@/lib/themes-data";
 import { toast } from "sonner";
 
@@ -82,10 +79,6 @@ export function ThemeSettings({ storeConfig, onSave }: ThemeSettingsProps) {
 
   const handleThemeSelect = (theme: ThemeInfo) => {
     setSelectedThemeId(theme.id);
-    setPrimaryColor(theme.primaryColor);
-    setAccentColor(theme.accentColor);
-    setBgColor(theme.bgColor);
-    setFontFamily(theme.fontFamily);
   };
 
   const handleSave = () => {

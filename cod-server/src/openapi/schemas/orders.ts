@@ -21,14 +21,14 @@ export const OrderStatusEnum = z.enum([
   "new",
   "confirmed",
   "unreachable",
-  "preparing",
-  "ready",
-  "assigned",
-  "dispatched",
-  "out_for_delivery",
+  "busy",
+  "postponed",
+  "shipped",
   "delivered",
-  "returned",
   "cancelled",
+  "fake",
+  "duplicate",
+  "returned",
 ]);
 
 export const DeliveryMethodEnum = z.enum(["unassigned", "driver", "company"]);

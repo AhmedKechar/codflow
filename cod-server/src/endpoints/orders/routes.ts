@@ -16,6 +16,7 @@ import * as shipmentOps from "./shipment-operations";
 
 import {
   createOrderSchema,
+  updateOrderSchema,
   updateOrderStatusSchema,
   assignDriverSchema,
   returnOrderProductSchema,
@@ -129,6 +130,38 @@ const deleteOrderRoute = defineRoute({
   handler: handlers.deleteOrder,
 });
 
+const updateOrderRoute = defineRoute({
+  method: "patch",
+  path: "/{id}",
+  auth: { scope: SCOPES.ORDERS_UPDATE },
+  tags: ["Orders"],
+  summary: "Edit order",
+  description: `Updates an existing order. All fields are optional — only changed fields are applied.
+
+**Editable statuses:** \`new\`, \`confirmed\`, \`busy\`, \`unreachable\`
+
+**Business rules:**
+- Products can be changed — inventory is restored for old products and deducted for new ones
+- \`codAmount\` is automatically recalculated as \`price + deliveryFee\`
+- Cannot edit orders in terminal statuses (\`delivered\`, \`cancelled\`, \`returned\`, \`fake\`, \`duplicate\`)`,
+  operationId: "updateOrder",
+  params: IdParamSchema,
+  body: updateOrderSchema,
+  responses: {
+    200: {
+      description: "Order updated",
+      content: jsonContent(SuccessWithMessageSchema(OrderDetailSchema)),
+    },
+    404: {
+      description: "Order not found",
+    },
+    422: {
+      description: "Order in non-editable status",
+    },
+  },
+  handler: handlers.updateOrder,
+});
+
 // ─── Lifecycle ────────────────────────────────────────────────────────────────
 
 const updateStatusRoute = defineRoute({
@@ -139,12 +172,14 @@ const updateStatusRoute = defineRoute({
   summary: "Update order status",
   description: `Updates the order status and appends a record to status history.
 
-**Main flow:** \`new\` → \`confirmed\` → \`preparing\` → \`ready\` → (\`assigned\` | \`dispatched\`) → \`out_for_delivery\` → \`delivered\` / \`returned\`
+**Main flow:** \`new\` → \`confirmed\` → \`shipped\` → \`delivered\` / \`returned\`
 
 **Branching statuses:**
 - \`unreachable\`: customer didn't answer — parks the order. Can retry back to \`confirmed\` or cancel
+- \`busy\`: customer busy — can retry back to \`confirmed\` or cancel
+- \`postponed\`: delivery postponed — can retry to \`confirmed\` or \`shipped\`
 
-**Transition guard:** Only forward moves in the flow are accepted. Invalid moves (e.g. \`delivered → new\`, \`cancelled → preparing\`) return \`400 INVALID_STATUS_TRANSITION\` with the list of allowed next statuses.
+**Transition guard:** Only forward moves in the flow are accepted. Invalid moves (e.g. \`delivered → new\`, \`cancelled → confirmed\`) return \`400 INVALID_STATUS_TRANSITION\` with the list of allowed next statuses.
 
 **Side effects:**
 - **delivered**: sets \`deliveryTime\`; increments driver's \`totalDelivered\` and \`totalEarnings\` if assigned
@@ -177,7 +212,7 @@ const assignDriverRoute = defineRoute({
 **Business rules — returns 422 if:**
 - The order already has a tracking number (dispatched to a company)
 - The order's \`deliveryMethod\` is \`"company"\`
-- The order status is \`out_for_delivery\`, \`delivered\`, \`returned\`, or \`cancelled\`
+- The order status is \`shipped\`, \`delivered\`, \`returned\`, or \`cancelled\`
 - The driver does not exist (404)`,
   operationId: "assignDriver",
   params: IdParamSchema,
@@ -201,11 +236,11 @@ const unassignDriverRoute = defineRoute({
   auth: { scope: SCOPES.ORDERS_ASSIGN },
   tags: ["Orders"],
   summary: "Unassign driver from order",
-  description: `Removes the driver currently assigned to an order. Clears driverId and driverFee, resets deliveryMethod to "unassigned", and rolls the status back from "assigned" → "ready" when applicable.
+  description: `Removes the driver currently assigned to an order. Clears driverId and driverFee, resets deliveryMethod to "unassigned".
 
 **Rejected when:**
 - order has no driver assigned
-- order has already progressed past dispatch (out_for_delivery, delivered, returned, cancelled) — at that point clearing the driver would erase payroll/handoff history.`,
+- order has already progressed past dispatch (shipped, delivered, returned, cancelled) — at that point clearing the driver would erase payroll/handoff history.`,
   operationId: "unassignDriver",
   params: IdParamSchema,
   responses: {
@@ -302,7 +337,7 @@ const dispatchToCompanyRoute = defineRoute({
 1. Validates business rules (not already dispatched, wilaya + commune set, station code for stop-desk)
 2. Calls the provider adapter to create the shipment
 3. Records the tracking number on the order
-4. Auto-validates where supported (NOEST) — advances status to out_for_delivery; otherwise status becomes dispatched
+4. Auto-validates where supported (NOEST) — advances status to shipped; otherwise status becomes shipped
 5. Logs the API call for audit
 
 **Body fields are all optional** — they override values stored on the order.`,
@@ -348,7 +383,7 @@ const validateShipmentRoute = defineRoute({
   auth: { scope: SCOPES.DELIVERY_DISPATCH },
   tags: ["Orders"],
   summary: "Manually validate a dispatched shipment",
-  description: `Manually validate a dispatched order at the carrier API. Only meaningful when company.auto_validate=false (e.g. Packers). Advances status dispatched → out_for_delivery.`,
+  description: `Manually validate a dispatched order at the carrier API. Only meaningful when company.auto_validate=false (e.g. Packers). Advances status shipped → shipped (confirmation).`,
   operationId: "validateShipmentManually",
   params: IdParamSchema,
   responses: {
@@ -367,7 +402,7 @@ const validateShipmentRoute = defineRoute({
     },
     422: {
       description:
-        "Order not in dispatched state (INVALID_STATUS_TRANSITION), inactive company, unsupported provider, or external API error (502 EXTERNAL_API_ERROR)",
+        "Order not in shipped state (INVALID_STATUS_TRANSITION), inactive company, unsupported provider, or external API error (502 EXTERNAL_API_ERROR)",
     },
     500: {
       description: "External API error",
@@ -388,7 +423,7 @@ const updateShipmentRoute = defineRoute({
 
 All fields are optional — omitted fields use current order values. EcoTrack requires ALL fields on every update call, so the server pre-fills from the order record and applies overrides.
 
-**Update restrictions:** EcoTrack-family orders can only be updated before validation (status \`dispatched\`). NOEST rejects after validation; Yalidine after label print. ZR Express addresses parcels by internal parcel UUID.
+**Update restrictions:** EcoTrack-family orders can only be updated before validation (status \`confirmed\`). NOEST rejects after validation; Yalidine after label print. ZR Express addresses parcels by internal parcel UUID.
 
 **Returns 422** when there is no tracking number, the provider doesn't support updates, or the EcoTrack pre-validation guard trips. External carrier failures surface as 502 EXTERNAL_API_ERROR.`,
   operationId: "updateShipmentInfo",
@@ -437,7 +472,7 @@ const cancelShipmentRoute = defineRoute({
   auth: { scope: SCOPES.DELIVERY_DISPATCH },
   tags: ["Orders"],
   summary: "Cancel shipment at carrier",
-  description: `Deletes/cancels a shipment at the carrier API (before validation only). On success: clears the tracking number from the order and resets status to "ready" so it can be re-dispatched.
+  description: `Deletes/cancels a shipment at the carrier API (before validation only). On success: clears the tracking number from the order and resets status to "confirmed" so it can be re-dispatched.
 
 Uses POST (not DELETE) to avoid routing ambiguity with DELETE /orders/{id}.
 
@@ -446,7 +481,7 @@ Provider support: ecotrack ✅ | others ❌ OPERATION_NOT_SUPPORTED.`,
   params: IdParamSchema,
   responses: {
     200: {
-      description: "Shipment cancelled — order reset to ready",
+      description: "Shipment cancelled — order reset to confirmed",
       content: jsonContent(MessageResponseSchema),
     },
     422: {
@@ -599,6 +634,7 @@ router.openapi(bulkDispatchRoute.route, bulkDispatchRoute.handler);
 
 router.openapi(getOrderRoute.route, getOrderRoute.handler);
 router.openapi(createOrderRoute.route, createOrderRoute.handler);
+router.openapi(updateOrderRoute.route, updateOrderRoute.handler);
 router.openapi(deleteOrderRoute.route, deleteOrderRoute.handler);
 router.openapi(updateStatusRoute.route, updateStatusRoute.handler);
 router.openapi(assignDriverRoute.route, assignDriverRoute.handler);

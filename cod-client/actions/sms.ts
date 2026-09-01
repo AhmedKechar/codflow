@@ -52,7 +52,7 @@ export async function listSmsMessages(filters: SmsFilters = {}): Promise<{ messa
     if (filters.offset) params.set("offset", String(filters.offset));
 
     const query = params.toString();
-    const response = await apiClient.get<ApiResponse<SmsMessage[]>>(
+    const response = await apiClient.getSilent<ApiResponse<SmsMessage[]>>(
       `/api/sms/messages${query ? `?${query}` : ""}`,
       apiKey,
     );
@@ -61,12 +61,8 @@ export async function listSmsMessages(filters: SmsFilters = {}): Promise<{ messa
       messages: response.data ?? [],
       count: response.count ?? 0,
     };
-  } catch (error) {
-    if (error instanceof ApiClientError && error.code) {
-      const locale = await getLocale();
-      throw new Error(mapError(error.code, locale, error.context));
-    }
-    throw error;
+  } catch {
+    return { messages: [], count: 0 };
   }
 }
 

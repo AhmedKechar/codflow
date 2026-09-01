@@ -23,21 +23,21 @@ import type { Order, OrderStatus } from "@/types/order.types";
 const STATUS_LABELS: Record<Locale, Record<string, string>> = {
   en: {
     new: "New", confirmed: "Confirmed", unreachable: "Unreachable",
-    preparing: "Preparing", ready: "Ready", assigned: "Assigned",
-    dispatched: "Dispatched", out_for_delivery: "Out for Delivery",
+    busy: "Busy", postponed: "Postponed", shipped: "Shipped",
     delivered: "Delivered", returned: "Returned", cancelled: "Cancelled",
+    fake: "Fake", duplicate: "Duplicate",
   },
   ar: {
     new: "جديد", confirmed: "تم التأكيد", unreachable: "لا يرد",
-    preparing: "قيد التحضير", ready: "جاهز", assigned: "تم التعيين",
-    dispatched: "تم الإرسال", out_for_delivery: "قيد التوصيل",
+    busy: "الخط مشغول", postponed: "مؤجل", shipped: "تم الشحن",
     delivered: "تم التسليم", returned: "مرتجع", cancelled: "ملغي",
+    fake: "مزيف", duplicate: "مكرر",
   },
   fr: {
     new: "Nouveau", confirmed: "Confirmé", unreachable: "Injoignable",
-    preparing: "En préparation", ready: "Prêt", assigned: "Assigné",
-    dispatched: "Expédié", out_for_delivery: "En cours de livraison",
+    busy: "Occupé", postponed: "Reporté", shipped: "Expédié",
     delivered: "Livré", returned: "Retourné", cancelled: "Annulé",
+    fake: "Faux", duplicate: "Doublon",
   },
 };
 
@@ -146,10 +146,10 @@ export async function createOrder(orderData: {
     }
 
     // Revalidate orders page
-    revalidatePath("/orders");
-    revalidatePath("/dashboard");
+      revalidatePath("/orders");
+    revalidatePath("/delivery");
 
-    return response.data;
+    return response.data!;
   } catch (error) {
     if (error instanceof ApiClientError && error.code) {
       const locale = await getLocale();
@@ -247,6 +247,41 @@ export async function updateOrderStatus(
     return {
       ok: false,
       error: error instanceof Error ? error.message : "Failed to update status",
+    };
+  }
+}
+
+/**
+ * Update order details (not status). Returns the updated order or an error.
+ */
+export async function updateOrder(
+  id: string,
+  data: Record<string, unknown>,
+): Promise<{ ok: true; data: Order } | { ok: false; error: string }> {
+  await requirePermission(SCOPES.ORDERS_UPDATE);
+
+  const apiKey = await getUserApiKey();
+  if (!apiKey) {
+    redirect("/setup-api-key");
+  }
+
+  try {
+    const result = await apiClient.patch<{ success: boolean; data: Order }>(`/api/orders/${id}`, apiKey, data);
+
+    revalidatePath("/orders");
+    revalidatePath(`/orders/${id}`);
+    return { ok: true, data: result.data };
+  } catch (error) {
+    const locale = await getLocale();
+    if (error instanceof ApiClientError) {
+      if (error.code) {
+        return { ok: false, error: mapError(error.code, locale, error.context) };
+      }
+      return { ok: false, error: error.message };
+    }
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : "Failed to update order",
     };
   }
 }
@@ -361,6 +396,61 @@ export async function dispatchOrder(
         companyId: options?.companyId,
       });
 
+      throw new Error(userMessage);
+    }
+    throw error;
+  }
+}
+
+/**
+ * Bulk dispatch multiple orders to a delivery company
+ */
+export async function bulkDispatchOrders(
+  companyId: string,
+  orderIds: string[]
+): Promise<{
+  success: boolean;
+  message: string;
+  results: Array<{
+    orderId: string;
+    orderNumber: string;
+    trackingNumber?: string;
+    error?: string;
+  }>;
+}> {
+  await requirePermission(SCOPES.DELIVERY_DISPATCH);
+
+  const apiKey = await getUserApiKey();
+  if (!apiKey) redirect("/setup-api-key");
+
+  try {
+    const response = await apiClient.post<ApiResponse<{
+      success: boolean;
+      message: string;
+      results: Array<{
+        orderId: string;
+        orderNumber: string;
+        trackingNumber?: string;
+        error?: string;
+      }>;
+    }>>(
+      "/api/orders/bulk-dispatch",
+      apiKey,
+      { companyId, orderIds }
+    );
+
+    if (!response.data) {
+      throw new Error("No dispatch data returned from API");
+    }
+
+    revalidatePath("/orders");
+    revalidatePath("/delivery");
+
+    return response.data;
+  } catch (error) {
+    if (error instanceof ApiClientError && error.code) {
+      const locale = await getLocale();
+      const userMessage = mapError(error.code, locale, error.context);
       throw new Error(userMessage);
     }
     throw error;

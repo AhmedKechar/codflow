@@ -32,6 +32,7 @@ export interface VariantOptionValue {
 export interface VariantOption {
   name: string;
   values: VariantOptionValue[];
+  displayMode?: "color-circle" | "color-frame" | "color-text" | "text" | null;
 }
 
 // ─── Product Variant ──────────────────────────────────────────────────────────
@@ -76,6 +77,15 @@ export interface Product {
   trackInventory: boolean;
   categoryId?: string | null;
   shippingProfileId?: string | null;
+  barcode?: string | null;
+  weightKg?: number | null;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  metaKeywords?: string | null;
+  shippingMethod?: "carrier" | "custom" | "free" | null;
+  shippingOfficePrice?: number | null;
+  shippingHomePrice?: number | null;
+  externalUrl?: string | null;
   tags: string[];
   visibility: boolean;
   status: ProductStatus;
@@ -138,6 +148,7 @@ export interface ProductFormState {
 export interface VariantOptionFormState {
   id: string; // temp UI key
   name: string;
+  displayMode: "color-circle" | "color-frame" | "color-text" | "text";
   values: VariantOptionValueFormState[];
 }
 

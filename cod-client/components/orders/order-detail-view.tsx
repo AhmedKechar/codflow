@@ -27,8 +27,8 @@ import { useErrorLocale } from "@/lib/errors/use-locale";
 import type { Order, OrderStatus, Driver, DeliveryCompany } from "@/types";
 import { AssignDriverDialog, DispatchCompanyDialog } from "@/components/orders/orders-table";
 
-const DRIVER_FLOW: OrderStatus[] = ["new", "confirmed", "preparing", "ready", "assigned", "out_for_delivery", "delivered"];
-const COMPANY_FLOW: OrderStatus[] = ["new", "confirmed", "preparing", "ready", "dispatched", "out_for_delivery", "delivered"];
+const DRIVER_FLOW: OrderStatus[] = ["new", "confirmed", "unreachable", "busy", "postponed", "shipped", "delivered"];
+const COMPANY_FLOW: OrderStatus[] = ["new", "confirmed", "unreachable", "busy", "postponed", "shipped", "delivered"];
 
 interface Props {
   order: Order;
@@ -87,7 +87,7 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
   const isDriverAssigned = !!driverId;
   const isDriverMethod = (deliveryMethod === "driver" && isDriverAssigned) || (isDriverAssigned && !isDispatched);
   const isCompanyMethod = isDispatched || deliveryMethod === "company";
-  const isOutOrLater = ["out_for_delivery", "delivered", "returned", "cancelled"].includes(status);
+  const isOutOrLater = ["shipped", "delivered", "returned", "cancelled"].includes(status);
 
   const STATUS_FLOW = isCompanyMethod ? COMPANY_FLOW : DRIVER_FLOW;
   const currentIndex = STATUS_FLOW.indexOf(status);
@@ -96,14 +96,14 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
     ? Math.max(-1, ...((initialOrder.statusHistory ?? []).map((h) => STATUS_FLOW.indexOf(h.status as OrderStatus)).filter((i) => i >= 0)))
     : currentIndex;
 
-  const canValidateShipment = status === "dispatched" && !!trackingNumber;
-  const canAdvanceFromReady = status === "ready" && isCompanyMethod && isDispatched;
+  const canValidateShipment = status === "confirmed" && !!trackingNumber;
+  const canAdvanceFromReady = status === "confirmed" && isCompanyMethod && isDispatched;
   const canAdvanceStatus =
     !isComplete &&
     !isUnreachable &&
     currentIndex >= 0 &&
     currentIndex < STATUS_FLOW.length - 1 &&
-    (status !== "ready" || canAdvanceFromReady);
+    (status !== "confirmed" || canAdvanceFromReady);
 
   const canMarkUnreachable = !isComplete && !isUnreachable && (status === "new" || status === "confirmed");
   const canAssignDriver = !isComplete && !isUnreachable && !isCompanyMethod && !isOutOrLater && drivers.length > 0;
@@ -172,8 +172,8 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
     startTransition(async () => {
       try {
         await validateShipment(initialOrder.id);
-        setStatus("out_for_delivery");
-        toast.success(t.detail?.validate_shipment_success ?? "Shipment validated — order is now out for delivery");
+        setStatus("shipped");
+        toast.success(t.detail?.validate_shipment_success ?? "Shipment validated — order is now shipped");
       } catch (error) {
         setErrorState({ isOpen: true, message: error instanceof Error ? error.message : (t.detail?.error_status ?? "Error") });
       }
@@ -246,8 +246,8 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
   //                     branch below never runs for it.
   const canCancelAtCarrier = (() => {
     if (!isDispatched || !caps.canCancel) return false;
-    if (companyCode === "yalidine") return ["dispatched", "out_for_delivery"].includes(status);
-    return status === "dispatched";
+    if (companyCode === "yalidine") return ["confirmed", "shipped"].includes(status);
+    return status === "confirmed";
   })();
 
   // UPDATE — provider-specific window.
@@ -260,8 +260,8 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
     if (isEcotrackCompany(companyCode) || companyCode === "zr_express") {
       return !["delivered", "returned", "cancelled"].includes(status);
     }
-    if (companyCode === "yalidine") return ["dispatched", "out_for_delivery"].includes(status);
-    return status === "dispatched";
+    if (companyCode === "yalidine") return ["confirmed", "shipped"].includes(status);
+    return status === "confirmed";
   })();
 
   // Remarks + tracking: simple capability check. No status-window restriction —
@@ -362,8 +362,8 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
       try {
         await cancelShipment(initialOrder.id);
         setTrackingNumber(null);
-        setStatus("ready");
-        toast.success(t.detail?.cancel_shipment_success ?? "Shipment cancelled — order reset to ready");
+        setStatus("confirmed");
+        toast.success(t.detail?.cancel_shipment_success ?? "Shipment cancelled — order reset to confirmed");
       } catch (err) {
         setErrorState({ isOpen: true, message: err instanceof Error ? err.message : (t.detail?.cancel_shipment_error ?? "Failed to cancel shipment") });
       }
@@ -412,19 +412,28 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
       <div className="flex items-center justify-between gap-3 mb-5 sm:mb-6">
         <Link
           href="/orders"
-          className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+          className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span className="hidden sm:inline">{t.detail?.back_to_orders ?? "Orders"}</span>
         </Link>
         <div className="flex items-center gap-2">
-          <StatusBadge status={status} label={t.status[status] ?? status} className="py-1 px-3 rounded-full text-[10px] font-black uppercase tracking-[0.1em] border shadow-sm" />
-          {(status === "new" || status === "preparing") && (
+          <StatusBadge status={status} label={t.status[status] ?? status} className="rounded-full" />
+          {(status === "new" || status === "confirmed" || status === "busy" || status === "unreachable") && (
+            <Link
+              href={`/orders/${initialOrder.id}/edit`}
+              className="inline-flex items-center gap-1.5 h-8 px-3 rounded-md border border-border text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Pencil size={12} />
+              تعديل
+            </Link>
+          )}
+          {(status === "new" || status === "confirmed") && (
             <Button
               variant="outline"
               onClick={handleDeleteOrder}
               disabled={isPending}
-              className="h-8 px-3 rounded-xl border-rose-500/20 bg-rose-500/5 text-rose-500 font-black text-[10px] uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all active:scale-95 hidden sm:flex items-center gap-1.5"
+              className="h-8 px-3 rounded-md border-border text-muted-foreground hidden sm:flex items-center gap-1.5"
             >
               <Trash2 size={12} />
               {t.detail.cancel_order}
@@ -438,54 +447,53 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
         <div className="lg:col-span-7 space-y-5 sm:space-y-6">
 
           {/* Hero Card */}
-          <div className="group relative glass-card rounded-2xl sm:rounded-3xl border-border/30 overflow-hidden shadow-sm transition-all duration-500 hover:shadow-premium">
-            <div className="absolute top-[-10%] start-[-10%] w-[50%] h-[40%] bg-primary/5 blur-[80px] pointer-events-none transition-opacity opacity-0 group-hover:opacity-100 duration-700" />
-            <div className="relative z-10 p-5 sm:p-7">
+          <div className="rounded-lg border border-border bg-card overflow-hidden">
+            <div className="p-5 sm:p-6">
               {/* Order number + type */}
               <div className="flex items-center gap-3 mb-5">
-                <div className="w-11 h-11 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
-                  <Package className="w-5 h-5 text-primary" />
+                <div className="w-11 h-11 rounded-md bg-muted flex items-center justify-center shrink-0">
+                  <Package className="w-5 h-5 text-muted-foreground" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h1 className="text-xl sm:text-2xl font-black text-foreground tracking-tight font-display leading-none">{initialOrder.orderNumber}</h1>
-                  <p className="text-[10px] font-black text-muted-foreground/50 uppercase tracking-widest mt-1">
+                  <h1 className="text-xl sm:text-2xl font-semibold text-foreground leading-none">{initialOrder.orderNumber}</h1>
+                  <p className="text-xs text-muted-foreground mt-1.5">
                     {initialOrder.orderType === "online" ? t.type.online : t.type.offline}
                     {isCompanyMethod && company && (
-                      <span className="ms-2 text-primary/60">· {company.name}</span>
+                      <span className="ms-2 text-muted-foreground/70">· {company.name}</span>
                     )}
                   </p>
                 </div>
                 {trackingNumber && (
-                  <span className="hidden sm:inline-block font-mono text-[10px] font-black bg-primary/10 text-primary px-2.5 py-1 rounded-lg shrink-0">
+                  <span className="hidden sm:inline-block font-mono text-xs bg-muted text-muted-foreground px-2.5 py-1 rounded-md shrink-0">
                     {trackingNumber}
                   </span>
                 )}
               </div>
 
               {/* Customer + Location row */}
-              <div className="grid grid-cols-2 gap-4 border-t border-border/10 pt-5">
+              <div className="grid grid-cols-2 gap-4 border-t border-border/60 pt-5">
                 <div className="space-y-0.5">
-                  <p className="text-[9px] font-black text-muted-foreground/50 uppercase tracking-widest flex items-center gap-1">
+                  <p className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
                     <User className="w-3 h-3 opacity-60" />
                     {t.detail?.customer ?? "Customer"}
                   </p>
-                  <p className="text-sm font-bold text-foreground truncate">{displayName}</p>
-                  <p className="text-[11px] font-bold text-muted-foreground/60">{displayPhone}</p>
+                  <p className="text-sm font-semibold text-foreground truncate">{displayName}</p>
+                  <p className="text-xs text-muted-foreground">{displayPhone}</p>
                 </div>
                 <div className="space-y-0.5">
-                  <p className="text-[9px] font-black text-muted-foreground/50 uppercase tracking-widest flex items-center gap-1">
+                  <p className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
                     <MapPin className="w-3 h-3 opacity-60" />
                     {t.detail?.destination ?? "Destination"}
                   </p>
-                  <p className="text-sm font-bold text-foreground truncate">{initialOrder.wilaya}</p>
-                  <p className="text-[11px] font-bold text-muted-foreground/60 truncate">{initialOrder.commune || "—"}</p>
+                  <p className="text-sm font-semibold text-foreground truncate">{initialOrder.wilaya}</p>
+                  <p className="text-xs text-muted-foreground truncate">{initialOrder.commune || "—"}</p>
                 </div>
               </div>
 
               {/* Tracking chip on mobile */}
               {trackingNumber && (
                 <div className="mt-4 sm:hidden">
-                  <span className="font-mono text-[10px] font-black bg-primary/10 text-primary px-2.5 py-1 rounded-lg">
+                  <span className="font-mono text-xs bg-muted text-muted-foreground px-2.5 py-1 rounded-md">
                     {trackingNumber}
                   </span>
                 </div>
@@ -495,33 +503,33 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
 
           {/* Products */}
           <Section title={t.form.products_section} icon={<ShoppingBag size={16} />}>
-            <div className="divide-y divide-border/5">
+            <div className="divide-y divide-border/60">
               {initialOrder.products?.map((p) => {
                 const isFreeReward = p.pricePerUnit === 0 && p.lineTotal === 0;
                 return (
-                  <div key={p.id} className="flex items-start justify-between gap-3 py-3.5 group/item">
+                  <div key={p.id} className="flex items-start justify-between gap-3 py-3.5">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className="font-bold text-[13px] text-foreground tracking-tight truncate group-hover/item:text-primary transition-colors">
+                        <p className="font-semibold text-[13px] text-foreground truncate">
                           {p.productName}
                         </p>
                         {isFreeReward && (
-                          <span className="inline-flex items-center gap-1 text-[0.6rem] font-black px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase tracking-wide shrink-0">
+                          <span className="inline-flex items-center gap-1 text-[11px] font-medium px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
                             🎁 مجاني
                           </span>
                         )}
                       </div>
                       {p.variantLabel && (
-                        <p className="text-[10px] text-muted-foreground/50 font-bold uppercase tracking-tight mt-0.5">
+                        <p className="text-xs text-muted-foreground mt-0.5">
                           {p.variantLabel}
                         </p>
                       )}
                     </div>
                     <div className="shrink-0 text-end">
-                      <p className={cn("text-sm font-black tabular-nums", isFreeReward ? "text-emerald-600" : "text-foreground")}>
+                      <p className="text-sm font-semibold tabular-nums text-foreground">
                         {isFreeReward ? "—" : formatPrice(p.lineTotal, common.currency.symbol)}
                       </p>
-                      <p className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-tighter mt-0.5">
+                      <p className="text-xs text-muted-foreground mt-0.5">
                         {p.quantity} × {isFreeReward ? "مجاني" : formatPrice(p.pricePerUnit, common.currency.symbol)}
                       </p>
                     </div>
@@ -531,22 +539,22 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
             </div>
 
             {/* Totals */}
-            <div className="mt-5 pt-5 border-t border-border/10 space-y-2">
-              <div className="flex items-center justify-between text-[12px]">
-                <span className="font-bold text-muted-foreground/60">{t.detail?.subtotal ?? "Subtotal"}</span>
-                <span className="font-black text-foreground/70 tabular-nums">{formatPrice(displayPrice - initialOrder.deliveryFee, common.currency.symbol)}</span>
+            <div className="mt-5 pt-5 border-t border-border/60 space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="font-medium text-muted-foreground">{t.detail?.subtotal ?? "Subtotal"}</span>
+                <span className="font-semibold text-foreground tabular-nums">{formatPrice(displayPrice - initialOrder.deliveryFee, common.currency.symbol)}</span>
               </div>
-              <div className="flex items-center justify-between text-[12px]">
-                <span className="font-bold text-muted-foreground/60">{t.detail?.delivery_fee ?? "Delivery"}</span>
+              <div className="flex items-center justify-between text-sm">
+                <span className="font-medium text-muted-foreground">{t.detail?.delivery_fee ?? "Delivery"}</span>
                 {initialOrder.deliveryFee === 0 ? (
-                  <span className="text-[0.65rem] font-black px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">🚚 مجاني</span>
+                  <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">🚚 مجاني</span>
                 ) : (
-                  <span className="font-black text-foreground/70 tabular-nums">{formatPrice(initialOrder.deliveryFee, common.currency.symbol)}</span>
+                  <span className="font-semibold text-foreground tabular-nums">{formatPrice(initialOrder.deliveryFee, common.currency.symbol)}</span>
                 )}
               </div>
-              <div className="flex items-center justify-between pt-3 border-t border-border/10">
-                <span className="text-[10px] font-black text-primary/60 uppercase tracking-widest">{t.detail?.total_price ?? "Total"}</span>
-                <span className="text-2xl sm:text-3xl font-black text-primary tabular-nums tracking-tight font-display">
+              <div className="flex items-center justify-between pt-3 border-t border-border/60">
+                <span className="text-xs font-semibold text-muted-foreground">{t.detail?.total_price ?? "Total"}</span>
+                <span className="text-2xl font-semibold text-foreground tabular-nums">
                   {formatPrice(displayPrice, common.currency.symbol)}
                 </span>
               </div>
@@ -561,28 +569,28 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
                 {displayAddress && <InfoRow label={t.detail.address} value={displayAddress} />}
                 {(initialOrder.deliveryAttempts ?? 0) > 0 && (
                   <div>
-                    <p className="text-[9px] font-black text-muted-foreground/50 uppercase tracking-widest mb-1">{t.detail?.delivery_attempts ?? "Attempts"}</p>
-                    <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-600 text-sm font-black">
+                    <p className="text-[11px] font-medium text-muted-foreground mb-1">{t.detail?.delivery_attempts ?? "Attempts"}</p>
+                    <span className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-muted text-muted-foreground text-sm font-semibold">
                       {initialOrder.deliveryAttempts}
                     </span>
                   </div>
                 )}
                 {initialOrder.trackingUrl && (
                   <a href={initialOrder.trackingUrl} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-[11px] font-black text-primary hover:text-primary/80 transition-colors">
+                    className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 transition-colors">
                     {t.detail?.track_on_provider ?? "Track on provider"}
-                    <ExternalLink size={10} />
+                    <ExternalLink size={12} />
                   </a>
                 )}
               </div>
             </Section>
             <Section title={t.detail.notes} icon={<Info size={16} />}>
               {initialOrder.notes ? (
-                <p className="text-xs font-bold text-foreground leading-relaxed">{initialOrder.notes}</p>
+                <p className="text-sm font-medium text-foreground leading-relaxed">{initialOrder.notes}</p>
               ) : (
-                <div className="flex flex-col items-center justify-center py-4 opacity-25">
+                <div className="flex flex-col items-center justify-center py-4 text-muted-foreground/60">
                   <Info size={20} className="mb-1.5" />
-                  <p className="text-[9px] font-black uppercase tracking-widest">{t.detail?.no_notes ?? "No notes"}</p>
+                  <p className="text-xs">{t.detail?.no_notes ?? "No notes"}</p>
                 </div>
               )}
             </Section>
@@ -597,13 +605,13 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
             title={t.detail.status_timeline}
             icon={<Clock size={16} />}
             extra={
-              <Badge variant="secondary" className="text-[8px] font-black uppercase tracking-tighter py-0 h-4 border-none bg-primary/5 text-primary/70">
+              <Badge variant="secondary" className="text-[11px] font-medium py-0 h-5 px-2">
                 {isCompanyMethod ? t.flow?.company_label ?? "Via company" : t.flow?.driver_label ?? "Manual"}
               </Badge>
             }
           >
             <div className="relative">
-              <div className="absolute top-2.5 bottom-0 start-[11.5px] w-px bg-border/10" />
+              <div className="absolute top-2.5 bottom-0 start-[11.5px] w-px bg-border/60" />
               <div className="space-y-0">
                 {STATUS_FLOW.map((s, i) => {
                   const historyItem = (initialOrder.statusHistory ?? []).find((h) => h.status === s);
@@ -612,26 +620,26 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
                   return (
                     <div key={s} className="flex items-start gap-3.5 relative pb-5">
                       <div className={cn(
-                        "w-6 h-6 rounded-lg border-2 flex items-center justify-center shrink-0 z-10 transition-all duration-500 bg-card",
-                        isDone ? "bg-primary border-primary shadow-lg shadow-primary/20"
-                          : isCurrent ? "border-primary animate-pulse"
-                            : "border-border/40"
+                        "w-6 h-6 rounded-md border-2 flex items-center justify-center shrink-0 z-10 bg-card",
+                        isDone ? "bg-primary border-primary"
+                          : isCurrent ? "border-primary"
+                            : "border-border"
                       )}>
                         {isDone && <Check size={11} className="text-primary-foreground" />}
                         {isCurrent && !isDone && <div className="w-1.5 h-1.5 rounded-sm bg-primary" />}
                       </div>
                       <div className="min-w-0 pt-0.5 flex-1">
                         <p className={cn(
-                          "text-[12px] font-black transition-colors uppercase tracking-tight",
-                          isDone || isCurrent ? "text-foreground" : "text-muted-foreground/30"
+                          "text-[13px] font-medium transition-colors",
+                          isDone || isCurrent ? "text-foreground" : "text-muted-foreground/40"
                         )}>
                           {t.status[s]}
                         </p>
                         {historyItem && (
-                          <p className="text-[10px] font-bold text-muted-foreground/50 mt-0.5 flex items-center gap-1 flex-wrap">
+                          <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1 flex-wrap">
                             <span className="tabular-nums">{formatDateTime(historyItem.timestamp)}</span>
                             {historyItem.by?.startsWith("webhook:") ? (
-                              <span className="inline-flex items-center gap-0.5 text-primary/60 font-black">
+                              <span className="inline-flex items-center gap-0.5 text-muted-foreground">
                                 <Zap size={9} />
                                 {historyItem.by === "webhook:zr_express" ? "ZR Express"
                                   : historyItem.by === "webhook:yalidine" ? "Yalidine"
@@ -642,8 +650,8 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
                             )}
                           </p>
                         )}
-                        {s === "dispatched" && trackingNumber && (
-                          <p className="font-mono text-[10px] text-emerald-600 font-black tracking-tight mt-0.5">{trackingNumber}</p>
+                        {s === "shipped" && trackingNumber && (
+                          <p className="font-mono text-xs text-muted-foreground mt-0.5">{trackingNumber}</p>
                         )}
                       </div>
                     </div>
@@ -654,24 +662,24 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
           </Section>
 
           {/* Quick Actions */}
-          <div className="glass-card rounded-2xl sm:rounded-3xl border-border/30 overflow-hidden shadow-md">
-            <div className="p-5 sm:p-7 space-y-4">
+          <div className="rounded-lg border border-border bg-card overflow-hidden">
+            <div className="p-5 sm:p-6 space-y-4">
 
               {/* Unreachable banner */}
               {isUnreachable && (
-                <div className="rounded-xl border-2 border-dashed border-amber-300 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-700 p-4 space-y-3">
+                <div className="rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-700 p-4 space-y-3">
                   <div className="flex items-center gap-2">
                     <PhoneMissed size={14} className="text-amber-600 shrink-0" />
-                    <p className="text-[11px] font-black text-amber-700 dark:text-amber-400 uppercase tracking-wider">{t.status.unreachable}</p>
+                    <p className="text-sm font-semibold text-amber-700 dark:text-amber-400">{t.status.unreachable}</p>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <Button onClick={handleRetryCall} disabled={isPending}
-                      className="h-10 rounded-xl font-black text-[10px] uppercase tracking-widest bg-amber-500 hover:bg-amber-600 text-white border-0">
+                      className="h-10 bg-amber-500 hover:bg-amber-600 text-white">
                       <Phone size={12} className="me-1.5" />
                       {isPending ? "..." : t.next_status.unreachable}
                     </Button>
                     <Button variant="outline" onClick={() => handleAdvanceViaStatus("cancelled")} disabled={isPending}
-                      className="h-10 rounded-xl font-black text-[10px] uppercase tracking-widest border-red-200 text-red-500 hover:bg-red-50">
+                      className="h-10 border-border text-muted-foreground">
                       {t.status.cancelled}
                     </Button>
                   </div>
@@ -681,7 +689,7 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
               {/* Primary advance button */}
               {canAdvanceStatus && (
                 <Button onClick={handleAdvanceStatus} disabled={isPending}
-                  className="w-full h-12 rounded-xl sm:rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all active:scale-95">
+                  className="w-full h-12">
                   {isPending ? "..." : t.next_status[status as keyof typeof t.next_status]}
                 </Button>
               )}
@@ -689,7 +697,7 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
               {/* Mark Unreachable */}
               {canMarkUnreachable && (
                 <Button variant="outline" onClick={handleMarkUnreachable} disabled={isPending}
-                  className="w-full h-10 rounded-xl font-black text-[10px] uppercase tracking-widest border-amber-300 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/30 flex items-center justify-center gap-2">
+                  className="w-full h-10 border-border text-muted-foreground flex items-center justify-center gap-2">
                   <PhoneMissed size={12} />
                   {t.next_status.mark_unreachable}
                 </Button>
@@ -697,49 +705,49 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
 
               {/* ── Delivery Assignment ── */}
               <div className="space-y-2.5 pt-1">
-                <p className="text-[9px] font-black text-muted-foreground/50 uppercase tracking-widest ms-0.5">
+                <p className="text-xs font-semibold text-muted-foreground ms-0.5">
                   {t.detail?.delivery_assignment ?? "Delivery"}
                 </p>
 
                 {isDispatched ? (
                   /* Company info chip — actions are in Shipment Actions below */
-                  <div className="flex items-center gap-3 bg-primary/5 border border-primary/10 rounded-2xl p-3.5">
-                    <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                      <Building2 size={16} className="text-primary" />
+                  <div className="flex items-center gap-3 rounded-md border border-border bg-muted/20 p-3.5">
+                    <div className="w-9 h-9 rounded-md bg-muted flex items-center justify-center shrink-0">
+                      <Building2 size={16} className="text-muted-foreground" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[13px] font-black text-foreground truncate">
+                      <p className="text-[13px] font-semibold text-foreground truncate">
                         {company?.name ?? t.detail?.partner_company ?? "Partner Company"}
                       </p>
-                      <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-0.5">
+                      <p className="text-xs text-muted-foreground mt-0.5">
                         {initialOrder.deliveryType === "home" ? t.detail?.home_delivery : t.detail?.stop_desk}
                       </p>
                     </div>
                     <StatusBadge status={status} label={t.status[status] ?? status}
-                      className="text-[8px] font-black uppercase tracking-tighter py-0.5 px-2 rounded-full border shrink-0" />
+                      className="shrink-0" />
                   </div>
                 ) : isDriverAssigned ? (
                   <div className="space-y-2">
                     <div className={cn(
-                      "flex items-center gap-3 rounded-2xl p-3.5 border transition-all",
-                      isOutOrLater ? "bg-muted/20 border-border/40" : "bg-primary/5 border-primary/10"
+                      "flex items-center gap-3 rounded-md p-3.5 border bg-card",
+                      isOutOrLater ? "border-border" : "border-primary bg-primary/5"
                     )}>
-                      <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center shrink-0", isOutOrLater ? "bg-muted/40" : "bg-primary/10")}>
-                        <Truck size={16} className={isOutOrLater ? "text-muted-foreground/40" : "text-primary"} />
+                      <div className={cn("w-9 h-9 rounded-md flex items-center justify-center shrink-0", isOutOrLater ? "bg-muted" : "bg-primary/10")}>
+                        <Truck size={16} className={isOutOrLater ? "text-muted-foreground" : "text-primary"} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-black text-foreground truncate">
+                        <p className="text-[13px] font-semibold text-foreground truncate">
                           {driver ? `${driver.firstName} ${driver.lastName}` : t.detail?.assigned_driver ?? "Assigned Driver"}
                         </p>
-                        <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-0.5">
+                        <p className="text-xs text-muted-foreground mt-0.5">
                           {t.detail?.manual_delivery ?? "Manual Delivery"}
                         </p>
                       </div>
-                      {isOutOrLater && <Lock size={13} className="text-muted-foreground/30" />}
+                      {isOutOrLater && <Lock size={13} className="text-muted-foreground/40" />}
                     </div>
                     {canAssignDriver && (
                       <Button variant="outline" onClick={() => setAssignOpen(true)}
-                        className="w-full h-10 rounded-xl text-[10px] font-black uppercase tracking-widest border-border/40">
+                        className="w-full h-10 border-border text-muted-foreground">
                         {t.detail?.reassign_driver ?? "Change Driver"}
                       </Button>
                     )}
@@ -748,14 +756,14 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
                   <div className="space-y-2">
                     {canAssignDriver && (
                       <Button variant="outline" onClick={() => setAssignOpen(true)}
-                        className="w-full h-10 rounded-xl text-[10px] font-black uppercase tracking-widest border-border/40 flex items-center gap-2">
+                        className="w-full h-10 border-border text-muted-foreground flex items-center gap-2">
                         <Truck size={13} className="opacity-50" />
                         {t.detail?.assign_to_driver ?? "Assign Driver"}
                       </Button>
                     )}
                     {canDispatch && (
                       <Button variant="outline" onClick={() => setDispatchOpen(true)}
-                        className="w-full h-10 rounded-xl text-[10px] font-black uppercase tracking-widest border-border/40 flex items-center gap-2">
+                        className="w-full h-10 border-border text-muted-foreground flex items-center gap-2">
                         <Building2 size={13} className="opacity-50" />
                         {t.detail?.dispatch_to ?? "Dispatch to Company"}
                       </Button>
@@ -765,9 +773,9 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
               </div>
 
               {/* Delete — mobile only, shown inside card */}
-              {(status === "new" || status === "preparing") && (
+          {(status === "new" || status === "confirmed") && (
                 <Button variant="outline" onClick={handleDeleteOrder} disabled={isPending}
-                  className="w-full h-9 rounded-xl border-rose-500/20 bg-rose-500/5 text-rose-500 font-black text-[10px] uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all active:scale-95 sm:hidden flex items-center justify-center gap-1.5">
+                  className="w-full h-9 border-border text-muted-foreground sm:hidden flex items-center justify-center gap-1.5">
                   <Trash2 size={12} />
                   {t.detail.cancel_order}
                 </Button>
@@ -777,16 +785,16 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
 
           {/* ── Shipment Actions ─────────────────────────────────────── */}
           {hasAnyShipmentAction && (
-            <div className="glass-card rounded-2xl sm:rounded-3xl border-border/30 overflow-hidden shadow-md">
-              <div className="p-5 sm:p-7 space-y-3">
-                <p className="text-[9px] font-black text-muted-foreground/50 uppercase tracking-widest">
+            <div className="rounded-lg border border-border bg-card overflow-hidden">
+              <div className="p-5 sm:p-6 space-y-3">
+                <p className="text-xs font-semibold text-muted-foreground">
                   {t.detail?.shipment_actions ?? "Shipment Actions"}
                 </p>
 
                 {/* Validate — most prominent, sits first */}
                 {canValidateShipment && (
                   <Button onClick={handleValidateShipment} disabled={isPending}
-                    className="w-full h-11 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 text-white shadow-lg shadow-violet-500/20 active:scale-95 transition-all">
+                    className="w-full h-11 flex items-center justify-center gap-2">
                     <Zap size={14} />
                     {isPending ? "..." : (t.detail?.validate_shipment_btn ?? "Validate Shipment")}
                   </Button>
@@ -796,7 +804,7 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
                 {labelUrl && (
                   <a href={`/api/orders/${initialOrder.id}/label`} target="_blank" rel="noopener noreferrer" className="block">
                     <Button variant="outline"
-                      className="w-full h-10 rounded-xl text-[10px] font-black uppercase tracking-widest border-border/40 flex items-center justify-center gap-2 hover:border-primary/30 hover:bg-primary/5 transition-all">
+                      className="w-full h-10 border-border text-muted-foreground flex items-center justify-center gap-2">
                       <FileDown size={13} />
                       {t.detail?.print_label ?? "Print Label"}
                     </Button>
@@ -807,7 +815,7 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
                 {canTrackLive && (
                   <div className="space-y-2">
                     <Button variant="outline" onClick={handleLoadTracking} disabled={loadingTracking}
-                      className="h-10 rounded-xl text-[10px] font-black uppercase tracking-widest border-border/40 flex items-center gap-2 w-full">
+                      className="h-10 border-border text-muted-foreground flex items-center gap-2 w-full">
                       <RefreshCw size={12} className={loadingTracking ? "animate-spin" : ""} />
                       {loadingTracking ? "..." : (t.detail?.track_live ?? "Refresh Tracking")}
                       {trackingEvents !== null && (
@@ -819,15 +827,15 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
                     {trackingEvents !== null && showTracking && (
                       <div className="space-y-1.5 ps-1">
                         {trackingEvents.length === 0 ? (
-                          <p className="text-[11px] text-muted-foreground/50 font-semibold px-3">—</p>
+                          <p className="text-xs text-muted-foreground px-3">—</p>
                         ) : (
                           trackingEvents.map((ev, i) => (
-                            <div key={i} className="flex items-start gap-3 py-2 px-3 rounded-xl bg-muted/30">
-                              <div className="w-1.5 h-1.5 rounded-full bg-primary/60 mt-1.5 shrink-0" />
+                            <div key={i} className="flex items-start gap-3 py-2 px-3 rounded-md bg-muted/30">
+                              <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
                               <div className="flex-1 min-w-0">
-                                <p className="text-[12px] font-bold text-foreground">{formatActivityLabel(ev.activity)}</p>
-                                {ev.description && <p className="text-[10px] text-muted-foreground/60 font-semibold mt-0.5">{ev.description}</p>}
-                                {ev.date && <p className="text-[10px] text-muted-foreground/40 font-semibold mt-0.5 tabular-nums">{ev.date}</p>}
+                                <p className="text-[13px] font-medium text-foreground">{formatActivityLabel(ev.activity)}</p>
+                                {ev.description && <p className="text-xs text-muted-foreground mt-0.5">{ev.description}</p>}
+                                {ev.date && <p className="text-xs text-muted-foreground/70 mt-0.5 tabular-nums">{ev.date}</p>}
                               </div>
                             </div>
                           ))
@@ -842,22 +850,22 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
                   <div className="space-y-2">
                     {!showRemarkForm ? (
                       <Button variant="outline" onClick={() => setShowRemarkForm(true)}
-                        className="h-10 rounded-xl text-[10px] font-black uppercase tracking-widest border-border/40 flex items-center gap-2 w-full">
+                        className="h-10 border-border text-muted-foreground flex items-center gap-2 w-full">
                         <MessageSquare size={12} />
                         {t.detail?.add_remark ?? "Add Note"}
                       </Button>
                     ) : (
-                      <div className="space-y-2 p-3.5 rounded-xl border border-border/30 bg-muted/10">
+                      <div className="space-y-2 p-3.5 rounded-md border border-border bg-muted/10">
                         <Input value={remarkContent} onChange={(e) => setRemarkContent(e.target.value)}
                           placeholder={t.detail?.remark_placeholder ?? "Note visible to the delivery company..."}
                           className="h-9 text-sm" maxLength={255} />
                         <div className="flex gap-2">
                           <Button onClick={handleSubmitRemark} disabled={submittingRemark || !remarkContent.trim()}
-                            className="flex-1 h-9 text-[10px] font-black uppercase tracking-widest rounded-xl">
+                            className="flex-1 h-9">
                             {submittingRemark ? "..." : (t.detail?.add_remark ?? "Send")}
                           </Button>
                           <Button variant="outline" onClick={() => { setShowRemarkForm(false); setRemarkContent(""); }}
-                            className="h-9 px-3 rounded-xl">
+                            className="h-9 px-3">
                             <X size={13} />
                           </Button>
                         </div>
@@ -871,40 +879,40 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
                   <div className="space-y-2">
                     {!showUpdateForm ? (
                       <Button variant="outline" onClick={() => setShowUpdateForm(true)}
-                        className="h-10 rounded-xl text-[10px] font-black uppercase tracking-widest border-border/40 flex items-center gap-2 w-full">
+                        className="h-10 border-border text-muted-foreground flex items-center gap-2 w-full">
                         <Pencil size={12} />
                         {t.detail?.update_shipment ?? "Edit Shipment"}
                       </Button>
                     ) : (
-                      <div className="space-y-3 p-3.5 rounded-xl border border-border/30 bg-muted/10">
-                        <p className="text-[9px] font-black text-muted-foreground/50 uppercase tracking-widest">{t.detail?.update_shipment ?? "Edit Shipment"}</p>
+                      <div className="space-y-3 p-3.5 rounded-md border border-border bg-muted/10">
+                        <p className="text-xs font-semibold text-muted-foreground">{t.detail?.update_shipment ?? "Edit Shipment"}</p>
                         {updateFieldSupport.name && (
                           <div className="space-y-0.5">
-                            <label className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-wide">{t.detail?.update_shipment_name ?? "Name"}</label>
+                            <label className="text-xs font-medium text-muted-foreground">{t.detail?.update_shipment_name ?? "Name"}</label>
                             <Input value={updateName} onChange={(e) => setUpdateName(e.target.value)} className="h-9 text-sm" />
                           </div>
                         )}
                         {updateFieldSupport.phone && (
                           <div className="space-y-0.5">
-                            <label className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-wide">{t.detail?.update_shipment_phone ?? "Phone"}</label>
+                            <label className="text-xs font-medium text-muted-foreground">{t.detail?.update_shipment_phone ?? "Phone"}</label>
                             <Input value={updatePhone} onChange={(e) => setUpdatePhone(e.target.value)} className="h-9 text-sm font-mono" />
                           </div>
                         )}
                         {updateFieldSupport.phone2 && (
                           <div className="space-y-0.5">
-                            <label className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-wide">{t.detail?.update_shipment_phone2 ?? "Phone 2"}</label>
+                            <label className="text-xs font-medium text-muted-foreground">{t.detail?.update_shipment_phone2 ?? "Phone 2"}</label>
                             <Input value={updatePhone2} onChange={(e) => setUpdatePhone2(e.target.value)} className="h-9 text-sm font-mono" />
                           </div>
                         )}
                         {updateFieldSupport.address && (
                           <div className="space-y-0.5">
-                            <label className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-wide">{t.detail?.address ?? "Address"}</label>
+                            <label className="text-xs font-medium text-muted-foreground">{t.detail?.address ?? "Address"}</label>
                             <Input value={updateAddress} onChange={(e) => setUpdateAddress(e.target.value)} className="h-9 text-sm" />
                           </div>
                         )}
                         {updateFieldSupport.amount && (
                           <div className="space-y-0.5">
-                            <label className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-wide">{t.detail?.update_shipment_amount ?? "Amount"}</label>
+                            <label className="text-xs font-medium text-muted-foreground">{t.detail?.update_shipment_amount ?? "Amount"}</label>
                             <Input type="number" value={updateAmount} onChange={(e) => setUpdateAmount(e.target.value)} className="h-9 text-sm" />
                           </div>
                         )}
@@ -912,30 +920,30 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
                           <div className="flex items-end gap-3">
                             {updateFieldSupport.weight && (
                               <div className="flex-1 space-y-0.5">
-                                <label className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-wide">{t.detail?.weight ?? "Weight (kg)"}</label>
+                                <label className="text-xs font-medium text-muted-foreground">{t.detail?.weight ?? "Weight (kg)"}</label>
                                 <Input type="number" min="0" step="0.1" value={updateWeight} onChange={(e) => setUpdateWeight(e.target.value)} className="h-9 text-sm" placeholder="0.5" />
                               </div>
                             )}
                             {updateFieldSupport.fragile && (
                               <label className="flex items-center gap-2 pb-2 cursor-pointer select-none">
                                 <Checkbox checked={updateFragile} onCheckedChange={(v) => setUpdateFragile(!!v)} />
-                                <span className="text-sm font-bold">{t.detail?.fragile ?? "Fragile"}</span>
+                                <span className="text-sm font-medium">{t.detail?.fragile ?? "Fragile"}</span>
                               </label>
                             )}
                           </div>
                         )}
                         {updateFieldSupport.remarks && (
                           <div className="space-y-0.5">
-                            <label className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-wide">{t.detail?.remarks ?? "Remarks"}</label>
+                            <label className="text-xs font-medium text-muted-foreground">{t.detail?.remarks ?? "Remarks"}</label>
                             <Input value={updateRemarks} onChange={(e) => setUpdateRemarks(e.target.value)} className="h-9 text-sm" maxLength={255} />
                           </div>
                         )}
                         <div className="flex gap-2">
                           <Button onClick={handleUpdateShipment} disabled={updatingShipment}
-                            className="flex-1 h-9 text-[10px] font-black uppercase tracking-widest rounded-xl">
+                            className="flex-1 h-9">
                             {updatingShipment ? "..." : common.confirm}
                           </Button>
-                          <Button variant="outline" onClick={() => setShowUpdateForm(false)} className="h-9 px-3 rounded-xl">
+                          <Button variant="outline" onClick={() => setShowUpdateForm(false)} className="h-9 px-3">
                             <X size={13} />
                           </Button>
                         </div>
@@ -947,7 +955,7 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
                 {/* Cancel at Carrier — danger, before validation only */}
                 {canCancelAtCarrier && (
                   <Button variant="outline" onClick={handleCancelAtCarrier} disabled={cancellingShipment}
-                    className="h-10 rounded-xl text-[10px] font-black uppercase tracking-widest border-rose-300/50 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 flex items-center gap-2 w-full">
+                    className="h-10 border-border text-muted-foreground flex items-center gap-2 w-full">
                     <XCircle size={12} />
                     {cancellingShipment ? "..." : (t.detail?.cancel_shipment ?? "Cancel Shipment")}
                   </Button>
@@ -960,34 +968,34 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
 
       {/* ── Floating Mobile Action Bar ──────────────────────────────────── */}
       <div className="fixed bottom-[88px] inset-x-3 z-40 lg:hidden animate-in slide-in-from-bottom-8 duration-500">
-        <div className="glass-card border-white/20 dark:border-white/5 rounded-[2rem] p-2 shadow-2xl flex items-center gap-2">
+        <div className="rounded-lg border border-border bg-card p-2 shadow-lg flex items-center gap-2">
           {/* Back */}
           <Button variant="outline" onClick={() => router.push("/orders")}
-            className="flex-none w-12 h-12 rounded-2xl border-border/40 bg-white/50 dark:bg-muted/20 text-muted-foreground active:scale-90 shadow-sm">
+            className="flex-none w-12 h-12 rounded-md border-border text-muted-foreground">
             <ArrowLeft size={18} />
           </Button>
 
           {/* Primary action */}
           {isUnreachable ? (
             <Button onClick={handleRetryCall} disabled={isPending}
-              className="flex-1 h-12 rounded-2xl font-black text-[10px] uppercase tracking-widest bg-amber-500 hover:bg-amber-600 text-white active:scale-95">
+              className="flex-1 h-12 bg-amber-500 hover:bg-amber-600 text-white">
               <Phone size={13} className="me-1.5" />
               {isPending ? "..." : t.next_status.unreachable}
             </Button>
           ) : canValidateShipment ? (
             <Button onClick={handleValidateShipment} disabled={isPending}
-              className="flex-1 h-12 rounded-2xl font-black text-[10px] uppercase tracking-widest bg-violet-600 hover:bg-violet-700 text-white shadow-lg shadow-violet-500/20 active:scale-95">
+              className="flex-1 h-12">
               <Zap size={13} className="me-1.5" />
               {isPending ? "..." : (t.detail?.validate_shipment_btn ?? "Validate")}
             </Button>
           ) : canAdvanceStatus ? (
             <Button onClick={handleAdvanceStatus} disabled={isPending}
-              className="flex-1 h-12 rounded-2xl font-black text-[10px] uppercase tracking-widest bg-primary text-primary-foreground shadow-lg shadow-primary/20 active:scale-95">
+              className="flex-1 h-12">
               {isPending ? "..." : t.next_status[status as keyof typeof t.next_status]}
             </Button>
           ) : (
-            <div className="flex-1 h-12 rounded-2xl bg-muted/50 flex items-center justify-center px-4">
-              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">{t.status[status]}</span>
+            <div className="flex-1 h-12 rounded-md bg-muted flex items-center justify-center px-4">
+              <span className="text-xs font-medium text-muted-foreground">{t.status[status]}</span>
             </div>
           )}
 
@@ -995,7 +1003,7 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
           {labelUrl && (
             <a href={`/api/orders/${initialOrder.id}/label`} target="_blank" rel="noopener noreferrer">
               <Button variant="outline"
-                className="flex-none w-12 h-12 rounded-2xl border-border/40 bg-white/50 dark:bg-muted/20 text-muted-foreground active:scale-90 shadow-sm">
+                className="flex-none w-12 h-12 rounded-md border-border text-muted-foreground">
                 <FileDown size={18} />
               </Button>
             </a>
@@ -1046,19 +1054,19 @@ function Section({ title, children, icon, extra }: {
   extra?: React.ReactNode;
 }) {
   return (
-    <div className="glass-card rounded-2xl sm:rounded-3xl border-border/30 overflow-hidden shadow-sm h-full">
-      <div className="flex items-center justify-between gap-3 px-5 py-3.5 sm:px-7 sm:py-4 border-b border-border/10 bg-muted/5">
+    <div className="rounded-lg border border-border bg-card overflow-hidden h-full">
+      <div className="flex items-center justify-between gap-3 px-5 py-3.5 sm:px-6 sm:py-4 border-b border-border/60 bg-muted/20">
         <div className="flex items-center gap-2.5">
           {icon && (
-            <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 shadow-inner">
-              <div className="text-primary">{icon}</div>
+            <div className="w-8 h-8 rounded-md bg-muted flex items-center justify-center shrink-0">
+              <div className="text-muted-foreground">{icon}</div>
             </div>
           )}
-          <h2 className="text-[13px] sm:text-sm font-black text-foreground tracking-tight font-display uppercase">{title}</h2>
+          <h2 className="text-sm font-semibold text-foreground">{title}</h2>
         </div>
         {extra}
       </div>
-      <div className="p-5 sm:p-7">
+      <div className="p-5 sm:p-6">
         {children}
       </div>
     </div>
@@ -1068,8 +1076,8 @@ function Section({ title, children, icon, extra }: {
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-[9px] font-black text-muted-foreground/50 uppercase tracking-widest mb-0.5">{label}</p>
-      <p className="text-[12px] font-bold text-foreground leading-snug">{value}</p>
+      <p className="text-[11px] font-medium text-muted-foreground mb-0.5">{label}</p>
+      <p className="text-[13px] font-semibold text-foreground leading-snug">{value}</p>
     </div>
   );
 }

@@ -147,7 +147,7 @@ export function PaymentForm({ plan, subscription, userScopes }: Props) {
             <label
               className={cn(
                 "flex items-center gap-2 px-4 py-2.5 rounded-xl border border-dashed border-border/60 bg-muted/20 cursor-pointer hover:bg-muted/40 transition-colors text-sm",
-                receiptFile && "border-primary/40 bg-primary/5"
+                receiptFile && "border-border bg-muted/30"
               )}
             >
               <Upload className="w-4 h-4 text-muted-foreground" />

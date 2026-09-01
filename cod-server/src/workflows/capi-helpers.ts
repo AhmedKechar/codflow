@@ -18,6 +18,6 @@ export function shouldTriggerCapiPurchase(
   wilayaId: number | null | undefined,
 ): boolean {
   if (newStatus === "delivered") return true;
-  if (newStatus === "out_for_delivery" && wilayaId != null && LONG_HAUL_WILAYA_IDS.has(wilayaId)) return true;
+  if (newStatus === "shipped" && wilayaId != null && LONG_HAUL_WILAYA_IDS.has(wilayaId)) return true;
   return false;
 }

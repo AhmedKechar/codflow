@@ -76,7 +76,9 @@
     "api_key_copied": "Copied!",
     "api_key_reveal": "Reveal",
     "api_key_hide": "Hide",
-    "api_key_missing": "API key not available. It will appear here after your next re-deployment."
+    "api_key_missing": "API key not available. It will appear here after your next re-deployment.",
+    "mcp_title": "MCP",
+    "mcp_subtitle": "AI Agents and Model Context Protocol connections"
   },
   "shipping": {
     "title": "Shipping Rates",

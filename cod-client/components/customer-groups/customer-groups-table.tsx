@@ -65,8 +65,8 @@ export function CustomerGroupsTable({
       sortable: true,
       render: (value) => (
         <div className="flex items-center gap-1.5">
-          <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center">
-            <Users className="w-3 h-3 text-primary/60" />
+          <div className="w-6 h-6 rounded-lg bg-muted flex items-center justify-center">
+            <Users className="w-3 h-3 text-muted-foreground/60" />
           </div>
           <span className="text-sm font-black text-foreground">{value ?? 0}</span>
         </div>
@@ -124,7 +124,7 @@ export function CustomerGroupsTable({
                 </p>
               )}
               <div className="flex items-center gap-1.5 mt-2">
-                <Users className="w-3 h-3 text-primary/40" />
+                <Users className="w-3 h-3 text-muted-foreground/60" />
                 <span className="text-[11px] font-black text-muted-foreground/70">
                   {group.memberCount ?? 0}
                 </span>
@@ -133,10 +133,10 @@ export function CustomerGroupsTable({
             {(onView || onEdit || onDelete) && (
               <div className="shrink-0">
                 <DropdownMenu>
-                  <DropdownMenuTrigger render={<button className="w-9 h-9 rounded-xl bg-muted/40 hover:bg-primary/10 flex items-center justify-center text-muted-foreground hover:text-primary transition-all active:scale-90" />}>
+                  <DropdownMenuTrigger render={<button className="w-9 h-9 rounded-md bg-muted/40 hover:bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors active:scale-90" />}>
                     <MoreHorizontal className="w-4 h-4" />
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align={dir === "rtl" ? "start" : "end"} className="glass-card rounded-2xl">
+                  <DropdownMenuContent align={dir === "rtl" ? "start" : "end"} className="rounded-lg">
                     {onView && (
                       <DropdownMenuItem onClick={() => onView(group)} className="text-[11px] font-bold uppercase tracking-wider py-2.5">
                         <Eye className="w-3.5 h-3.5 me-2" />{t.actions.view}
@@ -148,7 +148,7 @@ export function CustomerGroupsTable({
                       </DropdownMenuItem>
                     )}
                     {onDelete && (
-                      <DropdownMenuItem onClick={() => onDelete(group)} className="!text-rose-500 text-[11px] font-bold uppercase tracking-wider py-2.5">
+                      <DropdownMenuItem onClick={() => onDelete(group)} className="!text-destructive text-[11px] font-bold uppercase tracking-wider py-2.5">
                         <Trash2 className="w-3.5 h-3.5 me-2" />{t.actions.delete}
                       </DropdownMenuItem>
                     )}

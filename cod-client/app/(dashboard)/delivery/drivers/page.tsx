@@ -19,7 +19,7 @@ export default async function DriversPage() {
   const allDrivers = driversResult.status === "fulfilled" ? driversResult.value : [];
   const allOrders = ordersResult.status === "fulfilled" ? ordersResult.value : [];
 
-  const readyOrders = allOrders.filter((o) => o.status === "ready");
+  const readyOrders = allOrders.filter((o) => o.status === "confirmed");
 
   const driverOrdersMap: Record<string, Order[]> = {};
   allDrivers.forEach((driver) => {

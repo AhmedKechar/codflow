@@ -3,6 +3,7 @@
 import { Palette } from "lucide-react";
 import type { BorderRadius, ShadowIntensity } from "cod-shared/design-presets";
 import { DESIGN_PRESETS } from "cod-shared/design-presets";
+import { useThemes } from "@/lib/translations";
 
 interface PresetPickerProps {
   borderRadius: BorderRadius;
@@ -17,6 +18,8 @@ export function PresetPicker({
   onRadiusChange,
   onShadowChange,
 }: PresetPickerProps) {
+  const t = useThemes();
+
   const handlePresetSelect = (preset: (typeof DESIGN_PRESETS)[number]) => {
     onRadiusChange(preset.borderRadius);
     onShadowChange(preset.shadowIntensity);
@@ -32,8 +35,8 @@ export function PresetPicker({
           <Palette size={18} className="text-muted-foreground" />
         </div>
         <div>
-          <h2 className="text-sm font-bold text-foreground">Design Style</h2>
-          <p className="text-xs text-muted-foreground">Choose a preset or customize manually</p>
+          <h2 className="text-sm font-bold text-foreground">{t.design_style}</h2>
+          <p className="text-xs text-muted-foreground">{t.design_style_hint}</p>
         </div>
       </div>
       <div className="p-6 space-y-5">
@@ -63,7 +66,7 @@ export function PresetPicker({
 
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground">Border Radius</span>
+            <span className="text-xs font-semibold text-muted-foreground">{t.border_radius}</span>
             <div className="flex gap-1.5">
               {(["rounded", "sharp", "minimal"] as const).map((style) => (
                 <button
@@ -71,20 +74,20 @@ export function PresetPicker({
                   type="button"
                   onClick={() => onRadiusChange(style)}
                   className={[
-                    "px-2.5 py-1 text-[10px] font-semibold rounded-md border transition-all capitalize",
+                    "px-2.5 py-1 text-[10px] font-semibold rounded-md border transition-all",
                     borderRadius === style
                       ? "border-primary bg-primary/10 text-primary"
                       : "border-border text-muted-foreground hover:border-muted-foreground/30",
                   ].join(" ")}
                 >
-                  {style}
+                  {String(t[`border_radius_${style}` as keyof typeof t] ?? style)}
                 </button>
               ))}
             </div>
           </div>
 
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground">Shadow</span>
+            <span className="text-xs font-semibold text-muted-foreground">{t.shadow}</span>
             <div className="flex gap-1.5">
               {(["soft", "medium", "strong"] as const).map((level) => (
                 <button
@@ -92,13 +95,13 @@ export function PresetPicker({
                   type="button"
                   onClick={() => onShadowChange(level)}
                   className={[
-                    "px-2.5 py-1 text-[10px] font-semibold rounded-md border transition-all capitalize",
+                    "px-2.5 py-1 text-[10px] font-semibold rounded-md border transition-all",
                     shadowIntensity === level
                       ? "border-primary bg-primary/10 text-primary"
                       : "border-border text-muted-foreground hover:border-muted-foreground/30",
                   ].join(" ")}
                 >
-                  {level}
+                  {String(t[`shadow_${level}` as keyof typeof t] ?? level)}
                 </button>
               ))}
             </div>

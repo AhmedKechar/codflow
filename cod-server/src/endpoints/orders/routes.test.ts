@@ -279,12 +279,12 @@ describe("Orders routes (OpenAPIHono)", () => {
       const res = await app.request("/api/orders/ord_1/status", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "preparing" }),
+        body: JSON.stringify({ status: "busy" }),
       });
 
       expect(res.status).toBe(200);
       expect(queries.updateOrderStatus).toHaveBeenCalledWith(
-        mockDb, "test-store", "ord_1", "preparing", "admin_user_001", "Admin User"
+        mockDb, "test-store", "ord_1", "busy", "admin_user_001", "Admin User"
       );
     });
 
@@ -348,7 +348,7 @@ describe("Orders routes (OpenAPIHono)", () => {
 
     it("unassigns successfully when a driver is set", async () => {
       vi.mocked(queries.getOrderById).mockResolvedValue(
-        orderRow({ driverId: "drv_1", deliveryMethod: "driver", status: "assigned" }) as any
+        orderRow({ driverId: "drv_1", deliveryMethod: "driver", status: "confirmed" }) as any
       );
       vi.mocked(queries.unassignDriver).mockResolvedValue(undefined as any);
 

@@ -105,7 +105,7 @@ export function GiftCardList({ cards, isLoading, onRefresh }: GiftCardListProps)
 
   if (isLoading) {
     return (
-      <div className="glass-card rounded-2xl overflow-hidden">
+      <div className="rounded-xl border border-border bg-card overflow-hidden">
         <div className="p-6 space-y-4">
           {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="flex items-center gap-4 animate-pulse">
@@ -124,7 +124,7 @@ export function GiftCardList({ cards, isLoading, onRefresh }: GiftCardListProps)
 
   if (cards.length === 0) {
     return (
-      <div className="glass-card rounded-2xl p-12 text-center">
+      <div className="rounded-xl border border-border bg-card p-12 text-center">
         <Gift size={48} className="mx-auto text-muted-foreground/30 mb-4" />
         <h3 className="text-lg font-semibold text-foreground mb-2">
           {t.empty?.title ?? "No gift cards"}
@@ -167,7 +167,7 @@ export function GiftCardList({ cards, isLoading, onRefresh }: GiftCardListProps)
         </Select>
       </div>
 
-      <div className="glass-card rounded-2xl overflow-hidden">
+      <div className="rounded-xl border border-border bg-card overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
@@ -187,8 +187,8 @@ export function GiftCardList({ cards, isLoading, onRefresh }: GiftCardListProps)
                 <TableRow key={card.id}>
                   <TableCell>
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                        <Gift size={14} className="text-primary" />
+                      <div className="w-8 h-8 rounded-full bg-muted/60 flex items-center justify-center">
+                        <Gift size={14} className="text-muted-foreground" />
                       </div>
                       <span className="font-mono font-medium">{card.code}</span>
                     </div>

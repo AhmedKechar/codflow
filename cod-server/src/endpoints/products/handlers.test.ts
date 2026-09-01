@@ -128,6 +128,15 @@ describe("Products Endpoint - Error Scenarios", () => {
         variantsCount: 0,
         totalInventory: 10,
         shippingProfileId: null,
+        barcode: null,
+        weightKg: null,
+        metaTitle: null,
+        metaDescription: null,
+        metaKeywords: null,
+        shippingMethod: null,
+        shippingOfficePrice: null,
+        shippingHomePrice: null,
+        externalUrl: null,
       });
 
       const res = await app.request("/products/prod_123", {
@@ -219,6 +228,15 @@ describe("Products Endpoint - Error Scenarios", () => {
         variantsCount: 0,
         totalInventory: 0,
         shippingProfileId: null,
+        barcode: null,
+        weightKg: null,
+        metaTitle: null,
+        metaDescription: null,
+        metaKeywords: null,
+        shippingMethod: null,
+        shippingOfficePrice: null,
+        shippingHomePrice: null,
+        externalUrl: null,
       });
 
       const res = await app.request("/products", {
@@ -360,6 +378,15 @@ describe("Products Endpoint - Error Scenarios", () => {
         variantsCount: 0,
         totalInventory: 10,
         shippingProfileId: null,
+        barcode: null,
+        weightKg: null,
+        metaTitle: null,
+        metaDescription: null,
+        metaKeywords: null,
+        shippingMethod: null,
+        shippingOfficePrice: null,
+        shippingHomePrice: null,
+        externalUrl: null,
       });
 
       // Mock database query to return order with this product
@@ -421,6 +448,15 @@ describe("Products Endpoint - Error Scenarios", () => {
         variantsCount: 0,
         totalInventory: 10,
         shippingProfileId: null,
+        barcode: null,
+        weightKg: null,
+        metaTitle: null,
+        metaDescription: null,
+        metaKeywords: null,
+        shippingMethod: null,
+        shippingOfficePrice: null,
+        shippingHomePrice: null,
+        externalUrl: null,
       });
 
       // Mock no orders with this product

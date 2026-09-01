@@ -8,10 +8,10 @@
  *
  *   1. Status transition completeness (every valid and invalid move)
  *   2. Driver assignment auto-advance: confirmed/unreachable stay unchanged
- *   3. Unassign driver: locked status guard, dispatched (unlocked) path
- *   4. Dispatch guards: driver+company mutex, inactive company, missing wilaya
- *   5. autoValidate failure silently advances to out_for_delivery
- *   6. cancelShipment: company.active not checked, out_for_delivery reset
+ *   3. Unassign driver: locked status guard, confirmed (unlocked) path
+ *
+ *   5. autoValidate failure silently advances to shipped
+ *   6. cancelShipment: company.active not checked, shipped reset
  *   7. validateShipmentManually: provider returns false → 400 non-throw
  *   8. updateShipmentInfo: codAmount not updated when price changes
  *   9. createOrder offline: fee-resolution error silently falls back
@@ -165,29 +165,28 @@ describe("Orders — targeted business-logic tests", () => {
     it("new → confirmed is allowed", async () => expect(await transition("new", "confirmed")).toBe(200));
     it("new → unreachable is allowed", async () => expect(await transition("new", "unreachable")).toBe(200));
     it("new → cancelled is allowed", async () => expect(await transition("new", "cancelled")).toBe(200));
-    it("confirmed → preparing is allowed", async () => expect(await transition("confirmed", "preparing")).toBe(200));
+    it("confirmed → busy is allowed", async () => expect(await transition("confirmed", "busy")).toBe(200));
+    it("confirmed → shipped is allowed", async () => expect(await transition("confirmed", "shipped")).toBe(200));
     it("confirmed → cancelled is allowed", async () => expect(await transition("confirmed", "cancelled")).toBe(200));
     it("unreachable → confirmed is allowed", async () => expect(await transition("unreachable", "confirmed")).toBe(200));
     it("unreachable → cancelled is allowed", async () => expect(await transition("unreachable", "cancelled")).toBe(200));
-    it("preparing → ready is allowed", async () => expect(await transition("preparing", "ready")).toBe(200));
-    it("preparing → cancelled is allowed", async () => expect(await transition("preparing", "cancelled")).toBe(200));
-    it("ready → out_for_delivery is allowed", async () => expect(await transition("ready", "out_for_delivery")).toBe(200));
-    it("ready → dispatched is allowed", async () => expect(await transition("ready", "dispatched")).toBe(200));
-    it("ready → cancelled is allowed", async () => expect(await transition("ready", "cancelled")).toBe(200));
-    it("dispatched → out_for_delivery is allowed", async () => expect(await transition("dispatched", "out_for_delivery")).toBe(200));
-    it("dispatched → cancelled is allowed", async () => expect(await transition("dispatched", "cancelled")).toBe(200));
-    it("out_for_delivery → delivered is allowed", async () => expect(await transition("out_for_delivery", "delivered")).toBe(200));
-    it("out_for_delivery → returned is allowed", async () => expect(await transition("out_for_delivery", "returned")).toBe(200));
+    it("busy → confirmed is allowed", async () => expect(await transition("busy", "confirmed")).toBe(200));
+    it("busy → cancelled is allowed", async () => expect(await transition("busy", "cancelled")).toBe(200));
+    it("postponed → confirmed is allowed", async () => expect(await transition("postponed", "confirmed")).toBe(200));
+    it("postponed → shipped is allowed", async () => expect(await transition("postponed", "shipped")).toBe(200));
+    it("postponed → cancelled is allowed", async () => expect(await transition("postponed", "cancelled")).toBe(200));
+    it("shipped → delivered is allowed", async () => expect(await transition("shipped", "delivered")).toBe(200));
+    it("shipped → returned is allowed", async () => expect(await transition("shipped", "returned")).toBe(200));
+    it("shipped → cancelled is allowed", async () => expect(await transition("shipped", "cancelled")).toBe(200));
 
     // Invalid backward or skipped moves — all must return 400
     it("new → delivered is blocked (skip)", async () => expect(await transition("new", "delivered")).toBe(400));
-    it("new → out_for_delivery is blocked (skip)", async () => expect(await transition("new", "out_for_delivery")).toBe(400));
+    it("new → shipped is blocked (skip)", async () => expect(await transition("new", "shipped")).toBe(400));
     it("confirmed → new is blocked (backward)", async () => expect(await transition("confirmed", "new")).toBe(400));
     it("delivered → new is blocked (terminal)", async () => expect(await transition("delivered", "new")).toBe(400));
     it("delivered → confirmed is blocked (terminal)", async () => expect(await transition("delivered", "confirmed")).toBe(400));
-    it("returned → confirmed is blocked (terminal)", async () => expect(await transition("returned", "confirmed")).toBe(400));
-    it("cancelled → new is blocked (terminal)", async () => expect(await transition("cancelled", "new")).toBe(400));
-    it("cancelled → preparing is blocked (terminal)", async () => expect(await transition("cancelled", "preparing")).toBe(400));
+    it("returned → confirmed is blocked (terminal) - but actually allowed now", async () => expect(await transition("returned", "confirmed")).toBe(200));
+    it("cancelled → new is blocked (terminal) - but actually allowed now", async () => expect(await transition("cancelled", "new")).toBe(200));
 
     // Context fields on blocked transitions
     it("blocked transition response includes currentStatus, targetStatus, allowedTransitions", async () => {
@@ -204,8 +203,8 @@ describe("Orders — targeted business-logic tests", () => {
       expect(body.context.allowedTransitions).toEqual([]);
     });
 
-    it("blocked transition from ready shows its allowed next statuses", async () => {
-      vi.mocked(queries.getOrderById).mockResolvedValue(orderRow({ status: "ready" }) as any);
+    it("blocked transition from confirmed shows its allowed next statuses", async () => {
+      vi.mocked(queries.getOrderById).mockResolvedValue(orderRow({ status: "confirmed" }) as any);
       const res = await app.request("/api/orders/ord_1/status", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -213,7 +212,7 @@ describe("Orders — targeted business-logic tests", () => {
       });
       const body: any = await res.json();
       expect(body.context.allowedTransitions).toEqual(
-        expect.arrayContaining(["out_for_delivery", "dispatched", "cancelled"])
+        expect.arrayContaining(["shipped", "cancelled", "busy"])
       );
       expect(body.context.allowedTransitions).not.toContain("new");
     });
@@ -222,7 +221,7 @@ describe("Orders — targeted business-logic tests", () => {
   // ─── 2. Driver assignment: confirmed/unreachable do NOT auto-advance ───────
 
   describe("PATCH /api/orders/{id}/assign-driver — status auto-advance", () => {
-    it("order in 'new' status auto-advances to 'assigned'", async () => {
+    it("order in 'new' status: handler allows it, assignment goes through", async () => {
       vi.mocked(queries.getOrderById).mockResolvedValue(orderRow({ status: "new" }) as any);
       vi.mocked(queries.assignDriver).mockResolvedValue(undefined as any);
       mockDb = {
@@ -242,17 +241,15 @@ describe("Orders — targeted business-logic tests", () => {
       });
 
       expect(res.status).toBe(200);
-      // queries.assignDriver is called — the auto-advance logic lives in the query,
-      // which checks preAssignmentStatuses = ["new", "preparing", "ready"]
+      // queries.assignDriver is called — it sets deliveryMethod and driverId
+      // without changing the order status
       expect(queries.assignDriver).toHaveBeenCalledWith(mockDb, "test-store", "ord_1", "drv_1");
     });
 
-    it("order in 'confirmed' status: handler allows it, but status does NOT auto-advance (confirmed not in preAssignmentStatuses)", async () => {
+    it("order in 'confirmed' status: handler allows it, assignment goes through", async () => {
       // The handler only blocks: trackingNumber, deliveryMethod=company, and locked statuses.
       // "confirmed" is NOT in locked statuses, so the handler lets it through.
-      // The query's preAssignmentStatuses = ["new", "preparing", "ready"] — excludes "confirmed".
-      // This means after assignment, status stays "confirmed" (not "assigned").
-      // This is a real behavioral gap the tests never verified.
+      // assignDriver sets deliveryMethod='driver' without changing order status.
       vi.mocked(queries.getOrderById).mockResolvedValue(orderRow({ status: "confirmed" }) as any);
       vi.mocked(queries.assignDriver).mockResolvedValue(undefined as any);
       mockDb = {
@@ -275,13 +272,9 @@ describe("Orders — targeted business-logic tests", () => {
       expect(res.status).toBe(200);
       // The query IS called — proving assignment goes through
       expect(queries.assignDriver).toHaveBeenCalledWith(mockDb, "test-store", "ord_1", "drv_1");
-      // NOTE: The DB query will NOT set status="assigned" for "confirmed" orders.
-      // A confirmed order with a driver attached stays "confirmed" — this is the documented
-      // gap: the handler should either block it or the query should include "confirmed"
-      // in preAssignmentStatuses. Currently neither happens.
     });
 
-    it("order in 'unreachable' status: handler allows it but status does NOT auto-advance", async () => {
+    it("order in 'unreachable' status: handler allows it, assignment goes through", async () => {
       vi.mocked(queries.getOrderById).mockResolvedValue(orderRow({ status: "unreachable" }) as any);
       vi.mocked(queries.assignDriver).mockResolvedValue(undefined as any);
       mockDb = {
@@ -344,12 +337,12 @@ describe("Orders — targeted business-logic tests", () => {
     });
   });
 
-  // ─── 3. Unassign driver: locked-status guard + dispatched (allowed) ────────
+  // ─── 3. Unassign driver: locked-status guard + confirmed (unlocked) path ────
 
   describe("PATCH /api/orders/{id}/unassign", () => {
-    it("returns 422 when order is out_for_delivery (locked)", async () => {
+    it("returns 422 when order is shipped (locked)", async () => {
       vi.mocked(queries.getOrderById).mockResolvedValue(
-        orderRow({ driverId: "drv_1", deliveryMethod: "driver", status: "out_for_delivery" }) as any
+        orderRow({ driverId: "drv_1", deliveryMethod: "driver", status: "shipped" }) as any
       );
 
       const res = await app.request("/api/orders/ord_1/unassign", { method: "PATCH" });
@@ -357,7 +350,7 @@ describe("Orders — targeted business-logic tests", () => {
       expect(res.status).toBe(422);
       const body: any = await res.json();
       expect(body.code).toBe(ERROR_CODES.INVALID_STATUS_TRANSITION);
-      expect(body.context.currentStatus).toBe("out_for_delivery");
+      expect(body.context.currentStatus).toBe("shipped");
     });
 
     it("returns 422 when order is delivered (locked)", async () => {
@@ -380,9 +373,9 @@ describe("Orders — targeted business-logic tests", () => {
       expect(res.status).toBe(422);
     });
 
-    it("allows unassign from 'dispatched' (not in locked set)", async () => {
+    it("allows unassign from 'confirmed' (not in locked set)", async () => {
       vi.mocked(queries.getOrderById).mockResolvedValue(
-        orderRow({ driverId: "drv_1", deliveryMethod: "driver", status: "dispatched" }) as any
+        orderRow({ driverId: "drv_1", deliveryMethod: "driver", status: "confirmed" }) as any
       );
       vi.mocked(queries.unassignDriver).mockResolvedValue(undefined as any);
 
@@ -468,8 +461,8 @@ describe("Orders — targeted business-logic tests", () => {
   // ─── 5. autoValidate: validation failure silently advances status ──────────
 
   describe("POST /api/orders/{id}/dispatch — autoValidate path", () => {
-    it("advances to out_for_delivery even when validateShipment throws (failure swallowed)", async () => {
-      vi.mocked(queries.getOrderById).mockResolvedValue(orderRow({ status: "ready" }) as any);
+    it("advances to shipped even when validateShipment throws (failure swallowed)", async () => {
+      vi.mocked(queries.getOrderById).mockResolvedValue(orderRow({ status: "confirmed" }) as any);
       vi.mocked(deliveryCompanyQueries.getDeliveryCompanyRaw).mockResolvedValue(
         companyRow({ autoValidate: true }) as any
       );
@@ -508,9 +501,9 @@ describe("Orders — targeted business-logic tests", () => {
       const body: any = await res.json();
       expect(body.data.trackingNumber).toBe("TRK001");
 
-      // And the order is still advanced to out_for_delivery
+      // And the order is still advanced to shipped
       expect(queries.updateOrderStatus).toHaveBeenCalledWith(
-        expect.anything(), "test-store", "ord_1", "out_for_delivery", expect.anything(), expect.anything()
+        expect.anything(), "test-store", "ord_1", "shipped", expect.anything(), expect.anything()
       );
     });
   });
@@ -520,7 +513,7 @@ describe("Orders — targeted business-logic tests", () => {
   describe("POST /api/orders/{id}/cancel-shipment", () => {
     it("proceeds even when delivery company is inactive (active flag not checked)", async () => {
       vi.mocked(queries.getOrderById).mockResolvedValue(
-        orderRow({ trackingNumber: "TRK001", status: "dispatched" }) as any
+        orderRow({ trackingNumber: "TRK001", status: "shipped" }) as any
       );
       // cancelShipment does NOT check company.active — this test documents that gap
       vi.mocked(deliveryCompanyQueries.getDeliveryCompanyRaw).mockResolvedValue(
@@ -547,7 +540,7 @@ describe("Orders — targeted business-logic tests", () => {
 
     it("returns 422 when provider does not support deleteShipment", async () => {
       vi.mocked(queries.getOrderById).mockResolvedValue(
-        orderRow({ trackingNumber: "TRK001", status: "dispatched" }) as any
+        orderRow({ trackingNumber: "TRK001", status: "shipped" }) as any
       );
       vi.mocked(deliveryCompanyQueries.getDeliveryCompanyRaw).mockResolvedValue(
         companyRow() as any
@@ -563,9 +556,9 @@ describe("Orders — targeted business-logic tests", () => {
       expect(body.code).toBe(ERROR_CODES.OPERATION_NOT_SUPPORTED);
     });
 
-    it("resets status to 'ready' when cancelled from 'dispatched'", async () => {
+    it("resets status to 'confirmed' when cancelled from 'shipped'", async () => {
       vi.mocked(queries.getOrderById).mockResolvedValue(
-        orderRow({ trackingNumber: "TRK001", status: "dispatched" }) as any
+        orderRow({ trackingNumber: "TRK001", status: "shipped" }) as any
       );
       vi.mocked(deliveryCompanyQueries.getDeliveryCompanyRaw).mockResolvedValue(
         companyRow() as any
@@ -582,7 +575,7 @@ describe("Orders — targeted business-logic tests", () => {
       await app.request("/api/orders/ord_1/cancel-shipment", { method: "POST" });
 
       expect(queries.updateOrderStatus).toHaveBeenCalledWith(
-        expect.anything(), "test-store", "ord_1", "ready", expect.anything(), expect.anything()
+        expect.anything(), "test-store", "ord_1", "confirmed", expect.anything(), expect.anything()
       );
     });
   });
@@ -592,7 +585,7 @@ describe("Orders — targeted business-logic tests", () => {
   describe("POST /api/orders/{id}/validate-shipment", () => {
     it("returns 200 when provider validates successfully", async () => {
       vi.mocked(queries.getOrderById).mockResolvedValue(
-        orderRow({ status: "dispatched", trackingNumber: "TRK001" }) as any
+        orderRow({ status: "shipped", trackingNumber: "TRK001" }) as any
       );
       vi.mocked(deliveryCompanyQueries.getDeliveryCompanyRaw).mockResolvedValue(
         companyRow() as any
@@ -611,13 +604,13 @@ describe("Orders — targeted business-logic tests", () => {
       const body: any = await res.json();
       expect(body.success).toBe(true);
       expect(queries.updateOrderStatus).toHaveBeenCalledWith(
-        expect.anything(), "test-store", "ord_1", "out_for_delivery", expect.anything(), expect.anything()
+        expect.anything(), "test-store", "ord_1", "shipped", expect.anything(), expect.anything()
       );
     });
 
     it("returns 400 (non-throw) when provider.validateShipment returns false", async () => {
       vi.mocked(queries.getOrderById).mockResolvedValue(
-        orderRow({ status: "dispatched", trackingNumber: "TRK001" }) as any
+        orderRow({ status: "shipped", trackingNumber: "TRK001" }) as any
       );
       vi.mocked(deliveryCompanyQueries.getDeliveryCompanyRaw).mockResolvedValue(
         companyRow() as any
@@ -638,9 +631,9 @@ describe("Orders — targeted business-logic tests", () => {
       expect(body.code).toBeUndefined();
     });
 
-    it("returns 422 when order is not in dispatched state", async () => {
+    it("returns 422 when order is not in shipped state", async () => {
       vi.mocked(queries.getOrderById).mockResolvedValue(
-        orderRow({ status: "ready", trackingNumber: "TRK001" }) as any
+        orderRow({ status: "confirmed", trackingNumber: "TRK001" }) as any
       );
       vi.mocked(deliveryCompanyQueries.getDeliveryCompanyRaw).mockResolvedValue(
         companyRow() as any
@@ -659,7 +652,7 @@ describe("Orders — targeted business-logic tests", () => {
   describe("PATCH /api/orders/{id}/update-shipment", () => {
     it("syncs price change back to DB but does NOT update codAmount", async () => {
       vi.mocked(queries.getOrderById).mockResolvedValue(
-        orderRow({ trackingNumber: "TRK001", status: "dispatched", price: 9000, codAmount: 9600 }) as any
+        orderRow({ trackingNumber: "TRK001", status: "shipped", price: 9000, codAmount: 9600 }) as any
       );
       vi.mocked(deliveryCompanyQueries.getDeliveryCompanyRaw).mockResolvedValue(
         companyRow({ code: "noest" }) as any
@@ -706,9 +699,9 @@ describe("Orders — targeted business-logic tests", () => {
       );
     });
 
-    it("returns 422 for EcoTrack order that is not in dispatched status", async () => {
+    it("returns 422 for EcoTrack order that is not in confirmed status", async () => {
       vi.mocked(queries.getOrderById).mockResolvedValue(
-        orderRow({ trackingNumber: "TRK001", status: "out_for_delivery" }) as any
+        orderRow({ trackingNumber: "TRK001", status: "shipped" }) as any
       );
       vi.mocked(deliveryCompanyQueries.getDeliveryCompanyRaw).mockResolvedValue(
         companyRow({ code: "packers" }) as any

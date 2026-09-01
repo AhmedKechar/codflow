@@ -43,17 +43,17 @@ export function Pagination({
   const NextIcon = dir === "rtl" ? ChevronLeft : ChevronRight;
 
   const navBtn = cn(
-    "w-9 h-9 rounded-xl flex items-center justify-center",
-    "transition-all duration-200 active:scale-90",
-    "glass-card border-white/40 dark:border-white/5 text-muted-foreground",
-    "hover:border-primary/30 hover:text-primary hover:shadow-sm",
-    "disabled:opacity-30 disabled:pointer-events-none disabled:cursor-not-allowed",
+    "w-9 h-9 rounded-md flex items-center justify-center",
+    "transition-colors duration-150",
+    "bg-card border border-border text-muted-foreground",
+    "hover:bg-muted hover:text-foreground",
+    "disabled:opacity-40 disabled:pointer-events-none disabled:cursor-not-allowed",
   );
 
   return (
     <div className={cn("flex flex-col items-center gap-3 pt-2", className)}>
       {/* Range info */}
-      <p className="text-[11px] font-bold text-muted-foreground/40 uppercase tracking-widest tabular-nums">
+      <p className="text-xs text-muted-foreground tabular-nums">
         {from}–{to} / {totalItems}
       </p>
 
@@ -74,7 +74,7 @@ export function Pagination({
           page === "…" ? (
             <span
               key={`ellipsis-${i}`}
-              className="w-9 h-9 flex items-center justify-center text-[11px] font-black text-muted-foreground/25 select-none"
+              className="w-9 h-9 flex items-center justify-center text-xs text-muted-foreground select-none"
             >
               ···
             </span>
@@ -84,13 +84,13 @@ export function Pagination({
               onClick={() => onPageChange(page as number)}
               aria-current={page === currentPage ? "page" : undefined}
               className={cn(
-                "w-9 h-9 rounded-xl flex items-center justify-center text-[13px] font-black",
-                "transition-all duration-200 active:scale-90",
+                "w-9 h-9 rounded-md flex items-center justify-center text-sm",
+                "transition-colors duration-150",
                 page === currentPage
-                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-105"
+                  ? "bg-primary text-primary-foreground"
                   : cn(
-                      "glass-card border-white/40 dark:border-white/5 text-muted-foreground",
-                      "hover:border-primary/20 hover:text-primary hover:shadow-sm",
+                      "bg-card border border-border text-muted-foreground",
+                      "hover:bg-muted hover:text-foreground",
                     ),
               )}
             >

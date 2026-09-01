@@ -54,7 +54,7 @@ export async function listWhatsAppMessages(filters: WhatsAppFilters = {}): Promi
     if (filters.offset) params.set("offset", String(filters.offset));
 
     const query = params.toString();
-    const response = await apiClient.get<ApiResponse<WhatsAppMessage[]>>(
+    const response = await apiClient.getSilent<ApiResponse<WhatsAppMessage[]>>(
       `/api/whatsapp/messages${query ? `?${query}` : ""}`,
       apiKey,
     );
@@ -63,12 +63,8 @@ export async function listWhatsAppMessages(filters: WhatsAppFilters = {}): Promi
       messages: response.data ?? [],
       count: response.count ?? 0,
     };
-  } catch (error) {
-    if (error instanceof ApiClientError && error.code) {
-      const locale = await getLocale();
-      throw new Error(mapError(error.code, locale, error.context));
-    }
-    throw error;
+  } catch {
+    return { messages: [], count: 0 };
   }
 }
 

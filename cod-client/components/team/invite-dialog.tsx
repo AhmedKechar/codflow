@@ -139,14 +139,14 @@ export function InviteDialog({ open, onClose, onSuccess }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-lg p-0 overflow-hidden border-border/30 glass-card rounded-3xl">
+      <DialogContent className="sm:max-w-lg p-0 overflow-hidden border-border rounded-xl">
 
         {/* ── Success state ── */}
         {dialogState === "success" && (
           <>
             <DialogHeader className="p-6 sm:p-8 border-b border-border/10 bg-emerald-500/5">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center shrink-0 shadow-inner">
+                <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
                   <ShieldCheck className="w-5 h-5 text-emerald-500" />
                 </div>
                 <div>
@@ -163,21 +163,21 @@ export function InviteDialog({ open, onClose, onSuccess }: Props) {
             <div className="p-6 sm:p-8 space-y-5">
               <div className="space-y-3">
                 <Label className="text-[9px] sm:text-[10px] font-black text-muted-foreground/70 uppercase tracking-widest ms-1 flex items-center gap-1.5">
-                  <KeyRound size={10} className="text-primary/50" />
+                  <KeyRound size={10} className="text-muted-foreground/50" />
                   {t.invite_dialog_extra.api_key_label}
                 </Label>
                 <div className="flex items-center gap-2">
                   <Input
                     value={createdApiKey}
                     readOnly
-                    className="h-11 bg-muted/20 border-border/40 rounded-2xl px-4 text-sm font-bold font-mono tracking-wider text-foreground"
+                    className="h-11 bg-muted border-border rounded-lg px-4 text-sm font-bold font-mono tracking-wider text-foreground"
                     dir="ltr"
                   />
                   <Button
                     type="button"
                     variant="outline"
                     onClick={copyKey}
-                    className="h-11 w-11 shrink-0 rounded-2xl border-border/40 bg-white/50 dark:bg-muted/20 p-0 flex items-center justify-center transition-all active:scale-95"
+                    className="h-11 w-11 shrink-0 rounded-lg border-border p-0 flex items-center justify-center"
                   >
                     {copied
                       ? <Check className="w-4 h-4 text-emerald-500" />
@@ -196,14 +196,14 @@ export function InviteDialog({ open, onClose, onSuccess }: Props) {
                   <Input
                     value={createdTempPassword}
                     readOnly
-                    className="h-11 bg-amber-50/50 dark:bg-amber-500/5 border-amber-200/40 dark:border-amber-500/20 rounded-2xl px-4 text-sm font-bold font-mono tracking-wider text-foreground"
+                    className="h-11 bg-amber-50/50 dark:bg-amber-500/5 border-amber-200/40 dark:border-amber-500/20 rounded-lg px-4 text-sm font-bold font-mono tracking-wider text-foreground"
                     dir="ltr"
                   />
                   <Button
                     type="button"
                     variant="outline"
                     onClick={copyPassword}
-                    className="h-11 w-11 shrink-0 rounded-2xl border-amber-200/40 dark:border-amber-500/20 bg-amber-50/50 dark:bg-amber-500/5 p-0 flex items-center justify-center transition-all active:scale-95"
+                    className="h-11 w-11 shrink-0 rounded-lg border-amber-200/40 dark:border-amber-500/20 bg-amber-50/50 dark:bg-amber-500/5 p-0 flex items-center justify-center"
                   >
                     {copiedPassword
                       ? <Check className="w-4 h-4 text-emerald-500" />
@@ -229,7 +229,7 @@ export function InviteDialog({ open, onClose, onSuccess }: Props) {
             <div className="px-6 sm:px-8 py-5 border-t border-border/10 bg-muted/5">
               <Button
                 onClick={handleDone}
-                className="w-full h-11 sm:h-12 rounded-xl sm:rounded-2xl bg-primary text-primary-foreground font-black text-[10px] sm:text-[11px] uppercase tracking-widest shadow-lg shadow-primary/10 transition-all active:scale-95"
+                className="w-full h-11 sm:h-12 rounded-lg bg-primary text-primary-foreground font-black text-[10px] sm:text-[11px] uppercase tracking-widest"
               >
                 Done
               </Button>
@@ -242,8 +242,8 @@ export function InviteDialog({ open, onClose, onSuccess }: Props) {
           <>
             <DialogHeader className="p-6 sm:p-8 border-b border-border/10 bg-muted/5">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 shadow-inner">
-                  <UserPlus className="w-5 h-5 text-primary" />
+                <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                  <UserPlus className="w-5 h-5 text-muted-foreground" />
                 </div>
                 <div>
                   <DialogTitle className="text-xl font-black text-foreground tracking-tight font-display uppercase">
@@ -270,7 +270,7 @@ export function InviteDialog({ open, onClose, onSuccess }: Props) {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder={t.invite_dialog.name_placeholder}
-                      className="h-11 sm:h-12 bg-muted/20 border-border/40 rounded-xl sm:rounded-2xl ps-11 text-sm font-bold focus:ring-primary/20 focus:border-primary/30 transition-all"
+                      className="h-11 sm:h-12 bg-muted border-border rounded-lg ps-11 text-sm font-bold"
                       required
                       disabled={loading}
                     />
@@ -289,7 +289,7 @@ export function InviteDialog({ open, onClose, onSuccess }: Props) {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder={t.invite_dialog.email_placeholder}
-                      className="h-11 sm:h-12 bg-muted/20 border-border/40 rounded-xl sm:rounded-2xl ps-11 text-sm font-bold focus:ring-primary/20 focus:border-primary/30 transition-all"
+                      className="h-11 sm:h-12 bg-muted border-border rounded-lg ps-11 text-sm font-bold"
                       required
                       disabled={loading}
                       dir="ltr"
@@ -310,10 +310,10 @@ export function InviteDialog({ open, onClose, onSuccess }: Props) {
                     }}
                     disabled={loading}
                   >
-                    <SelectTrigger className="h-11 sm:h-12 bg-muted/20 border-border/40 rounded-xl sm:rounded-2xl px-4 text-sm font-bold focus:ring-primary/20 focus:border-primary/30 transition-all">
+                    <SelectTrigger className="h-11 sm:h-12 bg-muted border-border rounded-lg px-4 text-sm font-bold">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="glass-card rounded-2xl">
+                    <SelectContent className="rounded-lg">
                       <SelectItem value="staff" className="font-bold">{common.roles.staff}</SelectItem>
                       <SelectItem value="admin" className="font-bold">{common.roles.admin}</SelectItem>
                     </SelectContent>
@@ -325,15 +325,15 @@ export function InviteDialog({ open, onClose, onSuccess }: Props) {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between ms-1">
                       <Label className="text-[9px] sm:text-[10px] font-black text-muted-foreground/70 uppercase tracking-widest flex items-center gap-1.5">
-                        <KeyRound size={10} className="text-primary/50" />
+                        <KeyRound size={10} className="text-muted-foreground/50" />
                         {t.invite_dialog_extra.permissions_label}
                       </Label>
-                      <span className="text-[9px] font-black text-primary/60 uppercase tracking-widest">
+                      <span className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-widest">
                         {t.invite_dialog_extra.n_selected.replace("{{count}}", String(selectedScopes.length))}
                       </span>
                     </div>
 
-                    <div className="rounded-2xl border border-border/30 bg-muted/10 overflow-hidden divide-y divide-border/20">
+                    <div className="rounded-lg border border-border bg-muted/30 overflow-hidden divide-y divide-border/20">
                       {Object.entries(SCOPE_CATEGORIES).map(([key, group]) => {
                         const isExpanded = expandedGroups.includes(key);
                         const groupScopes = group.scopes as readonly string[];
@@ -362,7 +362,7 @@ export function InviteDialog({ open, onClose, onSuccess }: Props) {
                                   {t.scope_categories[key as keyof typeof t.scope_categories] ?? group.label}
                                 </span>
                                 {checkedCount > 0 && (
-                                  <span className="text-[9px] font-black text-primary bg-primary/10 px-1.5 py-0.5 rounded-md">
+                                  <span className="text-[9px] font-black text-muted-foreground bg-muted px-1.5 py-0.5 rounded-md">
                                     {checkedCount}/{groupScopes.length}
                                   </span>
                                 )}
@@ -380,7 +380,7 @@ export function InviteDialog({ open, onClose, onSuccess }: Props) {
                                     key={scope}
                                     className={cn(
                                       "flex items-center gap-3 cursor-pointer rounded-xl px-3 py-2 transition-colors hover:bg-muted/30",
-                                      selectedScopes.includes(scope) && "bg-primary/5",
+                                      selectedScopes.includes(scope) && "bg-muted/40",
                                     )}
                                   >
                                     <Checkbox
@@ -426,7 +426,7 @@ export function InviteDialog({ open, onClose, onSuccess }: Props) {
                 variant="outline"
                 onClick={() => { resetForm(); onClose(); }}
                 disabled={loading}
-                className="flex-1 h-11 sm:h-12 rounded-xl sm:rounded-2xl border-border/40 bg-white/50 dark:bg-muted/20 font-black text-[10px] sm:text-[11px] uppercase tracking-widest transition-all active:scale-95"
+                className="flex-1 h-11 sm:h-12 rounded-lg border-border font-black text-[10px] sm:text-[11px] uppercase tracking-widest"
               >
                 {t.invite_dialog.cancel}
               </Button>
@@ -434,7 +434,7 @@ export function InviteDialog({ open, onClose, onSuccess }: Props) {
                 type="submit"
                 form="invite-form"
                 disabled={loading}
-                className="flex-1 h-11 sm:h-12 rounded-xl sm:rounded-2xl bg-primary text-primary-foreground font-black text-[10px] sm:text-[11px] uppercase tracking-widest shadow-lg shadow-primary/10 transition-all active:scale-95"
+                className="flex-1 h-11 sm:h-12 rounded-lg bg-primary text-primary-foreground font-black text-[10px] sm:text-[11px] uppercase tracking-widest"
               >
                 {loading ? "..." : t.invite_dialog.send_invite}
               </Button>

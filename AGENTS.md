@@ -162,6 +162,34 @@ router.openapi(myRoute.route, myRoute.handler);
 | **`to-spec`** | **Convert ideas into formal specifications** |
 | **`to-tickets`** | **Break features into GitHub issues** |
 
+### Polaris Conversion Files
+
+| File | Purpose |
+|------|---------|
+| `POLARIS_PLAN.md` | Master plan — read first, update after every task |
+| `TEAM.md` | Agent roles, protocol, parallelism rules |
+| `phases/phase-0.md` | Phase 0 detailed specs (Shared Components) |
+| `phases/phase-1.md` | Phase 1 detailed specs (Index Pages) — generated when Phase 0 completes |
+| `phases/phase-2.md` | Phase 2 detailed specs (Product Form) — generated when Phase 1 completes |
+| `phases/phase-3.md` | Phase 3 detailed specs (Orders + Shipping) |
+| `phases/phase-4.md` | Phase 4 detailed specs (Customers + Groups) |
+| `phases/phase-5.md` | Phase 5 detailed specs (Offers + Discounts) |
+| `phases/phase-6.md` | Phase 6 detailed specs (Detail Views) |
+| `phases/phase-7.md` | Phase 7 detailed specs (AGENTS.md Config) |
+
+## Polaris Conversion (Active)
+
+CodFlow is converting its merchant dashboard to Shopify Polaris patterns.
+See these files for the multi-agent orchestration system:
+
+- **`POLARIS_PLAN.md`** — Master plan with all phases, tasks, and progress tracking
+- **`TEAM.md`** — 25-agent team roles, protocol, and parallelism rules
+- **`phases/phase-0.md`** — Detailed specs for Phase 0 (Shared Components)
+
+Every agent starts by reading `POLARIS_PLAN.md` to know the current phase and
+next available task. After completing a task, mark it `completed` in the plan
+and add your entry to the Progress Log.
+
 ## Team Architecture
 
 CodFlow uses a **multi-agent team system** for feature development. Each agent has specialized expertise and follows strict quality gates.

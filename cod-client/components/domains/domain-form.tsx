@@ -41,9 +41,9 @@ export function DomainForm({ onSuccess, onCancel }: DomainFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="bg-white/40 dark:bg-white/5 backdrop-blur-xl border border-border/60 rounded-2xl p-6 space-y-4">
+      <div className="rounded-xl border border-border bg-card p-6 space-y-4">
         <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-          <Globe size={20} className="text-primary" />
+          <Globe size={20} className="text-muted-foreground" />
           {t.form?.add_domain ?? "Add Custom Domain"}
         </h3>
 

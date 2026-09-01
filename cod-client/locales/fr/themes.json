@@ -131,6 +131,16 @@
   "pages_announcement": "Barre d'annonce",
   "pages_announcement_hint": "La barre promotionnelle en haut de la boutique",
   "pages_announcement_bar": "Afficher la barre d'annonce",
+  "design_style": "Style de design",
+  "design_style_hint": "Choisissez un préréglage ou personnalisez manuellement",
+  "border_radius": "Rayon des coins",
+  "shadow": "Ombre",
+  "border_radius_rounded": "Arrondi",
+  "border_radius_sharp": "Angulaire",
+  "border_radius_minimal": "Minimal",
+  "shadow_soft": "Douce",
+  "shadow_medium": "Moyenne",
+  "shadow_strong": "Forte",
   "themes": {
     "theme01": {
       "name": "Classique",

@@ -36,7 +36,7 @@ function Switch({
       <SwitchPrimitive.Thumb
         data-slot="switch-thumb"
         className={cn(
-          "pointer-events-none block rounded-full bg-white shadow-sm ring-0 transition-transform duration-200",
+          "pointer-events-none block rounded-full bg-white ring-0 transition-transform duration-200",
           // Default: thumb is size-5 (20px), container inner is 40px → travels 0→20px
           "group-data-[size=default]/switch:size-5",
           "group-data-[size=default]/switch:data-unchecked:translate-x-0",

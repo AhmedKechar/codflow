@@ -124,9 +124,8 @@ export function McpPage({ config, myConnections, teamConnections }: Props) {
       {/* ── Page header ────────────────────────────────────────── */}
       <div className="space-y-1.5">
         <div className="flex items-center gap-3">
-          <div className="relative w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group">
-            <div className="absolute inset-0 bg-primary/5 rounded-xl blur-xl group-hover:bg-primary/10 transition-all" />
-            <Sparkles size={18} className="text-primary relative z-10 group-hover:scale-110 group-hover:rotate-3 transition-transform" />
+          <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center shrink-0">
+            <Sparkles size={18} className="text-muted-foreground" />
           </div>
           <div className="min-w-0">
             <h1 className="text-xl sm:text-2xl font-black text-foreground tracking-tight truncate">
@@ -141,22 +140,22 @@ export function McpPage({ config, myConnections, teamConnections }: Props) {
 
       {/* ── Top-level tabs ──────────────────────────────────────── */}
       <Tabs defaultValue="connect" className="w-full">
-        <TabsList className="bg-muted/30 border border-border/20 p-1 rounded-xl h-11 w-full sm:w-auto inline-flex">
+        <TabsList className="bg-muted/30 border border-border p-1 rounded-lg h-11 w-full sm:w-auto inline-flex">
           <TabsTrigger
             value="connect"
-            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 rounded-lg flex-1 sm:flex-initial data-[state=active]:bg-white dark:data-[state=active]:bg-primary data-[state=active]:text-primary dark:data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-black text-[10px] uppercase tracking-widest transition-all"
+            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 rounded-lg flex-1 sm:flex-initial font-black text-[10px] uppercase tracking-widest"
           >
             <Plug size={14} />
             <span className="truncate">{t.tabs.connect}</span>
           </TabsTrigger>
           <TabsTrigger
             value="mine"
-            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 rounded-lg flex-1 sm:flex-initial data-[state=active]:bg-white dark:data-[state=active]:bg-primary data-[state=active]:text-primary dark:data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-black text-[10px] uppercase tracking-widest transition-all"
+            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 rounded-lg flex-1 sm:flex-initial font-black text-[10px] uppercase tracking-widest"
           >
             <Bot size={14} />
             <span className="truncate">{t.tabs.mine}</span>
             {myConnections.length > 0 && (
-              <span className="text-[9px] font-black bg-primary/10 text-primary px-1.5 py-0.5 rounded-full tabular-nums">
+              <span className="text-[9px] font-black bg-muted text-muted-foreground px-1.5 py-0.5 rounded-full tabular-nums">
                 {myConnections.length}
               </span>
             )}
@@ -164,12 +163,12 @@ export function McpPage({ config, myConnections, teamConnections }: Props) {
           {isAdmin && (
             <TabsTrigger
               value="team"
-              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 rounded-lg flex-1 sm:flex-initial data-[state=active]:bg-white dark:data-[state=active]:bg-primary data-[state=active]:text-primary dark:data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-black text-[10px] uppercase tracking-widest transition-all"
+              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 rounded-lg flex-1 sm:flex-initial font-black text-[10px] uppercase tracking-widest"
             >
               <Users size={14} />
               <span className="truncate">{t.tabs.team}</span>
               {otherUsersConnections.length > 0 && (
-                <span className="text-[9px] font-black bg-primary/10 text-primary px-1.5 py-0.5 rounded-full tabular-nums">
+                <span className="text-[9px] font-black bg-muted text-muted-foreground px-1.5 py-0.5 rounded-full tabular-nums">
                   {otherUsersConnections.length}
                 </span>
               )}
@@ -305,7 +304,7 @@ function PaginatedConnections({
 
             <div className="flex items-center gap-2 px-3 py-1.5 bg-card rounded-lg border border-border/60 shadow-xs">
               <span className="text-[11px] font-medium text-muted-foreground/60">{common.table.page}</span>
-              <span className="text-[13px] font-bold text-primary tabular-nums">{safePage}</span>
+              <span className="text-[13px] font-bold text-foreground tabular-nums">{safePage}</span>
               <span className="text-[11px] font-medium text-muted-foreground/60">{common.table.of} {totalPages}</span>
             </div>
 
@@ -352,18 +351,14 @@ function UrlHeroCard({ mcpUrl, t }: { mcpUrl: string; t: ReturnType<typeof useMc
   }
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-primary/20 glass-card group">
-      <div className="absolute -top-12 -end-12 w-40 h-40 bg-primary/10 blur-[120px] rounded-full pointer-events-none group-hover:bg-primary/15 transition-all duration-700" />
-      <div className="absolute inset-0 bg-noise opacity-[0.015] pointer-events-none" />
-
+    <div className="rounded-xl border border-border bg-card overflow-hidden">
       <div className="relative p-5 sm:p-6 space-y-4">
         <div className="flex items-center gap-2.5">
-          <div className="relative w-9 h-9 rounded-xl bg-primary/15 flex items-center justify-center shrink-0 group/icon">
-            <div className="absolute inset-0 bg-primary/10 rounded-xl blur-md group-hover/icon:bg-primary/20 transition-all" />
-            <Globe size={16} className="text-primary relative z-10 group-hover/icon:scale-110 transition-transform" />
+          <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
+            <Globe size={16} className="text-muted-foreground" />
           </div>
           <div className="min-w-0">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/70 leading-none">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/70 leading-none">
               {t.url_card.label}
             </p>
             <p className="text-[11px] sm:text-[12px] text-muted-foreground/60 font-semibold mt-1 leading-relaxed">
@@ -374,7 +369,7 @@ function UrlHeroCard({ mcpUrl, t }: { mcpUrl: string; t: ReturnType<typeof useMc
 
         <div className="flex flex-col sm:flex-row items-stretch gap-2">
           <div
-            className="flex-1 min-w-0 h-11 px-3.5 rounded-xl border border-border/40 bg-background/60 backdrop-blur flex items-center font-mono text-[13px] text-foreground/90 truncate select-all shadow-sm hover:border-border/60 transition-colors"
+            className="flex-1 min-w-0 h-11 px-3.5 rounded-lg border border-border bg-muted flex items-center font-mono text-[13px] text-foreground/90 truncate select-all"
             dir="ltr"
             title={mcpUrl}
           >
@@ -383,8 +378,8 @@ function UrlHeroCard({ mcpUrl, t }: { mcpUrl: string; t: ReturnType<typeof useMc
           <Button
             onClick={copy}
             className={cn(
-              "h-11 px-4 rounded-xl text-[11px] font-black uppercase tracking-widest shadow-md transition-all",
-              copied && "bg-emerald-500 hover:bg-emerald-500/90 shadow-emerald-500/20",
+              "h-11 px-4 rounded-lg text-[11px] font-black uppercase tracking-widest",
+              copied && "bg-emerald-500 hover:bg-emerald-500/90",
             )}
           >
             {copied ? <Check size={14} className="me-1.5" /> : <Copy size={14} className="me-1.5" />}
@@ -419,12 +414,11 @@ function QuickSetup({
   const otherCmd     = `npx mcp-remote ${mcpUrl}`;
 
   return (
-    <section className="relative glass-card rounded-2xl border-border/40 p-4 sm:p-5 space-y-4 overflow-hidden group">
-      <div className="absolute inset-0 bg-noise opacity-[0.01] pointer-events-none" />
+    <section className="rounded-xl border border-border bg-card p-4 sm:p-5 space-y-4">
 
       <div className="relative z-10">
         <div className="flex items-center gap-2">
-          <Terminal size={14} className="text-muted-foreground/70 group-hover:text-muted-foreground transition-colors" />
+          <Terminal size={14} className="text-muted-foreground/70" />
           <h2 className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground/70">
             {t.snippet.heading}
           </h2>
@@ -498,7 +492,7 @@ function Snippet({
   }
 
   return (
-    <div className="relative rounded-xl bg-background/60 border border-border/40 overflow-hidden group shadow-sm hover:shadow-md hover:border-border/60 transition-all">
+    <div className="rounded-lg bg-muted border border-border overflow-hidden">
       <pre
         dir="ltr"
         className={cn(
@@ -509,10 +503,10 @@ function Snippet({
       <button
         onClick={copy}
         className={cn(
-          "absolute top-2 end-2 h-8 px-2.5 rounded-lg border text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 transition-all active:scale-95",
+          "absolute top-2 end-2 h-8 px-2.5 rounded-lg border text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5",
           copied
-            ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30 shadow-sm"
-            : "bg-background/70 text-muted-foreground hover:text-foreground border-border/40 hover:bg-background/90",
+            ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30"
+            : "bg-card text-muted-foreground hover:text-foreground border-border hover:bg-muted",
         )}
         aria-label={t.snippet.copy_snippet}
         // eslint-disable-next-line react/no-unknown-property
@@ -529,16 +523,12 @@ function Snippet({
 
 function WhatIsThis({ t }: { t: ReturnType<typeof useMcp> }) {
   return (
-    <div className="relative glass-card rounded-2xl border-primary/10 p-5 sm:p-6 overflow-hidden group">
-      <div className="absolute -top-8 -end-8 w-36 h-36 bg-primary/6 blur-[80px] rounded-full pointer-events-none" />
-      <div className="absolute inset-0 bg-noise opacity-[0.01] pointer-events-none" />
-
-      <div className="relative z-10 space-y-4">
+    <div className="rounded-xl border border-border bg-card p-5 sm:p-6">
+      <div className="space-y-4">
         {/* Header */}
         <div className="flex items-center gap-3">
-          <div className="relative w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-            <div className="absolute inset-0 bg-primary/5 rounded-xl blur-md" />
-            <HelpCircle size={16} className="text-primary relative z-10 group-hover:scale-110 transition-transform duration-300" />
+          <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
+            <HelpCircle size={16} className="text-muted-foreground" />
           </div>
           <p className="text-[13px] font-black uppercase tracking-[0.15em] text-foreground/80">
             {t.help.title}
@@ -549,8 +539,8 @@ function WhatIsThis({ t }: { t: ReturnType<typeof useMcp> }) {
         <div className="space-y-3 ps-0.5">
           {[t.help.paragraph_1, t.help.paragraph_2, t.help.paragraph_3].map((para, i) => (
             <div key={i} className="flex items-start gap-3">
-              <div className="w-5 h-5 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                <span className="text-[9px] font-black text-primary tabular-nums">{i + 1}</span>
+              <div className="w-5 h-5 rounded-md bg-muted flex items-center justify-center shrink-0 mt-0.5">
+                <span className="text-[9px] font-black text-muted-foreground tabular-nums">{i + 1}</span>
               </div>
               <p className="text-[13px] leading-relaxed text-foreground/70 font-medium flex-1">
                 {para}
@@ -579,18 +569,16 @@ function ConnectionCard({
   const appLabel = conn.clientName?.trim() || conn.clientId;
 
   return (
-    <div className="relative glass-card rounded-2xl border-border/40 p-4 sm:p-5 space-y-3 overflow-hidden group hover:border-border/60 transition-all">
-      <div className="absolute inset-0 bg-noise opacity-[0.01] pointer-events-none" />
+    <div className="rounded-xl border border-border bg-card p-4 sm:p-5 space-y-3">
 
       {/* Row 1: icon + app + status + revoke button */}
-      <div className="flex items-start gap-3 relative z-10">
-        <div className="relative w-10 h-10 rounded-xl bg-muted/40 flex items-center justify-center shrink-0 overflow-hidden group/icon">
-          <div className="absolute inset-0 bg-muted/20 rounded-xl blur-md group-hover/icon:bg-muted/30 transition-all" />
+      <div className="flex items-start gap-3">
+        <div className="w-10 h-10 rounded-lg bg-muted/40 flex items-center justify-center shrink-0 overflow-hidden">
           {conn.clientIconUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={conn.clientIconUrl} alt={appLabel} className="w-full h-full object-cover relative z-10" />
+            <img src={conn.clientIconUrl} alt={appLabel} className="w-full h-full object-cover" />
           ) : (
-            <Bot size={18} className="text-muted-foreground/70 relative z-10 group-hover/icon:scale-110 transition-transform" />
+            <Bot size={18} className="text-muted-foreground/70" />
           )}
         </div>
 
@@ -601,7 +589,7 @@ function ConnectionCard({
           </div>
           <div className="flex items-center gap-3 flex-wrap">
             {showOwner && conn.user && (
-              <span className="text-[11px] text-primary/80 font-semibold truncate inline-flex items-center gap-1">
+              <span className="text-[11px] text-muted-foreground/80 font-semibold truncate inline-flex items-center gap-1">
                 <Users size={10} />
                 {conn.user.name || conn.user.email}
               </span>
@@ -624,7 +612,7 @@ function ConnectionCard({
           variant="outline"
           onClick={onRevoke}
           disabled={pending}
-          className="h-9 px-3 rounded-lg text-[10px] font-black uppercase tracking-widest text-rose-600 border-rose-500/30 hover:bg-rose-500/10 hover:text-rose-600 hover:border-rose-500/50 shrink-0 active:scale-95"
+          className="h-9 px-3 rounded-lg text-[10px] font-black uppercase tracking-widest text-rose-600 border-rose-500/30 hover:bg-rose-500/10 hover:text-rose-600 hover:border-rose-500/50 shrink-0"
         >
           {pending ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} className="me-1.5" />}
           <span className="hidden sm:inline">{t.my_connections.revoke}</span>
@@ -634,7 +622,7 @@ function ConnectionCard({
       {/* Row 2: scopes summary + expand */}
       <button
         onClick={() => setScopesOpen((v) => !v)}
-        className="flex items-center gap-2 text-[11px] font-semibold text-muted-foreground/70 hover:text-foreground transition-colors relative z-10 active:scale-[0.98]"
+        className="flex items-center gap-2 text-[11px] font-semibold text-muted-foreground/70 hover:text-foreground transition-colors"
       >
         <Lock size={11} />
         <span>
@@ -652,7 +640,7 @@ function ConnectionCard({
           {conn.scopes.map((scope) => (
             <li
               key={scope}
-              className="font-mono text-[10px] font-bold px-2 py-1 rounded-md bg-primary/5 text-primary/80 border border-primary/10 hover:bg-primary/10 transition-colors"
+              className="font-mono text-[10px] font-bold px-2 py-1 rounded-md bg-muted text-muted-foreground border border-border hover:bg-muted/60 transition-colors"
             >
               {scope}
             </li>

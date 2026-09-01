@@ -70,7 +70,7 @@ export function AssignOrdersDialog({ open, onClose, driver, readyOrders }: Props
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-md bg-card border-border">
         <DialogHeader>
-          <DialogTitle className="text-foreground font-black">
+          <DialogTitle className="text-foreground font-semibold">
             {t.assign_dialog.title} —{" "}
             <span dir="rtl" className="text-primary">
               {driver ? `${driver.firstName} ${driver.lastName}`.trim() : ""}
@@ -105,7 +105,7 @@ export function AssignOrdersDialog({ open, onClose, driver, readyOrders }: Props
                   disabled={loading}
                 />
                 <div>
-                  <p className="text-sm font-black text-foreground">{order.orderNumber}</p>
+                  <p className="text-sm font-semibold text-foreground">{order.orderNumber}</p>
                   <p dir="rtl" className="text-xs text-muted-foreground font-semibold">
                     {order.customerName} · {order.wilaya}
                   </p>
@@ -126,7 +126,7 @@ export function AssignOrdersDialog({ open, onClose, driver, readyOrders }: Props
           </Button>
           <Button
             size="sm"
-            className="bg-primary hover:bg-primary/90 text-primary-foreground font-black"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
             onClick={handleAssign}
             disabled={!selectedOrders.length || loading}
           >

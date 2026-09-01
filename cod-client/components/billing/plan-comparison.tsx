@@ -55,14 +55,14 @@ export function PlanComparison({
             className={cn(
               "relative transition-all duration-200",
               isSelected &&
-                "ring-2 ring-primary shadow-lg shadow-primary/10",
+                "ring-2 ring-primary shadow-sm",
               isCurrent &&
-                "border-primary/40 bg-primary/5"
+                "border-border bg-muted/30"
             )}
           >
             {plan.isPopular && (
               <div className="absolute -top-3 start-1/2 -translate-x-1/2">
-                <span className="bg-primary text-primary-foreground text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-md">
+                <span className="bg-foreground text-background text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full">
                   {t.popular}
                 </span>
               </div>

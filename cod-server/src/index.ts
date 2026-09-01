@@ -48,6 +48,7 @@ import discountCodesRoutes from "@/endpoints/discount-codes/routes";
 import giftCardsRoutes from "@/endpoints/gift-cards/routes";
 import whatsappRoutes from "@/endpoints/whatsapp/routes";
 import smsRoutes from "@/endpoints/sms/routes";
+import notificationSettingsRoutes from "@/endpoints/notification-settings/routes";
 import customDomainsRoutes from "@/endpoints/custom-domains/routes";
 
 import { subscriptionGating } from "@/middleware/subscription-gating";
@@ -205,6 +206,7 @@ app.route("/api/custom-domains", customDomainsRoutes);
 // ─── Messaging Routes ─────────────────────────────────────────────────────────
 app.route("/api/whatsapp", whatsappRoutes);
 app.route("/api/sms", smsRoutes);
+app.route("/api/notification-settings", notificationSettingsRoutes);
 
 // ─── SaaS Feature Routes ─────────────────────────────────────────────────────
 app.route("/api/subscriptions", subscriptionsRoutes);

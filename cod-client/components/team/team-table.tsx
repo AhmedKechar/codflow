@@ -52,8 +52,8 @@ export function TeamTable({
 
   const getRoleIcon = (role: string) => {
     switch (role) {
-      case "admin": return <Crown className="w-3 h-3 text-yellow-600" />;
-      default: return <UserIcon className="w-3 h-3 text-gray-600" />;
+      case "admin": return <Crown className="w-3 h-3 text-muted-foreground" />;
+      default: return <UserIcon className="w-3 h-3 text-muted-foreground" />;
     }
   };
 
@@ -95,8 +95,8 @@ export function TeamTable({
           variant="secondary"
           className={`text-[10px] font-black uppercase tracking-widest py-0 h-5 ${
             value === "admin"
-              ? "bg-yellow-500/15 text-yellow-700 border-yellow-500/20"
-              : "bg-gray-500/15 text-gray-700 border-gray-500/20"
+              ? "bg-muted text-foreground border-transparent"
+              : "bg-muted/50 text-muted-foreground border-transparent"
           }`}
         >
           {common.roles[value as keyof typeof common.roles] || value}
@@ -203,13 +203,13 @@ export function TeamTable({
               className={cn(
                 "text-[9px] font-black uppercase tracking-widest py-1 px-2.5 border-none",
                 user.role === "admin"
-                  ? "bg-yellow-500/10 text-yellow-700"
+                  ? "bg-muted text-foreground"
                   : "bg-muted/50 text-muted-foreground/70"
               )}
             >
               {common.roles[user.role as keyof typeof common.roles] || user.role}
             </Badge>
-            <StatusBadge status={user.status} className="py-0.5 px-2 rounded-full text-[8px] font-black uppercase tracking-widest border shadow-sm" />
+            <StatusBadge status={user.status} />
           </div>
 
           {/* Row 2: Name with icon (main title) */}
@@ -222,10 +222,10 @@ export function TeamTable({
             </div>
             {(onView || onEdit || onManageScopes || onRotateApiKey) && (
               <DropdownMenu>
-                <DropdownMenuTrigger render={<button className="w-8 h-8 rounded-lg bg-muted/40 hover:bg-primary/10 flex items-center justify-center text-muted-foreground hover:text-primary transition-all active:scale-90 shrink-0" />}>
+                <DropdownMenuTrigger render={<button className="w-8 h-8 rounded-lg bg-muted/40 hover:bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors shrink-0" />}>
                   <MoreHorizontal className="w-4 h-4" />
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align={dir === "rtl" ? "start" : "end"} className="glass-card rounded-2xl">
+                <DropdownMenuContent align={dir === "rtl" ? "start" : "end"} className="rounded-lg">
                   {onView && (
                     <DropdownMenuItem onClick={() => onView(user)} className="text-[11px] font-bold uppercase tracking-wider py-2.5">
                       <Eye className="w-3.5 h-3.5 me-2" />{t.actions?.view || "View"}
@@ -261,8 +261,8 @@ export function TeamTable({
 
           {/* Row 4: Permissions section */}
           <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-muted/30 border border-border/20">
-            <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-              <Shield className="w-3 h-3 text-primary/60" />
+            <div className="w-6 h-6 rounded-lg bg-muted/60 flex items-center justify-center shrink-0">
+              <Shield className="w-3 h-3 text-muted-foreground" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[9px] font-black uppercase tracking-wider text-muted-foreground/50">

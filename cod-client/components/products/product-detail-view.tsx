@@ -39,8 +39,8 @@ function ProductImageGallery({ images, productName }: { images: Product["images"
   
   if (!images || images.length === 0) {
     return (
-      <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl sm:rounded-[2rem] bg-primary/10 flex items-center justify-center shrink-0 shadow-inner border border-primary/5">
-        <Package className="w-9 h-9 sm:w-12 sm:h-12 text-primary" />
+      <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg bg-muted flex items-center justify-center shrink-0 border border-border">
+        <Package className="w-9 h-9 sm:w-12 sm:h-12 text-muted-foreground" />
       </div>
     );
   }
@@ -50,7 +50,7 @@ function ProductImageGallery({ images, productName }: { images: Product["images"
   return (
     <div className="space-y-3">
       {/* Main Image */}
-      <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl sm:rounded-[2rem] bg-primary/10 flex items-center justify-center shrink-0 shadow-inner border border-primary/5 overflow-hidden group">
+      <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-lg bg-muted flex items-center justify-center shrink-0 border border-border overflow-hidden group">
         {selectedImage ? (
           <Image
             src={selectedImage.srcMd || selectedImage.src}
@@ -242,9 +242,7 @@ export function ProductDetailView({ product, groups }: Props) {
         <div className="hidden lg:flex items-center gap-3">
           <Link
             href={`/products/${product.id}/edit`}
-            className={cn(
-              "inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-primary text-primary-foreground font-black text-[11px] uppercase tracking-widest shadow-lg shadow-primary/10 hover:shadow-primary/20 transition-all active:scale-95"
-            )}
+            className="inline-flex items-center gap-2 h-10 px-5 rounded-md bg-primary text-primary-foreground"
           >
             <Edit size={14} />
             {t.actions.edit}
@@ -253,7 +251,7 @@ export function ProductDetailView({ product, groups }: Props) {
             variant="outline"
             onClick={handleDelete}
             disabled={isPending}
-            className="h-10 px-5 rounded-xl border-rose-500/20 bg-rose-500/5 text-rose-500 font-black text-[11px] uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all active:scale-95"
+            className="h-10 px-5 rounded-md border-border text-muted-foreground"
           >
             <Trash2 size={14} className="me-2" />
             {t.actions.delete}
@@ -261,48 +259,46 @@ export function ProductDetailView({ product, groups }: Props) {
         </div>
         <Link
           href="/products"
-          className="group inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-border/40 bg-white/50 dark:bg-muted/20 text-muted-foreground hover:text-foreground transition-all shadow-sm active:scale-95"
+          className="inline-flex items-center justify-center w-10 h-10 rounded-md border border-border bg-card text-muted-foreground hover:text-foreground transition-colors"
         >
-          <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+          <ArrowLeft className="w-5 h-5" />
         </Link>
       </div>
 
-      {/* Hero Glass Card */}
-      <div className="group relative glass-card rounded-2xl sm:rounded-3xl border-border/30 overflow-hidden shadow-sm transition-all duration-500 hover:shadow-premium">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[40%] bg-primary/5 blur-[80px] pointer-events-none transition-opacity opacity-0 group-hover:opacity-100 duration-700" />
-
-        <div className="relative z-10 p-5 sm:p-8">
+      {/* Hero Card */}
+      <div className="rounded-lg border border-border bg-card overflow-hidden">
+        <div className="p-5 sm:p-6">
           <div className="flex flex-col lg:flex-row gap-6 sm:gap-8">
             <div className="flex items-start gap-4 sm:gap-6 flex-1 min-w-0">
               <ProductImageGallery images={product.images} productName={product.name} />
 
               <div className="space-y-2 sm:space-y-3 min-w-0 flex-1">
                 <div>
-                  <h1 className="text-base sm:text-2xl md:text-3xl font-black text-foreground tracking-tight leading-snug line-clamp-2 sm:line-clamp-1">
+                  <h1 className="text-base sm:text-2xl md:text-3xl font-semibold text-foreground leading-snug line-clamp-2 sm:line-clamp-1">
                     {product.name}
                   </h1>
-                  <p className="text-[9px] sm:text-xs font-mono text-muted-foreground/50 mt-0.5 uppercase tracking-widest truncate">
+                  <p className="text-xs font-mono text-muted-foreground mt-0.5 truncate">
                     {product.handle}
                   </p>
                 </div>
 
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <StatusBadge status={statusToVariant(product.status)} className="py-0.5 px-2 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest border shadow-sm" />
+                  <StatusBadge status={statusToVariant(product.status)} />
                   {product.sku && (
-                    <span className="text-[9px] sm:text-[10px] font-mono font-bold text-muted-foreground/50 bg-muted/30 px-2 py-0.5 rounded-lg border border-border/10 uppercase">
+                    <span className="text-xs font-mono font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-md">
                       {product.sku}
                     </span>
                   )}
                   {category && (
-                    <span className="flex items-center gap-1 text-[9px] sm:text-[10px] text-muted-foreground font-black bg-muted/50 px-2 py-0.5 rounded-lg uppercase tracking-tight">
-                      <Tag size={9} className="text-primary/50" />
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-md">
+                      <Tag size={11} className="text-muted-foreground" />
                       {category.name}
                     </span>
                   )}
                 </div>
 
                 {product.description && (
-                  <p className="hidden sm:block text-[13px] text-muted-foreground/70 leading-relaxed font-medium line-clamp-2" dir="auto">
+                  <p className="hidden sm:block text-[13px] text-muted-foreground leading-relaxed line-clamp-2" dir="auto">
                     {product.description}
                   </p>
                 )}
@@ -310,47 +306,47 @@ export function ProductDetailView({ product, groups }: Props) {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-2.5 sm:gap-3 shrink-0 lg:w-56">
-              <div className="bg-muted/20 border border-border/10 rounded-xl p-3 sm:p-4 transition-all hover:bg-primary/[0.02] hover:border-primary/10 shadow-sm">
-                <p className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-1 flex items-center gap-1.5">
-                  <TrendingUp className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-primary/50" />
+              <div className="bg-muted/20 border border-border rounded-md p-3 sm:p-4">
+                <p className="text-[11px] font-medium text-muted-foreground mb-1 flex items-center gap-1.5">
+                  <TrendingUp className="w-3 h-3 text-muted-foreground" />
                   {t.table.price}
                 </p>
-                <p className="text-lg sm:text-2xl font-black text-primary font-display tabular-nums leading-none">
+                <p className="text-lg sm:text-2xl font-semibold text-foreground tabular-nums leading-none">
                   {formatPrice(product.price, common.currency.symbol)}
                 </p>
               </div>
-              <div className="bg-muted/20 border border-border/10 rounded-xl p-3 sm:p-4 transition-all hover:bg-primary/[0.02] hover:border-primary/10 shadow-sm">
-                <p className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-1 flex items-center gap-1.5">
-                  <Layers className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-primary/50" />
+              <div className="bg-muted/20 border border-border rounded-md p-3 sm:p-4">
+                <p className="text-[11px] font-medium text-muted-foreground mb-1 flex items-center gap-1.5">
+                  <Layers className="w-3 h-3 text-muted-foreground" />
                   {t.table.variants}
                 </p>
-                <p className="text-lg sm:text-2xl font-black text-foreground font-display tabular-nums leading-none">
+                <p className="text-lg sm:text-2xl font-semibold text-foreground tabular-nums leading-none">
                   {product.variantsCount ?? product.variants?.length ?? 0}
                 </p>
               </div>
 
               {/* Stock stat card — with history button + threshold editor */}
-              <div className="bg-muted/20 border border-border/10 rounded-xl p-3 sm:p-4 transition-all hover:bg-primary/[0.02] hover:border-primary/10 shadow-sm space-y-2">
+              <div className="bg-muted/20 border border-border rounded-md p-3 sm:p-4 space-y-2">
                 <div className="flex items-center justify-between gap-1">
-                  <p className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 flex items-center gap-1.5">
-                    <Package className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-primary/50" />
+                  <p className="text-[11px] font-medium text-muted-foreground flex items-center gap-1.5">
+                    <Package className="w-3 h-3 text-muted-foreground" />
                     {t.stock?.in_stock ?? "Stock"}
                   </p>
                   <button
                     onClick={() => setHistory({ open: true })}
-                    className="w-5 h-5 sm:w-6 sm:h-6 rounded-lg bg-muted/40 hover:bg-primary/10 text-muted-foreground/50 hover:text-primary flex items-center justify-center transition-all active:scale-90"
+                    className="w-6 h-6 rounded-md bg-muted text-muted-foreground hover:text-foreground flex items-center justify-center transition-colors"
                     title={t.stock_history?.title}
                   >
-                    <History className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                    <History className="w-3.5 h-3.5" />
                   </button>
                 </div>
-                <p className="text-lg sm:text-2xl font-black text-foreground font-display tabular-nums leading-none">
+                <p className="text-lg sm:text-2xl font-semibold text-foreground tabular-nums leading-none">
                   {totalInventory}
                 </p>
                 {/* Threshold editor: only on sm+ to keep all 3 cards same height on mobile */}
                 {!(product.variants?.length) && (
                   <div className="hidden sm:flex items-center gap-1.5 flex-wrap">
-                    <span className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-widest">
+                    <span className="text-xs font-medium text-muted-foreground">
                       {t.stock_overview?.threshold_label ?? "Alert at"}:
                     </span>
                     <ThresholdEditor
@@ -363,15 +359,15 @@ export function ProductDetailView({ product, groups }: Props) {
             </div>
 
           {/* Mobile-only: description + threshold below the stat cards */}
-          <div className="sm:hidden space-y-3 pt-3 border-t border-border/10 mt-1">
+          <div className="sm:hidden space-y-3 pt-3 border-t border-border/60 mt-1">
             {product.description && (
-              <p className="text-xs text-muted-foreground/70 leading-relaxed font-medium line-clamp-3" dir="auto">
+              <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3" dir="auto">
                 {product.description}
               </p>
             )}
             {!(product.variants?.length) && (
               <div className="flex items-center gap-2">
-                <span className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-widest">
+                <span className="text-xs font-medium text-muted-foreground">
                   {t.stock_overview?.threshold_label ?? "Alert at"}:
                 </span>
                 <ThresholdEditor
@@ -395,7 +391,7 @@ export function ProductDetailView({ product, groups }: Props) {
                 {product.images.map((image, index) => (
                   <div
                     key={image.id}
-                    className="group relative aspect-square rounded-xl sm:rounded-2xl overflow-hidden bg-muted/20 border border-border/10 shadow-sm hover:shadow-md transition-all"
+                    className="group relative aspect-square rounded-lg overflow-hidden bg-muted/10 border border-border"
                   >
                     <Image
                       src={image.srcMd || image.src}
@@ -407,13 +403,13 @@ export function ProductDetailView({ product, groups }: Props) {
                     
                     {/* Image overlay with position indicator */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 text-white text-[10px] font-bold rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 text-white text-[11px] font-medium rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
                       #{image.position}
                     </div>
                     
                     {/* Primary image indicator */}
                     {index === 0 && (
-                      <div className="absolute top-2 right-2 px-2 py-1 bg-primary text-primary-foreground text-[9px] font-black rounded-md uppercase tracking-wider">
+                      <div className="absolute top-2 right-2 px-2 py-1 bg-primary text-primary-foreground text-[11px] font-medium rounded-md">
                         Primary
                       </div>
                     )}
@@ -422,19 +418,19 @@ export function ProductDetailView({ product, groups }: Props) {
               </div>
               
               {/* Image details */}
-              <div className="mt-6 pt-6 border-t border-border/10">
+              <div className="mt-6 pt-6 border-t border-border/60">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
                   <div className="space-y-1">
-                    <p className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-widest">Total Images</p>
-                    <p className="font-bold text-foreground">{product.images.length}</p>
+                    <p className="text-xs font-medium text-muted-foreground">Total Images</p>
+                    <p className="font-semibold text-foreground">{product.images.length}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-widest">Primary Image</p>
-                    <p className="font-bold text-foreground">{product.images[0]?.altText || "No alt text"}</p>
+                    <p className="text-xs font-medium text-muted-foreground">Primary Image</p>
+                    <p className="font-semibold text-foreground">{product.images[0]?.altText || "No alt text"}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-widest">Image Formats</p>
-                    <p className="font-bold text-foreground">
+                    <p className="text-xs font-medium text-muted-foreground">Image Formats</p>
+                    <p className="font-semibold text-foreground">
                       {product.images.some(img => img.srcLg) ? "Multi-size" : "Single-size"}
                     </p>
                   </div>
@@ -447,19 +443,19 @@ export function ProductDetailView({ product, groups }: Props) {
           <Section title={t.form?.section_pricing ?? "Pricing Matrix"} icon={<DollarSign size={18} />}>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-8">
               <div className="space-y-1">
-                <p className="text-[9px] sm:text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">{t.form?.base_price_label ?? "Selling Price"}</p>
-                <p className="text-xl sm:text-2xl font-black text-primary tabular-nums">{formatPrice(product.price, common.currency.symbol)}</p>
+                <p className="text-xs font-medium text-muted-foreground">{t.form?.base_price_label ?? "Selling Price"}</p>
+                <p className="text-xl sm:text-2xl font-semibold text-foreground tabular-nums">{formatPrice(product.price, common.currency.symbol)}</p>
               </div>
               {product.compareAtPrice && (
                 <div className="space-y-1">
-                  <p className="text-[9px] sm:text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">{t.form?.compare_at_price_label ?? "Compare At"}</p>
-                  <p className="text-xl sm:text-2xl font-bold text-muted-foreground/40 line-through tabular-nums">{formatPrice(product.compareAtPrice, common.currency.symbol)}</p>
+                  <p className="text-xs font-medium text-muted-foreground">{t.form?.compare_at_price_label ?? "Compare At"}</p>
+                  <p className="text-xl sm:text-2xl font-medium text-muted-foreground line-through tabular-nums">{formatPrice(product.compareAtPrice, common.currency.symbol)}</p>
                 </div>
               )}
               {product.costPrice && (
                 <div className="space-y-1">
-                  <p className="text-[9px] sm:text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">{t.form?.cost_price_label ?? "Item Cost"}</p>
-                  <p className="text-xl sm:text-2xl font-black text-foreground/80 tabular-nums">{formatPrice(product.costPrice, common.currency.symbol)}</p>
+                  <p className="text-xs font-medium text-muted-foreground">{t.form?.cost_price_label ?? "Item Cost"}</p>
+                  <p className="text-xl sm:text-2xl font-semibold text-foreground tabular-nums">{formatPrice(product.costPrice, common.currency.symbol)}</p>
                 </div>
               )}
             </div>
@@ -474,29 +470,29 @@ export function ProductDetailView({ product, groups }: Props) {
                 {product.variants?.map((variant) => {
                   const label = Object.entries(variant.variations).map(([, v]) => v).join(" / ");
                   return (
-                    <div key={variant.id} className="rounded-2xl border border-border/20 bg-muted/10 p-4 space-y-3">
+                    <div key={variant.id} className="rounded-md border border-border bg-muted/10 p-4 space-y-3">
                       {/* Top row: name + status */}
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
-                          <p className="font-bold text-sm text-foreground tracking-tight">{label}</p>
-                          {variant.sku && <p className="text-[10px] text-muted-foreground/50 font-mono mt-0.5 uppercase">{variant.sku}</p>}
+                          <p className="font-semibold text-sm text-foreground">{label}</p>
+                          {variant.sku && <p className="text-xs text-muted-foreground font-mono mt-0.5">{variant.sku}</p>}
                         </div>
                         <StatusBadge status={variant.active ? "available" : "inactive"} className="shrink-0 scale-90 -me-1" />
                       </div>
 
                       {/* Stats row: price | stock | threshold */}
-                      <div className="grid grid-cols-3 gap-3 pt-1 border-t border-border/10">
+                      <div className="grid grid-cols-3 gap-3 pt-1 border-t border-border/60">
                         <div className="space-y-0.5">
-                          <p className="text-[9px] font-black text-muted-foreground/50 uppercase tracking-widest">{t.table.price}</p>
-                          <p className="text-sm font-black text-primary tabular-nums">{formatPrice(variant.price, common.currency.symbol)}</p>
+                          <p className="text-[11px] font-medium text-muted-foreground">{t.table.price}</p>
+                          <p className="text-sm font-semibold text-foreground tabular-nums">{formatPrice(variant.price, common.currency.symbol)}</p>
                         </div>
                         <div className="space-y-0.5">
-                          <p className="text-[9px] font-black text-muted-foreground/50 uppercase tracking-widest">{t.stock.in_stock}</p>
+                          <p className="text-[11px] font-medium text-muted-foreground">{t.stock.in_stock}</p>
                           <div className="flex items-center gap-1.5">
-                            <p className="text-sm font-black text-foreground tabular-nums">{variant.inventory}</p>
+                            <p className="text-sm font-semibold text-foreground tabular-nums">{variant.inventory}</p>
                             <button
                               onClick={() => setHistory({ open: true, variantId: variant.id, variantLabel: label })}
-                              className="w-5 h-5 rounded-md bg-muted/40 text-muted-foreground/50 hover:text-primary hover:bg-primary/10 flex items-center justify-center transition-all active:scale-90"
+                              className="w-5 h-5 rounded-md bg-muted text-muted-foreground hover:text-foreground flex items-center justify-center transition-colors"
                               title={t.stock_history?.title}
                             >
                               <History className="w-3 h-3" />
@@ -504,7 +500,7 @@ export function ProductDetailView({ product, groups }: Props) {
                           </div>
                         </div>
                         <div className="space-y-0.5">
-                          <p className="text-[9px] font-black text-muted-foreground/50 uppercase tracking-widest">{t.stock_overview?.col_threshold}</p>
+                          <p className="text-[11px] font-medium text-muted-foreground">{t.stock_overview?.col_threshold}</p>
                           <ThresholdEditor
                             productId={product.id}
                             variantId={variant.id}
@@ -518,37 +514,37 @@ export function ProductDetailView({ product, groups }: Props) {
               </div>
 
               {/* ── Desktop table (hidden on mobile) ── */}
-              <div className="hidden sm:block overflow-x-auto no-scrollbar rounded-2xl border border-border/20 shadow-inner">
+              <div className="hidden sm:block overflow-x-auto rounded-lg border border-border bg-card">
                 <table className="w-full text-sm">
-                  <thead className="bg-muted/10">
-                    <tr className="border-b border-border/10">
-                      <th className="text-start py-3.5 px-5 text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">{t.table.name}</th>
-                      <th className="text-center py-3.5 px-5 text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">{t.table.price}</th>
-                      <th className="text-center py-3.5 px-5 text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">{t.stock.in_stock}</th>
-                      <th className="text-center py-3.5 px-5 text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">{t.stock_overview?.col_threshold}</th>
-                      <th className="text-end py-3.5 px-5 text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">{t.table.status}</th>
+                  <thead className="bg-muted/20">
+                    <tr className="border-b border-border/60">
+                      <th className="text-start py-3.5 px-5 text-xs font-semibold text-muted-foreground">{t.table.name}</th>
+                      <th className="text-center py-3.5 px-5 text-xs font-semibold text-muted-foreground">{t.table.price}</th>
+                      <th className="text-center py-3.5 px-5 text-xs font-semibold text-muted-foreground">{t.stock.in_stock}</th>
+                      <th className="text-center py-3.5 px-5 text-xs font-semibold text-muted-foreground">{t.stock_overview?.col_threshold}</th>
+                      <th className="text-end py-3.5 px-5 text-xs font-semibold text-muted-foreground">{t.table.status}</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border/5">
+                  <tbody className="divide-y divide-border/60">
                     {product.variants?.map((variant) => {
                       const label = Object.entries(variant.variations).map(([, v]) => v).join(" / ");
                       return (
-                        <tr key={variant.id} className="hover:bg-white/[0.02] transition-colors group/row">
+                        <tr key={variant.id} className="hover:bg-muted/40">
                           <td className="py-4 px-5">
                             <div className="min-w-0">
-                              <p className="font-bold text-sm text-foreground tracking-tight group-hover/row:text-primary transition-colors">{label}</p>
-                              {variant.sku && <p className="text-[10px] text-muted-foreground/50 font-mono mt-0.5 uppercase">{variant.sku}</p>}
+                              <p className="font-semibold text-sm text-foreground">{label}</p>
+                              {variant.sku && <p className="text-xs text-muted-foreground font-mono mt-0.5">{variant.sku}</p>}
                             </div>
                           </td>
                           <td className="py-4 px-5 text-center">
-                            <span className="text-sm font-black text-primary tabular-nums">{formatPrice(variant.price, common.currency.symbol)}</span>
+                            <span className="text-sm font-semibold text-foreground tabular-nums">{formatPrice(variant.price, common.currency.symbol)}</span>
                           </td>
                           <td className="py-4 px-5 text-center">
                             <div className="flex items-center justify-center gap-1.5">
-                              <span className="text-sm font-black text-foreground tabular-nums">{variant.inventory}</span>
+                              <span className="text-sm font-semibold text-foreground tabular-nums">{variant.inventory}</span>
                               <button
                                 onClick={() => setHistory({ open: true, variantId: variant.id, variantLabel: label })}
-                                className="w-5 h-5 rounded-md bg-muted/40 hover:bg-primary/10 text-muted-foreground/40 hover:text-primary flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-all active:scale-90"
+                                className="w-5 h-5 rounded-md bg-muted hover:bg-muted/80 text-muted-foreground flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity"
                                 title={t.stock_history?.title}
                               >
                                 <History className="w-3 h-3" />
@@ -573,11 +569,11 @@ export function ProductDetailView({ product, groups }: Props) {
               </div>
             </Section>
           ) : (
-            <div className="glass-card rounded-2xl sm:rounded-3xl border-border/30 p-10 text-center space-y-3 opacity-60">
-              <div className="w-12 h-12 bg-muted/50 rounded-xl flex items-center justify-center mx-auto">
-                <Info size={24} className="text-muted-foreground/40" />
+            <div className="rounded-lg border border-border bg-card p-10 text-center space-y-3 opacity-60">
+              <div className="w-12 h-12 bg-muted rounded-md flex items-center justify-center mx-auto">
+                <Info size={24} className="text-muted-foreground" />
               </div>
-              <p className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-muted-foreground/40">
+              <p className="text-xs font-medium text-muted-foreground">
                 {t.empty_state?.title ?? "No variants configured"}
               </p>
             </div>
@@ -587,18 +583,18 @@ export function ProductDetailView({ product, groups }: Props) {
 
       {/* Floating Mobile Action Bar */}
       <div className="fixed bottom-[88px] inset-x-4 z-40 lg:hidden animate-in slide-in-from-bottom-8 duration-500">
-        <div className="glass-card border-white/20 dark:border-white/5 rounded-[2rem] p-2.5 sm:p-3 shadow-2xl flex items-center gap-2.5 sm:gap-3">
+        <div className="rounded-lg border border-border bg-card p-2.5 sm:p-3 shadow-lg flex items-center gap-2.5 sm:gap-3">
           <Button
             variant="outline"
             onClick={handleDelete}
             disabled={isPending}
-            className="flex-none w-12 h-12 sm:w-14 sm:h-14 rounded-2xl border-rose-500/20 bg-rose-500/5 text-rose-500 transition-all active:scale-90 shadow-sm"
+            className="flex-none w-12 h-12 sm:w-14 sm:h-14 rounded-md border-border text-muted-foreground"
           >
             <Trash2 size={20} />
           </Button>
           <Link
             href={`/products/${product.id}/edit`}
-            className="flex-1 h-12 sm:h-14 rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/20 flex items-center justify-center gap-2 font-black text-[10px] sm:text-[11px] uppercase tracking-widest active:scale-95 transition-all"
+            className="flex-1 h-12 sm:h-14 rounded-md bg-primary text-primary-foreground flex items-center justify-center gap-2"
           >
             <Edit size={16} />
             {t.actions.edit}
@@ -623,16 +619,16 @@ export function ProductDetailView({ product, groups }: Props) {
 
 function Section({ title, children, icon }: { title: string; children: React.ReactNode; icon?: React.ReactNode }) {
   return (
-    <div className="glass-card rounded-2xl sm:rounded-[2rem] border-border/30 overflow-hidden shadow-sm">
-      <div className="flex items-center gap-3 px-6 py-4 sm:px-8 sm:py-5 border-b border-border/10 bg-muted/5">
+    <div className="rounded-lg border border-border bg-card overflow-hidden">
+      <div className="flex items-center gap-3 px-6 py-4 border-b border-border/60 bg-muted/20">
         {icon && (
-          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 shadow-inner">
-            <div className="text-primary scale-90 sm:scale-100">{icon}</div>
+          <div className="w-8 h-8 rounded-md bg-muted flex items-center justify-center shrink-0">
+            <div className="text-muted-foreground">{icon}</div>
           </div>
         )}
-        <h2 className="text-base sm:text-lg font-black text-foreground tracking-tight font-display uppercase">{title}</h2>
+        <h2 className="text-base font-semibold text-foreground">{title}</h2>
       </div>
-      <div className="p-6 sm:p-8">
+      <div className="p-6">
         {children}
       </div>
     </div>

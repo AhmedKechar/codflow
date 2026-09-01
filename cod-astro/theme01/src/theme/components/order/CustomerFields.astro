@@ -28,15 +28,15 @@ const cfg = {
 
 <div class="space-y-5 pt-2">
   <div class="flex items-center gap-3 py-2">
-    <div class="h-px flex-1 bg-black/[.05]"></div>
-    <span class="text-[0.6875rem] font-black uppercase tracking-[0.2em]" style="color: var(--clr-text)">{content.formDeliverySection}</span>
-    <div class="h-px flex-1 bg-black/[.05]"></div>
+    <div class="h-px flex-1 bg-[var(--clr-border)]"></div>
+    <span class="text-xs font-semibold uppercase tracking-[0.05em]" style="color: var(--clr-text-2)">{content.formDeliverySection}</span>
+    <div class="h-px flex-1 bg-[var(--clr-border)]"></div>
   </div>
 
   {cfg.showName && (
   <div>
     <label for="f-name" class="form-label">
-      {content.formNameLabel} <span class="text-red-400">*</span>
+      {content.formNameLabel} <span class="text-[var(--clr-error)]">*</span>
     </label>
     <input
       id="f-name" type="text" name="customerName"
@@ -45,7 +45,7 @@ const cfg = {
       class:list={["form-input", fieldErrors.customerName && "error"]}
     />
     {fieldErrors.customerName && (
-      <p class="text-[0.75rem] text-red-500 font-bold mt-2 ps-1">{fieldErrors.customerName[0]}</p>
+      <p class="text-[0.8125rem] font-medium mt-2 ps-1" style="color: var(--clr-error)">{fieldErrors.customerName[0]}</p>
     )}
   </div>
   )}
@@ -53,7 +53,7 @@ const cfg = {
   {cfg.showPhone && (
   <div>
     <label for="f-phone" class="form-label">
-      {content.formPhoneLabel} <span class="text-red-400">*</span>
+      {content.formPhoneLabel} <span class="text-[var(--clr-error)]">*</span>
     </label>
     <input
       id="f-phone" type="tel" name="phone"
@@ -63,7 +63,7 @@ const cfg = {
       class:list={["form-input", fieldErrors.phone && "error"]}
     />
     {fieldErrors.phone && (
-      <p class="text-[0.75rem] text-red-500 font-bold mt-2 ps-1">{fieldErrors.phone[0]}</p>
+      <p class="text-[0.8125rem] font-medium mt-2 ps-1" style="color: var(--clr-error)">{fieldErrors.phone[0]}</p>
     )}
   </div>
   )}
@@ -98,7 +98,7 @@ const cfg = {
       }))}
     />
     {fieldErrors.wilayaId && (
-      <p class="text-[0.75rem] text-red-500 font-bold mt-2 ps-1">{fieldErrors.wilayaId[0]}</p>
+      <p class="text-[0.8125rem] font-medium mt-2 ps-1" style="color: var(--clr-error)">{fieldErrors.wilayaId[0]}</p>
     )}
   </div>
   )}
@@ -118,7 +118,7 @@ const cfg = {
       dynamic={true}
     />
     {fieldErrors.communeId && (
-      <p class="text-[0.75rem] text-red-500 font-bold mt-2 ps-1">{fieldErrors.communeId[0]}</p>
+      <p class="text-[0.8125rem] font-medium mt-2 ps-1" style="color: var(--clr-error)">{fieldErrors.communeId[0]}</p>
     )}
   </div>
   )}
@@ -138,10 +138,10 @@ const cfg = {
               checked={i === 0} class="sr-only delivery-radio-input"
             />
             <div class:list={[
-              "h-14 rounded-2xl border-2 flex items-center justify-center gap-2.5 font-black text-[0.875rem] transition-all select-none active:scale-95",
+              "h-14 rounded-lg border flex items-center justify-center gap-2.5 font-semibold text-sm transition-colors select-none cursor-pointer",
               i === 0
-                ? "border-[var(--clr-primary)] text-[var(--clr-primary)] bg-[var(--clr-primary)]/5 shadow-sm"
-                : "border-[var(--clr-border)] text-[var(--clr-text-2)] bg-[var(--clr-surface-alt)]"
+                ? "border-[var(--clr-primary)] text-[var(--clr-primary)] bg-[var(--clr-primary)]/5"
+                : "border-[var(--clr-border)] text-[var(--clr-text-2)] bg-[var(--clr-surface)]"
             ]}>
               <Icon name={icon} class="w-5 h-5" /><span>{label}</span>
             </div>
