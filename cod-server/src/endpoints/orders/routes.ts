@@ -592,6 +592,39 @@ Provider support: all four ✅ (ecotrack, noest, yalidine, zr_express).`,
   handler: shipmentOps.getShipmentTracking,
 });
 
+const getCarrierTrackingRoute = defineRoute({
+  method: "get",
+  path: "/{id}/carrier-tracking",
+  auth: { scope: SCOPES.ORDERS_READ },
+  tags: ["Orders"],
+  summary: "Get cached carrier tracking events",
+  description: `Returns tracking events cached in the database from previous pulls or webhooks. This is faster than live tracking but may not have the latest events.`,
+  operationId: "getCarrierTracking",
+  params: IdParamSchema,
+  responses: {
+    200: {
+      description: "Carrier tracking events from database",
+      content: jsonContent(
+        z.object({
+          success: z.boolean().openapi({ example: true }),
+          data: z.array(z.object({
+            id: z.string(),
+            orderId: z.string(),
+            trackingNumber: z.string(),
+            status: z.string(),
+            statusRaw: z.string().nullable(),
+            statusAr: z.string().nullable(),
+            location: z.string().nullable(),
+            eventTime: z.string(),
+            createdAt: z.string(),
+          })),
+        })
+      ),
+    },
+  },
+  handler: handlers.getCarrierTracking,
+});
+
 const proxyLabelRoute = defineRoute({
   method: "get",
   path: "/{id}/label",
@@ -647,6 +680,7 @@ router.openapi(cancelShipmentRoute.route, cancelShipmentRoute.handler);
 router.openapi(addRemarkRoute.route, addRemarkRoute.handler);
 router.openapi(getRemarksRoute.route, getRemarksRoute.handler);
 router.openapi(getTrackingRoute.route, getTrackingRoute.handler);
+router.openapi(getCarrierTrackingRoute.route, getCarrierTrackingRoute.handler);
 router.openapi(proxyLabelRoute.route, proxyLabelRoute.handler);
 
 export default router;

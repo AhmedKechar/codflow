@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { RefreshCw, MapPin, Clock, Package, Truck, CheckCircle, RotateCcw, AlertCircle } from "lucide-react";
+import { RefreshCw, MapPin, Clock, Package, Truck, CheckCircle, RotateCcw, AlertCircle, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -103,27 +103,54 @@ export function TrackingTimeline({ orderId, showRefresh = true }: TrackingTimeli
   const [events, setEvents] = useState<TrackingEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [source, setSource] = useState<"cache" | "live">("cache");
 
-  async function fetchTracking(isRefresh = false) {
-    if (isRefresh) setRefreshing(true);
-    else setLoading(true);
+  // Fetch cached tracking events from DB
+  async function fetchCachedTracking() {
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/orders/${orderId}/carrier-tracking`);
+      const data = await response.json() as { success: boolean; data: Array<{ status: string; statusRaw: string | null; statusAr: string | null; eventTime: string; location: string | null }> };
+      if (data.success && Array.isArray(data.data)) {
+        // Map DB events to TrackingEvent format
+        const mapped: TrackingEvent[] = data.data.map((e) => ({
+          activity: e.statusAr ?? e.statusRaw ?? e.status,
+          description: e.statusRaw ?? undefined,
+          date: e.eventTime,
+          location: e.location ?? undefined,
+          status: e.status,
+        }));
+        setEvents(mapped);
+        setSource("cache");
+      }
+    } catch {
+      // Fallback to live tracking
+      await fetchLiveTracking();
+    } finally {
+      setLoading(false);
+    }
+  }
 
+  // Fetch live tracking from carrier API
+  async function fetchLiveTracking() {
+    setRefreshing(true);
     try {
       const result = await getShipmentTracking(orderId);
       setEvents(result);
-      if (isRefresh && result.length > 0) {
-        toast.success("تم تحديث التتبع");
+      setSource("live");
+      if (result.length > 0) {
+        toast.success("تم تحديث التتبع من الشركة");
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "خطأ في جلب التتبع");
     } finally {
-      setLoading(false);
       setRefreshing(false);
+      setLoading(false);
     }
   }
 
   useEffect(() => {
-    fetchTracking();
+    fetchCachedTracking();
   }, [orderId]);
 
   if (loading) return <TrackingSkeleton />;
@@ -131,16 +158,20 @@ export function TrackingTimeline({ orderId, showRefresh = true }: TrackingTimeli
   return (
     <div className="space-y-4">
       {showRefresh && (
-        <div className="flex justify-end">
+        <div className="flex items-center justify-between">
+          <Badge variant="outline" className="text-xs gap-1">
+            <Database size={10} />
+            {source === "cache" ? "من القاعدة" : "مباشر من الشركة"}
+          </Badge>
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => fetchTracking(true)}
+            onClick={() => fetchLiveTracking()}
             disabled={refreshing}
             className="gap-2 text-xs"
           >
             <RefreshCw size={12} className={refreshing ? "animate-spin" : ""} />
-            تحديث
+            تحديث من الشركة
           </Button>
         </div>
       )}

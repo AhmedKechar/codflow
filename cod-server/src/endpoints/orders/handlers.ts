@@ -394,3 +394,31 @@ export async function deleteOrder(c: Context<AppContext>) {
     message: "Order deleted",
   }, 200);
 }
+
+/**
+ * GET /orders/:id/carrier-tracking
+ * Returns cached carrier tracking events from the database.
+ * This is faster than live tracking but may not have the latest events.
+ */
+export async function getCarrierTracking(c: Context<AppContext>) {
+  const db = getDb(c.env.DB);
+  const storeId = c.get("storeId")!;
+  const orderId = c.req.param("id");
+
+  if (!orderId) {
+    throw new ValidationError("Order ID is required", ERROR_CODES.REQUIRED_FIELD_MISSING);
+  }
+
+  const order = await queries.getOrderById(db, storeId, orderId);
+  if (!order) {
+    throw new NotFoundError("Order", orderId);
+  }
+
+  const { getCarrierTrackingByOrder } = await import("../../../../cod-shared/queries/carrier-tracking");
+  const events = await getCarrierTrackingByOrder(db, storeId, orderId);
+
+  return c.json({
+    success: true,
+    data: events,
+  }, 200);
+}
