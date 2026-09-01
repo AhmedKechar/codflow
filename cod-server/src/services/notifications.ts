@@ -195,6 +195,9 @@ export async function sendStatusNotification(
 
 /**
  * Send carrier tracking notification to merchant
+ *
+ * Notifies the merchant when carrier tracking status changes.
+ * Uses the 'shipped' notification setting (since carrier tracking relates to shipped orders).
  */
 export async function sendCarrierTrackingNotification(
   db: AppDb,
@@ -202,7 +205,64 @@ export async function sendCarrierTrackingNotification(
   carrierStatus: string,
   storeId: string
 ): Promise<void> {
-  // This is a placeholder for future carrier tracking notifications
-  // When carrier status changes, notify the merchant via their preferred channel
-  console.log(`[NotificationService] Carrier tracking update for order ${orderId}: ${carrierStatus}`);
+  try {
+    // 1. Get the order with customer info
+    const orderResult = await db
+      .select({
+        id: orders.id,
+        orderNumber: orders.orderNumber,
+        trackingNumber: orders.trackingNumber,
+        storeId: orders.storeId,
+        customerId: orders.customerId,
+        phone: customers.phone,
+        customerName: customers.name,
+      })
+      .from(orders)
+      .leftJoin(customers, eq(orders.customerId, customers.id))
+      .where(eq(orders.id, orderId))
+      .limit(1)
+      .get();
+
+    if (!orderResult || !orderResult.phone) {
+      console.warn(`[NotificationService] Order ${orderId} not found or no phone number`);
+      return;
+    }
+
+    // 2. Get notification setting for 'shipped' status (carrier tracking is post-shipment)
+    const setting = await getNotificationSetting(db, storeId, "shipped");
+    if (!setting || !setting.enabled) {
+      return; // Notifications disabled for this status
+    }
+
+    // 3. Format carrier status label in Arabic
+    const CARRIER_STATUS_LABELS: Record<string, string> = {
+      received: "تم استلام الشحنة",
+      in_transit: "الشحنة في الطريق",
+      at_office: "الشحنة في المكتب",
+      with_driver: "الشحنة مع السائق",
+      delivered: "تم توصيل الشحنة",
+      returned: "تم إرجاع الشحنة",
+    };
+    const statusLabel = CARRIER_STATUS_LABELS[carrierStatus] ?? carrierStatus;
+
+    // 4. Build message
+    const message = `📦 تحديث شحنة طلب #${orderResult.orderNumber}\n\n${statusLabel}${orderResult.trackingNumber ? `\nرقم التتبع: ${orderResult.trackingNumber}` : ""}`;
+
+    // 5. Send to merchant's phone (not customer) via configured channel
+    // Note: For carrier tracking, we notify the MERCHANT, not the customer
+    // The merchant's phone should be retrieved from store settings
+    // For now, we log the notification - full implementation needs merchant phone lookup
+    console.log(`[NotificationService] Carrier tracking notification for order ${orderResult.orderNumber}: ${statusLabel}`);
+
+    // TODO: Implement merchant phone lookup and actual sending
+    // const merchantPhone = await getMerchantPhone(storeId);
+    // if (setting.channel === "whatsapp" || setting.channel === "both") {
+    //   await sendWhatsAppMessage(merchantPhone, message);
+    // }
+    // if (setting.channel === "sms" || setting.channel === "both") {
+    //   await sendSmsMessage(merchantPhone, message);
+    // }
+  } catch (err) {
+    console.error("[NotificationService] Error sending carrier tracking notification:", err);
+  }
 }

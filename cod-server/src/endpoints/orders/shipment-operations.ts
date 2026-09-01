@@ -24,6 +24,7 @@ import { upsertCarrierTracking } from "../../../../cod-shared/queries/carrier-tr
 import { mapNoestCarrierStatus, mapNoestEventKey, shouldAutoUpdateNoestStatus } from "../webhooks/noest-status-mapper";
 import { mapEcotrackCarrierStatus, mapEcotrackStatus, shouldAutoUpdateEcotrackStatus } from "../webhooks/ecotrack-status-mapper";
 import type { OrderStatus } from "../../../../cod-shared/db/schema";
+import { sendCarrierTrackingNotification } from "@/services/notifications";
 
 /**
  * PATCH /orders/:id/update-shipment
@@ -525,6 +526,13 @@ export async function getShipmentTracking(c: Context<AppContext>) {
         }, { from: order.status, to: latestOrderStatus, source: "pull_tracking" });
       }
     }
+  }
+
+  // Send carrier tracking notification to merchant (fire-and-forget)
+  if (latestCarrierStatus) {
+    void sendCarrierTrackingNotification(db, order.id, latestCarrierStatus, storeId).catch((err) =>
+      console.warn("[shipment-operations] Failed to send carrier tracking notification:", err)
+    );
   }
 
   return c.json({ success: true, data: events }, 200);
