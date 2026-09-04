@@ -2,17 +2,25 @@
 
 import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ShoppingBag, Package, Home, Landmark, User, Info } from "lucide-react";
+import { ShoppingBag, Package, Home, Landmark, User, Info, Weight, ShieldAlert } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { OrderCustomerSection } from "./order-customer-section";
 import { OrderProductSelector } from "./order-product-selector";
 import { OrderNotesSection } from "./order-notes-section";
 import { createOrder } from "@/actions/orders";
 import { getCommunes } from "@/actions/wilayas";
-import { getShippingRulesByProfileId } from "@/actions/shipping-profiles";
+import { getShippingRulesByProfileId, getShippingRuleCommunes } from "@/actions/shipping-profiles";
 import { toast } from "sonner";
-import type { Customer, Product, OrderProduct, ShippingRule, Wilaya, Commune } from "@/types";
+import type { Customer, Product, OrderProduct, ShippingRule, Wilaya, Commune, CommuneOverride } from "@/types";
 import { useOrders, useCommon } from "@/lib/translations";
 import { useLanguage } from "@/lib/i18n-context";
 import { createOrderFormSchema, type OrderFormErrors } from "@/validations/orders";
@@ -34,7 +42,7 @@ export function OrderFormPage({ customers, products, shippingRules, wilayas }: P
   const router = useRouter();
   const t = useOrders();
   const common = useCommon();
-  const { locale } = useLanguage();
+  const { locale, dir } = useLanguage();
   const [isPending, startTransition] = useTransition();
   const isEdit = false;
   const [errors, setErrors] = useState<OrderFormErrors>({});
@@ -53,6 +61,8 @@ export function OrderFormPage({ customers, products, shippingRules, wilayas }: P
   const [address, setAddress] = useState("");
   const [selectedProducts, setSelectedProducts] = useState<OrderProduct[]>([]);
   const [notes, setNotes] = useState("");
+  const [weight, setWeight] = useState<number | null>(null);
+  const [isFragile, setIsFragile] = useState(false);
 
   // ── Delivery ───────────────────────────────────────────────────────────────
   const [deliveryType, setDeliveryType] = useState<"home" | "stop_desk">("home");
@@ -61,6 +71,7 @@ export function OrderFormPage({ customers, products, shippingRules, wilayas }: P
   const [deliveryModeUnavailable, setDeliveryModeUnavailable] = useState(false);
   const [productShippingRules, setProductShippingRules] = useState<ShippingRule[]>([]);
   const [loadingProductRules, setLoadingProductRules] = useState(false);
+  const [communeOverrides, setCommuneOverrides] = useState<CommuneOverride[]>([]);
 
   // Fetch communes when wilayaId changes
   useEffect(() => {
@@ -68,6 +79,7 @@ export function OrderFormPage({ customers, products, shippingRules, wilayas }: P
       setCommunes([]);
       setCommune("");
       setPendingCommuneId(null);
+      setCommuneOverrides([]);
       return;
     }
     setLoadingCommunes(true);
@@ -85,6 +97,23 @@ export function OrderFormPage({ customers, products, shippingRules, wilayas }: P
       .finally(() => setLoadingCommunes(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wilayaId]);
+
+  // Fetch commune overrides when wilayaId changes (for fee calculation)
+  useEffect(() => {
+    if (!wilayaId) {
+      setCommuneOverrides([]);
+      return;
+    }
+    const activeRules = productShippingRules.length > 0 ? productShippingRules : shippingRules;
+    const rule = activeRules.find((r) => r.wilayaId === wilayaId);
+    if (!rule) {
+      setCommuneOverrides([]);
+      return;
+    }
+    getShippingRuleCommunes(rule.profileId, wilayaId)
+      .then(setCommuneOverrides)
+      .catch(() => setCommuneOverrides([]));
+  }, [wilayaId, shippingRules, productShippingRules]);
 
   // Fetch product-specific shipping rules when products are selected
   useEffect(() => {
@@ -119,7 +148,7 @@ export function OrderFormPage({ customers, products, shippingRules, wilayas }: P
       .finally(() => setLoadingProductRules(false));
   }, [selectedProducts, products]);
 
-  // Auto-fill delivery fee when wilayaId or deliveryType changes
+  // Auto-fill delivery fee when wilayaId, commune, or deliveryType changes
   useEffect(() => {
     if (!wilayaId) {
       setFeeAutoFilled(false);
@@ -139,14 +168,25 @@ export function OrderFormPage({ customers, products, shippingRules, wilayas }: P
     const rule = activeRules.find((r) => r.wilayaId === wilayaId);
     if (rule) {
       const isHome = deliveryType === "home";
-      const enabled = isHome ? rule.homeEnabled : rule.stopDeskEnabled;
-      if (!enabled) {
+
+      // Check commune override first (sparse: most communes have no row)
+      let effectiveEnabled = isHome ? rule.homeEnabled : rule.stopDeskEnabled;
+      let effectiveFee = isHome ? rule.homePrice : rule.stopDeskPrice;
+
+      if (commune) {
+        const override = communeOverrides.find((o) => o.communeId === commune);
+        if (override) {
+          effectiveEnabled = isHome ? override.effectiveHomeEnabled : override.effectiveStopDeskEnabled;
+          effectiveFee = isHome ? override.effectiveHomePrice : override.effectiveStopDeskPrice;
+        }
+      }
+
+      if (!effectiveEnabled) {
         setDeliveryFee(0);
         setFeeAutoFilled(false);
         setDeliveryModeUnavailable(true);
       } else {
-        const fee = isHome ? rule.homePrice : rule.stopDeskPrice;
-        setDeliveryFee(fee);
+        setDeliveryFee(effectiveFee);
         setFeeAutoFilled(true);
         setDeliveryModeUnavailable(false);
       }
@@ -154,7 +194,7 @@ export function OrderFormPage({ customers, products, shippingRules, wilayas }: P
       setFeeAutoFilled(false);
       setDeliveryModeUnavailable(false);
     }
-  }, [wilayaId, deliveryType, shippingRules, productShippingRules]);
+  }, [wilayaId, commune, deliveryType, shippingRules, productShippingRules, communeOverrides]);
 
   const productVariants = Object.fromEntries(
     products.map((p) => [p.id, p.variants ?? []])
@@ -232,6 +272,8 @@ export function OrderFormPage({ customers, products, shippingRules, wilayas }: P
           orderType: "online",
           deliveryType,
           deliveryFee,
+          weight: weight ?? undefined,
+          isFragile: isFragile || undefined,
           products: selectedProducts.map((p) => ({
             productId: p.productId,
             productName: p.productName,
@@ -270,26 +312,15 @@ export function OrderFormPage({ customers, products, shippingRules, wilayas }: P
           <Section title={t.detail.customer_info} icon={<User size={18} />}>
             <OrderCustomerSection
               customers={customers}
-              wilayas={wilayas}
               selectedCustomer={selectedCustomer}
               customerName={customerName}
               phone={phone}
-              wilayaId={wilayaId}
-              wilayaNameAr={wilayaNameAr}
-              commune={commune}
-              communes={communes}
-              loadingCommunes={loadingCommunes}
-              address={address}
-              deliveryType={deliveryType}
               onCustomerSelect={handleCustomerSelect}
               onCustomerClear={handleCustomerClear}
               customerMode={customerMode}
               onCustomerModeChange={setCustomerMode}
               onCustomerNameChange={(v) => { setCustomerName(v); markDirty(); }}
               onPhoneChange={(v) => { setPhone(v); markDirty(); }}
-              onWilayaChange={(id, nameAr) => { setWilayaId(id); setWilayaNameAr(nameAr); markDirty(); }}
-              onCommuneChange={(v) => { setCommune(v); markDirty(); }}
-              onAddressChange={(v) => { setAddress(v); markDirty(); }}
             />
           </Section>
 
@@ -306,7 +337,8 @@ export function OrderFormPage({ customers, products, shippingRules, wilayas }: P
         {/* Sidebar */}
         <div className="w-[320px] shrink-0 space-y-6">
           <Section title={t.form.delivery_section} icon={<Package size={18} />}>
-            <div className="space-y-6">
+            <div className="space-y-5">
+              {/* Delivery Type */}
               <div className="space-y-3">
                 <Label className="text-sm font-semibold text-foreground ml-1">
                   {t.form.delivery_type_label}
@@ -339,6 +371,122 @@ export function OrderFormPage({ customers, products, shippingRules, wilayas }: P
                 </div>
               </div>
 
+              {/* Wilaya */}
+              <div className="space-y-2">
+                <Label className="text-sm text-foreground font-bold">
+                  {t.form.wilaya_label} *
+                </Label>
+                <Select
+                  value={wilayaId ? String(wilayaId) : ""}
+                  onValueChange={(v) => {
+                    if (!v) return;
+                    const w = wilayas.find((x) => x.id === Number(v));
+                    if (w) {
+                      setWilayaId(w.id);
+                      setWilayaNameAr(w.nameAr);
+                      markDirty();
+                    }
+                  }}
+                >
+                  <SelectTrigger className="h-11 bg-muted border-border text-foreground">
+                    {wilayaNameAr ? (
+                      <span className="font-bold">{wilayaNameAr}</span>
+                    ) : (
+                      <span className="text-muted-foreground">{t.form.wilaya_placeholder}</span>
+                    )}
+                  </SelectTrigger>
+                  <SelectContent>
+                    {wilayas.map((w) => (
+                      <SelectItem key={w.id} value={String(w.id)}>
+                        {w.nameAr}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Commune */}
+              <div className="space-y-2">
+                <Label className="text-sm text-foreground font-bold">
+                  {t.form.commune_label} *
+                </Label>
+                <Select
+                  value={commune}
+                  onValueChange={(v) => { if (v) { setCommune(v); markDirty(); } }}
+                  disabled={!wilayaId || loadingCommunes}
+                >
+                  <SelectTrigger className="h-11 bg-muted border-border text-foreground">
+                    {commune ? (
+                      <span className="font-bold">
+                        {communes.find((c) => c.id === commune)?.nameAr || commune}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">
+                        {loadingCommunes
+                          ? t.form.commune_loading
+                          : t.form.commune_placeholder}
+                      </span>
+                    )}
+                  </SelectTrigger>
+                  <SelectContent>
+                    {communes.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.nameAr || c.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Address */}
+              <div className="space-y-2">
+                <Label className="text-sm text-foreground font-bold">
+                  {deliveryType === "home" ? `${t.form.address_label} *` : t.form.address_label}
+                </Label>
+                <Textarea
+                  value={address}
+                  onChange={(e) => { setAddress(e.target.value); markDirty(); }}
+                  placeholder={t.form.address_placeholder}
+                  rows={2}
+                  className="bg-muted border-border text-foreground resize-none text-base"
+                  dir={dir}
+                />
+              </div>
+
+              {/* Weight + Fragile */}
+              <div className="flex items-end gap-3">
+                <div className="flex-1 space-y-2">
+                  <Label className="text-sm text-foreground font-bold flex items-center gap-1.5">
+                    <Weight size={14} className="text-muted-foreground" />
+                    {t.form.weight_label ?? "الوزن (كغ)"}
+                  </Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={weight ?? ""}
+                    onChange={(e) => {
+                      const v = parseFloat(e.target.value);
+                      setWeight(isNaN(v) ? null : v);
+                      markDirty();
+                    }}
+                    placeholder="0.5"
+                    className="h-11 bg-muted border-border text-foreground text-base"
+                  />
+                </div>
+                <label className="flex items-center gap-2 pb-2 cursor-pointer select-none">
+                  <Switch
+                    checked={isFragile}
+                    onCheckedChange={(v) => { setIsFragile(v); markDirty(); }}
+                  />
+                  <span className="text-sm font-bold text-foreground flex items-center gap-1">
+                    <ShieldAlert size={14} className="text-amber-500" />
+                    {t.form.fragile_label ?? "هش"}
+                  </span>
+                </label>
+              </div>
+
+              {/* Delivery Fee */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between ml-1">
                   <Label className="text-xs font-semibold text-muted-foreground">

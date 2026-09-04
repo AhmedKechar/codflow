@@ -188,7 +188,7 @@ export async function dispatchToCompany(c: Context<AppContext>) {
       rawResponse: result.rawResponse,
     });
 
-    await queries.updateOrderTracking(db, storeId, order.id, result.trackingNumber);
+    await queries.updateOrderTracking(db, storeId, order.id, result.trackingNumber, undefined, company.name);
 
     const dispatchUser = c.get("user");
     const PRE_DISPATCH_STATUSES = ["new", "confirmed", "unreachable", "busy", "postponed"];
@@ -550,7 +550,7 @@ export async function bulkDispatch(c: Context<AppContext>) {
           rawResponse: result,
         });
 
-        await queries.updateOrderTracking(db, storeId, order.id, result.trackingNumber);
+        await queries.updateOrderTracking(db, storeId, order.id, result.trackingNumber, undefined, company.name);
 
         if (company.autoValidate) {
           const validateStart = Date.now();

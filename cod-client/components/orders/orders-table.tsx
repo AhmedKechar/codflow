@@ -2,10 +2,11 @@
 
 import { useState, useTransition, useMemo, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useDebounce } from "@/hooks/useDebounce";
 import {
   Eye, Package, MapPin, MoreHorizontal, Truck, Building2,
   Check, Search, X, Star, Zap, Trash2, Filter,
-  Home, Store, Send,
+  Home, Store,
 } from "lucide-react";
 import { toast } from "sonner";
 import { DataTable, TableColumn } from "@/components/ui/data-table";
@@ -43,7 +44,6 @@ import { useConfirm } from "@/components/ui/use-confirm";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FilterChip } from "@/components/ui/filter-chip";
-import { FilterResultCount } from "@/components/ui/filter-result-count";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { BulkDispatchDialog } from "./bulk-dispatch-dialog";
 import type { Order, OrderStatus, Driver, DeliveryCompany, StopDesk } from "@/types";
@@ -104,7 +104,12 @@ function StatusCell({ order, onRefresh }: { order: Order; onRefresh: () => void 
         }
       >
         <span className="inline-flex items-center gap-1.5">
-          <StatusBadge status={order.status} />
+          <StatusBadge
+            status={order.status}
+            label={order.status === "shipped" && order.deliveryMethodName
+              ? `${t.status?.shipped ?? "شُحن"} · ${order.deliveryMethodName}`
+              : undefined}
+          />
           {order.lastUpdatedBy?.startsWith("webhook:") && (
             <span
               title={`Auto-updated by ${order.lastUpdatedBy === "webhook:zr_express" ? "ZR Express" : "Yalidine"}`}
@@ -131,123 +136,61 @@ function StatusCell({ order, onRefresh }: { order: Order; onRefresh: () => void 
   );
 }
 
-// ── Assign Driver Dialog ───────────────────────────────────────────────────
+// ── Unified Delivery Dialog ────────────────────────────────────────────────
 
-export function AssignDriverDialog({
+export function DeliveryDialog({
   order,
   drivers,
+  companies,
+  driverWilayas,
   onClose,
   onAssigned,
+  onDispatched,
 }: {
   order: Order;
   drivers: Driver[];
+  companies: DeliveryCompany[];
+  driverWilayas: number[];
   onClose: () => void;
   onAssigned: () => void;
+  onDispatched: (trackingNumber: string, labelUrl?: string | null) => void;
 }) {
   const t = useOrders();
   const locale = useErrorLocale();
-  const [query, setQuery] = useState("");
-  const [selectedId, setSelectedId] = useState(order.driverId ?? "");
-  const [isPending, startTransition] = useTransition();
+
+  const hasDriverOption = order.wilayaId != null && driverWilayas.includes(order.wilayaId);
+  const hasCompanyOption = companies.length > 0;
+
+  // Pick default mode: driver if available, else company
+  const [mode, setMode] = useState<"driver" | "company">(hasDriverOption ? "driver" : "company");
+
+  // ── Driver state ──────────────────────────────────────────────────────
+  const [driverQuery, setDriverQuery] = useState("");
+  const [selectedDriverId, setSelectedDriverId] = useState(order.driverId ?? "");
+  const [assigning, startAssignTransition] = useTransition();
   const [errorState, setErrorState] = useState<{ isOpen: boolean; message: string; code?: string }>({ isOpen: false, message: "" });
 
-  const filtered = drivers.filter((d) => {
+  const filteredDrivers = drivers.filter((d) => {
     const name = `${d.firstName} ${d.lastName}`.toLowerCase();
-    return name.includes(query.toLowerCase());
+    return name.includes(driverQuery.toLowerCase());
   });
 
   function handleAssign() {
-    if (!selectedId) return;
-    startTransition(async () => {
+    if (!selectedDriverId) return;
+    startAssignTransition(async () => {
       try {
-        await assignDriverToOrder(order.id, selectedId);
-        toast.success(t.assign_driver_dialog?.success ?? "Driver assigned");
+        await assignDriverToOrder(order.id, selectedDriverId);
+        toast.success(t.assign_driver_dialog?.success ?? "تم تعيين السائق");
         onAssigned();
         onClose();
       } catch (err) {
-        setErrorState({ isOpen: true, message: err instanceof Error ? err.message : (t.detail?.error_assign ?? "Failed to assign driver") });
+        setErrorState({ isOpen: true, message: err instanceof Error ? err.message : (t.detail?.error_assign ?? "فشل في تعيين السائق") });
       }
     });
   }
 
-  return (
-    <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-sm">
-        <DialogHeader>
-          <DialogTitle className="font-black">{t.assign_driver_dialog?.title ?? "Assign Driver"}</DialogTitle>
-          <p className="text-xs text-muted-foreground font-semibold">{order.orderNumber} · {order.wilaya}</p>
-        </DialogHeader>
-
-        <div className="relative">
-          <Search size={13} className="absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={t.assign_driver_dialog?.search_placeholder ?? "Search driver..."}
-            className="ps-8 h-9 text-sm"
-          />
-        </div>
-
-        <div className="space-y-1 max-h-56 overflow-y-auto">
-          {filtered.length === 0 && (
-            <p className="py-6 text-center text-sm text-muted-foreground font-semibold">
-              {t.assign_driver_dialog?.no_drivers ?? "No drivers"}
-            </p>
-          )}
-          {filtered.map((d) => {
-            const isSelected = selectedId === d.id;
-            const isCurrent = order.driverId === d.id;
-            return (
-              <button
-                key={d.id}
-                onClick={() => setSelectedId(d.id)}
-                className={cn(
-                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-start transition-colors",
-                  isSelected ? "bg-primary/10 border border-primary/20" : "hover:bg-muted/60 border border-transparent"
-                )}
-              >
-                <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary text-xs font-black shrink-0">
-                  {d.firstName.charAt(0)}{d.lastName.charAt(0)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-foreground truncate">{d.firstName} {d.lastName}</p>
-                  <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wide">
-                    {d.status === "available" ? (t.assign_driver_dialog?.available ?? "Available") : (t.assign_driver_dialog?.busy ?? "Busy")}
-                    {isCurrent && " · current"}
-                  </p>
-                </div>
-                {isSelected && <Check size={14} className="text-primary shrink-0" />}
-              </button>
-            );
-          })}
-        </div>
-
-        <Button onClick={handleAssign} disabled={!selectedId || isPending} className="w-full h-10 font-black">
-          {isPending ? (t.assign_driver_dialog?.assigning ?? "Assigning...") : (t.assign_driver_dialog?.assign ?? "Assign")}
-        </Button>
-      </DialogContent>
-      <ErrorModal isOpen={errorState.isOpen} onClose={() => setErrorState({ isOpen: false, message: "" })} message={errorState.message} locale={locale} errorCode={errorState.code} />
-    </Dialog>
-  );
-}
-
-// ── Dispatch to Company Dialog ─────────────────────────────────────────────
-
-export function DispatchCompanyDialog({
-  order,
-  companies,
-  onClose,
-  onDispatched,
-}: {
-  order: Order;
-  companies: DeliveryCompany[];
-  onClose: () => void;
-  onDispatched: (trackingNumber: string, labelUrl?: string | null) => void;
-}) {
-  const t = useOrders();
-  const common = useCommon();
-  const locale = useErrorLocale();
-  const [selectedId, setSelectedId] = useState(order.companyId ?? "");
+  // ── Company state ─────────────────────────────────────────────────────
+  const [selectedCompanyId, setSelectedCompanyId] = useState(order.companyId ?? "");
   const [stationCode, setStationCode] = useState("");
   const [stationQuery, setStationQuery] = useState("");
   const [stations, setStations] = useState<StopDesk[]>([]);
@@ -255,31 +198,27 @@ export function DispatchCompanyDialog({
   const [remarks, setRemarks] = useState("");
   const [weight, setWeight] = useState("");
   const [fragile, setFragile] = useState(false);
-  const [isPending, startTransition] = useTransition();
-  const [errorState, setErrorState] = useState<{ isOpen: boolean; message: string; code?: string }>({ isOpen: false, message: "" });
+  const [dispatching, startDispatchTransition] = useTransition();
 
   const isStopDesk = order.deliveryType === "stop_desk";
-  const selectedCompany = companies.find((c) => c.id === selectedId);
+  const selectedCompany = companies.find((c) => c.id === selectedCompanyId);
   const fieldSupport = dispatchFieldSupport(selectedCompany?.code ?? "");
 
-  // Fetch stop desks when a company is selected for stop-desk orders
   useEffect(() => {
-    if (!selectedId || !isStopDesk) return;
+    if (!selectedCompanyId || !isStopDesk) return;
     setStations([]);
     setStationCode("");
     setStationQuery("");
     startStationsTransition(async () => {
       try {
-        const desks = await fetchCompanyStopDesks(selectedId, { activeOnly: true });
+        const desks = await fetchCompanyStopDesks(selectedCompanyId, { activeOnly: true });
         setStations(desks);
       } catch {
         setStations([]);
       }
     });
-  }, [selectedId, isStopDesk]);
+  }, [selectedCompanyId, isStopDesk]);
 
-  // When no search query, show only desks for the order's wilaya (if any match).
-  // Once the user types, search across all desks.
   const wilayaDesks = useMemo(
     () => (order.wilayaId ? stations.filter((s) => s.wilayaId === order.wilayaId) : []),
     [stations, order.wilayaId]
@@ -298,24 +237,22 @@ export function DispatchCompanyDialog({
   }, [stations, defaultPool, stationQuery]);
 
   function handleDispatch() {
-    if (!selectedId) return;
-    startTransition(async () => {
+    if (!selectedCompanyId) return;
+    startDispatchTransition(async () => {
       try {
         const parsedWeight = parseFloat(weight);
-        // Only forward fields the selected provider's createShipment will actually consume.
-        // Sending extras for yalidine/zr is harmless but misleading in API logs.
         const result = await dispatchOrder(order.id, {
-          companyId: selectedId,
+          companyId: selectedCompanyId,
           stationCode: stationCode || undefined,
           remarks: fieldSupport.remarks ? (remarks || undefined) : undefined,
           weight: fieldSupport.weight && weight && !isNaN(parsedWeight) && parsedWeight > 0 ? parsedWeight : undefined,
           fragile: fieldSupport.fragile && fragile ? true : undefined,
         });
-        toast.success((t.dispatch_dialog?.success ?? "Dispatched — Tracking: ") + result.trackingNumber);
+        toast.success((t.dispatch_dialog?.success ?? "تم الإرسال — التتبع: ") + result.trackingNumber);
         onDispatched(result.trackingNumber, result.labelUrl);
         onClose();
       } catch (err) {
-        setErrorState({ isOpen: true, message: err instanceof Error ? err.message : (t.detail?.dispatch_failed ?? "Dispatch failed") });
+        setErrorState({ isOpen: true, message: err instanceof Error ? err.message : (t.detail?.dispatch_failed ?? "فشل الإرسال") });
       }
     });
   }
@@ -323,194 +260,286 @@ export function DispatchCompanyDialog({
   const remarksMax = 500;
   const remarksOver = remarks.length > remarksMax;
 
+  // ── Determine available modes ─────────────────────────────────────────
+  const modes: Array<{ key: "driver" | "company"; label: string; icon: React.ReactNode }> = [];
+  if (hasDriverOption) {
+    modes.push({ key: "driver", label: t.assign_driver_dialog?.title ?? "تعيين سائق", icon: <Truck size={14} /> });
+  }
+  if (hasCompanyOption) {
+    modes.push({ key: "company", label: t.dispatch_dialog?.title ?? "إرسال لشركة", icon: <Building2 size={14} /> });
+  }
+
   return (
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-black">{t.dispatch_dialog?.title ?? "Dispatch to Company"}</DialogTitle>
+          <DialogTitle className="font-black">
+            {modes.length === 1 ? modes[0].label : "التوصيل"}
+          </DialogTitle>
           <p className="text-xs text-muted-foreground font-semibold">
             {order.orderNumber} · {order.wilaya}
-            {isStopDesk && (
-              <span className="ms-1.5 text-primary/60 font-black uppercase text-[10px] tracking-wide">
-                · {t.detail?.stop_desk ?? "Desk"}
-              </span>
-            )}
           </p>
         </DialogHeader>
 
-        {companies.length === 0 ? (
-          <p className="py-6 text-center text-sm text-muted-foreground font-semibold">
-            {t.dispatch_dialog?.no_companies ?? "No connected companies"}
-          </p>
-        ) : (
-          <div className="space-y-2">
-            {companies.map((c) => {
-              const isSelected = selectedId === c.id;
-              return (
-                <button
-                  key={c.id}
-                  onClick={() => setSelectedId(c.id)}
-                  className={cn(
-                    "w-full flex items-center gap-3 px-3 py-3 rounded-xl text-start transition-colors border",
-                    isSelected ? "bg-primary/10 border-primary/30" : "hover:bg-muted/60 border-border/50"
-                  )}
-                >
-                  <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center shrink-0">
-                    <Building2 size={16} className="text-muted-foreground" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-foreground">{c.name}</p>
-                    <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wide">{c.code}</p>
-                  </div>
-                  {isSelected && <Check size={14} className="text-primary shrink-0" />}
-                </button>
-              );
-            })}
+        {/* ── Mode selector tabs ─────────────────────────────────────────── */}
+        {modes.length > 1 && (
+          <div className="flex gap-1 p-1 rounded-xl bg-muted/40">
+            {modes.map((m) => (
+              <button
+                key={m.key}
+                onClick={() => setMode(m.key)}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition-colors",
+                  mode === m.key
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {m.icon}
+                {m.label}
+              </button>
+            ))}
           </div>
         )}
 
-        {/* Stop-desk picker */}
-        {isStopDesk && selectedId && (
-          <div className="space-y-2">
-            <label className="text-xs font-black text-muted-foreground uppercase tracking-wide">
-              {t.dispatch_dialog?.station_code_label ?? "Station"}
-            </label>
-
-            {loadingStations ? (
-              <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-border/30 bg-muted/20">
-                <div className="w-3 h-3 rounded-full border-2 border-primary border-t-transparent animate-spin shrink-0" />
-                <span className="text-xs text-muted-foreground font-semibold">
-                  {t.dispatch_dialog?.loading_stations ?? "Loading desks..."}
-                </span>
-              </div>
-            ) : stations.length > 0 ? (
-              <>
-                <div className="relative">
-                  <Search size={12} className="absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground/50" />
-                  <Input
-                    value={stationQuery}
-                    onChange={(e) => setStationQuery(e.target.value)}
-                    placeholder={t.dispatch_dialog?.station_picker_placeholder ?? "Search desks..."}
-                    className="ps-8 h-9 text-sm"
-                  />
-                </div>
-                {!stationQuery && wilayaDesks.length > 0 && wilayaDesks.length < stations.length && (
-                  <p className="text-[10px] text-muted-foreground/50 font-semibold">
-                    {order.wilaya} · search to see all wilayas
-                  </p>
-                )}
-                <div className="max-h-44 overflow-y-auto space-y-1 rounded-xl border border-border/30 p-1.5">
-                  {filteredStations.length === 0 ? (
-                    <p className="py-3 text-center text-xs text-muted-foreground font-semibold">—</p>
-                  ) : (
-                    filteredStations.map((s) => {
-                      const isSelected = stationCode === s.code;
-                      return (
-                        <button
-                          key={s.code}
-                          onClick={() => setStationCode(s.code)}
-                          className={cn(
-                            "w-full flex items-start gap-2.5 px-2.5 py-2 rounded-lg text-start transition-colors",
-                            isSelected ? "bg-primary/10 border border-primary/20" : "hover:bg-muted/60 border border-transparent"
-                          )}
-                        >
-                          <span className="shrink-0 font-mono text-[10px] font-black text-primary/70 bg-primary/5 px-1.5 py-0.5 rounded mt-0.5">
-                            {s.code}
-                          </span>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-bold text-foreground truncate">{s.name}</p>
-                            {s.commune && (
-                              <p className="text-[10px] text-muted-foreground/60 font-semibold truncate">
-                                {s.commune}
-                              </p>
-                            )}
-                          </div>
-                          {isSelected && <Check size={12} className="text-primary shrink-0 mt-1" />}
-                        </button>
-                      );
-                    })
-                  )}
-                </div>
-                {stationCode && (
-                  <p className="text-[10px] text-primary/70 font-black uppercase tracking-wide">
-                    ✓ {stationCode}
-                  </p>
-                )}
-              </>
-            ) : (
-              // Fallback manual input if station list is empty
-              <>
-                <Input
-                  value={stationCode}
-                  onChange={(e) => setStationCode(e.target.value)}
-                  placeholder={t.dispatch_dialog?.station_code_placeholder ?? "e.g. 16A"}
-                  className="h-9 text-sm font-mono"
-                />
-                <p className="text-[10px] text-muted-foreground font-semibold">
-                  {t.dispatch_dialog?.station_code_hint ?? "Required for stop-desk orders"}
-                </p>
-              </>
-            )}
-          </div>
-        )}
-
-        {/* Remarks — only providers that consume it on createShipment (ecotrack, noest) */}
-        {fieldSupport.remarks && (
-          <div className="space-y-1">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-black text-muted-foreground uppercase tracking-wide">
-                {t.dispatch_dialog?.remarks_label ?? "Remarks (optional)"}
-              </label>
-              {remarks.length > 0 && (
-                <span className={cn("text-[10px] font-bold tabular-nums", remarksOver ? "text-rose-500" : "text-muted-foreground/50")}>
-                  {remarks.length}/{remarksMax}
-                </span>
-              )}
+        {/* ── Driver mode ────────────────────────────────────────────────── */}
+        {mode === "driver" && hasDriverOption && (
+          <>
+            <div className="relative">
+              <Search size={13} className="absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={driverQuery}
+                onChange={(e) => setDriverQuery(e.target.value)}
+                placeholder={t.assign_driver_dialog?.search_placeholder ?? "بحث عن سائق..."}
+                className="ps-8 h-9 text-sm"
+              />
             </div>
-            <Input
-              value={remarks}
-              onChange={(e) => setRemarks(e.target.value)}
-              placeholder={t.dispatch_dialog?.remarks_placeholder ?? "e.g. Call before delivery"}
-              className={cn("h-9 text-sm", remarksOver && "border-rose-400 focus-visible:ring-rose-400")}
-            />
-          </div>
+
+            <div className="space-y-1 max-h-56 overflow-y-auto">
+              {filteredDrivers.length === 0 && (
+                <p className="py-6 text-center text-sm text-muted-foreground font-semibold">
+                  {t.assign_driver_dialog?.no_drivers ?? "لا يوجد سائقون"}
+                </p>
+              )}
+              {filteredDrivers.map((d) => {
+                const isSelected = selectedDriverId === d.id;
+                const isCurrent = order.driverId === d.id;
+                return (
+                  <button
+                    key={d.id}
+                    onClick={() => setSelectedDriverId(d.id)}
+                    className={cn(
+                      "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-start transition-colors",
+                      isSelected ? "bg-primary/10 border border-primary/20" : "hover:bg-muted/60 border border-transparent"
+                    )}
+                  >
+                    <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary text-xs font-black shrink-0">
+                      {d.firstName.charAt(0)}{d.lastName.charAt(0)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-foreground truncate">{d.firstName} {d.lastName}</p>
+                      <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wide">
+                        {d.status === "available" ? (t.assign_driver_dialog?.available ?? "متاح") : (t.assign_driver_dialog?.busy ?? "مشغول")}
+                        {isCurrent && " · الحالي"}
+                      </p>
+                    </div>
+                    {isSelected && <Check size={14} className="text-primary shrink-0" />}
+                  </button>
+                );
+              })}
+            </div>
+
+            <Button onClick={handleAssign} disabled={!selectedDriverId || assigning} className="w-full h-10 font-black">
+              {assigning ? (t.assign_driver_dialog?.assigning ?? "جاري التعيين...") : (t.assign_driver_dialog?.assign ?? "تعيين")}
+            </Button>
+          </>
         )}
 
-        {/* Weight + Fragile — both supported by ecotrack; weight only by noest */}
-        {(fieldSupport.weight || fieldSupport.fragile) && (
-          <div className="flex items-end gap-3">
-            {fieldSupport.weight && (
-              <div className="flex-1 space-y-1">
+        {/* ── Company mode ───────────────────────────────────────────────── */}
+        {mode === "company" && hasCompanyOption && (
+          <>
+            <div className="space-y-2">
+              {companies.map((c) => {
+                const isSelected = selectedCompanyId === c.id;
+                return (
+                  <button
+                    key={c.id}
+                    onClick={() => setSelectedCompanyId(c.id)}
+                    className={cn(
+                      "w-full flex items-center gap-3 px-3 py-3 rounded-xl text-start transition-colors border",
+                      isSelected ? "bg-primary/10 border-primary/30" : "hover:bg-muted/60 border-border/50"
+                    )}
+                  >
+                    <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center shrink-0">
+                      <Building2 size={16} className="text-muted-foreground" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-foreground">{c.name}</p>
+                      <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wide">{c.code}</p>
+                    </div>
+                    {isSelected && <Check size={14} className="text-primary shrink-0" />}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Stop-desk picker */}
+            {isStopDesk && selectedCompanyId && (
+              <div className="space-y-2">
                 <label className="text-xs font-black text-muted-foreground uppercase tracking-wide">
-                  {t.detail?.weight ?? "Weight (kg)"}
+                  {t.dispatch_dialog?.station_code_label ?? "المحطة"}
                 </label>
+
+                {loadingStations ? (
+                  <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-border/30 bg-muted/20">
+                    <div className="w-3 h-3 rounded-full border-2 border-primary border-t-transparent animate-spin shrink-0" />
+                    <span className="text-xs text-muted-foreground font-semibold">
+                      {t.dispatch_dialog?.loading_stations ?? "جاري تحميل المحطات..."}
+                    </span>
+                  </div>
+                ) : stations.length > 0 ? (
+                  <>
+                    <div className="relative">
+                      <Search size={12} className="absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground/50" />
+                      <Input
+                        value={stationQuery}
+                        onChange={(e) => setStationQuery(e.target.value)}
+                        placeholder={t.dispatch_dialog?.station_picker_placeholder ?? "بحث في المحطات..."}
+                        className="ps-8 h-9 text-sm"
+                      />
+                    </div>
+                    {!stationQuery && wilayaDesks.length > 0 && wilayaDesks.length < stations.length && (
+                      <p className="text-[10px] text-muted-foreground/50 font-semibold">
+                        {order.wilaya} · ابحث لرؤية جميع الولايات
+                      </p>
+                    )}
+                    <div className="max-h-44 overflow-y-auto space-y-1 rounded-xl border border-border/30 p-1.5">
+                      {filteredStations.length === 0 ? (
+                        <p className="py-3 text-center text-xs text-muted-foreground font-semibold">—</p>
+                      ) : (
+                        filteredStations.map((s) => {
+                          const isSelected = stationCode === s.code;
+                          return (
+                            <button
+                              key={s.code}
+                              onClick={() => setStationCode(s.code)}
+                              className={cn(
+                                "w-full flex items-start gap-2.5 px-2.5 py-2 rounded-lg text-start transition-colors",
+                                isSelected ? "bg-primary/10 border border-primary/20" : "hover:bg-muted/60 border border-transparent"
+                              )}
+                            >
+                              <span className="shrink-0 font-mono text-[10px] font-black text-primary/70 bg-primary/5 px-1.5 py-0.5 rounded mt-0.5">
+                                {s.code}
+                              </span>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-bold text-foreground truncate">{s.name}</p>
+                                {s.commune && (
+                                  <p className="text-[10px] text-muted-foreground/60 font-semibold truncate">
+                                    {s.commune}
+                                  </p>
+                                )}
+                              </div>
+                              {isSelected && <Check size={12} className="text-primary shrink-0 mt-1" />}
+                            </button>
+                          );
+                        })
+                      )}
+                    </div>
+                    {stationCode && (
+                      <p className="text-[10px] text-primary/70 font-black uppercase tracking-wide">
+                        ✓ {stationCode}
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <Input
+                      value={stationCode}
+                      onChange={(e) => setStationCode(e.target.value)}
+                      placeholder={t.dispatch_dialog?.station_code_placeholder ?? "مثال: 16A"}
+                      className="h-9 text-sm font-mono"
+                    />
+                    <p className="text-[10px] text-muted-foreground font-semibold">
+                      {t.dispatch_dialog?.station_code_hint ?? "مطلوب لطلبات الاستوديو"}
+                    </p>
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* Remarks */}
+            {fieldSupport.remarks && (
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-black text-muted-foreground uppercase tracking-wide">
+                    {t.dispatch_dialog?.remarks_label ?? "ملاحظات (اختياري)"}
+                  </label>
+                  {remarks.length > 0 && (
+                    <span className={cn("text-[10px] font-bold tabular-nums", remarksOver ? "text-rose-500" : "text-muted-foreground/50")}>
+                      {remarks.length}/{remarksMax}
+                    </span>
+                  )}
+                </div>
                 <Input
-                  type="number"
-                  min="0"
-                  step="0.1"
-                  value={weight}
-                  onChange={(e) => setWeight(e.target.value)}
-                  placeholder="0.5"
-                  className="h-9 text-sm"
+                  value={remarks}
+                  onChange={(e) => setRemarks(e.target.value)}
+                  placeholder={t.dispatch_dialog?.remarks_placeholder ?? "مثال: اتصل قبل التوصيل"}
+                  className={cn("h-9 text-sm", remarksOver && "border-rose-400 focus-visible:ring-rose-400")}
                 />
               </div>
             )}
-            {fieldSupport.fragile && (
-              <label className="flex items-center gap-2 pb-2 cursor-pointer select-none">
-                <Checkbox checked={fragile} onCheckedChange={(v) => setFragile(!!v)} />
-                <span className="text-sm font-bold">{t.detail?.fragile ?? "Fragile"}</span>
-              </label>
+
+            {/* Weight + Fragile */}
+            {(fieldSupport.weight || fieldSupport.fragile) && (
+              <div className="flex items-end gap-3">
+                {fieldSupport.weight && (
+                  <div className="flex-1 space-y-1">
+                    <label className="text-xs font-black text-muted-foreground uppercase tracking-wide">
+                      {t.detail?.weight ?? "الوزن (كغ)"}
+                    </label>
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      value={weight}
+                      onChange={(e) => setWeight(e.target.value)}
+                      placeholder="0.5"
+                      className="h-9 text-sm"
+                    />
+                  </div>
+                )}
+                {fieldSupport.fragile && (
+                  <label className="flex items-center gap-2 pb-2 cursor-pointer select-none">
+                    <Checkbox checked={fragile} onCheckedChange={(v) => setFragile(!!v)} />
+                    <span className="text-sm font-bold">{t.detail?.fragile ?? "هش"}</span>
+                  </label>
+                )}
+              </div>
             )}
-          </div>
+
+            <Button
+              onClick={handleDispatch}
+              disabled={!selectedCompanyId || dispatching || remarksOver || (isStopDesk && !stationCode)}
+              className="w-full h-10 font-black"
+            >
+              {dispatching ? (t.dispatch_dialog?.dispatching ?? "جاري الإرسال...") : (t.dispatch_dialog?.dispatch ?? "إرسال")}
+            </Button>
+          </>
         )}
 
-        <Button
-          onClick={handleDispatch}
-          disabled={!selectedId || isPending || remarksOver || (isStopDesk && !stationCode)}
-          className="w-full h-10 font-black"
-        >
-          {isPending ? (t.dispatch_dialog?.dispatching ?? "Dispatching...") : (t.dispatch_dialog?.dispatch ?? "Dispatch")}
-        </Button>
+        {/* ── No companies fallback ──────────────────────────────────────── */}
+        {mode === "company" && !hasCompanyOption && (
+          <p className="py-6 text-center text-sm text-muted-foreground font-semibold">
+            {t.dispatch_dialog?.no_companies ?? "لا توجد شركات متصلة"}
+          </p>
+        )}
+
+        {/* ── No driver option in this wilaya ────────────────────────────── */}
+        {mode === "driver" && !hasDriverOption && (
+          <p className="py-6 text-center text-sm text-muted-foreground font-semibold">
+            {t.assign_driver_dialog?.no_drivers ?? "لا يوجد سائقون متاحون لهذه الولاية"}
+          </p>
+        )}
       </DialogContent>
       <ErrorModal isOpen={errorState.isOpen} onClose={() => setErrorState({ isOpen: false, message: "" })} message={errorState.message} locale={locale} errorCode={errorState.code} />
     </Dialog>
@@ -523,20 +552,21 @@ function OrderRowActions({
   order,
   drivers,
   companies,
+  driverWilayas,
   userScopes,
   onRefresh,
 }: {
   order: Order;
   drivers: Driver[];
   companies: DeliveryCompany[];
+  driverWilayas: number[];
   userScopes: string[];
   onRefresh: () => void;
 }) {
   const t = useOrders();
   const common = useCommon();
   const router = useRouter();
-  const [assignOpen, setAssignOpen] = useState(false);
-  const [dispatchOpen, setDispatchOpen] = useState(false);
+  const [deliveryOpen, setDeliveryOpen] = useState(false);
   const [isDeleting, startDeleteTransition] = useTransition();
   const { confirm: confirmDialog, ConfirmDialog } = useConfirm();
 
@@ -548,8 +578,10 @@ function OrderRowActions({
   const isDriverMethod = order.deliveryMethod === "driver" && isDriverAssigned && !isDispatched;
   const isTerminal = ["shipped", "delivered", "returned", "cancelled"].includes(order.status);
 
-  const showAssign = hasScope(SCOPES.ORDERS_ASSIGN) && !isDispatched && !isCompanyMethod && !isTerminal;
-  const showDispatch = hasScope(SCOPES.DELIVERY_DISPATCH) && companies.length > 0 && !isDispatched && !isDriverMethod && !isTerminal;
+  // Check if this order's wilaya has driver coverage
+  const hasDriverCoverage = order.wilayaId != null && driverWilayas.includes(order.wilayaId);
+
+  const showDelivery = hasScope(SCOPES.ORDERS_ASSIGN) || hasScope(SCOPES.DELIVERY_DISPATCH);
   const showDelete = hasScope(SCOPES.ORDERS_DELETE);
 
   async function handleDelete() {
@@ -584,16 +616,10 @@ function OrderRowActions({
             <Eye size={13} className="me-2" />
             {t.actions?.view ?? "View"}
           </DropdownMenuItem>
-          {showAssign && (
-            <DropdownMenuItem onClick={() => setAssignOpen(true)} disabled={isDeleting}>
+          {showDelivery && (
+            <DropdownMenuItem onClick={() => setDeliveryOpen(true)} disabled={isDeleting}>
               <Truck size={13} className="me-2" />
-              {t.actions?.assign_driver ?? "Assign Driver"}
-            </DropdownMenuItem>
-          )}
-          {showDispatch && (
-            <DropdownMenuItem onClick={() => setDispatchOpen(true)} disabled={isDeleting}>
-              <Building2 size={13} className="me-2" />
-              {t.actions?.dispatch_to_company ?? "Dispatch to Company"}
+              {t.actions?.delivery ?? "التوصيل"}
             </DropdownMenuItem>
           )}
           {showDelete && (
@@ -618,20 +644,14 @@ function OrderRowActions({
 
       {ConfirmDialog}
 
-      {assignOpen && (
-        <AssignDriverDialog
+      {deliveryOpen && (
+        <DeliveryDialog
           order={order}
           drivers={drivers}
-          onClose={() => setAssignOpen(false)}
-          onAssigned={onRefresh}
-        />
-      )}
-
-      {dispatchOpen && (
-        <DispatchCompanyDialog
-          order={order}
           companies={companies}
-          onClose={() => setDispatchOpen(false)}
+          driverWilayas={driverWilayas}
+          onClose={() => setDeliveryOpen(false)}
+          onAssigned={onRefresh}
           onDispatched={() => onRefresh()}
         />
       )}
@@ -643,16 +663,26 @@ function OrderRowActions({
 
 interface OrdersTableProps {
   orders: Order[];
+  total: number;
+  currentPage: number;
+  pageSize: number;
   drivers?: Driver[];
   companies?: DeliveryCompany[];
+  driverWilayas?: number[];
   userScopes?: string[];
+  statusCounts?: Record<string, number>;
 }
 
 export function OrdersTable({
   orders,
+  total,
+  currentPage,
+  pageSize,
   drivers = [],
   companies = [],
+  driverWilayas = [],
   userScopes = [],
+  statusCounts = {},
 }: OrdersTableProps) {
   const t = useOrders();
   const common = useCommon();
@@ -661,96 +691,86 @@ export function OrdersTable({
   const searchParams = useSearchParams();
 
   // ── Filter state (synced with URL) ──────────────────────────────────────
-  const [search, setSearch] = useState(searchParams.get("q") ?? "");
+  const [searchInput, setSearchInput] = useState(searchParams.get("q") ?? "");
+  const debouncedSearch = useDebounce(searchInput, 400);
   const [statusFilter, setStatusFilter] = useState(searchParams.get("status") ?? "all");
-  const [deliveryFilter, setDeliveryFilter] = useState(searchParams.get("delivery") ?? "all");
-  const [wilayaFilter, setWilayaFilter] = useState(searchParams.get("wilaya") ?? "all");
-  const [typeFilter, setTypeFilter] = useState(searchParams.get("type") ?? "all");
+  const [wilayaFilter, setWilayaFilter] = useState(searchParams.get("wilayaId") ?? "all");
   const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
-    from: searchParams.get("from") ? new Date(searchParams.get("from")!) : undefined,
-    to: searchParams.get("to") ? new Date(searchParams.get("to")!) : undefined,
+    from: searchParams.get("startDate") ? new Date(searchParams.get("startDate")!) : undefined,
+    to: searchParams.get("endDate") ? new Date(searchParams.get("endDate")!) : undefined,
   });
 
-  // Sync filters to URL
+  // ⚡ Sync statusFilter state with URL when chips change it
   useEffect(() => {
-    const params = new URLSearchParams();
-    if (search) params.set("q", search);
-    if (statusFilter !== "all") params.set("status", statusFilter);
-    if (deliveryFilter !== "all") params.set("delivery", deliveryFilter);
-    if (wilayaFilter !== "all") params.set("wilaya", wilayaFilter);
-    if (typeFilter !== "all") params.set("type", typeFilter);
-    if (dateRange.from) params.set("from", dateRange.from.toISOString());
-    if (dateRange.to) params.set("to", dateRange.to.toISOString());
+    const urlStatus = searchParams.get("status");
+    const urlGroup = searchParams.get("group");
+    setStatusFilter(urlStatus ?? (urlGroup ? "all" : "all"));
+  }, [searchParams]);
 
-    const qs = params.toString();
-    router.replace(`/orders${qs ? `?${qs}` : ""}`, { scroll: false });
-  }, [search, statusFilter, deliveryFilter, wilayaFilter, typeFilter, dateRange, router]);
+  // ⚡ Sync debounced search to URL (replace for filter changes)
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (debouncedSearch) {
+      params.set("q", debouncedSearch);
+    } else {
+      params.delete("q");
+    }
+    params.set("page", "1"); // Reset to page 1 on filter change
+    router.replace(`/orders?${params.toString()}`, { scroll: false });
+  }, [debouncedSearch, router]);
 
+  // ⚡ Sync other filters to URL (replace for filter changes)
+  function handleFilterChange(key: string, value: string) {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value === "all" || !value) {
+      params.delete(key);
+    } else {
+      params.set(key, value);
+    }
+    params.set("page", "1"); // Reset to page 1 on filter change
+    router.replace(`/orders?${params.toString()}`, { scroll: false });
+  }
+
+  // ⚡ Sync date range to URL
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (dateRange.from) {
+      params.set("startDate", dateRange.from.toISOString());
+    } else {
+      params.delete("startDate");
+    }
+    if (dateRange.to) {
+      params.set("endDate", dateRange.to.toISOString());
+    } else {
+      params.delete("endDate");
+    }
+    params.set("page", "1"); // Reset to page 1 on filter change
+    router.replace(`/orders?${params.toString()}`, { scroll: false });
+  }, [dateRange, router]);
+
+  // ⚡ Server-side filtering - orders are already filtered by the server
   const hasActiveFilter =
-    search.trim() !== "" ||
-    statusFilter !== "all" ||
-    deliveryFilter !== "all" ||
-    wilayaFilter !== "all" ||
-    typeFilter !== "all" ||
-    dateRange.from !== undefined ||
-    dateRange.to !== undefined;
+    searchParams.get("q")?.trim() !== "" ||
+    searchParams.get("status") !== null ||
+    searchParams.get("group") !== null ||
+    searchParams.get("wilayaId") !== null ||
+    searchParams.get("startDate") !== null ||
+    searchParams.get("endDate") !== null;
 
-  // Unique wilayas derived from all orders (not filtered) for the dropdown
+  // Unique wilayas derived from current page orders (id + name pairs)
   const uniqueWilayas = useMemo(
-    () => [...new Set(orders.map((o) => o.wilaya))].sort(),
+    () => {
+      const map = new Map<number, string>();
+      orders.forEach((o) => {
+        if (o.wilayaId && o.wilaya) map.set(o.wilayaId, o.wilaya);
+      });
+      return Array.from(map.entries()).sort((a, b) => a[1].localeCompare(b[1]));
+    },
     [orders]
   );
 
-  // Filtered orders
-  const filtered = useMemo(() => {
-    let result = orders;
-
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      result = result.filter(
-        (o) =>
-          o.orderNumber.toLowerCase().includes(q) ||
-          o.customerName.toLowerCase().includes(q) ||
-          o.phone.toLowerCase().includes(q)
-      );
-    }
-
-    if (statusFilter !== "all") {
-      result = result.filter((o) => o.status === statusFilter);
-    }
-
-    if (deliveryFilter === "driver") {
-      result = result.filter((o) => !o.trackingNumber && !!o.driverId);
-    } else if (deliveryFilter === "company") {
-      result = result.filter((o) => !!o.trackingNumber);
-    } else if (deliveryFilter === "unassigned") {
-      result = result.filter((o) => !o.trackingNumber && !o.driverId);
-    }
-
-    if (wilayaFilter !== "all") {
-      result = result.filter((o) => o.wilaya === wilayaFilter);
-    }
-
-    if (typeFilter !== "all") {
-      result = result.filter((o) => o.orderType === typeFilter);
-    }
-
-    // Date range filter
-    if (dateRange.from || dateRange.to) {
-      result = result.filter((o) => {
-        const orderDate = new Date(o.createdAt);
-        if (dateRange.from && orderDate < dateRange.from) return false;
-        if (dateRange.to) {
-          const toEnd = new Date(dateRange.to);
-          toEnd.setHours(23, 59, 59, 999);
-          if (orderDate > toEnd) return false;
-        }
-        return true;
-      });
-    }
-
-    return result;
-  }, [orders, search, statusFilter, deliveryFilter, wilayaFilter, typeFilter, dateRange]);
+  // ⚡ No client-side filtering - orders are already filtered by server
+  const filtered = orders;
 
   // ── Bulk selection state ──────────────────────────────────────────────────
   const [selectedOrderIds, setSelectedOrderIds] = useState<Set<string>>(new Set());
@@ -793,32 +813,21 @@ export function OrdersTable({
     });
   }
 
-  function clearFilters() {
-    setSearch("");
-    setStatusFilter("all");
-    setDeliveryFilter("all");
-    setWilayaFilter("all");
-    setTypeFilter("all");
-    setDateRange({ from: undefined, to: undefined });
-  }
-
   function handleRefresh() {
     router.refresh();
   }
 
-  // Compute stat counts for filter chips
-  const statsMap = useMemo(() => {
-    const counts: Record<string, number> = {};
-    for (const order of orders) {
-      counts[order.status] = (counts[order.status] ?? 0) + 1;
-    }
-    return counts;
-  }, [orders]);
+  // ── Total count for "All" chip ──────────────────────────────────────────────
+  const totalCount = Object.values(statusCounts).reduce((sum, c) => sum + c, 0);
 
   const statChips = [
-    { status: "new" as OrderStatus, label: t.status?.new ?? "جديد", count: statsMap["new"] ?? 0, color: "bg-blue-500" },
-    { status: "delivered" as OrderStatus, label: t.status?.delivered ?? "تم التسليم", count: statsMap["delivered"] ?? 0, color: "bg-green-500" },
-    { status: "returned" as OrderStatus, label: t.status?.returned ?? "مرتجعات", count: statsMap["returned"] ?? 0, color: "bg-orange-500" },
+    { key: "all",       label: "الكل",           count: totalCount,         color: "bg-muted" },
+    { key: "new",       label: t.status?.new ?? "جديد",         count: statusCounts["new"] ?? 0,       color: "bg-blue-500" },
+    { key: "pending",   label: "قيد التأكيد",    count: (statusCounts["unreachable"] ?? 0) + (statusCounts["busy"] ?? 0) + (statusCounts["postponed"] ?? 0), color: "bg-amber-500" },
+    { key: "confirmed", label: t.status?.confirmed ?? "مؤكدة",   count: statusCounts["confirmed"] ?? 0, color: "bg-indigo-500" },
+    { key: "shipped",   label: t.status?.shipped ?? "قيد التوصيل",  count: statusCounts["shipped"] ?? 0,   color: "bg-teal-500" },
+    { key: "fake",      label: t.status?.fake ?? "مزيفة",       count: statusCounts["fake"] ?? 0,      color: "bg-red-800" },
+    { key: "cancelled", label: t.status?.cancelled ?? "ملغاة",   count: statusCounts["cancelled"] ?? 0, color: "bg-red-500" },
   ];
 
   // ── Column definitions ────────────────────────────────────────────────────
@@ -844,22 +853,27 @@ export function OrdersTable({
     },
     {
       key: "orderNumber",
-      label: t.table.order_number,
+      label: t.table.product,
       sortable: true,
       isTitle: true,
-      render: (value, row) => (
+      render: (_value, row) => (
         <div className="flex items-center gap-2.5">
-          <div className="relative w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center border border-primary/20 shadow-sm shrink-0">
-            <Package className="w-4 h-4 text-primary" />
-            <span className="absolute -bottom-1 -end-1 w-3.5 h-3.5 rounded-full bg-card border border-border/50 flex items-center justify-center shadow-sm">
-              {row.deliveryType === "stop_desk"
-                ? <Store size={8} className="text-amber-500/80" />
-                : <Home size={8} className="text-primary/70" />}
-            </span>
+          <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center border border-primary/20 shadow-sm shrink-0 overflow-hidden">
+            {row.firstProductImage ? (
+              <img
+                src={row.firstProductImage}
+                alt={row.firstProductName ?? ""}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <Package className="w-4 h-4 text-primary" />
+            )}
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <span className="font-mono text-sm font-black tracking-tight">{value}</span>
+              <span className="text-sm font-bold tracking-tight truncate max-w-[160px]">
+                {row.firstProductName || row.orderNumber}
+              </span>
               {(row.hasReview ?? 0) > 0 && (
                 <Star className="w-3 h-3 fill-amber-400 text-amber-400 shrink-0" />
               )}
@@ -884,7 +898,7 @@ export function OrdersTable({
       key: "phone",
       label: t.table.phone,
       render: (value) => (
-        <span className="text-[11px] font-bold text-muted-foreground/70 tabular-nums select-all whitespace-nowrap" dir="ltr">
+        <span className="text-[11px] font-bold text-foreground tabular-nums select-all whitespace-nowrap" dir="ltr">
           {value}
         </span>
       ),
@@ -916,39 +930,6 @@ export function OrdersTable({
       ),
     },
     {
-      key: "deliveryMethod",
-      label: t.table.delivery,
-      render: (_value, row) => {
-        if (row.trackingNumber) {
-          const company = companies.find((c) => c.id === row.companyId);
-          return (
-            <div className="flex items-center gap-1.5 min-w-0">
-              <div className="w-5 h-5 rounded-md bg-primary/8 border border-primary/12 flex items-center justify-center shrink-0">
-                <Building2 size={11} className="text-primary/60" />
-              </div>
-              <p className="text-[11px] font-bold text-foreground/80 truncate">
-                {company?.name ?? t.detail?.partner_company ?? "Company"}
-              </p>
-            </div>
-          );
-        }
-        if (row.driverName) {
-          return (
-            <div className="flex items-center gap-1.5 min-w-0">
-              <Truck size={12} className="text-muted-foreground/50 shrink-0" />
-              <span className="text-xs font-bold text-foreground/70 truncate">
-                {row.driverName}
-              </span>
-            </div>
-          );
-        }
-        return <span className="text-muted-foreground/20 text-sm select-none">—</span>;
-      },
-      tabletHidden: true,
-    },
-
-
-    {
       key: "price",
       label: t.table.price,
       sortable: true,
@@ -967,6 +948,7 @@ export function OrdersTable({
           order={row}
           drivers={drivers}
           companies={companies}
+          driverWilayas={driverWilayas}
           userScopes={userScopes}
           onRefresh={handleRefresh}
         />
@@ -979,49 +961,62 @@ export function OrdersTable({
     <div className="space-y-4">
       {/* ── Stat filter chips ────────────────────────────────────────────────── */}
       <div className="flex flex-wrap items-center gap-2">
-        {statChips.map((chip) => (
-          <FilterChip
-            key={chip.status}
-            label={chip.label}
-            count={chip.count}
-            active={statusFilter === chip.status}
-            onClick={() => setStatusFilter(statusFilter === chip.status ? "all" : chip.status)}
-            variant="status"
-            statusColor={chip.color}
-          />
-        ))}
-      </div>
+        {statChips.map((chip) => {
+          const isActive = chip.key === "all"
+            ? statusFilter === "all" && !searchParams.get("group")
+            : chip.key === "pending"
+              ? searchParams.get("group") === "pending"
+              : statusFilter === chip.key;
 
-      {/* ── Filter result count ──────────────────────────────────────────────── */}
-      {hasActiveFilter && (
-        <FilterResultCount
-          count={filtered.length}
-          total={orders.length}
-        />
-      )}
+          return (
+            <FilterChip
+              key={chip.key}
+              label={chip.label}
+              count={chip.count}
+              active={isActive}
+              onClick={() => {
+                const params = new URLSearchParams(searchParams.toString());
+                params.delete("status");
+                params.delete("group");
+                params.set("page", "1");
+                if (chip.key === "all") {
+                  // Already deleted status and group above
+                } else if (chip.key === "pending") {
+                  params.set("group", "pending");
+                } else {
+                  params.set("status", chip.key);
+                }
+                router.replace(`/orders?${params.toString()}`, { scroll: false });
+              }}
+              variant="status"
+              statusColor={chip.color}
+            />
+          );
+        })}
+      </div>
 
       {/* ── Filter bar ─────────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row gap-2.5 flex-wrap">
-        {/* Search */}
+        {/* Search - debounced */}
         <div className="relative flex-1 min-w-48 group">
           <Search className={cn(
             "absolute top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60 transition-colors group-focus-within:text-primary",
             dir === "rtl" ? "right-3.5" : "left-3.5"
           )} />
           <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
             placeholder={t.search_placeholder ?? "Search..."}
             className={cn(
               "bg-card border-border/60 shadow-xs h-10",
               dir === "rtl" ? "pr-10" : "pl-10",
-              search && (dir === "rtl" ? "pe-9" : "ps-9")
+              searchInput && (dir === "rtl" ? "pe-9" : "ps-9")
             )}
             dir={dir}
           />
-          {search && (
+          {searchInput && (
             <button
-              onClick={() => setSearch("")}
+              onClick={() => setSearchInput("")}
               className={cn(
                 "absolute top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-foreground transition-colors",
                 dir === "rtl" ? "left-3" : "right-3"
@@ -1032,8 +1027,8 @@ export function OrdersTable({
           )}
         </div>
 
-        {/* Status filter */}
-        <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v ?? "all")}>
+        {/* Status filter - server-side */}
+        <Select value={statusFilter} onValueChange={(v) => handleFilterChange("status", v ?? "all")}>
           <SelectTrigger className="w-full sm:w-44 bg-card border-border/60 shadow-xs h-10">
             <div className="flex items-center gap-2 flex-1 min-w-0">
               <Filter className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
@@ -1052,45 +1047,23 @@ export function OrdersTable({
           </SelectContent>
         </Select>
 
-        {/* Delivery method filter */}
-        <Select value={deliveryFilter} onValueChange={(v) => setDeliveryFilter(v ?? "all")}>
-          <SelectTrigger className="w-full sm:w-44 bg-card border-border/60 shadow-xs h-10">
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              <Truck className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
-              <span className="truncate text-[13px] font-medium">
-                {deliveryFilter === "all"
-                  ? (t.filters?.delivery_method ?? "Delivery")
-                  : deliveryFilter === "driver"
-                    ? (t.filters?.driver ?? "Driver")
-                    : deliveryFilter === "company"
-                      ? (t.filters?.company ?? "Company")
-                      : (t.filters?.unassigned ?? "Unassigned")}
-              </span>
-            </div>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t.filters?.all_delivery ?? "All Methods"}</SelectItem>
-            <SelectItem value="driver">{t.filters?.driver ?? "Driver"}</SelectItem>
-            <SelectItem value="company">{t.filters?.company ?? "Company"}</SelectItem>
-            <SelectItem value="unassigned">{t.filters?.unassigned ?? "Unassigned"}</SelectItem>
-          </SelectContent>
-        </Select>
-
-        {/* Wilaya filter */}
+        {/* Wilaya filter - server-side */}
         {uniqueWilayas.length > 1 && (
-          <Select value={wilayaFilter} onValueChange={(v) => setWilayaFilter(v ?? "all")}>
+          <Select value={wilayaFilter} onValueChange={(v) => handleFilterChange("wilayaId", v ?? "all")}>
             <SelectTrigger className="w-full sm:w-44 bg-card border-border/60 shadow-xs h-10">
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 <MapPin className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
                 <span className="truncate text-[13px] font-medium">
-                  {wilayaFilter === "all" ? (t.filters?.wilaya ?? "Wilaya") : wilayaFilter}
+                  {wilayaFilter === "all"
+                    ? (t.filters?.wilaya ?? "Wilaya")
+                    : uniqueWilayas.find(([id]) => String(id) === wilayaFilter)?.[1] ?? wilayaFilter}
                 </span>
               </div>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t.filters?.all_wilayas ?? "All Wilayas"}</SelectItem>
-              {uniqueWilayas.map((w) => (
-                <SelectItem key={w} value={w}>{w}</SelectItem>
+              {uniqueWilayas.map(([id, name]) => (
+                <SelectItem key={id} value={String(id)}>{name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -1102,18 +1075,6 @@ export function OrdersTable({
           onChange={(range) => setDateRange(range ?? { from: undefined, to: undefined })}
           className="w-full sm:w-auto"
         />
-
-        {/* Clear filters */}
-        {hasActiveFilter && (
-          <Button
-            variant="outline"
-            onClick={clearFilters}
-            className="h-10 px-3 border-border/60 text-muted-foreground hover:text-foreground shrink-0"
-          >
-            <X size={13} className="me-1.5" />
-            <span className="text-[12px] font-bold">{common.cancel ?? "Clear"}</span>
-          </Button>
-        )}
       </div>
 
       {/* ── Bulk action bar ──────────────────────────────────────────────── */}
@@ -1136,18 +1097,19 @@ export function OrdersTable({
             disabled={selectedDispatchableOrders.length === 0}
             className="gap-2"
           >
-            <Send size={14} />
+            <Truck size={14} />
             إرسال جماعي ({selectedDispatchableOrders.length})
           </Button>
         </div>
       )}
 
-      {/* ── Data table (pagination + sort only — search/filter handled above) ─ */}
+      {/* ── Data table (server-side filtered + paginated) ─ */}
       <DataTable
         data={filtered}
         columns={columns}
         searchable={false}
         filterable={false}
+        pagination={false}
         emptyState={
           hasActiveFilter ? (
             <div className="py-10 text-center">
@@ -1178,13 +1140,21 @@ export function OrdersTable({
                   )}
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
-                  <span className="font-mono text-[10px] font-bold text-muted-foreground/35 tracking-tight" dir="ltr">
-                    #{order.orderNumber}
+                  {order.firstProductImage ? (
+                    <img
+                      src={order.firstProductImage}
+                      alt={order.firstProductName ?? ""}
+                      className="w-5 h-5 rounded object-cover"
+                    />
+                  ) : null}
+                  <span className="text-[11px] font-bold text-muted-foreground/60 truncate max-w-[120px]">
+                    {order.firstProductName || `#${order.orderNumber}`}
                   </span>
                   <OrderRowActions
                     order={order}
                     drivers={drivers}
                     companies={companies}
+                    driverWilayas={driverWilayas}
                     userScopes={userScopes}
                     onRefresh={handleRefresh}
                   />
@@ -1263,6 +1233,67 @@ export function OrdersTable({
           );
         }}
       />
+
+      {/* ── Server-side pagination ──────────────────────────────────────── */}
+      {total > pageSize && (
+        <div className="flex items-center justify-between pt-4 border-t border-border/20">
+          <p className="text-xs font-bold text-muted-foreground/60">
+            عرض {(currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, total)} من {total}
+          </p>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const params = new URLSearchParams(searchParams.toString());
+                params.set("page", String(currentPage - 1));
+                router.push(`/orders?${params.toString()}`);
+              }}
+              disabled={currentPage <= 1}
+              className="h-8 px-3 text-xs font-bold"
+            >
+              السابق
+            </Button>
+            {Array.from({ length: Math.ceil(total / pageSize) }, (_, i) => i + 1)
+              .filter((page) => {
+                const totalPages = Math.ceil(total / pageSize);
+                return page === 1 || page === totalPages || Math.abs(page - currentPage) <= 1;
+              })
+              .map((page, idx, arr) => (
+                <span key={page} className="flex items-center">
+                  {idx > 0 && arr[idx - 1] !== page - 1 && (
+                    <span className="px-1 text-xs text-muted-foreground/40">...</span>
+                  )}
+                  <Button
+                    variant={page === currentPage ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => {
+                      const params = new URLSearchParams(searchParams.toString());
+                      params.set("page", String(page));
+                      router.push(`/orders?${params.toString()}`);
+                    }}
+                    className="h-8 w-8 p-0 text-xs font-bold"
+                  >
+                    {page}
+                  </Button>
+                </span>
+              ))}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const params = new URLSearchParams(searchParams.toString());
+                params.set("page", String(currentPage + 1));
+                router.push(`/orders?${params.toString()}`);
+              }}
+              disabled={currentPage >= Math.ceil(total / pageSize)}
+              className="h-8 px-3 text-xs font-bold"
+            >
+              التالي
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* ── Bulk dispatch dialog ────────────────────────────────────────── */}
       <BulkDispatchDialog

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { User, MapPin, Phone, Globe } from "lucide-react";
+import { User, MapPin, Phone, Globe, Mail } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -32,6 +32,7 @@ interface FormState {
   name: string;
   phone: string;
   phone2: string;
+  email: string;
   wilayaId: number | null;
   wilayaName: string;
   commune: string;
@@ -56,6 +57,7 @@ function getInitialForm(customer?: Customer | null, wilayas?: Wilaya[]): FormSta
     name: customer?.name ?? "",
     phone: customer?.phone ?? "",
     phone2: customer?.phone2 ?? "",
+    email: customer?.email ?? "",
     wilayaId,
     wilayaName,
     commune: customer?.communeId ?? "",
@@ -126,6 +128,7 @@ export function CustomerFormPage({ customer, wilayas }: Props) {
           name: form.name.trim(),
           phone: form.phone.trim(),
           phone2: form.phone2.trim() || null,
+          email: form.email.trim() || undefined,
           wilayaId: form.wilayaId!,
           communeId: form.commune,
           address: form.address.trim() || undefined,
@@ -163,7 +166,7 @@ export function CustomerFormPage({ customer, wilayas }: Props) {
       <div className="flex items-start gap-6">
         {/* Main column */}
         <div className="flex-1 min-w-0 space-y-6">
-          <Section title="Personal Information" icon={<User size={18} />}>
+          <Section title={t.form.personal_info_label} icon={<User size={18} />}>
             <div className="space-y-5">
               <Field label={`${t.form.name_label} *`}>
                 <Input
@@ -206,6 +209,20 @@ export function CustomerFormPage({ customer, wilayas }: Props) {
                   </div>
                 </Field>
               </div>
+              <Field label={t.form.email_label}>
+                <div className="relative">
+                  <Mail size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/40" />
+                  <Input
+                    value={form.email}
+                    onChange={(e) => set("email", e.target.value)}
+                    placeholder={t.form.email_placeholder}
+                    className="h-11 bg-card border-border rounded-md pl-11 text-sm"
+                    type="email"
+                    dir="ltr"
+                    disabled={isPending}
+                  />
+                </div>
+              </Field>
             </div>
           </Section>
         </div>

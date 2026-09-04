@@ -125,13 +125,15 @@ export function DateRangePicker({
           {formatDateDisplay()}
         </span>
         {value?.from && (
-          <button
-            type="button"
-            onClick={handleClear}
-            className="rounded p-0.5 hover:bg-muted"
+          <span
+            role="button"
+            tabIndex={0}
+            onClick={(e) => { e.stopPropagation(); onChange?.(undefined); setFromDate(""); setToDate(""); }}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onChange?.(undefined); setFromDate(""); setToDate(""); } }}
+            className="rounded p-0.5 hover:bg-muted cursor-pointer"
           >
             <XIcon className="size-3" />
-          </button>
+          </span>
         )}
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">

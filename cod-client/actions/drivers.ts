@@ -7,11 +7,13 @@ import { apiClient, ApiClientError } from "@/lib/api-client";
 import { getDb } from "@/db";
 import { getUserApiKey, requirePermission, getUserStoreId } from "@/lib/auth";
 import { SCOPES } from "@/../cod-shared/rbac/scopes";
+import { eq } from "drizzle-orm";
 import {
   getAllDrivers,
   getDriverById,
   getCompensationsForDriver,
 } from "@/../cod-shared/queries/drivers";
+import { driverCompensations } from "@/../cod-shared/db/schema";
 import { mapError } from "@/lib/errors/mapper";
 import { getLocale } from "@/lib/locale";
 import type { Driver, DriverCompensation } from "@/types";
@@ -293,4 +295,21 @@ export async function deleteDriver(id: string): Promise<void> {
     }
     throw error;
   }
+}
+
+/**
+ * Returns the list of distinct wilaya IDs for which the store has driver
+ * compensation rows (i.e. wilayas where at least one driver is configured).
+ */
+export async function getStoreDriverWilayas(): Promise<number[]> {
+  await requirePermission(SCOPES.DELIVERY_READ);
+  const { env } = await getCloudflareContext({ async: true });
+  const db = getDb(env.DB);
+  const storeId = await getUserStoreId();
+  const rows = await db
+    .select({ wilayaId: driverCompensations.wilayaId })
+    .from(driverCompensations)
+    .where(eq(driverCompensations.storeId, storeId))
+    .all();
+  return [...new Set(rows.map((r) => r.wilayaId))];
 }

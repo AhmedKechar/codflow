@@ -7,7 +7,8 @@
   "search_placeholder": "بحث بالاسم أو الرمز...",
   "table": {
     "name": "المنتج",
-    "group": "المجموعة",
+    "group": "الفئة",
+    "show_in_store": "في المتجر",
     "price": "السعر",
     "variants": "المتغيرات",
     "stock": "المخزون",
@@ -24,7 +25,7 @@
     "stock_history": "سجل المخزون"
   },
   "filters": {
-    "group": "المجموعة",
+    "group": "الفئة",
     "availability": "التوفر",
     "pricing_unit": "وحدة السعر"
   },
@@ -65,8 +66,12 @@
     "name_ar_label": "الاسم (بالعربية)",
     "name_placeholder": "مثال: Cotton T-Shirt",
     "name_ar_placeholder": "مثال: قميص قطني",
-    "group_label": "مجموعة المنتج",
-    "group_placeholder": "اختر مجموعة",
+    "show_in_store_label": "يظهر في المتجر",
+    "show_in_store_hint": "إظهار هذا المنتج في المتجر العام",
+    "group_label": "فئة المنتج",
+    "group_placeholder": "اختر فئة",
+    "category_uncategorized": "غير مصنف",
+    "category_create": "إنشاء فئة جديدة",
     "slug_label": "الرابط المختصر",
     "sku_label": "رمز المنتج",
     "sku_placeholder": "مثال: PROD-001",
@@ -128,7 +133,7 @@
     "has_variants_label": "هذا المنتج له متغيرات",
     "has_variants_hint": "مثال: اللون، المقاس، الخامة — ستُولَّد المتغيرات تلقائياً",
     "options_hint": "أضف خيارات كاللون أو المقاس. ستُولَّد صفوف المتغيرات تلقائياً.",
-    "variants_hint": "حدد السعر والرمز والمخزون الأولي لكل مجموعة متغيرات.",
+    "variants_hint": "حدد السعر والرمز والمخزون الأولي لكل فئة متغيرات.",
     "variant_active": "نشط",
     "variant_threshold": "حد التنبيه",
     "variant_saved_badge": "محفوظ",

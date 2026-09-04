@@ -27,6 +27,7 @@ export const CustomerSchema = z
       description: "Algerian mobile number starting with 05, 06, or 07",
     }),
     phone2: z.string().nullable().openapi({ description: "Secondary phone number", example: null }),
+    email: z.string().nullable().openapi({ description: "Customer email address (unique per store)", example: null }),
     wilayaId: z.number().int().min(1).max(58).nullable().openapi({
       description: "Official wilaya number (1–58)",
       example: 16,

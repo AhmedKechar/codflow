@@ -12,6 +12,7 @@ import {
   customers,
   productVariants,
   products,
+  productImages,
   drivers,
   driverCompensations,
   users,
@@ -30,14 +31,20 @@ import {
   or,
   sql,
   aliasedTable,
+  gte,
+  lte,
+  inArray,
 } from "drizzle-orm";
 
 const driversAlias = aliasedTable(drivers, "d");
 
 export interface OrderFilters {
   status?: (typeof orders.$inferSelect)["status"] | "all";
+  statuses?: (typeof orders.$inferSelect)["status"][];
   wilayaId?: number;
   search?: string;
+  startDate?: string;
+  endDate?: string;
   limit?: number;
   offset?: number;
 }
@@ -53,17 +60,37 @@ export async function getAllOrders(db: AppDb, storeId: string, filters: OrderFil
     conditions.push(eq(orders.status, filters.status));
   }
 
+  if (filters.statuses && filters.statuses.length > 0) {
+    conditions.push(inArray(orders.status, filters.statuses));
+  }
+
   if (filters.wilayaId) {
     conditions.push(eq(orders.wilayaId, filters.wilayaId));
   }
 
   if (filters.search) {
-    const searchConditions = or(
-      like(orders.orderNumber, `%${filters.search}%`),
-      like(orders.customerName, `%${filters.search}%`),
-      like(orders.phone, `%${filters.search}%`),
-    );
-    if (searchConditions) conditions.push(searchConditions);
+    const search = filters.search.trim();
+    // ⚡ If search looks like an order number, use prefix match (uses index)
+    if (search.startsWith("ORD-") || /^\d{8}-\d{4}$/.test(search)) {
+      conditions.push(like(orders.orderNumber, `${search}%`));
+    } else {
+      // Otherwise, search across name and phone fields
+      const searchConditions = or(
+        like(orders.customerName, `%${search}%`),
+        like(orders.phone, `%${search}%`),
+      );
+      if (searchConditions) conditions.push(searchConditions);
+    }
+  }
+
+  // ⚡ Date range filtering (createdAt is text in ISO format, string comparison works)
+  if (filters.startDate) {
+    conditions.push(gte(orders.createdAt, filters.startDate));
+  }
+  if (filters.endDate) {
+    const end = new Date(filters.endDate);
+    end.setHours(23, 59, 59, 999);
+    conditions.push(lte(orders.createdAt, end.toISOString()));
   }
 
   return db
@@ -87,6 +114,7 @@ export async function getAllOrders(db: AppDb, storeId: string, filters: OrderFil
       driverFee: orders.driverFee,
       codAmount: orders.codAmount,
       trackingNumber: orders.trackingNumber,
+      deliveryMethodName: orders.deliveryMethodName,
       createdAt: orders.createdAt,
       updatedAt: orders.updatedAt,
       wilaya: wilayas.nameAr,
@@ -98,6 +126,12 @@ export async function getAllOrders(db: AppDb, storeId: string, filters: OrderFil
       lastUpdatedBy: sql<
         string | null
       >`(SELECT by FROM order_status_history WHERE order_id = orders.id ORDER BY timestamp DESC LIMIT 1)`,
+      firstProductName: sql<
+        string | null
+      >`(SELECT op.product_name FROM order_products op WHERE op.order_id = orders.id ORDER BY op.created_at LIMIT 1)`,
+      firstProductImage: sql<
+        string | null
+      >`(SELECT pi.src FROM order_products op JOIN product_images pi ON pi.product_id = op.product_id WHERE op.order_id = orders.id ORDER BY op.created_at, pi.position LIMIT 1)`,
     })
     .from(orders)
     .leftJoin(wilayas, eq(orders.wilayaId, wilayas.id))
@@ -108,6 +142,141 @@ export async function getAllOrders(db: AppDb, storeId: string, filters: OrderFil
     .limit(filters.limit ?? 50)
     .offset(filters.offset ?? 0)
     .all();
+}
+
+/**
+ * Get total count of orders matching filters.
+ * Uses COUNT(*) with same conditions as getAllOrders but WITHOUT joins.
+ * ⚡ Performance: Single COUNT query, no JOINs needed.
+ */
+export async function getOrdersCount(
+  db: AppDb,
+  storeId: string,
+  filters: Pick<OrderFilters, "status" | "statuses" | "wilayaId" | "search" | "startDate" | "endDate">
+): Promise<number> {
+  const conditions = [eq(orders.storeId, storeId)];
+
+  if (filters.status && filters.status !== "all") {
+    conditions.push(eq(orders.status, filters.status));
+  }
+
+  if (filters.statuses && filters.statuses.length > 0) {
+    conditions.push(inArray(orders.status, filters.statuses));
+  }
+
+  if (filters.wilayaId) {
+    conditions.push(eq(orders.wilayaId, filters.wilayaId));
+  }
+
+  if (filters.search) {
+    const search = filters.search.trim();
+    // ⚡ If search looks like an order number, use prefix match (uses index)
+    if (search.startsWith("ORD-") || /^\d{8}-\d{4}$/.test(search)) {
+      conditions.push(like(orders.orderNumber, `${search}%`));
+    } else {
+      // Otherwise, search across name and phone fields
+      const searchConditions = or(
+        like(orders.customerName, `%${search}%`),
+        like(orders.phone, `%${search}%`),
+      );
+      if (searchConditions) conditions.push(searchConditions);
+    }
+  }
+
+  // ⚡ Date range filtering (createdAt is text in ISO format, string comparison works)
+  if (filters.startDate) {
+    conditions.push(gte(orders.createdAt, filters.startDate));
+  }
+  if (filters.endDate) {
+    const end = new Date(filters.endDate);
+    end.setHours(23, 59, 59, 999);
+    conditions.push(lte(orders.createdAt, end.toISOString()));
+  }
+
+  const result = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(orders)
+    .where(and(...conditions))
+    .get();
+
+  return result?.count ?? 0;
+}
+
+/**
+ * Get order counts grouped by status, respecting all filters EXCEPT status.
+ * This is used for the status filter chips — counts are independent of which
+ * status chip is currently selected so the merchant always sees all options.
+ * ⚡ Uses same filter logic as getOrdersCount but returns GROUP BY status.
+ */
+export async function getOrderStatusCounts(
+  db: AppDb,
+  storeId: string,
+  filters: Pick<OrderFilters, "wilayaId" | "search" | "startDate" | "endDate">
+): Promise<Record<string, number>> {
+  const conditions = [eq(orders.storeId, storeId)];
+
+  if (filters.wilayaId) {
+    conditions.push(eq(orders.wilayaId, filters.wilayaId));
+  }
+
+  if (filters.search) {
+    const search = filters.search.trim();
+    if (search.startsWith("ORD-") || /^\d{8}-\d{4}$/.test(search)) {
+      conditions.push(like(orders.orderNumber, `${search}%`));
+    } else {
+      const searchConditions = or(
+        like(orders.customerName, `%${search}%`),
+        like(orders.phone, `%${search}%`),
+      );
+      if (searchConditions) conditions.push(searchConditions);
+    }
+  }
+
+  if (filters.startDate) {
+    conditions.push(gte(orders.createdAt, filters.startDate));
+  }
+  if (filters.endDate) {
+    const end = new Date(filters.endDate);
+    end.setHours(23, 59, 59, 999);
+    conditions.push(lte(orders.createdAt, end.toISOString()));
+  }
+
+  const rows = await db
+    .select({
+      status: orders.status,
+      count: sql<number>`count(*)`,
+    })
+    .from(orders)
+    .where(and(...conditions))
+    .groupBy(orders.status)
+    .all();
+
+  const counts: Record<string, number> = {};
+  for (const row of rows) {
+    counts[row.status] = Number(row.count);
+  }
+  return counts;
+}
+
+export interface OrdersResult {
+  rows: ReturnType<typeof getAllOrders> extends Promise<infer R> ? R : never;
+  total: number;
+}
+
+/**
+ * Get orders with total count for pagination.
+ * ⚡ Performance: Runs COUNT and SELECT in parallel via Promise.all.
+ */
+export async function getOrdersPaginated(
+  db: AppDb,
+  storeId: string,
+  filters: OrderFilters = {}
+): Promise<OrdersResult> {
+  const [rows, total] = await Promise.all([
+    getAllOrders(db, storeId, filters),
+    getOrdersCount(db, storeId, filters),
+  ]);
+  return { rows, total };
 }
 
 export async function getOrderById(db: AppDb, storeId: string, orderId: string) {
@@ -832,6 +1001,14 @@ export async function assignDriver(db: AppDb, storeId: string, orderId: string, 
     .where(and(eq(orders.id, orderId), eq(orders.storeId, storeId)))
     .get();
 
+  // Fetch driver name for deliveryMethodName
+  const driver = await db
+    .select({ firstName: drivers.firstName, lastName: drivers.lastName })
+    .from(drivers)
+    .where(eq(drivers.id, driverId))
+    .get();
+  const driverFullName = driver ? `${driver.firstName} ${driver.lastName}` : null;
+
   let driverFee = 0;
   if (order?.wilayaId) {
     const comp = await db
@@ -850,12 +1027,16 @@ export async function assignDriver(db: AppDb, storeId: string, orderId: string, 
     }
   }
 
+  const PRE_DISPATCH_STATUSES = ["new", "confirmed", "unreachable", "busy", "postponed"];
+
   await db
     .update(orders)
     .set({
       driverId,
       driverFee,
       deliveryMethod: "driver",
+      deliveryMethodName: driverFullName,
+      ...(order && PRE_DISPATCH_STATUSES.includes(order.status) ? { status: "shipped" as const } : {}),
       updatedAt: now,
     })
     .where(and(eq(orders.id, orderId), eq(orders.storeId, storeId)));
@@ -910,12 +1091,14 @@ export async function updateOrderTracking(
   orderId: string,
   trackingNumber: string,
   trackingUrl?: string,
+  deliveryMethodName?: string,
 ) {
   await db
     .update(orders)
     .set({
       trackingNumber,
       trackingUrl: trackingUrl ?? null,
+      ...(deliveryMethodName ? { deliveryMethodName } : {}),
       updatedAt: new Date().toISOString(),
     })
     .where(and(eq(orders.id, orderId), eq(orders.storeId, storeId)));

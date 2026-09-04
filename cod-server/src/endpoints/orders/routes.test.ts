@@ -103,6 +103,7 @@ function orderRow(overrides: Record<string, any> = {}) {
     feePaymentId: null,
     weight: null,
     isFragile: null,
+    deliveryMethodName: null,
     createdAt: NOW,
     updatedAt: NOW,
     ...overrides,
@@ -288,8 +289,9 @@ describe("Orders routes (OpenAPIHono)", () => {
       );
     });
 
-    it("blocks an invalid backward transition with 400 INVALID_STATUS_TRANSITION", async () => {
+    it("allows any transition (no guard)", async () => {
       vi.mocked(queries.getOrderById).mockResolvedValue(orderRow({ status: "delivered" }) as any);
+      vi.mocked(queries.updateOrderStatus).mockResolvedValue(undefined as any);
 
       const res = await app.request("/api/orders/ord_1/status", {
         method: "PATCH",
@@ -297,10 +299,7 @@ describe("Orders routes (OpenAPIHono)", () => {
         body: JSON.stringify({ status: "new" }),
       });
 
-      expect(res.status).toBe(400);
-      const body: any = await res.json();
-      expect(body.code).toBe("INVALID_STATUS_TRANSITION");
-      expect(body.context.allowedTransitions).toEqual([]);
+      expect(res.status).toBe(200);
     });
   });
 

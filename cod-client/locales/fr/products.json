@@ -7,7 +7,8 @@
   "search_placeholder": "Rechercher par nom, SKU...",
   "table": {
     "name": "Produit",
-    "group": "Groupe",
+    "group": "Catégorie",
+    "show_in_store": "En boutique",
     "price": "Prix",
     "variants": "Variantes",
     "stock": "Stock",
@@ -24,7 +25,7 @@
     "stock_history": "Historique du stock"
   },
   "filters": {
-    "group": "Groupe",
+    "group": "Catégorie",
     "availability": "Disponibilité",
     "pricing_unit": "Unité"
   },
@@ -65,8 +66,12 @@
     "name_ar_label": "Nom (Arabe)",
     "name_placeholder": "ex: T-Shirt en coton",
     "name_ar_placeholder": "مثال: قميص قطني",
-    "group_label": "Groupe de produits",
-    "group_placeholder": "Sélectionner un groupe",
+    "show_in_store_label": "Visible en boutique",
+    "show_in_store_hint": "Afficher ce produit dans la boutique publique",
+    "group_label": "Catégorie de produit",
+    "group_placeholder": "Sélectionner une catégorie",
+    "category_uncategorized": "Non catégorisé",
+    "category_create": "Créer une nouvelle catégorie",
     "slug_label": "Slug",
     "sku_label": "SKU",
     "sku_placeholder": "ex: PROD-001",

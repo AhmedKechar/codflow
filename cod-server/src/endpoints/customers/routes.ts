@@ -109,6 +109,10 @@ const createCustomerRoute = createRoute({
             (v) => (v === "" || v == null ? undefined : v),
             z.string().regex(phoneRegex, "Invalid Algerian phone number").optional()
           ).openapi({ description: "Secondary phone number (optional)" }),
+          email: z.preprocess(
+            (v) => (v === "" || v == null ? undefined : v),
+            z.string().email("Invalid email format").optional()
+          ).openapi({ description: "Customer email address (optional, unique per store)" }),
           wilayaId: z.number().int().min(1).max(58).openapi({
             description: "Official wilaya number (1–58)",
             example: 16,
@@ -186,6 +190,10 @@ const updateCustomerRoute = createRoute({
             (v) => (v === "" ? null : v),
             z.string().regex(phoneRegex, "Invalid Algerian phone number").nullable().optional()
           ).openapi({ description: "Secondary phone. Set to null to clear it." }),
+          email: z.preprocess(
+            (v) => (v === "" ? null : v),
+            z.string().email("Invalid email format").nullable().optional()
+          ).openapi({ description: "Customer email. Set to null to clear it." }),
           wilayaId: z.number().int().min(1).max(58).optional().openapi({
             description: "Official wilaya number (1–58)",
             example: 16,

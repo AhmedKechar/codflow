@@ -5,6 +5,7 @@
   "search_placeholder": "Search by order number or customer...",
   "table": {
     "order_number": "Order #",
+    "product": "Product",
     "customer": "Customer",
     "phone": "Phone",
     "wilaya": "Wilaya",
@@ -24,6 +25,7 @@
     "view_details": "View Details",
     "assign_driver": "Assign Driver",
     "dispatch_to_company": "Dispatch to Company",
+    "delivery": "Delivery",
     "update_status": "Update Status"
   },
   "assign_driver_dialog": {
@@ -259,6 +261,9 @@
     "error_customer_name": "Customer name is required",
     "error_phone": "Phone number is required",
     "error_wilaya": "Please select a wilaya",
+    "weight_label": "Weight (kg)",
+    "fragile_label": "Fragile",
+    "fragile_description": "Handle with care during delivery",
     "new_order_subtitle": "Fill in the customer info and add products to create a new order"
   }
 }

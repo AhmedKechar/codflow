@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef, useTransition } from "react";
+import { useState, useEffect, useRef, useTransition, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   AlertCircle, Package, DollarSign, Layers, Settings2, BarChart3,
   ImageIcon, Upload, File, Truck, Search, ChevronDown,
-  ChevronUp, Hash,
+  ChevronUp, Hash, Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +35,10 @@ import { FormSection as Section, FormField as Field } from "@/components/ui/form
 import { ContextualSaveBar } from "@/components/ui/contextual-save-bar";
 import { FormHeader } from "@/components/ui/form-header";
 import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
+import { createProductGroup } from "@/actions/product-groups";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose,
+} from "@/components/ui/dialog";
 
 interface Props {
   productId?: string;
@@ -57,7 +61,13 @@ interface VariantRow {
 const STATUS_VALUES: ProductStatus[] = ["ACTIVE", "DRAFT", "ARCHIVED"];
 
 function toSlug(name: string) {
-  return name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/[^\w\s-]/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 function calcMargin(price: string, cost: string) {
@@ -98,6 +108,12 @@ export function ProductFormPage({ productId, groups, shippingProfiles = [] }: Pr
   const [shippingProfileId, setShippingProfileId] = useState<string | null>(null);
   const [description, setDescription] = useState("");
 
+  // Category creation
+  const [localGroups, setLocalGroups] = useState<ProductCategory[]>(groups);
+  const [showCategoryDialog, setShowCategoryDialog] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [isCreatingCategory, setIsCreatingCategory] = useState(false);
+
   // Digital product
   const [isDigital, setIsDigital] = useState(false);
   const [digitalFile, setDigitalFile] = useState<File | null>(null);
@@ -112,6 +128,7 @@ export function ProductFormPage({ productId, groups, shippingProfiles = [] }: Pr
 
   // Settings
   const [status, setStatus] = useState<ProductStatus>("ACTIVE");
+  const [showInStore, setShowInStore] = useState(true);
   const [trackInventory, setTrackInventory] = useState(true);
   const [inventory, setInventory] = useState("0");
   const [lowStockThreshold, setLowStockThreshold] = useState("5");
@@ -130,6 +147,24 @@ export function ProductFormPage({ productId, groups, shippingProfiles = [] }: Pr
 
   // Collapsible sections
   const [inventoryExpanded, setInventoryExpanded] = useState(false);
+
+  const handleCreateCategory = useCallback(async () => {
+    if (!newCategoryName.trim()) return;
+    setIsCreatingCategory(true);
+    try {
+      const cat = await createProductGroup({ name: newCategoryName.trim() });
+      setLocalGroups((prev) => [...prev, cat]);
+      setCategoryId(cat.id);
+      setNewCategoryName("");
+      setShowCategoryDialog(false);
+      markDirty();
+      toast.success(t.form.category_create);
+    } catch {
+      toast.error("Error");
+    } finally {
+      setIsCreatingCategory(false);
+    }
+  }, [newCategoryName, markDirty, t, common]);
 
   // Images
   const [existingImages, setExistingImages] = useState<ProductImage[]>([]);
@@ -199,6 +234,7 @@ export function ProductFormPage({ productId, groups, shippingProfiles = [] }: Pr
       setCompareAtPrice(p.compareAtPrice ? String(p.compareAtPrice) : "");
       setCostPrice(p.costPrice ? String(p.costPrice) : "");
       setStatus(p.status);
+      setShowInStore(p.showInStore);
       setTrackInventory(p.trackInventory);
       setInventory(String(p.inventory));
       setLowStockThreshold(String(p.lowStockThreshold ?? 5));
@@ -352,6 +388,7 @@ export function ProductFormPage({ productId, groups, shippingProfiles = [] }: Pr
           compareAtPrice: compareAtPrice ? Math.round(Number(compareAtPrice)) : undefined,
           costPrice: costPrice ? Math.round(Number(costPrice)) : undefined,
           status,
+          showInStore,
           trackInventory,
           type: isDigital ? "DIGITAL" as const : "PHYSICAL" as const,
           barcode: barcode || undefined,
@@ -1254,7 +1291,9 @@ export function ProductFormPage({ productId, groups, shippingProfiles = [] }: Pr
               <Field label={t.form.status_label}>
                 <Select value={status} onValueChange={(v) => { setStatus(v as ProductStatus); markDirty(); }}>
                   <SelectTrigger className="h-11 bg-card border-border rounded-md px-4 text-sm" disabled={isPending}>
-                    <SelectValue />
+                    <SelectValue>
+                      {t.status_options[status.toLowerCase() as keyof typeof t.status_options] ?? status}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent className="rounded-md border-border bg-popover text-popover-foreground">
                     {STATUS_VALUES.map((s) => (
@@ -1264,18 +1303,61 @@ export function ProductFormPage({ productId, groups, shippingProfiles = [] }: Pr
                 </Select>
               </Field>
 
+              {status === "ACTIVE" && (
+                <label className="flex items-center justify-between gap-4 cursor-pointer group">
+                  <div className="space-y-0.5">
+                    <p className="text-[13px] sm:text-sm font-bold text-foreground group-hover:text-primary transition-colors">
+                      {t.form.show_in_store_label ?? "Visible in store"}
+                    </p>
+                    <p className="text-[10px] sm:text-[11px] text-muted-foreground font-medium opacity-70">
+                      {t.form.show_in_store_hint ?? "Show this product in the public storefront"}
+                    </p>
+                  </div>
+                  <Switch
+                    checked={showInStore}
+                    onCheckedChange={(v) => { setShowInStore(v); markDirty(); }}
+                    disabled={isPending}
+                    className="scale-95 sm:scale-100 shrink-0"
+                  />
+                </label>
+              )}
+
               <Field label={t.form.group_label}>
-                <Select value={categoryId} onValueChange={(v) => { setCategoryId(v ?? ""); markDirty(); }}>
-                  <SelectTrigger className="h-11 bg-card border-border rounded-md px-4 text-sm" disabled={isPending}>
-                    <SelectValue placeholder={t.form.group_placeholder} />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-md border-border bg-popover text-popover-foreground">
-                    <SelectItem value="">{t.form.group_placeholder}</SelectItem>
-                    {groups.map((g) => (
-                      <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex gap-1.5">
+                  <div className="flex-1">
+                    <Select
+                      value={categoryId || "__uncategorized__"}
+                      onValueChange={(v: string | null) => {
+                        if (v === "__create__") {
+                          setShowCategoryDialog(true);
+                        } else {
+                          setCategoryId(v === "__uncategorized__" || v === null ? "" : v);
+                          markDirty();
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="h-11 bg-card border-border rounded-md px-4 text-sm" disabled={isPending}>
+                        <SelectValue>
+                          {categoryId
+                            ? localGroups.find((g) => g.id === categoryId)?.name ?? categoryId
+                            : t.form.category_uncategorized}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent className="rounded-md border-border bg-popover text-popover-foreground">
+                        <SelectItem value="__uncategorized__" label={t.form.category_uncategorized}>{t.form.category_uncategorized}</SelectItem>
+                        {localGroups.map((g) => (
+                          <SelectItem key={g.id} value={g.id} label={g.name}>{g.name}</SelectItem>
+                        ))}
+                        <SelectItem value="__create__" label={t.form.category_create}>
+                          <span className="flex items-center gap-1.5 text-primary">
+                            <Plus className="w-3.5 h-3.5" />
+                            {t.form.category_create}
+                          </span>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               </Field>
             </div>
           </Section>
@@ -1283,6 +1365,33 @@ export function ProductFormPage({ productId, groups, shippingProfiles = [] }: Pr
       </div>
 
       {ConfirmDialog}
+
+      <Dialog open={showCategoryDialog} onOpenChange={setShowCategoryDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t.form.category_create}</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <Input
+              value={newCategoryName}
+              onChange={(e) => setNewCategoryName(e.target.value)}
+              placeholder={t.form.group_placeholder}
+              autoFocus
+              onKeyDown={(e) => { if (e.key === "Enter") handleCreateCategory(); }}
+            />
+          </div>
+          <DialogFooter>
+            <DialogClose render={<Button variant="ghost" size="sm" />}>{common.cancel}</DialogClose>
+            <Button
+              size="sm"
+              onClick={handleCreateCategory}
+              disabled={!newCategoryName.trim() || isCreatingCategory}
+            >
+              {isCreatingCategory ? "..." : common.save}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

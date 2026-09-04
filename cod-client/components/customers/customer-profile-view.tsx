@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft, Package, Edit, Plus, Phone, MapPin, TrendingUp,
-  Calendar, Hash, DollarSign, Layers, Tag, UserPlus, X, Search,
+  Calendar, Hash, DollarSign, Layers, Tag, UserPlus, X, Search, Mail,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -195,6 +195,17 @@ export function CustomerProfileView({
                         </div>
                       </div>
                     ) : <div />}
+
+                    {/* Email */}
+                    {customer.email && (
+                      <div className="min-w-0">
+                        <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40 mb-0.5">{t.form.email_label}</p>
+                        <div className="flex items-center gap-1.5">
+                          <Mail size={11} className="text-muted-foreground/60 shrink-0" />
+                          <span className="text-[12px] sm:text-[13px] font-bold text-foreground" dir="ltr">{customer.email}</span>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Wilaya */}
                     {customer.wilaya && (

@@ -31,6 +31,7 @@ export interface CreateCustomerData {
   name: string;
   phone: string;
   phone2?: string;
+  email?: string;
   wilayaId: number;
   communeId?: string;
   address?: string;
@@ -40,6 +41,7 @@ export interface UpdateCustomerData {
   name?: string;
   phone?: string;
   phone2?: string | null;
+  email?: string | null;
   wilayaId?: number;
   communeId?: string | null;
   address?: string | null;
@@ -138,6 +140,14 @@ export async function getCustomerByPhone(db: AppDb, storeId: string, phone: stri
     .get();
 }
 
+export async function getCustomerByEmail(db: AppDb, storeId: string, email: string) {
+  return await db
+    .select()
+    .from(customers)
+    .where(and(eq(customers.email, email), eq(customers.storeId, storeId)))
+    .get();
+}
+
 export async function createCustomer(db: AppDb, storeId: string, customerData: CreateCustomerData) {
   const now = new Date().toISOString();
   const customerId = crypto.randomUUID();
@@ -164,6 +174,7 @@ export async function createCustomer(db: AppDb, storeId: string, customerData: C
     name: customerData.name,
     phone: customerData.phone,
     phone2: customerData.phone2 || null,
+    email: customerData.email || null,
     wilayaId: customerData.wilayaId,
     communeId: customerData.communeId ?? null,
     wilaya: wilayaRow?.nameAr ?? String(customerData.wilayaId),

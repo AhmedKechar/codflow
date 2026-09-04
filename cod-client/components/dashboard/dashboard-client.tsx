@@ -6,8 +6,6 @@ import {
   Package,
   CheckCircle2,
   Undo2,
-  TrendingUp,
-  ArrowUpRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useDashboard, useNavigation } from "@/lib/translations";
@@ -20,7 +18,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { ChartsSection } from "./charts-section";
-import type { OrderStatusStat } from "@/../cod-shared/queries/analytics";
+import type { OrderStatusStat, DailyRevenue, DailyOrders, WilayaStat, RecentOrder } from "@/../cod-shared/queries/analytics";
 import type { LucideIcon } from "lucide-react";
 
 interface StatCard {
@@ -34,9 +32,19 @@ interface StatCard {
 
 interface DashboardClientProps {
   statusStats: OrderStatusStat[];
+  revenueData: DailyRevenue[];
+  ordersData: DailyOrders[];
+  wilayaData: WilayaStat[];
+  recentOrders: RecentOrder[];
 }
 
-export function DashboardClient({ statusStats }: DashboardClientProps) {
+export function DashboardClient({
+  statusStats,
+  revenueData,
+  ordersData,
+  wilayaData,
+  recentOrders,
+}: DashboardClientProps) {
   const t = useDashboard();
   const nav = useNavigation();
   const { locale, dir } = useLanguage();
@@ -124,7 +132,6 @@ export function DashboardClient({ statusStats }: DashboardClientProps) {
                       <div className={cn("w-10 h-10 rounded-md flex items-center justify-center", iconBg)}>
                         <Icon size={20} className={iconColor} />
                       </div>
-                      <ArrowUpRight size={16} className="text-muted-foreground" />
                     </div>
                     <div>
                       <p className="text-xs font-medium text-muted-foreground mb-1">
@@ -155,7 +162,13 @@ export function DashboardClient({ statusStats }: DashboardClientProps) {
       </TooltipProvider>
 
       {/* Charts section */}
-      <ChartsSection data={statusStats} />
+      <ChartsSection
+        data={statusStats}
+        revenueData={revenueData}
+        ordersData={ordersData}
+        wilayaData={wilayaData}
+        recentOrders={recentOrders}
+      />
     </div>
   );
 }

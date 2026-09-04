@@ -62,6 +62,8 @@ export interface Order {
   /** PDF label URL from the company shipment record (null if not generated or not dispatched). */
   labelUrl: string | null;
   externalOrderId: string | null;
+  /** Human-readable delivery provider/driver name (e.g. "EcoTrack", "Ahmed K."). */
+  deliveryMethodName: string | null;
   pickupTime: string | null;
   deliveryTime: string | null;
   deliveryAttempts: number | null;
@@ -75,6 +77,10 @@ export interface Order {
   hasReview?: number;
   /** The `by` field from the most recent orderStatusHistory entry. "webhook:zr_express" | "webhook:yalidine" | userId | null */
   lastUpdatedBy?: string | null;
+  /** Name of the first product in the order. */
+  firstProductName?: string | null;
+  /** Small image URL of the first product in the order. */
+  firstProductImage?: string | null;
   createdAt: string;
   updatedAt: string;
   /** Products in this order. */

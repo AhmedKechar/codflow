@@ -43,35 +43,6 @@ export async function updateStatus(c: Context<AppContext>) {
     throw new NotFoundError("Order", orderId);
   }
 
-  // Guard: enforce valid transitions
-  const ALLOWED_TRANSITIONS: Record<string, string[]> = {
-    new:       ["confirmed", "unreachable", "busy", "cancelled", "fake", "duplicate"],
-    confirmed: ["unreachable", "busy", "shipped", "cancelled", "fake", "duplicate"],
-    unreachable: ["confirmed", "busy", "cancelled", "fake", "duplicate"],
-    busy:      ["confirmed", "unreachable", "cancelled", "fake", "duplicate"],
-    postponed: ["confirmed", "shipped", "cancelled", "fake", "duplicate"],
-    shipped:   ["delivered", "returned", "cancelled"],
-    delivered: ["returned"],
-    returned:  ["confirmed", "cancelled"],
-    cancelled: ["confirmed", "new"],
-    fake:      ["confirmed", "new"],
-    duplicate: ["confirmed", "new"],
-  };
-
-  const allowed = ALLOWED_TRANSITIONS[order.status] ?? [];
-  if (!allowed.includes(validated.status)) {
-    return c.json({
-      error: `Cannot transition from "${order.status}" to "${validated.status}"`,
-      code: "INVALID_STATUS_TRANSITION",
-      category: ERROR_CATEGORIES.BUSINESS_LOGIC,
-      context: {
-        currentStatus:     order.status,
-        targetStatus:      validated.status,
-        allowedTransitions: allowed,
-      },
-    }, 400);
-  }
-
   // Get user from context (set by auth middleware)
   const user = c.get("user");
 

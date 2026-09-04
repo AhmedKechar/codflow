@@ -25,7 +25,7 @@ import { formatPrice, formatDateTime } from "@/lib/format";
 import { ErrorModal } from "@/components/errors/error-modal";
 import { useErrorLocale } from "@/lib/errors/use-locale";
 import type { Order, OrderStatus, Driver, DeliveryCompany } from "@/types";
-import { AssignDriverDialog, DispatchCompanyDialog } from "@/components/orders/orders-table";
+import { DeliveryDialog } from "@/components/orders/orders-table";
 
 const DRIVER_FLOW: OrderStatus[] = ["new", "confirmed", "unreachable", "busy", "postponed", "shipped", "delivered"];
 const COMPANY_FLOW: OrderStatus[] = ["new", "confirmed", "unreachable", "busy", "postponed", "shipped", "delivered"];
@@ -34,9 +34,10 @@ interface Props {
   order: Order;
   drivers: Driver[];
   companies: DeliveryCompany[];
+  driverWilayas: number[];
 }
 
-export function OrderDetailView({ order: initialOrder, drivers, companies }: Props) {
+export function OrderDetailView({ order: initialOrder, drivers, companies, driverWilayas }: Props) {
   const t = useOrders();
   const common = useCommon();
   const router = useRouter();
@@ -48,8 +49,7 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
   const [driverId, setDriverId] = useState<string | null>(initialOrder.driverId);
   const [deliveryMethod, setDeliveryMethod] = useState(initialOrder.deliveryMethod);
   const [labelUrl, setLabelUrl] = useState<string | null>(initialOrder.labelUrl ?? null);
-  const [assignOpen, setAssignOpen] = useState(false);
-  const [dispatchOpen, setDispatchOpen] = useState(false);
+  const [deliveryOpen, setDeliveryOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [errorState, setErrorState] = useState<{ isOpen: boolean; message: string; code?: string }>({ isOpen: false, message: "" });
 
@@ -106,8 +106,10 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
     (status !== "confirmed" || canAdvanceFromReady);
 
   const canMarkUnreachable = !isComplete && !isUnreachable && (status === "new" || status === "confirmed");
-  const canAssignDriver = !isComplete && !isUnreachable && !isCompanyMethod && !isOutOrLater && drivers.length > 0;
+  const hasDriverCoverage = initialOrder.wilayaId != null && driverWilayas.includes(initialOrder.wilayaId);
+  const canAssignDriver = !isComplete && !isUnreachable && !isCompanyMethod && !isOutOrLater && hasDriverCoverage;
   const canDispatch = !isComplete && !isUnreachable && !isDispatched && !isDriverMethod && companies.length > 0;
+  const canDeliver = canAssignDriver || canDispatch;
 
   const company = companies.find((c) => c.id === initialOrder.companyId) ?? null;
   const driver = drivers.find((d) => d.id === driverId) ?? null;
@@ -418,7 +420,11 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
           <span className="hidden sm:inline">{t.detail?.back_to_orders ?? "Orders"}</span>
         </Link>
         <div className="flex items-center gap-2">
-          <StatusBadge status={status} label={t.status[status] ?? status} className="rounded-full" />
+          <StatusBadge status={status} label={
+            status === "shipped" && initialOrder.deliveryMethodName
+              ? `${t.status?.shipped ?? "شُحن"} · ${initialOrder.deliveryMethodName}`
+              : t.status[status] ?? status
+          } className="rounded-full" />
           {(status === "new" || status === "confirmed" || status === "busy" || status === "unreachable") && (
             <Link
               href={`/orders/${initialOrder.id}/edit`}
@@ -723,7 +729,11 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
                         {initialOrder.deliveryType === "home" ? t.detail?.home_delivery : t.detail?.stop_desk}
                       </p>
                     </div>
-                    <StatusBadge status={status} label={t.status[status] ?? status}
+                    <StatusBadge status={status} label={
+                      status === "shipped" && initialOrder.deliveryMethodName
+                        ? `${t.status?.shipped ?? "شُحن"} · ${initialOrder.deliveryMethodName}`
+                        : t.status[status] ?? status
+                    }
                       className="shrink-0" />
                   </div>
                 ) : isDriverAssigned ? (
@@ -745,27 +755,20 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
                       </div>
                       {isOutOrLater && <Lock size={13} className="text-muted-foreground/40" />}
                     </div>
-                    {canAssignDriver && (
-                      <Button variant="outline" onClick={() => setAssignOpen(true)}
+                    {canDeliver && (
+                      <Button variant="outline" onClick={() => setDeliveryOpen(true)}
                         className="w-full h-10 border-border text-muted-foreground">
-                        {t.detail?.reassign_driver ?? "Change Driver"}
+                        {t.actions?.delivery ?? "التوصيل"}
                       </Button>
                     )}
                   </div>
                 ) : !isComplete ? (
                   <div className="space-y-2">
-                    {canAssignDriver && (
-                      <Button variant="outline" onClick={() => setAssignOpen(true)}
+                    {canDeliver && (
+                      <Button variant="outline" onClick={() => setDeliveryOpen(true)}
                         className="w-full h-10 border-border text-muted-foreground flex items-center gap-2">
                         <Truck size={13} className="opacity-50" />
-                        {t.detail?.assign_to_driver ?? "Assign Driver"}
-                      </Button>
-                    )}
-                    {canDispatch && (
-                      <Button variant="outline" onClick={() => setDispatchOpen(true)}
-                        className="w-full h-10 border-border text-muted-foreground flex items-center gap-2">
-                        <Building2 size={13} className="opacity-50" />
-                        {t.detail?.dispatch_to ?? "Dispatch to Company"}
+                        {t.actions?.delivery ?? "التوصيل"}
                       </Button>
                     )}
                   </div>
@@ -1021,25 +1024,19 @@ export function OrderDetailView({ order: initialOrder, drivers, companies }: Pro
         </div>
       </div>
 
-      {assignOpen && (
-        <AssignDriverDialog
+      {deliveryOpen && (
+        <DeliveryDialog
           order={initialOrder}
           drivers={drivers}
-          onClose={() => setAssignOpen(false)}
-          onAssigned={() => { router.refresh(); setAssignOpen(false); }}
-        />
-      )}
-
-      {dispatchOpen && (
-        <DispatchCompanyDialog
-          order={initialOrder}
           companies={companies}
-          onClose={() => setDispatchOpen(false)}
+          driverWilayas={driverWilayas}
+          onClose={() => setDeliveryOpen(false)}
+          onAssigned={() => { router.refresh(); setDeliveryOpen(false); }}
           onDispatched={(tn, lu) => {
             setTrackingNumber(tn);
             setLabelUrl(lu ?? null);
             setDeliveryMethod("company");
-            setDispatchOpen(false);
+            setDeliveryOpen(false);
           }}
         />
       )}

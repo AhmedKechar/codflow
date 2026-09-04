@@ -5,6 +5,7 @@
   "search_placeholder": "Rechercher par numéro de commande ou client...",
   "table": {
     "order_number": "Commande #",
+    "product": "Produit",
     "customer": "Client",
     "phone": "Tél.",
     "wilaya": "Wilaya",
@@ -24,6 +25,7 @@
     "view_details": "Voir les détails",
     "assign_driver": "Assigner un livreur",
     "dispatch_to_company": "Expédier à une société",
+    "delivery": "Livraison",
     "update_status": "Mettre à jour le statut"
   },
   "assign_driver_dialog": {
@@ -259,6 +261,9 @@
     "error_customer_name": "Le nom du client est requis",
     "error_phone": "Le numéro de téléphone est requis",
     "error_wilaya": "Veuillez sélectionner une wilaya",
+    "weight_label": "Poids (kg)",
+    "fragile_label": "Fragile",
+    "fragile_description": "Manipuler avec précaution lors de la livraison",
     "new_order_subtitle": "Remplissez les informations du client et ajoutez des produits pour créer une nouvelle commande"
   }
 }

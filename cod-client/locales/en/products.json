@@ -7,7 +7,8 @@
   "search_placeholder": "Search by name, SKU...",
   "table": {
     "name": "Product",
-    "group": "Group",
+    "group": "Category",
+    "show_in_store": "In Store",
     "price": "Price",
     "variants": "Variants",
     "stock": "Stock",
@@ -24,7 +25,7 @@
     "stock_history": "Stock History"
   },
   "filters": {
-    "group": "Group",
+    "group": "Category",
     "availability": "Availability",
     "pricing_unit": "Unit"
   },
@@ -65,8 +66,12 @@
     "name_ar_label": "Name (Arabic)",
     "name_placeholder": "e.g., Cotton T-Shirt",
     "name_ar_placeholder": "مثال: قميص قطني",
-    "group_label": "Product Group",
-    "group_placeholder": "Select group",
+    "show_in_store_label": "Visible in store",
+    "show_in_store_hint": "Show this product in the public storefront",
+    "group_label": "Product Category",
+    "group_placeholder": "Select category",
+    "category_uncategorized": "Uncategorized",
+    "category_create": "Create new category",
     "slug_label": "Slug",
     "sku_label": "SKU",
     "sku_placeholder": "e.g., PROD-001",

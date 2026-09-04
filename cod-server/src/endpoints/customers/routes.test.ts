@@ -52,6 +52,7 @@ function customerRow(overrides: Record<string, any> = {}) {
     name: "Ahmed Benali",
     phone: "0551234567",
     phone2: null,
+        email: null,
     wilayaId: 16,
     communeId: null,
     wilaya: "الجزائر",

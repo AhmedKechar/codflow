@@ -1,11 +1,11 @@
 {
-  "page_title": "Product Groups",
-  "add_group": "Add Group",
-  "groups_count": "groups",
-  "search_placeholder": "Search groups...",
+  "page_title": "Product Categories",
+  "add_group": "Add Category",
+  "groups_count": "categories",
+  "search_placeholder": "Search categories...",
   "table": {
     "name": "Name",
-    "parent": "Parent Group",
+    "parent": "Parent Category",
     "products": "Products",
     "status": "Status",
     "created_at": "Created"
@@ -15,13 +15,13 @@
     "delete": "Delete"
   },
   "empty_state": {
-    "title": "No groups yet",
-    "description": "Create groups to categorize and organize your products for better catalog management.",
-    "action": "Add Your First Group"
+    "title": "No categories yet",
+    "description": "Create categories to organize your products for better catalog management.",
+    "action": "Add Your First Category"
   },
   "form": {
-    "title_add": "Add Group",
-    "title_edit": "Edit Group",
+    "title_add": "Add Category",
+    "title_edit": "Edit Category",
     "name_label": "Name (English)",
     "name_ar_label": "Name (Arabic)",
     "name_placeholder": "e.g., Clothing",
@@ -29,9 +29,9 @@
     "slug_label": "Slug",
     "description_label": "Description",
     "description_ar_label": "Description (Arabic)",
-    "parent_label": "Parent Group",
+    "parent_label": "Parent Category",
     "parent_placeholder": "None (top-level)",
-    "image_label": "Group Image",
+    "image_label": "Category Image",
     "image_help": "Upload an image to represent this category in the store",
     "section_image": "Image",
     "section_seo": "SEO Settings",
@@ -48,11 +48,11 @@
     "error_name_required": "Name is required",
     "error_save_failed": "Failed to save",
     "cancel": "Cancel",
-    "save": "Save Group",
+    "save": "Save Category",
     "saving": "Saving...",
-    "success_add": "Group created successfully",
-    "success_edit": "Group updated successfully",
-    "delete_confirm": "Delete this group? Products in it will become ungrouped.",
-    "cannot_delete": "Cannot delete group with products"
+    "success_add": "Category created successfully",
+    "success_edit": "Category updated successfully",
+    "delete_confirm": "Delete this category? Products in it will become uncategorized.",
+    "cannot_delete": "Cannot delete category with products"
   }
 }

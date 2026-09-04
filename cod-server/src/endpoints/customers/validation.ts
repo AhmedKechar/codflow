@@ -13,6 +13,10 @@ export const createCustomerSchema = z.object({
     (v) => (v === "" || v == null ? undefined : v),
     z.string().regex(/^0[5-7]\d{8}$/, "Invalid Algerian phone number").optional()
   ).describe("Secondary Algerian phone number (optional)"),
+  email: z.preprocess(
+    (v) => (v === "" || v == null ? undefined : v),
+    z.string().email("Invalid email format").optional()
+  ).describe("Customer email address (optional, unique per store)"),
   wilayaId: z.number().int().min(1).max(58).describe("The numeric ID of the Algerian wilaya (1-58)"),
   communeId: z.string().min(1, "Commune is required").describe("The commune's text ID in \"c-XX-YYY\" format (e.g. \"c-16-001\")"),
   address: z.string().optional().describe("Full residential or business address (optional)"),
@@ -25,6 +29,10 @@ export const updateCustomerSchema = z.object({
     (v) => (v === "" ? null : v),
     z.string().regex(/^0[5-7]\d{8}$/, "Invalid Algerian phone number").nullable().optional()
   ).describe("Updated secondary Algerian phone number (can be null)"),
+  email: z.preprocess(
+    (v) => (v === "" ? null : v),
+    z.string().email("Invalid email format").nullable().optional()
+  ).describe("Updated customer email address (can be null to clear)"),
   wilayaId: z.number().int().min(1).max(58).optional().describe("Updated numeric ID of the wilaya (1-58)"),
   communeId: z.string().min(1, "Commune is required").nullable().optional().describe("Updated ID of the commune (can be null to clear)"),
   address: z.string().optional().nullable().describe("Updated full address"),

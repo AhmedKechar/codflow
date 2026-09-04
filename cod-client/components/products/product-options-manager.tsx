@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuGroup,
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
@@ -231,15 +232,17 @@ export function ProductOptionsManager({ options, onChange, disabled = false }: P
               }
             />
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>{t.form.option_preset_label}</DropdownMenuLabel>
-              {presets.map((p) => (
-                <DropdownMenuItem
-                  key={p.name}
-                  onClick={() => addOption(p.name, p.displayMode)}
-                >
-                  {p.name}
-                </DropdownMenuItem>
-              ))}
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>{t.form.option_preset_label}</DropdownMenuLabel>
+                {presets.map((p) => (
+                  <DropdownMenuItem
+                    key={p.name}
+                    onClick={() => addOption(p.name, p.displayMode)}
+                  >
+                    {p.name}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => addOption("", "text")}>
                 <Plus className="w-4 h-4" />

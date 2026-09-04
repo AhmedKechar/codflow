@@ -5,6 +5,7 @@
   "search_placeholder": "البحث برقم الطلب أو العميل...",
   "table": {
     "order_number": "رقم الطلب",
+    "product": "المنتج",
     "customer": "العميل",
     "phone": "الهاتف",
     "wilaya": "الولاية",
@@ -24,6 +25,7 @@
     "view_details": "عرض التفاصيل",
     "assign_driver": "تعيين سائق",
     "dispatch_to_company": "إرسال لشركة توصيل",
+    "delivery": "التوصيل",
     "update_status": "تحديث الحالة"
   },
   "assign_driver_dialog": {
@@ -80,7 +82,7 @@
     "unreachable": "لا يرد",
     "busy": "مشغول",
     "postponed": "مؤجل",
-    "shipped": "تم الشحن",
+    "shipped": "قيد التوصيل",
     "delivered": "تم التسليم",
     "returned": "مرتجع",
     "cancelled": "ملغي",
@@ -259,6 +261,9 @@
     "error_customer_name": "اسم العميل مطلوب",
     "error_phone": "رقم الهاتف مطلوب",
     "error_wilaya": "يرجى اختيار الولاية",
+    "weight_label": "الوزن (كغ)",
+    "fragile_label": "هش",
+    "fragile_description": "يتم التعامل معه بعناية عند التوصيل",
     "new_order_subtitle": "أدخل بيانات العميل وأضف المنتجات لإنشاء طلب جديد"
   }
 }

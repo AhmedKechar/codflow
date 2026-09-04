@@ -1,11 +1,11 @@
 {
-  "page_title": "مجموعات المنتجات",
-  "add_group": "إضافة مجموعة",
-  "groups_count": "مجموعة",
-  "search_placeholder": "بحث في المجموعات...",
+  "page_title": "فئات المنتجات",
+  "add_group": "إضافة فئة",
+  "groups_count": "فئة",
+  "search_placeholder": "بحث في الفئات...",
   "table": {
     "name": "الاسم",
-    "parent": "المجموعة الأم",
+    "parent": "الفئة الأم",
     "products": "المنتجات",
     "status": "الحالة",
     "created_at": "تاريخ الإضافة"
@@ -15,13 +15,13 @@
     "delete": "حذف"
   },
   "empty_state": {
-    "title": "لا توجد مجموعات بعد",
-    "description": "أنشئ مجموعات لتصنيف وتنظيم منتجاتك من أجل إدارة أفضل للكتالوج.",
-    "action": "أضف مجموعتك الأولى"
+    "title": "لا توجد فئات بعد",
+    "description": "أنشئ فئات لتصنيف وتنظيم منتجاتك من أجل إدارة أفضل للكتالوج.",
+    "action": "أضف فئتك الأولى"
   },
   "form": {
-    "title_add": "إضافة مجموعة",
-    "title_edit": "تعديل المجموعة",
+    "title_add": "إضافة فئة",
+    "title_edit": "تعديل الفئة",
     "name_label": "الاسم (بالإنجليزية)",
     "name_ar_label": "الاسم (بالعربية)",
     "name_placeholder": "مثال: Clothing",
@@ -29,9 +29,9 @@
     "slug_label": "الرابط المختصر",
     "description_label": "الوصف",
     "description_ar_label": "الوصف (بالعربية)",
-    "parent_label": "المجموعة الأم",
+    "parent_label": "الفئة الأم",
     "parent_placeholder": "بدون (مستوى أول)",
-    "image_label": "صورة المجموعة",
+    "image_label": "صورة الفئة",
     "image_help": "قم بتحميل صورة لتمثيل هذا القسم في المتجر",
     "section_image": "الصورة",
     "section_seo": "إعدادات SEO",
@@ -48,11 +48,11 @@
     "error_name_required": "الاسم مطلوب",
     "error_save_failed": "فشل الحفظ",
     "cancel": "إلغاء",
-    "save": "حفظ المجموعة",
+    "save": "حفظ الفئة",
     "saving": "جارٍ الحفظ...",
-    "success_add": "تمت إضافة المجموعة بنجاح",
-    "success_edit": "تم تحديث المجموعة بنجاح",
-    "delete_confirm": "حذف هذه المجموعة؟ ستصبح منتجاتها بدون مجموعة.",
-    "cannot_delete": "لا يمكن حذف مجموعة تحتوي على منتجات"
+    "success_add": "تمت إضافة الفئة بنجاح",
+    "success_edit": "تم تحديث الفئة بنجاح",
+    "delete_confirm": "حذف هذه الفئة؟ ستصبح منتجات بدون فئة.",
+    "cannot_delete": "لا يمكن حذف فئة تحتوي على منتجات"
   }
 }

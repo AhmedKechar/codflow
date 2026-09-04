@@ -102,6 +102,7 @@ function orderRow(overrides: Record<string, any> = {}) {
     feePaymentId: null,
     weight: null,
     isFragile: null,
+    deliveryMethodName: null,
     createdAt: NOW,
     updatedAt: NOW,
     products: [],
@@ -149,7 +150,7 @@ describe("Orders — targeted business-logic tests", () => {
 
   // ─── 1. Status transition completeness ────────────────────────────────────
 
-  describe("PATCH /api/orders/{id}/status — transition table", () => {
+  describe("PATCH /api/orders/{id}/status — all transitions allowed", () => {
     async function transition(from: string, to: string) {
       vi.mocked(queries.getOrderById).mockResolvedValue(orderRow({ status: from }) as any);
       vi.mocked(queries.updateOrderStatus).mockResolvedValue(undefined as any);
@@ -161,61 +162,25 @@ describe("Orders — targeted business-logic tests", () => {
       return res.status;
     }
 
-    // Valid forward moves
+    // All transitions are now allowed — business logic is driven by the new status
     it("new → confirmed is allowed", async () => expect(await transition("new", "confirmed")).toBe(200));
     it("new → unreachable is allowed", async () => expect(await transition("new", "unreachable")).toBe(200));
+    it("new → shipped is allowed", async () => expect(await transition("new", "shipped")).toBe(200));
+    it("new → delivered is allowed", async () => expect(await transition("new", "delivered")).toBe(200));
     it("new → cancelled is allowed", async () => expect(await transition("new", "cancelled")).toBe(200));
-    it("confirmed → busy is allowed", async () => expect(await transition("confirmed", "busy")).toBe(200));
     it("confirmed → shipped is allowed", async () => expect(await transition("confirmed", "shipped")).toBe(200));
+    it("confirmed → new is allowed", async () => expect(await transition("confirmed", "new")).toBe(200));
     it("confirmed → cancelled is allowed", async () => expect(await transition("confirmed", "cancelled")).toBe(200));
+    it("unreachable → shipped is allowed", async () => expect(await transition("unreachable", "shipped")).toBe(200));
     it("unreachable → confirmed is allowed", async () => expect(await transition("unreachable", "confirmed")).toBe(200));
-    it("unreachable → cancelled is allowed", async () => expect(await transition("unreachable", "cancelled")).toBe(200));
-    it("busy → confirmed is allowed", async () => expect(await transition("busy", "confirmed")).toBe(200));
-    it("busy → cancelled is allowed", async () => expect(await transition("busy", "cancelled")).toBe(200));
-    it("postponed → confirmed is allowed", async () => expect(await transition("postponed", "confirmed")).toBe(200));
-    it("postponed → shipped is allowed", async () => expect(await transition("postponed", "shipped")).toBe(200));
-    it("postponed → cancelled is allowed", async () => expect(await transition("postponed", "cancelled")).toBe(200));
     it("shipped → delivered is allowed", async () => expect(await transition("shipped", "delivered")).toBe(200));
     it("shipped → returned is allowed", async () => expect(await transition("shipped", "returned")).toBe(200));
-    it("shipped → cancelled is allowed", async () => expect(await transition("shipped", "cancelled")).toBe(200));
-
-    // Invalid backward or skipped moves — all must return 400
-    it("new → delivered is blocked (skip)", async () => expect(await transition("new", "delivered")).toBe(400));
-    it("new → shipped is blocked (skip)", async () => expect(await transition("new", "shipped")).toBe(400));
-    it("confirmed → new is blocked (backward)", async () => expect(await transition("confirmed", "new")).toBe(400));
-    it("delivered → new is blocked (terminal)", async () => expect(await transition("delivered", "new")).toBe(400));
-    it("delivered → confirmed is blocked (terminal)", async () => expect(await transition("delivered", "confirmed")).toBe(400));
-    it("returned → confirmed is blocked (terminal) - but actually allowed now", async () => expect(await transition("returned", "confirmed")).toBe(200));
-    it("cancelled → new is blocked (terminal) - but actually allowed now", async () => expect(await transition("cancelled", "new")).toBe(200));
-
-    // Context fields on blocked transitions
-    it("blocked transition response includes currentStatus, targetStatus, allowedTransitions", async () => {
-      vi.mocked(queries.getOrderById).mockResolvedValue(orderRow({ status: "delivered" }) as any);
-      const res = await app.request("/api/orders/ord_1/status", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "confirmed" }),
-      });
-      const body: any = await res.json();
-      expect(body.code).toBe("INVALID_STATUS_TRANSITION");
-      expect(body.context.currentStatus).toBe("delivered");
-      expect(body.context.targetStatus).toBe("confirmed");
-      expect(body.context.allowedTransitions).toEqual([]);
-    });
-
-    it("blocked transition from confirmed shows its allowed next statuses", async () => {
-      vi.mocked(queries.getOrderById).mockResolvedValue(orderRow({ status: "confirmed" }) as any);
-      const res = await app.request("/api/orders/ord_1/status", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "new" }),
-      });
-      const body: any = await res.json();
-      expect(body.context.allowedTransitions).toEqual(
-        expect.arrayContaining(["shipped", "cancelled", "busy"])
-      );
-      expect(body.context.allowedTransitions).not.toContain("new");
-    });
+    it("shipped → new is allowed", async () => expect(await transition("shipped", "new")).toBe(200));
+    it("delivered → new is allowed", async () => expect(await transition("delivered", "new")).toBe(200));
+    it("delivered → confirmed is allowed", async () => expect(await transition("delivered", "confirmed")).toBe(200));
+    it("returned → confirmed is allowed", async () => expect(await transition("returned", "confirmed")).toBe(200));
+    it("cancelled → new is allowed", async () => expect(await transition("cancelled", "new")).toBe(200));
+    it("cancelled → shipped is allowed", async () => expect(await transition("cancelled", "shipped")).toBe(200));
   });
 
   // ─── 2. Driver assignment: confirmed/unreachable do NOT auto-advance ───────

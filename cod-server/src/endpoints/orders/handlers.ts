@@ -32,16 +32,20 @@ export async function listOrders(c: Context<AppContext>) {
       status: c.req.query("status"),
       wilayaId: c.req.query("wilayaId"),
       search: c.req.query("search"),
+      startDate: c.req.query("startDate"),
+      endDate: c.req.query("endDate"),
       limit: c.req.query("limit"),
       offset: c.req.query("offset"),
     });
 
-    const orders = await queries.getAllOrders(db, storeId, filters);
+    // ⚡ Use paginated query for total count
+    const { rows, total } = await queries.getOrdersPaginated(db, storeId, filters);
 
     return c.json({
       success: true,
-      data: orders,
-      count: orders.length,
+      data: rows,
+      count: rows.length,    // items in this page
+      total,                 // total matching items
     }, 200);
   } catch (error) {
     throw error;

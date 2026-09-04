@@ -44,7 +44,7 @@ export function CustomersTable({
     {
       key: "name",
       label: t.table.customer,
-      sortable: true,
+      sortable: false,
       isTitle: true,
       render: (value) => (
         <div className="font-black text-sm tracking-tight">

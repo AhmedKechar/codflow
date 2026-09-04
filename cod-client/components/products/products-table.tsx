@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, Edit, Trash2, Package, MoreHorizontal, Star } from "lucide-react";
+import { Eye, EyeOff, Edit, Trash2, Package, MoreHorizontal, Star } from "lucide-react";
 import { DataTable, type TableColumn, type TableAction } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +26,7 @@ interface Props {
   onEdit?: (p: Product) => void;
   onDelete?: (p: Product) => void;
   onCreate?: () => void;
+  onToggleShowInStore?: (p: Product) => void;
 }
 
 function StockBadge({ product }: { product: Product }) {
@@ -41,7 +42,7 @@ function statusToVariant(status: string): string {
   return "out_of_stock"; // ARCHIVED
 }
 
-export function ProductsTable({ products, groups, loading = false, onView, onEdit, onDelete, onCreate }: Props) {
+export function ProductsTable({ products, groups, loading = false, onView, onEdit, onDelete, onCreate, onToggleShowInStore }: Props) {
   const t = useProducts();
   const common = useCommon();
   const { dir } = useLanguage();
@@ -88,6 +89,31 @@ export function ProductsTable({ products, groups, loading = false, onView, onEdi
       sortable: true,
       isStatus: true,
       render: (value) => <StatusBadge status={statusToVariant(value)} />,
+    },
+    {
+      key: "showInStore",
+      label: t.table.show_in_store ?? "In Store",
+      sortable: false,
+      render: (value, row) => onToggleShowInStore ? (
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onToggleShowInStore(row); }}
+          className={cn(
+            "inline-flex items-center gap-1 text-xs font-medium rounded-md px-2 py-1 transition-colors",
+            value
+              ? "text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
+              : "text-muted-foreground/50 hover:bg-muted/50"
+          )}
+          title={value ? (t.form.show_in_store_hint ?? "Hide from store") : (t.form.show_in_store_hint ?? "Show in store")}
+        >
+          {value ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+        </button>
+      ) : (
+        <span className={cn("inline-flex items-center gap-1 text-xs font-medium", value ? "text-emerald-600" : "text-muted-foreground/50")}>
+          {value ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+        </span>
+      ),
+      mobileHidden: true,
     },
     {
       key: "price",

@@ -74,9 +74,11 @@ export const returnOrderProductSchema = z.object({
 
 export const orderFiltersSchema = z.object({
   status: z.enum(ORDER_STATUSES).optional(),
-  wilayaId: z.coerce.number().int().optional(),
+  wilayaId: z.coerce.number().int().min(1).max(58).optional(),
   search: z.string().optional(),
-  limit: z.coerce.number().int().positive().max(100).default(50),
+  startDate: z.string().datetime().optional(),
+  endDate: z.string().datetime().optional(),
+  limit: z.coerce.number().int().positive().max(100).default(20),
   offset: z.coerce.number().int().min(0).default(0),
 });
 

@@ -15,6 +15,7 @@ export {
   getAllCustomers,
   getCustomerById,
   getCustomerByPhone,
+  getCustomerByEmail,
   createCustomer,
   updateCustomer,
   getOrdersByCustomerId,

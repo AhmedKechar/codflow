@@ -1,11 +1,11 @@
 {
-  "page_title": "Groupes de produits",
-  "add_group": "Ajouter un groupe",
-  "groups_count": "groupes",
-  "search_placeholder": "Rechercher des groupes...",
+  "page_title": "Catégories de produits",
+  "add_group": "Ajouter une catégorie",
+  "groups_count": "catégories",
+  "search_placeholder": "Rechercher des catégories...",
   "table": {
     "name": "Nom",
-    "parent": "Groupe parent",
+    "parent": "Catégorie parente",
     "products": "Produits",
     "status": "Statut",
     "created_at": "Créé le"
@@ -15,13 +15,13 @@
     "delete": "Supprimer"
   },
   "empty_state": {
-    "title": "Aucun groupe pour le moment",
-    "description": "Créez des groupes pour catégoriser et organiser vos produits pour une meilleure gestion du catalogue.",
-    "action": "Ajouter votre premier groupe"
+    "title": "Aucune catégorie pour le moment",
+    "description": "Créez des catégories pour organiser vos produits pour une meilleure gestion du catalogue.",
+    "action": "Ajouter votre première catégorie"
   },
   "form": {
-    "title_add": "Ajouter un groupe",
-    "title_edit": "Modifier le groupe",
+    "title_add": "Ajouter une catégorie",
+    "title_edit": "Modifier la catégorie",
     "name_label": "Nom (Anglais)",
     "name_ar_label": "Nom (Arabe)",
     "name_placeholder": "ex: Vêtements",
@@ -29,9 +29,9 @@
     "slug_label": "Slug",
     "description_label": "Description",
     "description_ar_label": "Description (Arabe)",
-    "parent_label": "Groupe parent",
+    "parent_label": "Catégorie parente",
     "parent_placeholder": "Aucun (niveau supérieur)",
-    "image_label": "Image du groupe",
+    "image_label": "Image de catégorie",
     "image_help": "Téléchargez une image pour représenter cette catégorie dans la boutique",
     "section_image": "Image",
     "section_seo": "Paramètres SEO",
@@ -48,11 +48,11 @@
     "error_name_required": "Le nom est requis",
     "error_save_failed": "Échec de l'enregistrement",
     "cancel": "Annuler",
-    "save": "Enregistrer le groupe",
+    "save": "Enregistrer la catégorie",
     "saving": "Enregistrement...",
-    "success_add": "Groupe créé avec succès",
-    "success_edit": "Groupe mis à jour avec succès",
-    "delete_confirm": "Supprimer ce groupe ? Les produits qu'il contient ne seront plus groupés.",
-    "cannot_delete": "Impossible de supprimer un groupe contenant des produits"
+    "success_add": "Catégorie créée avec succès",
+    "success_edit": "Catégorie mise à jour avec succès",
+    "delete_confirm": "Supprimer cette catégorie ? Les produits qu'elle contient ne seront plus catégorisés.",
+    "cannot_delete": "Impossible de supprimer une catégorie contenant des produits"
   }
 }

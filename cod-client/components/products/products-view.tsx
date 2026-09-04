@@ -8,7 +8,7 @@ import { useConfirm } from "@/components/ui/use-confirm";
 import { ProductsTable } from "./products-table";
 import { ProtectedAction } from "@/components/rbac/ProtectedAction";
 import { SCOPES } from "@/../cod-shared/rbac/scopes";
-import { deleteProduct } from "@/actions/products";
+import { deleteProduct, updateProduct } from "@/actions/products";
 import { ErrorModal } from "@/components/errors/error-modal";
 import { useErrorLocale } from "@/lib/errors/use-locale";
 import { useState } from "react";
@@ -54,6 +54,15 @@ export function ProductsView({ products, groups, userScopes }: Props) {
     }
   };
 
+  const handleToggleShowInStore = async (product: Product) => {
+    try {
+      await updateProduct(product.id, { showInStore: !product.showInStore });
+      router.refresh();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to update product");
+    }
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <PageHeader
@@ -71,6 +80,7 @@ export function ProductsView({ products, groups, userScopes }: Props) {
         onView={(p) => router.push(`/products/${p.id}`)}
         onEdit={(p) => router.push(`/products/${p.id}/edit`)}
         onDelete={handleDelete}
+        onToggleShowInStore={handleToggleShowInStore}
       />
       {ConfirmDialog}
       

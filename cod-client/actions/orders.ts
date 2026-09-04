@@ -14,7 +14,7 @@ import { apiClient, ApiClientError } from "@/lib/api-client";
 import { getDb } from "@/db";
 import { getUserApiKey, requirePermission, getUserStoreId } from "@/lib/auth";
 import { SCOPES } from "@/../cod-shared/rbac/scopes";
-import { getAllOrders, getOrderById, type OrderFilters } from "@/../cod-shared/queries/orders";
+import { getAllOrders, getOrdersPaginated as getOrdersPaginatedQuery, getOrderById, getOrderStatusCounts as getOrderStatusCountsQuery, type OrderFilters } from "@/../cod-shared/queries/orders";
 import { mapError } from "@/lib/errors/mapper";
 import { getLocale, type Locale } from "@/lib/locale";
 import type { Order, OrderStatus } from "@/types/order.types";
@@ -29,7 +29,7 @@ const STATUS_LABELS: Record<Locale, Record<string, string>> = {
   },
   ar: {
     new: "جديد", confirmed: "تم التأكيد", unreachable: "لا يرد",
-    busy: "الخط مشغول", postponed: "مؤجل", shipped: "تم الشحن",
+    busy: "الخط مشغول", postponed: "مؤجل",     shipped: "قيد التوصيل",
     delivered: "تم التسليم", returned: "مرتجع", cancelled: "ملغي",
     fake: "مزيف", duplicate: "مكرر",
   },
@@ -81,7 +81,7 @@ interface ApiResponse<T = any> {
 }
 
 /**
- * Get all orders
+ * Get all orders (backward compatible - returns array only)
  */
 export async function getOrders(filters: OrderFilters = {}): Promise<Order[]> {
   await requirePermission(SCOPES.ORDERS_READ);
@@ -90,6 +90,43 @@ export async function getOrders(filters: OrderFilters = {}): Promise<Order[]> {
   const storeId = await getUserStoreId();
   const rows = await getAllOrders(db, storeId, filters);
   return rows as unknown as Order[];
+}
+
+export interface PaginatedOrders {
+  data: Order[];
+  count: number;
+  total: number;
+}
+
+/**
+ * Get orders with pagination metadata.
+ * ⚡ New function - keeps getOrders() backward compatible.
+ */
+export async function getOrdersPaginated(filters: OrderFilters = {}): Promise<PaginatedOrders> {
+  await requirePermission(SCOPES.ORDERS_READ);
+  const { env } = await getCloudflareContext({ async: true });
+  const db = getDb(env.DB);
+  const storeId = await getUserStoreId();
+  const result = await getOrdersPaginatedQuery(db, storeId, filters);
+  return {
+    data: result.rows as unknown as Order[],
+    count: result.rows.length,
+    total: result.total,
+  };
+}
+
+/**
+ * Get order counts grouped by status (for filter chips).
+ * Applies all filters EXCEPT status so counts are always complete.
+ */
+export async function getOrderStatusCounts(
+  filters: Pick<OrderFilters, "wilayaId" | "search" | "startDate" | "endDate">
+): Promise<Record<string, number>> {
+  await requirePermission(SCOPES.ORDERS_READ);
+  const { env } = await getCloudflareContext({ async: true });
+  const db = getDb(env.DB);
+  const storeId = await getUserStoreId();
+  return getOrderStatusCountsQuery(db, storeId, filters);
 }
 
 /**
@@ -121,6 +158,8 @@ export async function createOrder(orderData: {
   deliveryType: "home" | "stop_desk";
   deliveryFee: number;
   companyId?: string | null;
+  weight?: number | null;
+  isFragile?: boolean | null;
   products: Array<{
     productId: string;
     productName: string;

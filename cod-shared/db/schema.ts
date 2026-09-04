@@ -43,6 +43,7 @@ export const customers = sqliteTable("customers", {
   name: text("name").notNull(),
   phone: text("phone").notNull(),
   phone2: text("phone2"),
+  email: text("email"),
   /** Wilaya FK — authority for wilaya. Kept in sync with `wilaya` text column. */
   wilayaId: integer("wilaya_id").references(() => wilayas.id),
   /** Commune FK — authority for commune. Kept in sync with `commune` text column. */
@@ -478,6 +479,9 @@ export const orders = sqliteTable("orders", {
   trackingNumber: text("tracking_number"),
   trackingUrl: text("tracking_url"),
   externalOrderId: text("external_order_id"),
+
+  /** Human-readable delivery provider/driver name (e.g. "EcoTrack", "Ahmed K."). */
+  deliveryMethodName: text("delivery_method_name"),
 
   // ── Delivery specifics ────────────────────────────────────────────────────
   deliveryType: text("delivery_type", { enum: ["home", "stop_desk"] })
@@ -1726,7 +1730,7 @@ export const whatsappMessages = sqliteTable("whatsapp_messages", {
 export const smsMessages = sqliteTable("sms_messages", {
   id: text("id").primaryKey(),
   storeId: text("store_id")
-    .notNull()
+    .notNull() 
     .references(() => stores.id, { onDelete: "cascade" }),
   orderId: text("order_id").references(() => orders.id),
   customerId: text("customer_id").references(() => customers.id),

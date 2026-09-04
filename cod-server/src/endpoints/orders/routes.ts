@@ -29,6 +29,7 @@ import {
   SuccessWithMessageSchema,
   MessageResponseSchema,
   ListResponseSchema,
+  ListWithTotalResponseSchema,
   IdParamSchema,
   OrderListItemSchema,
   OrderDetailSchema,
@@ -57,8 +58,8 @@ const listOrdersRoute = defineRoute({
   responses: {
     200: {
       description:
-        "List of orders (each item includes wilaya/commune/driverName joins plus hasReview and lastUpdatedBy)",
-      content: jsonContent(ListResponseSchema(OrderListItemSchema)),
+        "List of orders with pagination metadata (each item includes wilaya/commune/driverName joins plus hasReview and lastUpdatedBy)",
+      content: jsonContent(ListWithTotalResponseSchema(OrderListItemSchema)),
     },
   },
   handler: handlers.listOrders,

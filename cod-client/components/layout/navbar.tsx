@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Moon, Sun, ChevronDown, LogOut, User, Settings, Loader2 } from "lucide-react";
+import { Moon, Sun, ChevronDown, LogOut, User, Settings, Loader2, Store } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "./language-switcher";
@@ -13,6 +13,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface NavbarProps {
   storeDomain?: string | null;
@@ -70,8 +71,29 @@ export function Navbar({ storeDomain, user, onSignOut }: NavbarProps) {
         ) : null}
       </div>
 
-      {/* Right side — language + theme + user */}
+      {/* Right side — store + language + theme + user */}
       <div className="flex items-center gap-3 shrink-0">
+        {/* Visit Store — icon-only with tooltip */}
+        {storeDomain && (
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <a
+                  href={`https://${storeDomain}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center w-10 h-10 rounded-md hover:bg-background/10 text-background transition-colors"
+                />
+              }
+            >
+              <Store size={18} />
+            </TooltipTrigger>
+            <TooltipContent side="bottom" sideOffset={6}>
+              {common.visit_store || "Visit Store"}
+            </TooltipContent>
+          </Tooltip>
+        )}
+
         <LanguageSwitcher />
 
         <Button

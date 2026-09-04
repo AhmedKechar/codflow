@@ -40,7 +40,7 @@ export const ORDER_STATUS_CONFIG: Record<OrderStatus, StatusConfig> = {
   },
   shipped: {
     label: "Shipped",
-    labelAr: "تم الشحن",
+    labelAr: "قيد التوصيل",
     dotClass: "bg-teal-500",
     badgeClass: "bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-950 dark:text-teal-300 dark:border-teal-800",
   },

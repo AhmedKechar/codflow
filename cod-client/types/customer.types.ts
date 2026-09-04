@@ -5,6 +5,7 @@ export interface Customer {
   name: string;
   phone: string;
   phone2?: string;
+  email?: string;
   wilayaId?: number;
   communeId?: string;
   wilaya: string;

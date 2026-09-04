@@ -85,6 +85,18 @@ export async function createCustomer(c: Context<AppContext>) {
     );
   }
 
+  // Check for duplicate email
+  if (validated.email) {
+    const existingByEmail = await queries.getCustomerByEmail(db, storeId, validated.email);
+    if (existingByEmail) {
+      throw new ConflictError(
+        "A customer with this email already exists",
+        ERROR_CODES.DUPLICATE_PHONE,
+        { email: validated.email, existingCustomerId: existingByEmail.id }
+      );
+    }
+  }
+
   const customer = await queries.createCustomer(db, storeId, validated);
 
   if (!customer) {
@@ -133,6 +145,18 @@ export async function updateCustomer(c: Context<AppContext>) {
         "A customer with this phone number already exists",
         ERROR_CODES.DUPLICATE_PHONE,
         { phone: validated.phone, existingCustomerId: existingCustomer.id }
+      );
+    }
+  }
+
+  // Check if email is being updated and if it's a duplicate
+  if (validated.email) {
+    const existingByEmail = await queries.getCustomerByEmail(db, storeId, validated.email);
+    if (existingByEmail && existingByEmail.id !== customerId) {
+      throw new ConflictError(
+        "A customer with this email already exists",
+        ERROR_CODES.DUPLICATE_PHONE,
+        { email: validated.email, existingCustomerId: existingByEmail.id }
       );
     }
   }

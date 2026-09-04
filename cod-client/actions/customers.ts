@@ -39,6 +39,7 @@ interface Customer {
   name: string;
   phone: string;
   phone2?: string;
+  email?: string;
   wilayaId?: number;
   communeId?: string;
   wilaya: string;
@@ -54,6 +55,7 @@ interface CreateCustomerData {
   name: string;
   phone: string;
   phone2?: string | null;
+  email?: string;
   wilayaId: number;
   communeId?: string;
   address?: string;
@@ -63,6 +65,7 @@ interface UpdateCustomerData {
   name?: string;
   phone?: string;
   phone2?: string | null;
+  email?: string;
   wilayaId?: number;
   communeId?: string | null;
   address?: string | null;

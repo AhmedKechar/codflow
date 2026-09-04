@@ -9,12 +9,27 @@ import { PageHeader } from "@/components/ui/page-header";
 
 interface Props {
   orders: Order[];
+  total: number;
+  currentPage: number;
+  pageSize: number;
   drivers: Driver[];
   companies: DeliveryCompany[];
+  driverWilayas: number[];
   userScopes: string[];
+  statusCounts: Record<string, number>;
 }
 
-export function OrdersView({ orders, drivers, companies, userScopes }: Props) {
+export function OrdersView({
+  orders,
+  total,
+  currentPage,
+  pageSize,
+  drivers,
+  companies,
+  driverWilayas,
+  userScopes,
+  statusCounts,
+}: Props) {
   const t = useOrders();
   const nav = useNavigation();
   const router = useRouter();
@@ -32,9 +47,14 @@ export function OrdersView({ orders, drivers, companies, userScopes }: Props) {
 
       <OrdersTable
         orders={orders}
+        total={total}
+        currentPage={currentPage}
+        pageSize={pageSize}
         drivers={drivers}
         companies={companies}
+        driverWilayas={driverWilayas}
         userScopes={userScopes}
+        statusCounts={statusCounts}
       />
     </div>
   );

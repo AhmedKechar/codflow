@@ -18,22 +18,8 @@ import { getDb } from "@/db";
  * sale from creation through delivery or return.
  *
  * ─── Status lifecycle ────────────────────────────────────────────────────────
- * new → confirmed → busy/postponed → shipped → delivered | returned
- * Any status → cancelled (except delivered/returned/cancelled)
- * unreachable ↔ confirmed (customer unreachable, retry later)
- *
- * ALLOWED_TRANSITIONS (enforced by updateOrderStatus):
- *   new:              confirmed, unreachable, busy, cancelled, fake, duplicate
- *   confirmed:        unreachable, busy, shipped, cancelled, fake, duplicate
- *   unreachable:      confirmed, busy, cancelled, fake, duplicate
- *   busy:             confirmed, unreachable, cancelled, fake, duplicate
- *   postponed:        confirmed, shipped, cancelled, fake, duplicate
- *   shipped:          delivered, returned, cancelled
- *   delivered:        returned
- *   returned:         confirmed, cancelled
- *   cancelled:        confirmed, new
- *   fake:             confirmed, new
- *   duplicate:        confirmed, new
+ * Any status can transition to any other status.
+ * Business logic (inventory, notifications) is driven by the new status, not the transition.
  *
  * ─── Delivery methods (mutually exclusive) ───────────────────────────────────
  *   driver  → assign a driver via assignDriverToOrder
@@ -319,21 +305,9 @@ export const getOrderTools = (db: ReturnType<typeof getDb>, storeId: string) => 
 
   updateOrderStatus: tool({
     description:
-      "Updates an order's status. Enforces valid transitions — invalid moves are rejected with the allowed next statuses. " +
+      "Updates an order's status. Any status can transition to any other status. " +
       "Required: orderId (UUID), status (target status). " +
       "Valid statuses: new, confirmed, unreachable, busy, postponed, shipped, delivered, cancelled, fake, duplicate, returned. " +
-      "Transition rules: " +
-      "new → confirmed|unreachable|busy|cancelled|fake|duplicate. " +
-      "confirmed → unreachable|busy|shipped|cancelled|fake|duplicate. " +
-      "unreachable → confirmed|busy|cancelled|fake|duplicate. " +
-      "busy → confirmed|unreachable|cancelled|fake|duplicate. " +
-      "postponed → confirmed|shipped|cancelled|fake|duplicate. " +
-      "shipped → delivered|returned|cancelled. " +
-      "delivered → returned. " +
-      "returned → confirmed|cancelled. " +
-      "cancelled → confirmed|new. " +
-      "fake → confirmed|new. " +
-      "duplicate → confirmed|new. " +
       "Setting cancelled or returned automatically restores inventory for tracked products.",
     inputSchema: z.object({}).passthrough(), // Layer 1: Permissive input
     execute: async (args) => {
@@ -356,29 +330,6 @@ export const getOrderTools = (db: ReturnType<typeof getDb>, storeId: string) => 
         const order = await queries.getOrderById(db, storeId, parsed.data.orderId);
         if (!order) {
           return { success: false, error: `Order not found with ID: ${parsed.data.orderId}` };
-        }
-
-        // Enforce transition table — same logic as the REST handler
-        const ALLOWED_TRANSITIONS: Record<string, string[]> = {
-          new:              ["confirmed", "unreachable", "busy", "cancelled", "fake", "duplicate"],
-          confirmed:        ["unreachable", "busy", "shipped", "cancelled", "fake", "duplicate"],
-          unreachable:      ["confirmed", "busy", "cancelled", "fake", "duplicate"],
-          busy:             ["confirmed", "unreachable", "cancelled", "fake", "duplicate"],
-          postponed:        ["confirmed", "shipped", "cancelled", "fake", "duplicate"],
-          shipped:          ["delivered", "returned", "cancelled"],
-          delivered:        ["returned"],
-          returned:         ["confirmed", "cancelled"],
-          cancelled:        ["confirmed", "new"],
-          fake:             ["confirmed", "new"],
-          duplicate:        ["confirmed", "new"],
-        };
-
-        const allowed = ALLOWED_TRANSITIONS[order.status] ?? [];
-        if (!allowed.includes(parsed.data.status)) {
-          return {
-            success: false,
-            error: `Cannot transition order "${order.orderNumber}" from "${order.status}" to "${parsed.data.status}". Allowed next statuses: [${allowed.join(", ") || "none — terminal status"}]`,
-          };
         }
 
         await queries.updateOrderStatus(db, storeId, parsed.data.orderId, parsed.data.status, "ai-agent", "AI Agent");

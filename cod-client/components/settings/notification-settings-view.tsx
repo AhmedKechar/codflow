@@ -27,7 +27,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
   unreachable: { label: "لا يرد", color: "bg-gray-100 text-gray-800" },
   busy: { label: "الخط مشغول", color: "bg-amber-100 text-amber-800" },
   postponed: { label: "مؤجل", color: "bg-purple-100 text-purple-800" },
-  shipped: { label: "تم الشحن", color: "bg-teal-100 text-teal-800" },
+  shipped: { label: "قيد التوصيل", color: "bg-teal-100 text-teal-800" },
   delivered: { label: "تم التسليم", color: "bg-green-100 text-green-800" },
   cancelled: { label: "ملغي", color: "bg-red-100 text-red-800" },
   fake: { label: "مزيف", color: "bg-red-100 text-red-800" },
