@@ -313,11 +313,10 @@ describe("checkStoreOrderStock — stock × offer", () => {
   });
 
   it("E5: offer tier (variantSelections) — qty satisfies offer, all variants in stock → passes", async () => {
-    // Offer tier: 2 units selected (var_a ×1, var_b ×1), both in stock
     const db = makeMockDb([
       productQ(true, 0),
-      variantQ(5),   // var_a: 5 in stock
-      variantQ(8),   // var_b: 8 in stock
+      variantQ(5),
+      variantQ(8),
     ]);
     const error = await checkStoreOrderStock(db, "test-store", {
       productId: "prod-001",
@@ -331,8 +330,8 @@ describe("checkStoreOrderStock — stock × offer", () => {
   it("E6: offer tier — one selection OOS, offer should not be allowed through stock gate", async () => {
     const db = makeMockDb([
       productQ(true, 0),
-      variantQ(5),   // var_a: ok
-      variantQ(0),   // var_b: OOS
+      variantQ(5),
+      variantQ(0),
     ]);
     const error = await checkStoreOrderStock(db, "test-store", {
       productId: "prod-001",
@@ -344,10 +343,9 @@ describe("checkStoreOrderStock — stock × offer", () => {
   });
 
   it("E7: offer tier — same variant repeated, cumulative qty exceeds stock → blocked", async () => {
-    // Customer picks var_a ×3 via offer tier, but only 2 in stock
     const db = makeMockDb([
       productQ(true, 0),
-      variantQ(2),   // var_a: only 2 in stock
+      variantQ(2),
     ]);
     const error = await checkStoreOrderStock(db, "test-store", {
       productId: "prod-001",

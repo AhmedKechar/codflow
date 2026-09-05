@@ -16,6 +16,7 @@ import {
   gte,
   or,
   asc,
+  inArray,
 } from "drizzle-orm";
 import {
   products,
@@ -121,8 +122,6 @@ export async function getStoreProducts(
       weightKg: products.weightKg,
       createdAt: products.createdAt,
       updatedAt: products.updatedAt,
-      avgRating: sql<number | null>`(SELECT ROUND(AVG(r.rating), 1) FROM reviews r WHERE r.product_id = products.id AND r.status = 'approved')`,
-      reviewCount: sql<number>`COALESCE((SELECT COUNT(*) FROM reviews r WHERE r.product_id = products.id AND r.status = 'approved'), 0)`,
     })
     .from(products)
     .where(and(...conditions))
@@ -130,43 +129,72 @@ export async function getStoreProducts(
     .limit(params.limit ?? 24)
     .all();
 
-  return Promise.all(
-    rows.map(async (p) => {
-      const { avgRating, reviewCount, ...productData } = p;
-      const [image, variantInventoryRow] = await Promise.all([
-        db
-          .select()
-          .from(productImages)
-          .where(eq(productImages.productId, p.id))
-          .orderBy(productImages.position)
-          .get(),
-        productData.hasVariants
-          ? db
-              .select({
-                total: sql<number>`COALESCE(SUM(${productVariants.inventory}), 0)`,
-              })
-              .from(productVariants)
-              .where(
-                and(
-                  eq(productVariants.productId, p.id),
-                  eq(productVariants.active, true),
-                ),
-              )
-              .get()
+  if (rows.length === 0) return [];
+
+  const productIds = rows.map((r) => r.id);
+  const hasVariantIds = rows.filter((r) => r.hasVariants).map((r) => r.id);
+
+  const [reviewStats, coverImages, variantInventories] = await Promise.all([
+    db
+      .select({
+        productId: reviews.productId,
+        avgRating: sql<number | null>`ROUND(AVG(${reviews.rating}), 1)`,
+        reviewCount: sql<number>`COUNT(*)`,
+      })
+      .from(reviews)
+      .where(and(inArray(reviews.productId, productIds), eq(reviews.status, "approved")))
+      .groupBy(reviews.productId)
+      .all(),
+    db
+      .select({
+        productId: productImages.productId,
+        id: productImages.id,
+        src: productImages.src,
+        srcSm: productImages.srcSm,
+        srcMd: productImages.srcMd,
+        srcLg: productImages.srcLg,
+        altText: productImages.altText,
+        position: productImages.position,
+      })
+      .from(productImages)
+      .where(inArray(productImages.productId, productIds))
+      .orderBy(productImages.position)
+      .all(),
+    hasVariantIds.length > 0
+      ? db
+          .select({
+            productId: productVariants.productId,
+            total: sql<number>`COALESCE(SUM(${productVariants.inventory}), 0)`,
+          })
+          .from(productVariants)
+          .where(and(inArray(productVariants.productId, hasVariantIds), eq(productVariants.active, true)))
+          .groupBy(productVariants.productId)
+          .all()
+      : Promise.resolve([]),
+  ]);
+
+  const reviewMap = new Map(reviewStats.map((r) => [r.productId, r]));
+  const imageMap = new Map<string, typeof coverImages[number]>();
+  for (const img of coverImages) {
+    if (!imageMap.has(img.productId)) imageMap.set(img.productId, img);
+  }
+  const variantInvMap = new Map(variantInventories.map((v) => [v.productId, v.total]));
+
+  return rows.map((p) => {
+    const review = reviewMap.get(p.id);
+    const inventory = p.hasVariants
+      ? (variantInvMap.get(p.id) ?? 0)
+      : p.inventory;
+    return {
+      ...p,
+      inventory,
+      coverImage: imageMap.get(p.id) ?? null,
+      reviewStats:
+        review && review.reviewCount > 0
+          ? { avgRating: review.avgRating ?? 0, reviewCount: review.reviewCount }
           : null,
-      ]);
-      const inventory = productData.hasVariants
-        ? variantInventoryRow?.total ?? 0
-        : productData.inventory;
-      return {
-        ...productData,
-        inventory,
-        coverImage: image ?? null,
-        reviewStats:
-          reviewCount > 0 ? { avgRating: avgRating ?? 0, reviewCount } : null,
-      };
-    }),
-  );
+    };
+  });
 }
 
 export async function getStoreProductByHandle(db: AppDb, storeId: string, handle: string) {
@@ -235,44 +263,44 @@ export async function getStoreProductByHandle(db: AppDb, storeId: string, handle
     .orderBy(offers.createdAt)
     .all();
 
-  const resolvedOffers = await Promise.all(
-    offerRows.map(async (offer) => {
-      const rewardProduct = offer.rewardProductId
-        ? await db
-            .select({ id: products.id, name: products.name })
-            .from(products)
-            .where(eq(products.id, offer.rewardProductId))
-            .get()
-        : null;
+  const rewardProductIds = offerRows.filter((o) => o.rewardProductId).map((o) => o.rewardProductId as string);
+  const rewardVariantIds = offerRows.filter((o) => o.rewardVariantId).map((o) => o.rewardVariantId as string);
 
-      const rewardVariant = offer.rewardVariantId
-        ? await db
-            .select({ id: productVariants.id, variations: productVariants.variations })
-            .from(productVariants)
-            .where(eq(productVariants.id, offer.rewardVariantId))
-            .get()
-        : null;
+  const [rewardProducts, rewardVariants] = await Promise.all([
+    rewardProductIds.length > 0
+      ? db.select({ id: products.id, name: products.name }).from(products).where(inArray(products.id, [...new Set(rewardProductIds)])).all()
+      : Promise.resolve([]),
+    rewardVariantIds.length > 0
+      ? db.select({ id: productVariants.id, variations: productVariants.variations }).from(productVariants).where(inArray(productVariants.id, [...new Set(rewardVariantIds)])).all()
+      : Promise.resolve([]),
+  ]);
 
-      return {
-        id: offer.id,
-        name: offer.name,
-        discountType: offer.discountType as "free" | "free_shipping",
-        triggerQuantity: offer.triggerQuantity,
-        triggerVariantId: offer.triggerVariantId ?? null,
-        rewardQuantity: offer.rewardQuantity,
-        rewardProductId: offer.rewardProductId ?? null,
-        rewardProductName: rewardProduct?.name ?? "",
-        rewardVariantId: offer.rewardVariantId ?? null,
-        rewardVariantLabel: rewardVariant
-          ? Object.values(
-              JSON.parse(rewardVariant.variations) as Record<string, string>,
-            ).join(" / ")
-          : null,
-        startsAt: offer.startsAt ?? null,
-        endsAt: offer.endsAt ?? null,
-      };
-    }),
-  );
+  const rewardProductMap = new Map(rewardProducts.map((p) => [p.id, p]));
+  const rewardVariantMap = new Map(rewardVariants.map((v) => [v.id, v]));
+
+  const resolvedOffers = offerRows.map((offer) => {
+    const rewardProduct = offer.rewardProductId ? rewardProductMap.get(offer.rewardProductId) ?? null : null;
+    const rewardVariant = offer.rewardVariantId ? rewardVariantMap.get(offer.rewardVariantId) ?? null : null;
+
+    return {
+      id: offer.id,
+      name: offer.name,
+      discountType: offer.discountType as "free" | "free_shipping",
+      triggerQuantity: offer.triggerQuantity,
+      triggerVariantId: offer.triggerVariantId ?? null,
+      rewardQuantity: offer.rewardQuantity,
+      rewardProductId: offer.rewardProductId ?? null,
+      rewardProductName: rewardProduct?.name ?? "",
+      rewardVariantId: offer.rewardVariantId ?? null,
+      rewardVariantLabel: rewardVariant
+        ? Object.values(
+            JSON.parse(rewardVariant.variations) as Record<string, string>,
+          ).join(" / ")
+        : null,
+      startsAt: offer.startsAt ?? null,
+      endsAt: offer.endsAt ?? null,
+    };
+  });
 
   const totalInventory = product.hasVariants
     ? variants.reduce((sum, v) => sum + v.inventory, 0)
@@ -688,12 +716,15 @@ export async function createStoreOrder(
 
   if (data.variantSelections && data.variantSelections.length > 0) {
     const groups = groupVariantSelections(data.variantSelections);
+    const groupVariantIds = groups.map((g) => g.variantId);
+    const skuRows = await db
+      .select({ id: productVariants.id, sku: productVariants.sku })
+      .from(productVariants)
+      .where(inArray(productVariants.id, groupVariantIds))
+      .all();
+    const skuMap = new Map(skuRows.map((r) => [r.id, r.sku]));
+
     for (const group of groups) {
-      const varSkuRow = await db
-        .select({ sku: productVariants.sku })
-        .from(productVariants)
-        .where(eq(productVariants.id, group.variantId))
-        .get();
       const groupLineTotal = group.count * data.pricePerUnit;
       await db.insert(orderProducts).values({
         id: crypto.randomUUID(),
@@ -703,7 +734,7 @@ export async function createStoreOrder(
         productName: data.productName,
         variantId: group.variantId,
         variantLabel: group.variantLabel,
-        sku: varSkuRow?.sku ?? null,
+        sku: skuMap.get(group.variantId) ?? null,
         quantity: group.count,
         pricePerUnit: data.pricePerUnit,
         lineTotal: groupLineTotal,
@@ -1046,13 +1077,14 @@ export async function validateOrderSkus(
 ): Promise<{ missing: "variant" | "product"; id: string } | null> {
   if (variantSelections && variantSelections.length > 0) {
     const uniqueVariantIds = [...new Set(variantSelections.map((v) => v.variantId))];
+    const skuRows = await db
+      .select({ id: productVariants.id, sku: productVariants.sku })
+      .from(productVariants)
+      .where(and(inArray(productVariants.id, uniqueVariantIds), eq(productVariants.storeId, storeId)))
+      .all();
+    const skuMap = new Map(skuRows.map((r) => [r.id, r.sku]));
     for (const vid of uniqueVariantIds) {
-      const row = await db
-        .select({ sku: productVariants.sku })
-        .from(productVariants)
-        .where(and(eq(productVariants.id, vid), eq(productVariants.storeId, storeId)))
-        .get();
-      if (!row?.sku) return { missing: "variant", id: vid };
+      if (!skuMap.get(vid)) return { missing: "variant", id: vid };
     }
     return null;
   }

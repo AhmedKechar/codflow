@@ -194,8 +194,8 @@ describe("checkStoreOrderStock — variantSelections (offer tiers)", () => {
   it("allows when all selected variants have sufficient stock", async () => {
     const db = makeMockDb([
       productQ(true, 0),
-      variantQ(10),    // var_a: 10 in stock, 1 unit
-      variantQ(5),     // var_b: 5 in stock, 1 unit
+      variantQ(10),
+      variantQ(5),
     ]);
     const result = await checkStoreOrderStock(db, "test-store", {
       productId: "prod_1",
@@ -209,8 +209,8 @@ describe("checkStoreOrderStock — variantSelections (offer tiers)", () => {
   it("blocks when one variant in selections has 0 stock", async () => {
     const db = makeMockDb([
       productQ(true, 0),
-      variantQ(5),     // var_a: ok
-      variantQ(0),     // var_b: OOS
+      variantQ(5),
+      variantQ(0),
     ]);
     const result = await checkStoreOrderStock(db, "test-store", {
       productId: "prod_1",
@@ -222,10 +222,9 @@ describe("checkStoreOrderStock — variantSelections (offer tiers)", () => {
   });
 
   it("blocks when same variant selected ×3 but stock = 2", async () => {
-    // groupVariantSelections collapses duplicates and checks cumulative count
     const db = makeMockDb([
       productQ(true, 0),
-      variantQ(2),     // var_a: only 2 in stock, but 3 units selected
+      variantQ(2),
     ]);
     const result = await checkStoreOrderStock(db, "test-store", {
       productId: "prod_1",
