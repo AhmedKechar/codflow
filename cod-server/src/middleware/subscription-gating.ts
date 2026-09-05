@@ -86,6 +86,11 @@ export async function subscriptionGating(c: Context<AppContext>, next: Next) {
     }, 403);
   } catch (err) {
     console.error("[subscription-gating] Error:", err);
-    return next();
+    // Fail-closed: reject request on error to prevent subscription bypass
+    return c.json({
+      error: "Subscription check failed",
+      code: "SUBSCRIPTION_CHECK_FAILED",
+      detail: { upgradeUrl: "/billing" },
+    }, 500);
   }
 }

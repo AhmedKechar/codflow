@@ -14,19 +14,22 @@ export async function corsMiddleware(c: Context<AppContext>, next: Next) {
   const requestOrigin = c.req.header("origin");
   
   // Determine allowed origins based on environment
-  let allowedOrigin = "*";
+  let allowedOrigin: string | null = null;
   
-  if (env.ENVIRONMENT === "production" && env.ALLOWED_ORIGINS) {
-    // In production, validate against whitelist
+  // No origin header (server-to-server, curl, etc.) — allow through
+  if (!requestOrigin) {
+    allowedOrigin = "*";
+  } else if (env.ENVIRONMENT === "production" && env.ALLOWED_ORIGINS) {
+    // In production, validate against whitelist — reject unknown origins
     const allowedOrigins = env.ALLOWED_ORIGINS.split(",").map(o => o.trim());
     
-    if (requestOrigin && allowedOrigins.includes(requestOrigin)) {
+    if (allowedOrigins.includes(requestOrigin)) {
       allowedOrigin = requestOrigin;
     } else {
-      // Default to first allowed origin if request origin doesn't match
-      allowedOrigin = allowedOrigins[0] || "*";
+      // Reject: origin not in whitelist
+      return c.json({ error: "Origin not allowed" }, 403);
     }
-  } else if (requestOrigin) {
+  } else {
     // In development, echo back the request origin (allows localhost on any port)
     allowedOrigin = requestOrigin;
   }

@@ -38,6 +38,72 @@ import {
 
 const driversAlias = aliasedTable(drivers, "d");
 
+// ─── Batch Helpers (N+1 Prevention) ──────────────────────────────────────────
+
+/**
+ * Batch-fetch trackInventory flags for a set of product IDs.
+ * Returns a Map<productId, boolean>.
+ */
+type DbLike = {
+  select(fields?: any): any;
+};
+
+async function batchFetchTrackInventory(
+  db: DbLike,
+  productIds: string[],
+): Promise<Map<string, boolean>> {
+  const map = new Map<string, boolean>();
+  if (productIds.length === 0) return map;
+  const uniqueIds = [...new Set(productIds)];
+  const rows = await db
+    .select({ id: products.id, trackInventory: products.trackInventory })
+    .from(products)
+    .where(inArray(products.id, uniqueIds))
+    .all();
+  for (const row of rows) map.set(row.id, !!row.trackInventory);
+  return map;
+}
+
+/**
+ * Batch-fetch inventory levels for a set of variant/product IDs.
+ * Returns a Map<id, inventory>.
+ */
+async function batchFetchVariantInventory(
+  db: DbLike,
+  variantIds: string[],
+): Promise<Map<string, number>> {
+  const map = new Map<string, number>();
+  if (variantIds.length === 0) return map;
+  const uniqueIds = [...new Set(variantIds)];
+  const rows = await db
+    .select({ id: productVariants.id, inventory: productVariants.inventory })
+    .from(productVariants)
+    .where(inArray(productVariants.id, uniqueIds))
+    .all();
+  for (const row of rows) map.set(row.id, row.inventory);
+  return map;
+}
+
+/**
+ * Batch-fetch product inventory levels for a set of product IDs.
+ * Returns a Map<productId, inventory>.
+ */
+async function batchFetchProductInventory(
+  db: DbLike,
+  productIds: string[],
+): Promise<Map<string, number>> {
+  const map = new Map<string, number>();
+  if (productIds.length === 0) return map;
+  const uniqueIds = [...new Set(productIds)];
+  const rows = await db
+    .select({ id: products.id, inventory: products.inventory })
+    .from(products)
+    .where(inArray(products.id, uniqueIds))
+    .all();
+  for (const row of rows) map.set(row.id, row.inventory);
+  return map;
+}
+
 export interface OrderFilters {
   status?: (typeof orders.$inferSelect)["status"] | "all";
   statuses?: (typeof orders.$inferSelect)["status"][];
@@ -49,11 +115,43 @@ export interface OrderFilters {
   offset?: number;
 }
 
+export type OrderListItem = {
+  id: string;
+  storeId: string;
+  orderNumber: string;
+  customerId: string;
+  customerName: string;
+  phone: string;
+  wilayaId: number | null;
+  communeId: string | null;
+  price: number;
+  status: (typeof orders.$inferSelect)["status"];
+  orderType: string | null;
+  deliveryMethod: string | null;
+  driverId: string | null;
+  companyId: string | null;
+  deliveryType: string | null;
+  deliveryFee: number | null;
+  driverFee: number | null;
+  codAmount: number | null;
+  trackingNumber: string | null;
+  deliveryMethodName: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+  wilaya: string | null;
+  commune: string | null;
+  driverName: string | null;
+  hasReview: number;
+  lastUpdatedBy: string | null;
+  firstProductName: string | null;
+  firstProductImage: string | null;
+};
+
 /**
  * Get all orders with optional filtering.
  * Joins wilayas + communes to return Arabic display names.
  */
-export async function getAllOrders(db: AppDb, storeId: string, filters: OrderFilters = {}) {
+export async function getAllOrders(db: AppDb, storeId: string, filters: OrderFilters = {}): Promise<OrderListItem[]> {
   const conditions = [eq(orders.storeId, storeId)];
 
   if (filters.status && filters.status !== "all") {
@@ -93,7 +191,7 @@ export async function getAllOrders(db: AppDb, storeId: string, filters: OrderFil
     conditions.push(lte(orders.createdAt, end.toISOString()));
   }
 
-  return db
+  const rows = await db
     .select({
       id: orders.id,
       storeId: orders.storeId,
@@ -122,16 +220,6 @@ export async function getAllOrders(db: AppDb, storeId: string, filters: OrderFil
       driverName: sql<
         string | null
       >`CASE WHEN ${driversAlias.firstName} IS NOT NULL THEN ${driversAlias.firstName} || ' ' || ${driversAlias.lastName} ELSE NULL END`,
-      hasReview: sql<number>`(SELECT count(*) FROM reviews WHERE reviews.order_id = orders.id)`,
-      lastUpdatedBy: sql<
-        string | null
-      >`(SELECT by FROM order_status_history WHERE order_id = orders.id ORDER BY timestamp DESC LIMIT 1)`,
-      firstProductName: sql<
-        string | null
-      >`(SELECT op.product_name FROM order_products op WHERE op.order_id = orders.id ORDER BY op.created_at LIMIT 1)`,
-      firstProductImage: sql<
-        string | null
-      >`(SELECT pi.src FROM order_products op JOIN product_images pi ON pi.product_id = op.product_id WHERE op.order_id = orders.id ORDER BY op.created_at, pi.position LIMIT 1)`,
     })
     .from(orders)
     .leftJoin(wilayas, eq(orders.wilayaId, wilayas.id))
@@ -142,6 +230,69 @@ export async function getAllOrders(db: AppDb, storeId: string, filters: OrderFil
     .limit(filters.limit ?? 50)
     .offset(filters.offset ?? 0)
     .all();
+
+  if (rows.length === 0) return rows as OrderListItem[];
+
+  const orderIds = rows.map((r) => r.id);
+
+  const [reviewCounts, lastStatuses, firstProducts, firstImages] =
+    await Promise.all([
+      db
+        .select({
+          orderId: sql<string>`order_id`,
+          cnt: sql<number>`count(*)`,
+        })
+        .from(sql`reviews`)
+        .where(sql`order_id IN (${sql.join(orderIds.map((id) => sql`${id}`), sql`,`)})`)
+        .groupBy(sql`order_id`)
+        .all(),
+      db
+        .select({
+          orderId: orderStatusHistory.orderId,
+          by: orderStatusHistory.by,
+        })
+        .from(orderStatusHistory)
+        .where(inArray(orderStatusHistory.orderId, orderIds))
+        .orderBy(desc(orderStatusHistory.timestamp))
+        .all(),
+      db
+        .select({
+          orderId: orderProducts.orderId,
+          productName: orderProducts.productName,
+        })
+        .from(orderProducts)
+        .where(inArray(orderProducts.orderId, orderIds))
+        .orderBy(orderProducts.createdAt)
+        .all(),
+      db
+        .select({
+          orderId: sql<string>`op.order_id`,
+          src: sql<string | null>`pi.src`,
+        })
+        .from(sql`order_products op`)
+        .innerJoin(sql`product_images pi`, sql`pi.product_id = op.product_id`)
+        .where(sql`op.order_id IN (${sql.join(orderIds.map((id) => sql`${id}`), sql`,`)})`)
+        .orderBy(sql`op.created_at, pi.position`)
+        .all(),
+    ]);
+
+  const reviewCountMap = new Map(reviewCounts.map((r) => [r.orderId, r.cnt]));
+  const lastStatusMap = new Map(
+    lastStatuses.map((s) => [s.orderId, s.by]),
+  );
+  const firstProductMap = new Map(
+    firstProducts.map((p) => [p.orderId, p.productName]),
+  );
+  const firstImageMap = new Map(firstImages.map((i) => [i.orderId, i.src]));
+
+  for (const row of rows) {
+    (row as OrderListItem).hasReview = reviewCountMap.get(row.id) ?? 0;
+    (row as OrderListItem).lastUpdatedBy = lastStatusMap.get(row.id) ?? null;
+    (row as OrderListItem).firstProductName = firstProductMap.get(row.id) ?? null;
+    (row as OrderListItem).firstProductImage = firstImageMap.get(row.id) ?? null;
+  }
+
+  return rows as OrderListItem[];
 }
 
 /**
@@ -280,9 +431,47 @@ export async function getOrdersPaginated(
 }
 
 export async function getOrderById(db: AppDb, storeId: string, orderId: string) {
-  const order = await db.select().from(orders).where(and(eq(orders.id, orderId), eq(orders.storeId, storeId))).get();
+  const orderRow = await db
+    .select({
+      id: orders.id,
+      storeId: orders.storeId,
+      orderNumber: orders.orderNumber,
+      customerId: orders.customerId,
+      customerName: orders.customerName,
+      phone: orders.phone,
+      wilayaId: orders.wilayaId,
+      communeId: orders.communeId,
+      address: orders.address,
+      price: orders.price,
+      status: orders.status,
+      orderType: orders.orderType,
+      deliveryMethod: orders.deliveryMethod,
+      driverId: orders.driverId,
+      companyId: orders.companyId,
+      deliveryType: orders.deliveryType,
+      deliveryFee: orders.deliveryFee,
+      driverFee: orders.driverFee,
+      codAmount: orders.codAmount,
+      trackingNumber: orders.trackingNumber,
+      deliveryMethodName: orders.deliveryMethodName,
+      notes: orders.notes,
+      weight: orders.weight,
+      isFragile: orders.isFragile,
+      stationCode: orders.stationCode,
+      createdAt: orders.createdAt,
+      updatedAt: orders.updatedAt,
+      wilaya: wilayas.nameAr,
+      commune: communes.nameAr,
+      driverName: sql<string | null>`CASE WHEN ${drivers.firstName} IS NOT NULL THEN ${drivers.firstName} || ' ' || ${drivers.lastName} ELSE NULL END`,
+    })
+    .from(orders)
+    .leftJoin(wilayas, eq(orders.wilayaId, wilayas.id))
+    .leftJoin(communes, eq(orders.communeId, communes.id))
+    .leftJoin(drivers, eq(orders.driverId, drivers.id))
+    .where(and(eq(orders.id, orderId), eq(orders.storeId, storeId)))
+    .get();
 
-  if (!order) return null;
+  if (!orderRow) return null;
 
   const [orderProductsList, historyRows, shipmentRow] = await Promise.all([
     db.select().from(orderProducts).where(eq(orderProducts.orderId, orderId)).all(),
@@ -307,38 +496,8 @@ export async function getOrderById(db: AppDb, storeId: string, orderId: string) 
       .get(),
   ]);
 
-  let driverName: string | null = null;
-  if (order.driverId) {
-    const driver = await db
-      .select({ firstName: drivers.firstName, lastName: drivers.lastName })
-      .from(drivers)
-      .where(eq(drivers.id, order.driverId))
-      .get();
-    if (driver) driverName = `${driver.firstName} ${driver.lastName}`.trim();
-  }
-
-  const [wilayaRow, communeRow] = await Promise.all([
-    order.wilayaId
-      ? db
-          .select({ nameAr: wilayas.nameAr })
-          .from(wilayas)
-          .where(eq(wilayas.id, order.wilayaId))
-          .get()
-      : undefined,
-    order.communeId
-      ? db
-          .select({ nameAr: communes.nameAr })
-          .from(communes)
-          .where(eq(communes.id, order.communeId))
-          .get()
-      : undefined,
-  ]);
-
   return {
-    ...order,
-    wilaya: wilayaRow?.nameAr ?? null,
-    commune: communeRow?.nameAr ?? null,
-    driverName,
+    ...orderRow,
     labelUrl: shipmentRow?.labelUrl ?? null,
     products: orderProductsList,
     statusHistory: historyRows.map((h) => ({
@@ -359,116 +518,124 @@ export async function createOrder(
   productsData: Array<typeof orderProducts.$inferInsert>,
   actor?: { id: string; name: string } | null,
 ) {
-  await db.insert(orders).values({ ...orderData, storeId });
+  return db.transaction(async (tx) => {
+    await tx.insert(orders).values({ ...orderData, storeId });
 
-  if (productsData.length > 0) {
-    await db.insert(orderProducts).values(productsData);
-  }
-
-  await db.insert(orderStatusHistory).values({
-    id: crypto.randomUUID(),
-    storeId,
-    orderId: orderData.id!,
-    status: orderData.status!,
-    timestamp: orderData.createdAt!,
-    by: null,
-  });
-
-  await db
-    .update(customers)
-    .set({
-      totalOrders: sql`${customers.totalOrders} + 1`,
-      totalSpent: sql`${customers.totalSpent} + ${orderData.price ?? 0}`,
-      lastOrderAt: orderData.createdAt,
-    })
-    .where(eq(customers.id, orderData.customerId));
-
-  const now = orderData.createdAt ?? new Date().toISOString();
-  for (const item of productsData) {
-    const qty = item.quantity as number;
-
-    const productRow = await db
-      .select({ trackInventory: products.trackInventory })
-      .from(products)
-      .where(eq(products.id, item.productId))
-      .get();
-
-    if (!productRow?.trackInventory) continue;
-
-    if (item.variantId) {
-      const variantRow = await db
-        .select({ inventory: productVariants.inventory })
-        .from(productVariants)
-        .where(eq(productVariants.id, item.variantId))
-        .get();
-
-      const qtyBefore = variantRow?.inventory ?? 0;
-      const qtyAfter = Math.max(0, qtyBefore - qty);
-
-      await db
-        .update(productVariants)
-        .set({ inventory: qtyAfter, updatedAt: now })
-        .where(eq(productVariants.id, item.variantId));
-
-      await db
-        .insert(stockMovements)
-        .values({
-          id: crypto.randomUUID(),
-          storeId,
-          productId: item.productId,
-          variantId: item.variantId,
-          type: "ORDER_DEDUCTED",
-          delta: -(qtyBefore - qtyAfter),
-          qtyBefore,
-          qtyAfter,
-          reason: null,
-          reference: orderData.id ?? null,
-          createdBy: actor?.id ?? "system",
-          createdByName: actor?.name ?? "النظام",
-          createdAt: now,
-        })
-        .catch((err) =>
-          console.error("[stock] Failed to log ORDER_DEDUCTED movement:", err),
-        );
-    } else {
-      const productInventoryRow = await db
-        .select({ inventory: products.inventory })
-        .from(products)
-        .where(eq(products.id, item.productId))
-        .get();
-
-      const qtyBefore = productInventoryRow?.inventory ?? 0;
-      const qtyAfter = Math.max(0, qtyBefore - qty);
-
-      await db
-        .update(products)
-        .set({ inventory: qtyAfter, updatedAt: now })
-        .where(eq(products.id, item.productId));
-
-      await db
-        .insert(stockMovements)
-        .values({
-          id: crypto.randomUUID(),
-          storeId,
-          productId: item.productId,
-          variantId: null,
-          type: "ORDER_DEDUCTED",
-          delta: -(qtyBefore - qtyAfter),
-          qtyBefore,
-          qtyAfter,
-          reason: null,
-          reference: orderData.id ?? null,
-          createdBy: actor?.id ?? "system",
-          createdByName: actor?.name ?? "النظام",
-          createdAt: now,
-        })
-        .catch((err) =>
-          console.error("[stock] Failed to log ORDER_DEDUCTED movement:", err),
-        );
+    if (productsData.length > 0) {
+      await tx.insert(orderProducts).values(productsData);
     }
-  }
 
-  return orderData.id;
+    await tx.insert(orderStatusHistory).values({
+      id: crypto.randomUUID(),
+      storeId,
+      orderId: orderData.id!,
+      status: orderData.status!,
+      timestamp: orderData.createdAt!,
+      by: null,
+    });
+
+    await tx
+      .update(customers)
+      .set({
+        totalOrders: sql`${customers.totalOrders} + 1`,
+        totalSpent: sql`${customers.totalSpent} + ${orderData.price ?? 0}`,
+        lastOrderAt: orderData.createdAt,
+      })
+      .where(eq(customers.id, orderData.customerId));
+
+    const now = orderData.createdAt ?? new Date().toISOString();
+
+    const productIds = productsData.map((p) => p.productId as string);
+    const trackMap = await batchFetchTrackInventory(tx, productIds);
+
+    for (const item of productsData) {
+      const qty = item.quantity as number;
+
+      if (!trackMap.get(item.productId as string)) continue;
+
+      if (item.variantId) {
+        const updated = await tx
+          .update(productVariants)
+          .set({
+            inventory: sql`MAX(0, ${productVariants.inventory} - ${qty})`,
+            updatedAt: now,
+          })
+          .where(
+            and(
+              eq(productVariants.id, item.variantId),
+              gte(productVariants.inventory, qty),
+            ),
+          )
+          .returning({ inventory: productVariants.inventory });
+
+        if (!updated.length) {
+          throw new Error(`Insufficient inventory for variant ${item.variantId}`);
+        }
+
+        const qtyAfter = updated[0].inventory;
+        const qtyBefore = qtyAfter + qty;
+
+        await tx
+          .insert(stockMovements)
+          .values({
+            id: crypto.randomUUID(),
+            storeId,
+            productId: item.productId,
+            variantId: item.variantId,
+            type: "ORDER_DEDUCTED",
+            delta: -qty,
+            qtyBefore,
+            qtyAfter,
+            reason: null,
+            reference: orderData.id ?? null,
+            createdBy: actor?.id ?? "system",
+            createdByName: actor?.name ?? "النظام",
+            createdAt: now,
+          });
+      } else {
+        const updated = await tx
+          .update(products)
+          .set({
+            inventory: sql`MAX(0, ${products.inventory} - ${qty})`,
+            updatedAt: now,
+          })
+          .where(
+            and(
+              eq(products.id, item.productId),
+              gte(products.inventory, qty),
+            ),
+          )
+          .returning({ inventory: products.inventory });
+
+        if (!updated.length) {
+          throw new Error(`Insufficient inventory for product ${item.productId}`);
+        }
+
+        const qtyAfter = updated[0].inventory;
+        const qtyBefore = qtyAfter + qty;
+
+        await tx
+          .insert(stockMovements)
+          .values({
+            id: crypto.randomUUID(),
+            storeId,
+            productId: item.productId,
+            variantId: null,
+            type: "ORDER_DEDUCTED",
+            delta: -qty,
+            qtyBefore,
+            qtyAfter,
+            reason: null,
+            reference: orderData.id ?? null,
+            createdBy: actor?.id ?? "system",
+            createdByName: actor?.name ?? "النظام",
+            createdAt: now,
+          });
+      }
+    }
+
+    return orderData.id;
+  });
 }
 
 export async function updateOrder(
@@ -529,25 +696,21 @@ export async function updateOrder(
       .where(eq(orderProducts.orderId, orderId))
       .all();
 
+    const oldProductIds = oldProducts.map((p) => p.productId as string);
+    const oldVariantIds = oldProducts.filter((p) => p.variantId).map((p) => p.variantId as string);
+    const [oldTrackMap, oldVariantInvMap, oldProductInvMap] = await Promise.all([
+      batchFetchTrackInventory(db, oldProductIds),
+      batchFetchVariantInventory(db, oldVariantIds),
+      batchFetchProductInventory(db, oldProductIds),
+    ]);
+
     for (const op of oldProducts) {
       if (!op.productId) continue;
 
-      const productRow = await db
-        .select({ trackInventory: products.trackInventory })
-        .from(products)
-        .where(eq(products.id, op.productId))
-        .get();
-
-      if (!productRow?.trackInventory) continue;
+      if (!oldTrackMap.get(op.productId)) continue;
 
       if (op.variantId) {
-        const variantRow = await db
-          .select({ inventory: productVariants.inventory })
-          .from(productVariants)
-          .where(eq(productVariants.id, op.variantId))
-          .get();
-
-        const qtyBefore = variantRow?.inventory ?? 0;
+        const qtyBefore = oldVariantInvMap.get(op.variantId) ?? 0;
         const qtyAfter = qtyBefore + op.quantity;
 
         await db
@@ -555,13 +718,7 @@ export async function updateOrder(
           .set({ inventory: qtyAfter, updatedAt: now })
           .where(eq(productVariants.id, op.variantId));
       } else {
-        const productInventoryRow = await db
-          .select({ inventory: products.inventory })
-          .from(products)
-          .where(eq(products.id, op.productId))
-          .get();
-
-        const qtyBefore = productInventoryRow?.inventory ?? 0;
+        const qtyBefore = oldProductInvMap.get(op.productId) ?? 0;
         const qtyAfter = qtyBefore + op.quantity;
 
         await db
@@ -577,13 +734,15 @@ export async function updateOrder(
       .where(eq(orderProducts.orderId, orderId));
 
     // Insert new order products
-    for (const item of data.products) {
-      const product = await db
-        .select({ trackInventory: products.trackInventory })
-        .from(products)
-        .where(eq(products.id, item.productId))
-        .get();
+    const newProductIds = data.products.map((p) => p.productId);
+    const newVariantIds = data.products.filter((p) => p.variantId).map((p) => p.variantId as string);
+    const [newTrackMap, newVariantInvMap, newProductInvMap] = await Promise.all([
+      batchFetchTrackInventory(db, newProductIds),
+      batchFetchVariantInventory(db, newVariantIds),
+      batchFetchProductInventory(db, newProductIds),
+    ]);
 
+    for (const item of data.products) {
       const lineTotal = item.pricePerUnit * item.quantity;
 
       await db.insert(orderProducts).values({
@@ -600,16 +759,9 @@ export async function updateOrder(
         createdAt: now,
       });
 
-      // Deduct new inventory
-      if (product?.trackInventory) {
+      if (newTrackMap.get(item.productId)) {
         if (item.variantId) {
-          const variantRow = await db
-            .select({ inventory: productVariants.inventory })
-            .from(productVariants)
-            .where(eq(productVariants.id, item.variantId))
-            .get();
-
-          const qtyBefore = variantRow?.inventory ?? 0;
+          const qtyBefore = newVariantInvMap.get(item.variantId) ?? 0;
           const qtyAfter = Math.max(0, qtyBefore - item.quantity);
 
           await db
@@ -617,13 +769,7 @@ export async function updateOrder(
             .set({ inventory: qtyAfter, updatedAt: now })
             .where(eq(productVariants.id, item.variantId));
         } else {
-          const productInventoryRow = await db
-            .select({ inventory: products.inventory })
-            .from(products)
-            .where(eq(products.id, item.productId))
-            .get();
-
-          const qtyBefore = productInventoryRow?.inventory ?? 0;
+          const qtyBefore = newProductInvMap.get(item.productId) ?? 0;
           const qtyAfter = Math.max(0, qtyBefore - item.quantity);
 
           await db
@@ -761,26 +907,22 @@ export async function updateOrderStatus(
       .where(eq(orderProducts.orderId, orderId))
       .all();
 
+    const cancellableProductIds = ordProductRows.map((r) => r.productId);
+    const cancellableVariantIds = ordProductRows.filter((r) => r.variantId).map((r) => r.variantId as string);
+    const [cancelTrackMap, cancelVariantInvMap, cancelProductInvMap] = await Promise.all([
+      batchFetchTrackInventory(db, cancellableProductIds),
+      batchFetchVariantInventory(db, cancellableVariantIds),
+      batchFetchProductInventory(db, cancellableProductIds),
+    ]);
+
     for (const op of ordProductRows) {
       const remaining = op.quantity - (op.returnedQuantity ?? 0);
       if (remaining <= 0) continue;
 
-      const productRow = await db
-        .select({ trackInventory: products.trackInventory })
-        .from(products)
-        .where(eq(products.id, op.productId))
-        .get();
-
-      if (!productRow?.trackInventory) continue;
+      if (!cancelTrackMap.get(op.productId)) continue;
 
       if (op.variantId) {
-        const variantRow = await db
-          .select({ inventory: productVariants.inventory })
-          .from(productVariants)
-          .where(eq(productVariants.id, op.variantId))
-          .get();
-
-        const qtyBefore = variantRow?.inventory ?? 0;
+        const qtyBefore = cancelVariantInvMap.get(op.variantId) ?? 0;
         const qtyAfter = qtyBefore + remaining;
 
         await db
@@ -809,13 +951,7 @@ export async function updateOrderStatus(
           console.error("[stock] Failed to log", movementType, "movement:", err),
         );
       } else {
-        const productInventoryRow = await db
-          .select({ inventory: products.inventory })
-          .from(products)
-          .where(eq(products.id, op.productId))
-          .get();
-
-        const qtyBefore = productInventoryRow?.inventory ?? 0;
+        const qtyBefore = cancelProductInvMap.get(op.productId) ?? 0;
         const qtyAfter = qtyBefore + remaining;
 
         await db
@@ -824,25 +960,25 @@ export async function updateOrderStatus(
           .where(eq(products.id, op.productId));
 
         await db
-          .insert(stockMovements)
-          .values({
-            id: crypto.randomUUID(),
-            storeId,
-            productId: op.productId,
-            variantId: null,
-            type: movementType,
-            delta: remaining,
-            qtyBefore,
-            qtyAfter,
-            reason: null,
-            reference: orderId,
-            createdBy: userId ?? "system",
-            createdByName: userName ?? "النظام",
-            createdAt: now,
-          })
-          .catch((err) =>
-            console.error("[stock] Failed to log", movementType, "movement:", err),
-          );
+        .insert(stockMovements)
+        .values({
+          id: crypto.randomUUID(),
+          storeId,
+          productId: op.productId,
+          variantId: null,
+          type: movementType,
+          delta: remaining,
+          qtyBefore,
+          qtyAfter,
+          reason: null,
+          reference: orderId,
+          createdBy: userId ?? "system",
+          createdByName: userName ?? "النظام",
+          createdAt: now,
+        })
+        .catch((err) =>
+          console.error("[stock] Failed to log", movementType, "movement:", err),
+        );
       }
 
       await db
@@ -1148,27 +1284,22 @@ export async function deleteOrder(db: AppDb, storeId: string, orderId: string) {
   }
 
   // Restore inventory for products that track inventory
+  const delProductIds = orderProductsList.map((op) => op.productId);
+  const delVariantIds = orderProductsList.filter((op) => op.variantId).map((op) => op.variantId as string);
+  const [delTrackMap, delVariantInvMap, delProductInvMap] = await Promise.all([
+    batchFetchTrackInventory(db, delProductIds),
+    batchFetchVariantInventory(db, delVariantIds),
+    batchFetchProductInventory(db, delProductIds),
+  ]);
+
   for (const op of orderProductsList) {
     const remaining = op.quantity - (op.returnedQuantity ?? 0);
-    if (remaining <= 0) continue; // Already returned, no stock to restore
+    if (remaining <= 0) continue;
 
-    const productRow = await db
-      .select({ trackInventory: products.trackInventory })
-      .from(products)
-      .where(eq(products.id, op.productId))
-      .get();
-
-    if (!productRow?.trackInventory) continue; // Product doesn't track inventory
+    if (!delTrackMap.get(op.productId)) continue;
 
     if (op.variantId) {
-      // Restore variant inventory
-      const variantRow = await db
-        .select({ inventory: productVariants.inventory })
-        .from(productVariants)
-        .where(eq(productVariants.id, op.variantId))
-        .get();
-
-      const qtyBefore = variantRow?.inventory ?? 0;
+      const qtyBefore = delVariantInvMap.get(op.variantId) ?? 0;
       const qtyAfter = qtyBefore + remaining;
 
       await db
@@ -1197,14 +1328,7 @@ export async function deleteOrder(db: AppDb, storeId: string, orderId: string) {
           console.error("[stock] Failed to log ORDER_CANCELLED movement:", err),
         );
     } else {
-      // Restore product inventory
-      const productInventoryRow = await db
-        .select({ inventory: products.inventory })
-        .from(products)
-        .where(eq(products.id, op.productId))
-        .get();
-
-      const qtyBefore = productInventoryRow?.inventory ?? 0;
+      const qtyBefore = delProductInvMap.get(op.productId) ?? 0;
       const qtyAfter = qtyBefore + remaining;
 
       await db
@@ -1344,26 +1468,22 @@ export async function updateOrderStatusWebhook(
       .where(eq(orderProducts.orderId, orderId))
       .all();
 
+    const whProductIds = ordProductRows.map((r) => r.productId);
+    const whVariantIds = ordProductRows.filter((r) => r.variantId).map((r) => r.variantId as string);
+    const [whTrackMap, whVariantInvMap, whProductInvMap] = await Promise.all([
+      batchFetchTrackInventory(db, whProductIds),
+      batchFetchVariantInventory(db, whVariantIds),
+      batchFetchProductInventory(db, whProductIds),
+    ]);
+
     for (const op of ordProductRows) {
       const remaining = op.quantity - (op.returnedQuantity ?? 0);
       if (remaining <= 0) continue;
 
-      const productRow = await db
-        .select({ trackInventory: products.trackInventory })
-        .from(products)
-        .where(eq(products.id, op.productId))
-        .get();
-
-      if (!productRow?.trackInventory) continue;
+      if (!whTrackMap.get(op.productId)) continue;
 
       if (op.variantId) {
-        const variantRow = await db
-          .select({ inventory: productVariants.inventory })
-          .from(productVariants)
-          .where(eq(productVariants.id, op.variantId))
-          .get();
-
-        const qtyBefore = variantRow?.inventory ?? 0;
+        const qtyBefore = whVariantInvMap.get(op.variantId) ?? 0;
         const qtyAfter = qtyBefore + remaining;
 
         await db
@@ -1397,13 +1517,7 @@ export async function updateOrderStatusWebhook(
             ),
           );
       } else {
-        const productInventoryRow = await db
-          .select({ inventory: products.inventory })
-          .from(products)
-          .where(eq(products.id, op.productId))
-          .get();
-
-        const qtyBefore = productInventoryRow?.inventory ?? 0;
+        const qtyBefore = whProductInvMap.get(op.productId) ?? 0;
         const qtyAfter = qtyBefore + remaining;
 
         await db

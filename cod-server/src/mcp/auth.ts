@@ -56,18 +56,116 @@ interface JwtPayload {
   [key: string]: unknown;
 }
 
+interface JwtHeader {
+  alg?: string;
+  typ?: string;
+  kid?: string;
+  [key: string]: unknown;
+}
+
+function decodeJwtHeader(bearer: string): JwtHeader {
+  const parts = bearer.split(".");
+  if (parts.length !== 3) {
+    throw new Error("Malformed JWT (expected three dot-separated parts)");
+  }
+  const b64 = parts[0].replace(/-/g, "+").replace(/_/g, "/");
+  const padded = b64.padEnd(Math.ceil(b64.length / 4) * 4, "=");
+  return JSON.parse(atob(padded)) as JwtHeader;
+}
+
 function decodeJwtPayload(bearer: string): JwtPayload {
   const parts = bearer.split(".");
   if (parts.length !== 3) {
     throw new Error("Malformed JWT (expected three dot-separated parts)");
   }
-  // JWT payloads are base64url-encoded (RFC 7515 §4.1.2). `atob` expects
-  // standard base64, so translate URL-safe chars back and restore padding
-  // before decoding — otherwise tokens whose payload happens to contain `+`
-  // or `/` throw "not correctly encoded".
   const b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
   const padded = b64.padEnd(Math.ceil(b64.length / 4) * 4, "=");
   return JSON.parse(atob(padded)) as JwtPayload;
+}
+
+async function verifyJwtSignature(
+  bearer: string,
+  jwks: { keys: Array<Record<string, unknown>> },
+): Promise<void> {
+  const header = decodeJwtHeader(bearer);
+  if (header.alg === "none") {
+    throw new Error("JWKS keys rejected alg=none token");
+  }
+
+  const kid = header.kid;
+  if (!kid) {
+    throw new Error("JWT header missing kid");
+  }
+
+  const keyRecord = jwks.keys.find((k) => k.kid === kid);
+  if (!keyRecord) {
+    throw new Error(`No matching key found for kid: ${kid}`);
+  }
+
+  const keyOps = keyRecord.key_ops as string[] | undefined;
+  if (keyOps && !keyOps.includes("verify")) {
+    throw new Error("Matched key does not support verify operation");
+  }
+
+  const parts = bearer.split(".");
+  const data = new TextEncoder().encode(`${parts[0]}.${parts[1]}`);
+  const sigBase64 = parts[2].replace(/-/g, "+").replace(/_/g, "/");
+  const sigPadded = sigBase64.padEnd(Math.ceil(sigBase64.length / 4) * 4, "=");
+  const signature = Uint8Array.from(atob(sigPadded), (c) => c.charCodeAt(0));
+
+  const alg = header.alg ?? (keyRecord.alg as string) ?? "";
+
+  if (alg.startsWith("RS")) {
+    const hashName = alg === "RS256" ? "SHA-256" : alg === "RS384" ? "SHA-384" : "SHA-512";
+    const algorithm = { name: "RSASSA-PKCS1-v1_5", hash: { name: hashName } };
+    const key = await crypto.subtle.importKey(
+      "jwk",
+      keyRecord as unknown as JsonWebKey,
+      algorithm,
+      false,
+      ["verify"],
+    );
+    const verified = await crypto.subtle.verify(algorithm, key, signature, data);
+    if (!verified) {
+      throw new Error("JWT signature verification failed");
+    }
+  } else if (alg.startsWith("ES")) {
+    const curve = alg.slice(2);
+    const namedCurve = curve === "256" ? "P-256" : curve === "384" ? "P-384" : "P-521";
+    const hashName = curve === "256" ? "SHA-256" : curve === "384" ? "SHA-384" : "SHA-512";
+    const algorithm = { name: "ECDSA", namedCurve };
+    const key = await crypto.subtle.importKey(
+      "jwk",
+      keyRecord as unknown as JsonWebKey,
+      algorithm,
+      false,
+      ["verify"],
+    );
+    const verified = await crypto.subtle.verify(
+      { name: "ECDSA", hash: hashName },
+      key,
+      signature,
+      data,
+    );
+    if (!verified) {
+      throw new Error("JWT signature verification failed");
+    }
+  } else if (alg === "EdDSA") {
+    const algorithm = { name: "Ed25519" };
+    const key = await crypto.subtle.importKey(
+      "jwk",
+      keyRecord as unknown as JsonWebKey,
+      algorithm,
+      false,
+      ["verify"],
+    );
+    const verified = await crypto.subtle.verify(algorithm, key, signature, data);
+    if (!verified) {
+      throw new Error("JWT signature verification failed");
+    }
+  } else {
+    throw new Error(`Unsupported JWT algorithm: ${alg}`);
+  }
 }
 
 /**
@@ -100,30 +198,16 @@ export async function bearerToProps(
   try {
     payload = decodeJwtPayload(bearer);
 
-    // Signature check gate: fetch JWKS so the issuer is reachable and the
-    // key set is cacheable by the Worker runtime. A proper per-key verify
-    // lands once Better Auth's `verifyAccessToken` can round-trip the
-    // exp-claim bug (see header docstring).
     const jwksResponse = await fetch(jwksUrl);
     if (!jwksResponse.ok) {
       throw new Error(`Failed to fetch JWKS (${jwksResponse.status})`);
     }
-    await jwksResponse.json();
+    const jwks = (await jwksResponse.json()) as { keys: Array<Record<string, unknown>> };
 
     if (payload.iss !== issuer) {
       throw new Error(`Invalid issuer: expected ${issuer}, got ${payload.iss ?? "<none>"}`);
     }
 
-    // Audience match — lenient about the form the MCP client sent as the
-    // `resource` parameter. Different MCP clients pick different shapes:
-    //
-    //   • Some send the bare RFC 9728 `resource` value (e.g. "https://api.x.com")
-    //   • Some append a trailing slash ("https://api.x.com/")  ← Cloudflare AI Playground
-    //   • Some append the `/mcp` path ("https://api.x.com/mcp")
-    //
-    // Better Auth puts whatever the client sent into the `aud` claim, so we
-    // need to accept all three for our own origin. cod-client's
-    // `validAudiences` mirrors this same set on the AS side.
     const aud = Array.isArray(payload.aud) ? payload.aud : payload.aud ? [payload.aud] : [];
     const baseAudience = audience.replace(/\/+$/, "");
     const acceptable = new Set([baseAudience, `${baseAudience}/`, `${baseAudience}/mcp`]);
@@ -135,12 +219,13 @@ export async function bearerToProps(
     const now = Math.floor(Date.now() / 1000);
     const { exp, iat } = payload;
     if (typeof exp === "number") {
-      // Better Auth bug workaround: exp serialised as duration.
       const effectiveExp = exp < 10_000 && typeof iat === "number" ? iat + exp : exp;
       if (now > effectiveExp) {
         throw new Error("Token expired");
       }
     }
+
+    await verifyJwtSignature(bearer, jwks);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     throw new UnauthenticatedError("invalid_token", message);

@@ -96,7 +96,15 @@ describe("Store API routes (OpenAPIHono)", () => {
     });
     app.onError(errorHandler);
     app.route("/store", storeRouter);
-    mockDb = {};
+    mockDb = {
+      select: vi.fn(() => ({
+        from: vi.fn(() => ({
+          where: vi.fn(() => ({
+            get: vi.fn(() => ({ price: 45000 })),
+          })),
+        })),
+      })),
+    };
     vi.clearAllMocks();
   });
 
@@ -201,7 +209,7 @@ describe("Store API routes (OpenAPIHono)", () => {
       productId: "prod_1",
       productName: "Galaxy A54",
       quantity: 2,
-      pricePerUnit: 4500,
+      pricePerUnit: 45000,
     };
 
     it("creates an order and returns totals with 201", async () => {
@@ -215,7 +223,7 @@ describe("Store API routes (OpenAPIHono)", () => {
       vi.mocked(queries.createStoreOrder).mockResolvedValue({
         id: "ord_1",
         orderNumber: "ORD-20260821-0001",
-        price: 9000,
+        price: 90000,
         deliveryFee: 600,
       } as any);
 
@@ -227,7 +235,7 @@ describe("Store API routes (OpenAPIHono)", () => {
 
       expect(res.status).toBe(201);
       const body: any = await res.json();
-      expect(body.data.total).toBe(9600);
+      expect(body.data.total).toBe(90600);
     });
 
     it("surfaces insufficient stock as 422", async () => {

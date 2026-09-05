@@ -3,14 +3,16 @@
  * request. These tests nail the contract at the boundary:
  *   • missing bearer              → throws UnauthenticatedError("missing_bearer")
  *   • bad JWT / unreachable JWKS  → throws UnauthenticatedError("invalid_token")
+ *   • signature mismatch          → throws UnauthenticatedError("invalid_token")
  *   • happy path                  → returns fully-shaped McpProps
  *
  * Verification is fully offline: we fetch the issuer's JWKS (for
- * reachability + cacheability) and then check issuer, audience and expiry
- * locally. `fetch` is stubbed so tests never touch the network.
+ * reachability + cacheability) and then verify the JWT signature,
+ * issuer, audience and expiry locally. `fetch` is stubbed so tests
+ * never touch the network.
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from "vitest";
 import { bearerToProps, extractBearer, UnauthenticatedError } from "./auth";
 import type { Env } from "@/types/env";
 
@@ -21,21 +23,46 @@ const env = {
 
 const JWKS_URL = "https://app.example.com/api/auth/jwks";
 
+let rsaKeyPair: CryptoKeyPair;
+let publicKeyJwk: JsonWebKey & { kid?: string };
+const TEST_KID = "test-key-2024";
+
+beforeAll(async () => {
+  rsaKeyPair = (await crypto.subtle.generateKey(
+    { name: "RSASSA-PKCS1-v1_5", modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: "SHA-256" },
+    true,
+    ["sign", "verify"],
+  )) as CryptoKeyPair;
+  publicKeyJwk = (await crypto.subtle.exportKey("jwk", rsaKeyPair.publicKey)) as JsonWebKey & { kid?: string };
+  publicKeyJwk.kid = TEST_KID;
+  publicKeyJwk.alg = "RS256";
+  publicKeyJwk.use = "sig";
+});
+
 function base64url(input: object | string): string {
   const raw = typeof input === "string" ? input : JSON.stringify(input);
   return Buffer.from(raw).toString("base64url");
 }
 
-function makeToken(payload: object): string {
-  return `${base64url({ alg: "none", typ: "JWT" })}.${base64url(payload)}.fake-sig`;
+async function makeSignedToken(payload: object): Promise<string> {
+  const header = base64url({ alg: "RS256", typ: "JWT", kid: TEST_KID });
+  const body = base64url(payload);
+  const data = new TextEncoder().encode(`${header}.${body}`);
+  const sig = new Uint8Array(await crypto.subtle.sign("RSASSA-PKCS1-v1_5", rsaKeyPair.privateKey, data));
+  const sigB64 = Buffer.from(sig).toString("base64url");
+  return `${header}.${body}.${sigB64}`;
 }
 
-function stubJwks(ok = true): void {
+function stubJwks(ok = true, keys: (JsonWebKey & { kid?: string })[] = []): void {
   vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
     ok,
     status: ok ? 200 : 500,
-    json: async () => ({ keys: [] }),
+    json: async () => ({ keys }),
   }));
+}
+
+function stubJwksWithTestKey(ok = true): void {
+  stubJwks(ok, [publicKeyJwk]);
 }
 
 const validPayload = {
@@ -86,7 +113,7 @@ describe("bearerToProps", () => {
   });
 
   it("throws invalid_token for a malformed JWT", async () => {
-    stubJwks();
+    stubJwksWithTestKey();
     await expect(bearerToProps("bad.token", env)).rejects.toMatchObject({
       name: "UnauthenticatedError",
       code: "invalid_token",
@@ -95,38 +122,74 @@ describe("bearerToProps", () => {
 
   it("throws invalid_token when the issuer JWKS is unreachable", async () => {
     stubJwks(false);
-    await expect(bearerToProps(makeToken(validPayload), env)).rejects.toMatchObject({
+    const token = await makeSignedToken(validPayload);
+    await expect(bearerToProps(token, env)).rejects.toMatchObject({
       name: "UnauthenticatedError",
       code: "invalid_token",
     });
   });
 
   it("throws invalid_token when the token is expired", async () => {
-    stubJwks();
+    stubJwksWithTestKey();
     const expired = {
       ...validPayload,
       iat: Math.floor(Date.now() / 1000) - 7200,
       exp: Math.floor(Date.now() / 1000) - 3600,
     };
-    await expect(bearerToProps(makeToken(expired), env)).rejects.toMatchObject({
+    const token = await makeSignedToken(expired);
+    await expect(bearerToProps(token, env)).rejects.toMatchObject({
       name: "UnauthenticatedError",
       code: "invalid_token",
     });
   });
 
   it("throws invalid_token on issuer mismatch", async () => {
-    stubJwks();
+    stubJwksWithTestKey();
     const wrongIssuer = { ...validPayload, iss: "https://evil.example" };
-    await expect(bearerToProps(makeToken(wrongIssuer), env)).rejects.toMatchObject({
+    const token = await makeSignedToken(wrongIssuer);
+    await expect(bearerToProps(token, env)).rejects.toMatchObject({
       name: "UnauthenticatedError",
       code: "invalid_token",
     });
   });
 
   it("throws invalid_token on audience mismatch", async () => {
-    stubJwks();
+    stubJwksWithTestKey();
     const wrongAud = { ...validPayload, aud: "https://other.example" };
-    await expect(bearerToProps(makeToken(wrongAud), env)).rejects.toMatchObject({
+    const token = await makeSignedToken(wrongAud);
+    await expect(bearerToProps(token, env)).rejects.toMatchObject({
+      name: "UnauthenticatedError",
+      code: "invalid_token",
+    });
+  });
+
+  it("throws invalid_token on signature mismatch (tampered payload)", async () => {
+    stubJwksWithTestKey();
+    const tampered = { ...validPayload, sub: "attacker" };
+    const token = await makeSignedToken(tampered);
+    const parts = token.split(".");
+    parts[1] = base64url({ sub: "attacker", iss: validPayload.iss, aud: validPayload.aud, exp: validPayload.exp, iat: validPayload.iat });
+    const tamperedToken = parts.join(".");
+    await expect(bearerToProps(tamperedToken, env)).rejects.toMatchObject({
+      name: "UnauthenticatedError",
+      code: "invalid_token",
+    });
+  });
+
+  it("throws invalid_token when no matching kid in JWKS", async () => {
+    const wrongKeyJwk = { ...publicKeyJwk, kid: "wrong-kid-999" } as JsonWebKey & { kid?: string };
+    stubJwks(true, [wrongKeyJwk]);
+    const token = await makeSignedToken(validPayload);
+    await expect(bearerToProps(token, env)).rejects.toMatchObject({
+      name: "UnauthenticatedError",
+      code: "invalid_token",
+    });
+  });
+
+  it("throws invalid_token for alg=none tokens", async () => {
+    const noneToken = `${base64url({ alg: "none", typ: "JWT" })}.${base64url(validPayload)}.fake-sig`;
+    stubJwksWithTestKey();
+    await expect(bearerToProps(noneToken, env)).rejects.toMatchObject({
       name: "UnauthenticatedError",
       code: "invalid_token",
     });
@@ -135,17 +198,19 @@ describe("bearerToProps", () => {
   it("fetches the issuer's JWKS for reachability", async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({ keys: [] }),
+      json: async () => ({ keys: [publicKeyJwk] }),
     });
     vi.stubGlobal("fetch", fetchMock);
 
-    await bearerToProps(makeToken(validPayload), env);
+    const token = await makeSignedToken(validPayload);
+    await bearerToProps(token, env);
     expect(fetchMock).toHaveBeenCalledWith(JWKS_URL);
   });
 
   it("projects JWT claims onto McpProps (happy path, staff)", async () => {
-    stubJwks();
-    const props = await bearerToProps(makeToken(validPayload), env);
+    stubJwksWithTestKey();
+    const token = await makeSignedToken(validPayload);
+    const props = await bearerToProps(token, env);
     expect(props).toEqual({
       userId: "user-abc",
       role: "staff",
@@ -156,53 +221,54 @@ describe("bearerToProps", () => {
   });
 
   it("marks admin role correctly", async () => {
-    stubJwks();
-    const props = await bearerToProps(
-      makeToken({ ...validPayload, sub: "admin-1", scope: "", role: "admin" }),
-      env,
-    );
+    stubJwksWithTestKey();
+    const token = await makeSignedToken({ ...validPayload, sub: "admin-1", scope: "", role: "admin" });
+    const props = await bearerToProps(token, env);
     expect(props.role).toBe("admin");
   });
 
   it("defaults non-admin role to 'staff' even when missing", async () => {
-    stubJwks();
+    stubJwksWithTestKey();
     const { role: _role, ...noRole } = validPayload;
-    const props = await bearerToProps(makeToken(noRole), env);
+    const token = await makeSignedToken(noRole);
+    const props = await bearerToProps(token, env);
     expect(props.role).toBe("staff");
   });
 
   it("handles empty scope string", async () => {
-    stubJwks();
-    const props = await bearerToProps(
-      makeToken({ ...validPayload, scope: "", role: "staff" }),
-      env,
-    );
+    stubJwksWithTestKey();
+    const token = await makeSignedToken({ ...validPayload, scope: "", role: "staff" });
+    const props = await bearerToProps(token, env);
     expect(props.scopes).toEqual([]);
   });
 
   it("handles array scope claim (future-proofing)", async () => {
-    stubJwks();
-    const props = await bearerToProps(
-      makeToken({ ...validPayload, scope: ["orders:read", "customers:read"] }),
-      env,
-    );
+    stubJwksWithTestKey();
+    const token = await makeSignedToken({ ...validPayload, scope: ["orders:read", "customers:read"] });
+    const props = await bearerToProps(token, env);
     expect(props.scopes).toEqual(["orders:read", "customers:read"]);
   });
 
   it("coerces missing name/email to empty strings (never undefined)", async () => {
-    stubJwks();
+    stubJwksWithTestKey();
     const { name: _name, email: _email, ...minimal } = validPayload;
-    const props = await bearerToProps(makeToken(minimal), env);
+    const token = await makeSignedToken(minimal);
+    const props = await bearerToProps(token, env);
     expect(props.name).toBe("");
     expect(props.email).toBe("");
   });
 
   it("accepts the /mcp audience variant (RFC 8707 resource forms)", async () => {
-    stubJwks();
-    const props = await bearerToProps(
-      makeToken({ ...validPayload, aud: "https://api.example.com/mcp" }),
-      env,
-    );
+    stubJwksWithTestKey();
+    const token = await makeSignedToken({ ...validPayload, aud: "https://api.example.com/mcp" });
+    const props = await bearerToProps(token, env);
+    expect(props.userId).toBe("user-abc");
+  });
+
+  it("accepts the trailing-slash audience variant", async () => {
+    stubJwksWithTestKey();
+    const token = await makeSignedToken({ ...validPayload, aud: "https://api.example.com/" });
+    const props = await bearerToProps(token, env);
     expect(props.userId).toBe("user-abc");
   });
 });

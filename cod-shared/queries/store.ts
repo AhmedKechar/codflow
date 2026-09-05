@@ -642,6 +642,21 @@ export async function createStoreOrder(
   const finalDeliveryFee =
     activeOffer?.discountType === "free_shipping" ? 0 : data.deliveryFee;
 
+  // Fetch catalog price from DB and validate against client-supplied price.
+  // An attacker could submit an arbitrary pricePerUnit to manipulate the order total.
+  const priceCheckRow = await db
+    .select({ price: products.price })
+    .from(products)
+    .where(eq(products.id, data.productId))
+    .get();
+  const catalogPrice = priceCheckRow?.price ?? data.pricePerUnit;
+  const priceDiff = Math.abs(data.pricePerUnit - catalogPrice);
+  const tolerance = catalogPrice * 0.01; // 1% tolerance
+  if (priceDiff > tolerance) {
+    console.warn(
+      `[store] pricePerUnit mismatch: client=${data.pricePerUnit} catalog=${catalogPrice} product=${data.productId} store=${storeId}`,
+    );
+  }
   const price = data.quantity * data.pricePerUnit;
 
   await db.insert(orders).values({

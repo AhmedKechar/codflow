@@ -340,7 +340,7 @@ export function OrderFormPage({ customers, products, shippingRules, wilayas }: P
             <div className="space-y-5">
               {/* Delivery Type */}
               <div className="space-y-3">
-                <Label className="text-sm font-semibold text-foreground ml-1">
+                <Label className="text-sm font-semibold text-foreground ms-1">
                   {t.form.delivery_type_label}
                 </Label>
                 <div className="flex gap-3">
@@ -488,7 +488,7 @@ export function OrderFormPage({ customers, products, shippingRules, wilayas }: P
 
               {/* Delivery Fee */}
               <div className="space-y-2">
-                <div className="flex items-center justify-between ml-1">
+                <div className="flex items-center justify-between ms-1">
                   <Label className="text-xs font-semibold text-muted-foreground">
                     {t.form.delivery_fee_label}
                   </Label>

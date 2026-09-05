@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { useCommon } from "@/lib/translations";
+import { useCommon, useOrders } from "@/lib/translations";
 import { updateOrder } from "@/actions/orders";
 import { formatPrice } from "@/lib/format";
 import type { Order } from "@/types";
@@ -27,10 +27,14 @@ interface Props {
   communes: Array<{ id: string; nameAr: string; name?: string; wilayaId: number }>;
 }
 
+type FormErrors = Partial<Record<string, string>>;
+
 export function OrderEditForm({ order, wilayas, communes }: Props) {
   const common = useCommon();
+  const t = useOrders();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [errors, setErrors] = useState<FormErrors>({});
 
   const [customerName, setCustomerName] = useState(order.customerName);
   const [phone, setPhone] = useState(order.phone);
@@ -47,8 +51,22 @@ export function OrderEditForm({ order, wilayas, communes }: Props) {
   const filteredCommunes = communes.filter((c) => c.wilayaId === wilayaId);
   const codAmount = price + deliveryFee;
 
+  function validate(): FormErrors {
+    const e: FormErrors = {};
+    if (!customerName.trim()) e.customerName = "اسم العميل مطلوب";
+    if (!phone.trim()) e.phone = "الهاتف مطلوب";
+    else if (!/^0[5-7]\d{8}$/.test(phone)) e.phone = "رقم الهاتف غير صحيح";
+    if (!wilayaId) e.wilayaId = "الولاية مطلوبة";
+    if (price < 0) e.price = "السعر لا يمكن أن يكون سالباً";
+    if (deliveryFee < 0) e.deliveryFee = "رسوم التوصيل لا يمكن أن تكون سالبة";
+    return e;
+  }
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const validationErrors = validate();
+    setErrors(validationErrors);
+    if (Object.keys(validationErrors).length > 0) return;
 
     startTransition(async () => {
       const result = await updateOrder(order.id, {
@@ -66,7 +84,7 @@ export function OrderEditForm({ order, wilayas, communes }: Props) {
       });
 
       if (result.ok) {
-        toast.success("تم التحديث بنجاح");
+        toast.success(t.edit?.success ?? "تم التحديث بنجاح");
         router.push(`/orders/${order.id}`);
         router.refresh();
       } else {
@@ -79,19 +97,20 @@ export function OrderEditForm({ order, wilayas, communes }: Props) {
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Customer Info */}
       <div className="rounded-lg border p-4 space-y-4">
-        <h3 className="font-medium">معلومات العميل</h3>
+        <h3 className="font-medium">{t.edit?.customer_info ?? "معلومات العميل"}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="customerName">اسم العميل</Label>
+            <Label htmlFor="customerName">{t.edit?.customer_name ?? "اسم العميل"}</Label>
             <Input
               id="customerName"
               value={customerName}
               onChange={(e) => setCustomerName(e.target.value)}
               required
             />
+            {errors.customerName && <p className="text-sm text-destructive">{errors.customerName}</p>}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="phone">الهاتف</Label>
+            <Label htmlFor="phone">{t.edit?.phone ?? "الهاتف"}</Label>
             <Input
               id="phone"
               value={phone}
@@ -99,16 +118,17 @@ export function OrderEditForm({ order, wilayas, communes }: Props) {
               pattern="^0[5-7]\d{8}$"
               required
             />
+            {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
           </div>
         </div>
       </div>
 
       {/* Location Info */}
       <div className="rounded-lg border p-4 space-y-4">
-        <h3 className="font-medium">الموقع</h3>
+        <h3 className="font-medium">{t.edit?.location ?? "الموقع"}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label>الولاية</Label>
+            <Label>{t.edit?.wilaya ?? "الولاية"}</Label>
             <Select
               value={String(wilayaId)}
               onValueChange={(v) => {
@@ -117,7 +137,7 @@ export function OrderEditForm({ order, wilayas, communes }: Props) {
               }}
             >
               <SelectTrigger>
-                <SelectValue placeholder="اختر الولاية" />
+                <SelectValue placeholder={t.edit?.select_wilaya ?? "اختر الولاية"} />
               </SelectTrigger>
               <SelectContent>
                 {wilayas.map((w) => (
@@ -129,10 +149,10 @@ export function OrderEditForm({ order, wilayas, communes }: Props) {
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>البلدية</Label>
+            <Label>{t.edit?.commune ?? "البلدية"}</Label>
             <Select value={communeId} onValueChange={setCommuneId}>
               <SelectTrigger>
-                <SelectValue placeholder="اختر البلدية" />
+                <SelectValue placeholder={t.edit?.select_commune ?? "اختر البلدية"} />
               </SelectTrigger>
               <SelectContent>
                 {filteredCommunes.map((c) => (
@@ -144,7 +164,7 @@ export function OrderEditForm({ order, wilayas, communes }: Props) {
             </Select>
           </div>
           <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="address">العنوان</Label>
+            <Label htmlFor="address">{t.edit?.address ?? "العنوان"}</Label>
             <Textarea
               id="address"
               value={address}
@@ -157,10 +177,10 @@ export function OrderEditForm({ order, wilayas, communes }: Props) {
 
       {/* Pricing */}
       <div className="rounded-lg border p-4 space-y-4">
-        <h3 className="font-medium">التسعير</h3>
+        <h3 className="font-medium">{t.edit?.pricing ?? "التسعير"}</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="price">السعر</Label>
+            <Label htmlFor="price">{t.edit?.price ?? "السعر"}</Label>
             <Input
               id="price"
               type="number"
@@ -170,9 +190,10 @@ export function OrderEditForm({ order, wilayas, communes }: Props) {
               onChange={(e) => setPrice(parseFloat(e.target.value) || 0)}
               required
             />
+            {errors.price && <p className="text-sm text-destructive">{errors.price}</p>}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="deliveryFee">رسوم التوصيل</Label>
+            <Label htmlFor="deliveryFee">{t.edit?.delivery_fee ?? "رسوم التوصيل"}</Label>
             <Input
               id="deliveryFee"
               type="number"
@@ -183,7 +204,7 @@ export function OrderEditForm({ order, wilayas, communes }: Props) {
             />
           </div>
           <div className="space-y-2">
-            <Label>المبلغ المطلوب عند التسليم</Label>
+            <Label>{t.edit?.cod_amount ?? "المبلغ المطلوب عند التسليم"}</Label>
             <div className="h-10 px-3 py-2 rounded-md border bg-muted font-medium">
               {formatPrice(codAmount)}
             </div>
@@ -193,10 +214,10 @@ export function OrderEditForm({ order, wilayas, communes }: Props) {
 
       {/* Delivery */}
       <div className="rounded-lg border p-4 space-y-4">
-        <h3 className="font-medium">التوصيل</h3>
+        <h3 className="font-medium">{t.edit?.delivery ?? "التوصيل"}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label>نوع التوصيل</Label>
+            <Label>{t.edit?.delivery_type ?? "نوع التوصيل"}</Label>
             <Select
               value={deliveryType}
               onValueChange={(v) => { if (v) setDeliveryType(v as "home" | "stop_desk"); }}
@@ -205,13 +226,13 @@ export function OrderEditForm({ order, wilayas, communes }: Props) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="home">توصيل للمنزل</SelectItem>
-                <SelectItem value="stop_desk">نقطة استلام</SelectItem>
+                <SelectItem value="home">{t.edit?.home_delivery ?? "توصيل للمنزل"}</SelectItem>
+                <SelectItem value="stop_desk">{t.edit?.stop_desk ?? "نقطة استلام"}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="weight">الوزن (كغ)</Label>
+            <Label htmlFor="weight">{t.edit?.weight ?? "الوزن (كغ)"}</Label>
             <Input
               id="weight"
               type="number"
@@ -227,19 +248,19 @@ export function OrderEditForm({ order, wilayas, communes }: Props) {
               checked={isFragile}
               onCheckedChange={setIsFragile}
             />
-            <Label htmlFor="fragile">قابل للكسر</Label>
+            <Label htmlFor="fragile">{t.edit?.fragile ?? "قابل للكسر"}</Label>
           </div>
         </div>
       </div>
 
       {/* Notes */}
       <div className="rounded-lg border p-4 space-y-4">
-        <h3 className="font-medium">ملاحظات</h3>
+        <h3 className="font-medium">{t.edit?.notes ?? "ملاحظات"}</h3>
         <Textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={3}
-          placeholder="ملاحظات إضافية..."
+          placeholder={t.edit?.notes_placeholder ?? "ملاحظات إضافية..."}
         />
       </div>
 

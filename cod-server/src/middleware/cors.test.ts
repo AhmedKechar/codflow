@@ -104,7 +104,7 @@ describe("CORS Middleware", () => {
       expect(res.headers.get("Access-Control-Allow-Credentials")).toBe("true");
     });
 
-    it("should reject non-whitelisted origin by returning first allowed origin", async () => {
+    it("should reject non-whitelisted origin with 403", async () => {
       const res = await app.request("/test", {
         method: "GET",
         headers: {
@@ -112,9 +112,7 @@ describe("CORS Middleware", () => {
         },
       });
 
-      expect(res.status).toBe(200);
-      expect(res.headers.get("Access-Control-Allow-Origin")).toBe("https://app.example.com");
-      // Browser will reject this response due to origin mismatch
+      expect(res.status).toBe(403);
     });
 
     it("should handle requests without origin header", async () => {
@@ -123,7 +121,6 @@ describe("CORS Middleware", () => {
       });
 
       expect(res.status).toBe(200);
-      expect(res.headers.get("Access-Control-Allow-Origin")).toBe("https://app.example.com");
     });
 
     it("should handle OPTIONS preflight for whitelisted origin", async () => {

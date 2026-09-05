@@ -1,6 +1,8 @@
 import { Context } from "hono";
+import { eq } from "drizzle-orm";
 import type { AppContext } from "@/types";
 import { getDb } from "@/db";
+import { products as productsTable } from "../../../../cod-shared/db/schema";
 import * as queries from "./queries";
 import { storeOrderSchema, storeReviewSchema } from "./validation";
 import { NotFoundError, ValidationError, ConflictError, BusinessLogicError } from "@/lib/errors/classes";
@@ -128,6 +130,25 @@ export async function createStoreOrder(c: Context<AppContext>) {
   });
   if (stockError) {
     throw new BusinessLogicError(stockError, ERROR_CODES.INSUFFICIENT_STOCK);
+  }
+
+  // Price validation: reject orders where client-supplied pricePerUnit deviates
+  // significantly from the catalog price (more than 50%).
+  const priceCheckRow = await db
+    .select({ price: productsTable.price })
+    .from(productsTable)
+    .where(eq(productsTable.id, data.productId))
+    .get();
+  if (priceCheckRow) {
+    const catalogPrice = priceCheckRow.price;
+    const diff = Math.abs(data.pricePerUnit - catalogPrice);
+    if (diff > catalogPrice * 0.5) {
+      throw new BusinessLogicError(
+        "Price mismatch — the submitted price differs too much from the catalog price",
+        ERROR_CODES.VALUE_OUT_OF_RANGE,
+        { submitted: data.pricePerUnit, catalog: catalogPrice }
+      );
+    }
   }
 
   const customer = await queries.findOrCreateCustomer(db, storeId, {

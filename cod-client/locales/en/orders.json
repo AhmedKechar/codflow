@@ -271,5 +271,30 @@
   "reconcile_updated": "Updated",
   "reconcile_of": "of",
   "reconcile_orders": "orders",
-  "reconcile_all_synced": "All orders are up to date"
+  "reconcile_all_synced": "All orders are up to date",
+  "edit": {
+    "page_title": "Edit Order",
+    "success": "Updated successfully",
+    "customer_info": "Customer Information",
+    "customer_name": "Customer Name",
+    "phone": "Phone",
+    "location": "Location",
+    "wilaya": "Wilaya",
+    "select_wilaya": "Select wilaya",
+    "commune": "Commune",
+    "select_commune": "Select commune",
+    "address": "Address",
+    "pricing": "Pricing",
+    "price": "Price",
+    "delivery_fee": "Delivery Fee",
+    "cod_amount": "Amount Due on Delivery",
+    "delivery": "Delivery",
+    "delivery_type": "Delivery Type",
+    "home_delivery": "Home Delivery",
+    "stop_desk": "Pickup Point",
+    "weight": "Weight (kg)",
+    "fragile": "Fragile",
+    "notes": "Notes",
+    "notes_placeholder": "Additional notes..."
+  }
 }

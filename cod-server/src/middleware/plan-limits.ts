@@ -83,7 +83,11 @@ export function requireWithinPlanLimit(resource: Resource) {
       await next();
     } catch (err) {
       console.error("[plan-limits] Error:", err);
-      await next();
+      // Fail-closed: reject request on error to prevent plan limit bypass
+      return c.json({
+        error: "Plan limit check failed",
+        code: "PLAN_LIMIT_CHECK_FAILED",
+      }, 500);
     }
   };
 }

@@ -271,5 +271,30 @@
   "reconcile_updated": "تم تحديث",
   "reconcile_of": "من",
   "reconcile_orders": "طلبات",
-  "reconcile_all_synced": "جميع الطلبات محدثة"
+  "reconcile_all_synced": "جميع الطلبات محدثة",
+  "edit": {
+    "page_title": "تعديل الطلب",
+    "success": "تم التحديث بنجاح",
+    "customer_info": "معلومات العميل",
+    "customer_name": "اسم العميل",
+    "phone": "الهاتف",
+    "location": "الموقع",
+    "wilaya": "الولاية",
+    "select_wilaya": "اختر الولاية",
+    "commune": "البلدية",
+    "select_commune": "اختر البلدية",
+    "address": "العنوان",
+    "pricing": "التسعير",
+    "price": "السعر",
+    "delivery_fee": "رسوم التوصيل",
+    "cod_amount": "المبلغ المطلوب عند التسليم",
+    "delivery": "التوصيل",
+    "delivery_type": "نوع التوصيل",
+    "home_delivery": "توصيل للمنزل",
+    "stop_desk": "نقطة استلام",
+    "weight": "الوزن (كغ)",
+    "fragile": "قابل للكسر",
+    "notes": "ملاحظات",
+    "notes_placeholder": "ملاحظات إضافية..."
+  }
 }

@@ -271,5 +271,30 @@
   "reconcile_updated": "Mis à jour",
   "reconcile_of": "sur",
   "reconcile_orders": "commandes",
-  "reconcile_all_synced": "Toutes les commandes sont à jour"
+  "reconcile_all_synced": "Toutes les commandes sont à jour",
+  "edit": {
+    "page_title": "Modifier la commande",
+    "success": "Mis à jour avec succès",
+    "customer_info": "Informations client",
+    "customer_name": "Nom du client",
+    "phone": "Téléphone",
+    "location": "Emplacement",
+    "wilaya": "Wilaya",
+    "select_wilaya": "Sélectionner la wilaya",
+    "commune": "Commune",
+    "select_commune": "Sélectionner la commune",
+    "address": "Adresse",
+    "pricing": "Tarification",
+    "price": "Prix",
+    "delivery_fee": "Frais de livraison",
+    "cod_amount": "Montant dû à la livraison",
+    "delivery": "Livraison",
+    "delivery_type": "Type de livraison",
+    "home_delivery": "Livraison à domicile",
+    "stop_desk": "Point relais",
+    "weight": "Poids (kg)",
+    "fragile": "Fragile",
+    "notes": "Notes",
+    "notes_placeholder": "Notes supplémentaires..."
+  }
 }
