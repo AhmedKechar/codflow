@@ -21,6 +21,7 @@ import {
   getOrderByTracking,
   getOrderByReference,
 } from "./queries";
+import { verifyYalidineSignature } from "./yalidine-verify";
 import {
   updateOrderStatusWebhook,
   incrementDeliveryAttempts,
@@ -312,15 +313,19 @@ export async function handleYalidineWebhook(c: Context<AppContext>) {
     return c.json({ received: true }, 200);
   }
 
-  // TODO: implement Yalidine signature verification once "Secure Your Webhook"
-  // documentation is obtained. The header name and algorithm are not documented
-  // in the currently available Yalidine webhook docs. The webhookSecret is stored
-  // in the DB but verification is deferred until docs are available.
+  // Verify Yalidine webhook signature (HMAC-SHA256)
+  // When webhookSecret is configured, reject if signature is missing or invalid (fail-closed)
   if (company.webhookSecret) {
-    console.warn(
-      "[webhook][yalidine] webhookSecret is set but signature verification is not yet implemented — " +
-      "obtain the 'Secure Your Webhook' section from Yalidine docs to implement"
-    );
+    const signature = c.req.header("x-yalidine-signature");
+    const { valid, error } = await verifyYalidineSignature(rawBody, signature, company.webhookSecret);
+    if (!valid) {
+      console.warn(`[webhook][yalidine] Signature verification failed: ${error}`);
+      throw new ValidationError(
+        `Webhook signature verification failed: ${error}`,
+        ERROR_CODES.INVALID_WEBHOOK_PAYLOAD,
+        { provider: "yalidine" }
+      );
+    }
   }
 
   let payload: {
