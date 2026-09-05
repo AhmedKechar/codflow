@@ -23,7 +23,7 @@ import { createRoute, z } from "@hono/zod-openapi";
 import type { ZodType } from "zod";
 import type { Context } from "hono";
 import type { AppContext } from "@/types";
-import { requireAdmin, requireScope, requireAnyScope, requireAllScopes } from "@/rbac/middleware";
+import { requireAdmin, requireSuperAdmin, requireScope, requireAnyScope, requireAllScopes } from "@/rbac/middleware";
 import { ErrorResponseSchema } from "@/openapi/schemas";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -41,8 +41,10 @@ import { ErrorResponseSchema } from "@/openapi/schemas";
  * - { allOf: ["orders:read", "products:read"] }: Requires all scopes
  */
 export type AuthStrategy =
+  | "none"
   | "api-key"
   | "admin"
+  | "super-admin"
   | "store"
   | { scope: string }
   | { anyOf: string[] }
@@ -61,9 +63,19 @@ export interface RouteDefinition {
   operationId?: string;
   query?: ZodType;                            // Query parameters (GET /users?role=admin)
   params?: ZodType;                           // Path parameters (GET /users/:id)
-  body?: ZodType;                             // Request body (POST /users)
+  body?: ZodType;                             // Request body (POST /users) — wrapped in application/json
+  headers?: ZodType;                          // Request headers
   handler: (c: Context<AppContext>) => any;   // Your handler function
-  
+
+  /**
+   * Full OpenAPI requestBody object. When provided, overrides the `body` field.
+   * Use for non-JSON content types like multipart/form-data.
+   */
+  requestBody?: {
+    content: Record<string, { schema: ZodType }>;
+    required?: boolean;
+  };
+
   /**
    * Optional custom responses. If not provided, standard responses are generated.
    * Use when you need custom response schemas (e.g., orders create endpoint).
@@ -125,12 +137,18 @@ const standardErrors: Record<number, any> = {
  * Convert auth strategy to Hono middleware array.
  */
 function resolveAuthMiddleware(auth: AuthStrategy) {
+  if (auth === "none") {
+    return [];
+  }
   if (auth === "api-key") {
     // Just authMiddleware (loaded at app level) — no additional middleware
     return [];
   }
   if (auth === "admin") {
     return [requireAdmin()];
+  }
+  if (auth === "super-admin") {
+    return [requireSuperAdmin()];
   }
   if (auth === "store") {
     // Store auth uses a different middleware (requireStoreAuth)
@@ -149,6 +167,9 @@ function resolveAuthMiddleware(auth: AuthStrategy) {
  * Convert auth strategy to OpenAPI security requirement.
  */
 function resolveSecurity(auth: AuthStrategy) {
+  if (auth === "none") {
+    return [];
+  }
   if (auth === "store") {
     return [{ StoreAuth: [] }];
   }
@@ -231,7 +252,12 @@ export function defineRoute(def: RouteDefinition): BuiltRoute {
   const request: any = {};
   if (def.query) request.query = def.query;
   if (def.params) request.params = def.params;
-  if (def.body) request.body = { content: jsonContent(def.body) };
+  if (def.headers) request.headers = def.headers;
+  if (def.requestBody) {
+    request.body = def.requestBody;
+  } else if (def.body) {
+    request.body = { content: jsonContent(def.body) };
+  }
   
   // Use custom responses if provided, otherwise generate standard ones
   const responses = def.responses
@@ -251,7 +277,7 @@ export function defineRoute(def: RouteDefinition): BuiltRoute {
     operationId,
     request,
     responses,
-    security: resolveSecurity(def.auth),
+    ...(def.auth !== "none" ? { security: resolveSecurity(def.auth) } : {}),
   });
 
   return {

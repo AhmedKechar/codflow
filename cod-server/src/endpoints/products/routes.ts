@@ -20,10 +20,6 @@ import {
   ListResponseSchema,
 } from "@/openapi/schemas";
 
-const jsonContent = <T extends z.ZodType>(schema: T) => ({
-  "application/json": { schema },
-});
-
 const idParams = z.object({
   id: z.string().openapi({ description: "Product ID", example: "prod_abc123" }),
 });
@@ -55,7 +51,7 @@ const listProductsRoute = defineRoute({
   responses: {
     200: {
       description: "List of products",
-      content: jsonContent(ListResponseSchema(ProductSchema)),
+      content: { "application/json": { schema: ListResponseSchema(ProductSchema) } },
     },
   },
   handler: h.listProducts,
@@ -74,7 +70,7 @@ const createProductRoute = defineRoute({
   responses: {
     201: {
       description: "Product created",
-      content: jsonContent(SuccessResponseSchema(ProductSchema)),
+      content: { "application/json": { schema: SuccessResponseSchema(ProductSchema) } },
     },
     409: { description: "Duplicate SKU (DUPLICATE_SKU)" },
   },
@@ -95,12 +91,14 @@ const listProductImagesRoute = defineRoute({
   responses: {
     200: {
       description: "List of product images ordered by position",
-      content: jsonContent(
-        z.object({
-          success: z.boolean().openapi({ example: true }),
-          data: z.array(ProductImageSchema),
-        })
-      ),
+      content: {
+        "application/json": {
+          schema: z.object({
+            success: z.boolean().openapi({ example: true }),
+            data: z.array(ProductImageSchema),
+          }),
+        },
+      },
     },
   },
   handler: ih.listProductImages,
@@ -136,7 +134,7 @@ const saveProductImageRoute = defineRoute({
   responses: {
     201: {
       description: "Image record created",
-      content: jsonContent(SuccessResponseSchema(ProductImageSchema)),
+      content: { "application/json": { schema: SuccessResponseSchema(ProductImageSchema) } },
     },
   },
   handler: ih.saveProductImage,
@@ -162,12 +160,14 @@ const reorderProductImagesRoute = defineRoute({
   responses: {
     200: {
       description: "Images reordered successfully. Returns updated image list in new order.",
-      content: jsonContent(
-        z.object({
-          success: z.boolean().openapi({ example: true }),
-          data: z.array(ProductImageSchema),
-        })
-      ),
+      content: {
+        "application/json": {
+          schema: z.object({
+            success: z.boolean().openapi({ example: true }),
+            data: z.array(ProductImageSchema),
+          }),
+        },
+      },
     },
     422: { description: "Duplicate IDs, image IDs that don't belong to this product, or incomplete set" },
   },
@@ -186,7 +186,7 @@ const deleteProductImageRoute = defineRoute({
   responses: {
     200: {
       description: "Image deleted",
-      content: jsonContent(z.object({ success: z.boolean().openapi({ example: true }) })),
+      content: { "application/json": { schema: z.object({ success: z.boolean().openapi({ example: true }) }) } },
     },
   },
   handler: ih.deleteProductImage,
@@ -207,7 +207,7 @@ const updateProductStatusRoute = defineRoute({
   responses: {
     200: {
       description: "Status updated. Returns full updated product record.",
-      content: jsonContent(SuccessResponseSchema(ProductSchema)),
+      content: { "application/json": { schema: SuccessResponseSchema(ProductSchema) } },
     },
   },
   handler: h.updateProductStatus,
@@ -227,7 +227,7 @@ const getProductRoute = defineRoute({
   responses: {
     200: {
       description: "Product detail",
-      content: jsonContent(SuccessResponseSchema(ProductSchema)),
+      content: { "application/json": { schema: SuccessResponseSchema(ProductSchema) } },
     },
   },
   handler: h.getProduct,
@@ -247,7 +247,7 @@ const updateProductRoute = defineRoute({
   responses: {
     200: {
       description: "Product updated. Returns full updated product record.",
-      content: jsonContent(SuccessResponseSchema(ProductSchema)),
+      content: { "application/json": { schema: SuccessResponseSchema(ProductSchema) } },
     },
   },
   handler: h.updateProduct,
@@ -266,12 +266,14 @@ const deleteProductRoute = defineRoute({
   responses: {
     200: {
       description: "Product deleted",
-      content: jsonContent(
-        z.object({
-          success: z.boolean().openapi({ example: true }),
-          message: z.string().openapi({ example: "Product deleted" }),
-        })
-      ),
+      content: {
+        "application/json": {
+          schema: z.object({
+            success: z.boolean().openapi({ example: true }),
+            message: z.string().openapi({ example: "Product deleted" }),
+          }),
+        },
+      },
     },
     422: { description: "Cannot delete product with existing orders (PRODUCT_HAS_ORDERS)" },
   },
@@ -292,7 +294,7 @@ const listVariantsRoute = defineRoute({
   responses: {
     200: {
       description: "List of variants ordered by position",
-      content: jsonContent(ListResponseSchema(ProductVariantSchema)),
+      content: { "application/json": { schema: ListResponseSchema(ProductVariantSchema) } },
     },
   },
   handler: vh.listVariants,
@@ -310,7 +312,7 @@ const createVariantRoute = defineRoute({
   responses: {
     201: {
       description: "Variant created",
-      content: jsonContent(SuccessResponseSchema(ProductVariantSchema)),
+      content: { "application/json": { schema: SuccessResponseSchema(ProductVariantSchema) } },
     },
   },
   handler: vh.createVariant,
@@ -327,7 +329,7 @@ const getVariantRoute = defineRoute({
   responses: {
     200: {
       description: "Variant detail",
-      content: jsonContent(SuccessResponseSchema(ProductVariantSchema)),
+      content: { "application/json": { schema: SuccessResponseSchema(ProductVariantSchema) } },
     },
   },
   handler: vh.getVariant,
@@ -346,7 +348,7 @@ const updateVariantRoute = defineRoute({
   responses: {
     200: {
       description: "Variant updated",
-      content: jsonContent(SuccessResponseSchema(ProductVariantSchema)),
+      content: { "application/json": { schema: SuccessResponseSchema(ProductVariantSchema) } },
     },
   },
   handler: vh.updateVariant,
@@ -365,7 +367,7 @@ const deleteVariantRoute = defineRoute({
   responses: {
     200: {
       description: "Variant deleted",
-      content: jsonContent(z.object({ success: z.boolean().openapi({ example: true }) })),
+      content: { "application/json": { schema: z.object({ success: z.boolean().openapi({ example: true }) }) } },
     },
     422: { description: "Cannot delete variant referenced by existing orders (VARIANT_HAS_ORDERS)" },
   },

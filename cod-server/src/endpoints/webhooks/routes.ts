@@ -8,16 +8,14 @@
  * Mount order in index.ts:
  *   app.route("/webhooks", webhooksRouter)  ← BEFORE app.use("/api/*", authMiddleware)
  *
- * Migrated to @hono/zod-openapi for the OpenAPI spec. Deliberately NO
- * request-body validation on the event-delivery routes: handlers must read
- * the RAW body (c.req.text()) before any JSON parsing because Svix
- * signatures verify raw bytes — framework parsing here would break that
- * contract. Payload shapes are documented in the route descriptions and the
- * handlers enforce their own specific error codes.
+ * Migrated to defineRoute() from @/lib/route-builder — route definitions below
+ * are the single source of truth for validation and the OpenAPI spec.
+ * Handlers enforce their own specific error codes.
  */
 
-import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
+import { OpenAPIHono, z } from "@hono/zod-openapi";
 import type { AppContext } from "@/types";
+import { defineRoute } from "@/lib/route-builder";
 import {
   handleYalidineChallenge,
   handleYalidineWebhook,
@@ -37,9 +35,17 @@ const receivedResponse = {
   ),
 };
 
-const yalidineChallengeRoute = createRoute({
+const errorSchema = z.object({
+  error: z.string(),
+  code: z.string().openapi({ example: "INVALID_WEBHOOK_PAYLOAD" }),
+  category: z.string().openapi({ example: "VALIDATION" }),
+  context: z.record(z.string(), z.unknown()).optional(),
+});
+
+const yalidineChallengeRoute = defineRoute({
   method: "get",
   path: "/yalidine",
+  auth: "none",
   tags: ["Webhooks"],
   summary: "Yalidine CRC challenge",
   description:
@@ -47,20 +53,15 @@ const yalidineChallengeRoute = createRoute({
     "at creation, edit, and periodically. The endpoint echoes the crc_token as plain text. " +
     "If this fails, Yalidine disables the webhook automatically.",
   operationId: "yalidineChallenge",
-  request: {
-    query: z.object({
-      subscribe: z.string().optional().openapi({
-        description: "Sent by Yalidine to initiate the CRC challenge",
-      }),
-      crc_token: z.string().optional().openapi({
-        description: "Token echoed back in the (plain-text) response body",
-      }),
+  query: z.object({
+    subscribe: z.string().optional().openapi({
+      description: "Sent by Yalidine to initiate the CRC challenge",
     }),
-  },
+    crc_token: z.string().optional().openapi({
+      description: "Token echoed back in the (plain-text) response body",
+    }),
+  }),
   responses: {
-    // Documented contract: crc_token echoed as text/plain. Without challenge
-    // params the legacy handler answers a tiny {ok:true} JSON ack instead —
-    // the dual return predates typed routes, hence the registration cast below.
     200: {
       description: "CRC token echoed as plain text",
       content: {
@@ -70,11 +71,13 @@ const yalidineChallengeRoute = createRoute({
       },
     },
   },
+  handler: handleYalidineChallenge as never,
 });
 
-const yalidineWebhookRoute = createRoute({
+const yalidineWebhookRoute = defineRoute({
   method: "post",
   path: "/yalidine",
+  auth: "none",
   tags: ["Webhooks"],
   summary: "Yalidine event delivery",
   description: `Receives webhook event batches from Yalidine. One event type per request, multiple events per batch. Each event carries its own idempotency key (\`event_id\`). Always returns 200 — errors are logged internally.
@@ -87,32 +90,25 @@ Invalid payloads are rejected with \`400 INVALID_WEBHOOK_PAYLOAD\`; processing f
     200: receivedResponse,
     400: {
       description: "Invalid webhook payload (INVALID_WEBHOOK_PAYLOAD)",
-      content: jsonContent(
-        z.object({
-          error: z.string(),
-          code: z.string().openapi({ example: "INVALID_WEBHOOK_PAYLOAD" }),
-          category: z.string().openapi({ example: "VALIDATION" }),
-          context: z.record(z.string(), z.unknown()).optional(),
-        })
-      ),
+      content: jsonContent(errorSchema),
     },
     502: {
       description: "Webhook processing failed (EXTERNAL_API_FAILURE)",
       content: jsonContent(
-        z.object({
-          error: z.string(),
+        errorSchema.extend({
           code: z.string().openapi({ example: "EXTERNAL_API_FAILURE" }),
           category: z.string().openapi({ example: "SYSTEM" }),
-          context: z.record(z.string(), z.unknown()).optional(),
         })
       ),
     },
   },
+  handler: handleYalidineWebhook,
 });
 
-const zrWebhookRoute = createRoute({
+const zrWebhookRoute = defineRoute({
   method: "post",
   path: "/zr_express",
+  auth: "none",
   tags: ["Webhooks"],
   summary: "ZR Express event delivery",
   description: `Receives webhook events from ZR Express via Svix. Signature is verified using HMAC-SHA256 with the stored whsec_ secret over the RAW request bytes. Idempotency key is the \`svix-id\` header. Always returns 200.
@@ -121,47 +117,34 @@ const zrWebhookRoute = createRoute({
 
 Signature/payload failures are rejected with \`400 INVALID_WEBHOOK_PAYLOAD\`; processing failures surface as \`502 EXTERNAL_API_FAILURE\`.`,
   operationId: "zrExpressWebhook",
-  request: {
-    headers: z.object({
-      "svix-id": z.string().openapi({ description: "Svix idempotency key" }),
-      "svix-timestamp": z.string().openapi({ description: "Svix signed timestamp" }),
-      "svix-signature": z.string().openapi({ description: "Svix HMAC-SHA256 signature" }),
-    }),
-  },
+  headers: z.object({
+    "svix-id": z.string().openapi({ description: "Svix idempotency key" }),
+    "svix-timestamp": z.string().openapi({ description: "Svix signed timestamp" }),
+    "svix-signature": z.string().openapi({ description: "Svix HMAC-SHA256 signature" }),
+  }),
   responses: {
     200: receivedResponse,
     400: {
       description: "Invalid webhook payload or signature (INVALID_WEBHOOK_PAYLOAD)",
-      content: jsonContent(
-        z.object({
-          error: z.string(),
-          code: z.string().openapi({ example: "INVALID_WEBHOOK_PAYLOAD" }),
-          category: z.string().openapi({ example: "VALIDATION" }),
-          context: z.record(z.string(), z.unknown()).optional(),
-        })
-      ),
+      content: jsonContent(errorSchema),
     },
     502: {
       description: "Webhook processing failed (EXTERNAL_API_FAILURE)",
       content: jsonContent(
-        z.object({
-          error: z.string(),
+        errorSchema.extend({
           code: z.string().openapi({ example: "EXTERNAL_API_FAILURE" }),
           category: z.string().openapi({ example: "SYSTEM" }),
-          context: z.record(z.string(), z.unknown()).optional(),
         })
       ),
     },
   },
+  handler: handleZrWebhook,
 });
 
 const webhooksRouter = new OpenAPIHono<AppContext>();
 
-// Dual-protocol endpoint (text/plain challenge ack vs JSON ack when params
-// are absent) — the union return predates typed routes, so registration
-// widens the handler type. Runtime behavior is unchanged.
-webhooksRouter.openapi(yalidineChallengeRoute, handleYalidineChallenge as never);
-webhooksRouter.openapi(yalidineWebhookRoute, handleYalidineWebhook);
-webhooksRouter.openapi(zrWebhookRoute, handleZrWebhook);
+webhooksRouter.openapi(yalidineChallengeRoute.route, yalidineChallengeRoute.handler);
+webhooksRouter.openapi(yalidineWebhookRoute.route, yalidineWebhookRoute.handler);
+webhooksRouter.openapi(zrWebhookRoute.route, zrWebhookRoute.handler);
 
 export default webhooksRouter;

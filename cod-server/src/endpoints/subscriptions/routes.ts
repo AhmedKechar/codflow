@@ -1,110 +1,69 @@
-import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
+import { OpenAPIHono, z } from "@hono/zod-openapi";
 import type { AppContext } from "@/types";
 import { SCOPES } from "../../../../cod-shared/rbac/scopes";
-import { requireScope } from "@/rbac/middleware";
+import { defineRoute } from "@/lib/route-builder";
 import * as h from "./handlers";
-import { ErrorResponseSchema } from "@/openapi/schemas";
 
-const jsonContent = <T extends z.ZodType>(schema: T) => ({
-  "application/json": { schema },
-});
-
-const errorResponse = (description: string) => ({
-  description,
-  content: jsonContent(ErrorResponseSchema),
-});
-
-const listPlansRoute = createRoute({
+const listPlansRoute = defineRoute({
   method: "get",
   path: "/plans",
+  auth: "api-key",
   tags: ["Subscriptions"],
   summary: "List available plans",
   operationId: "listPlans",
-  responses: {
-    200: { description: "List of active plans" },
-    401: errorResponse("Missing or invalid API key"),
-  },
-  security: [{ ApiKeyAuth: [] }],
+  handler: h.listPlans,
 });
 
-const getPlanRoute = createRoute({
+const getPlanRoute = defineRoute({
   method: "get",
   path: "/plans/{id}",
+  auth: "api-key",
   tags: ["Subscriptions"],
   summary: "Get plan details",
   operationId: "getPlan",
-  request: {
-    params: z.object({ id: z.string() }),
-  },
-  responses: {
-    200: { description: "Plan details" },
-    401: errorResponse("Missing or invalid API key"),
-    404: errorResponse("Plan not found"),
-  },
-  security: [{ ApiKeyAuth: [] }],
+  params: z.object({ id: z.string() }),
+  handler: h.getPlan,
 });
 
-const getMySubscriptionRoute = createRoute({
+const getMySubscriptionRoute = defineRoute({
   method: "get",
   path: "/current",
-  middleware: [requireScope(SCOPES.SUBSCRIPTIONS_READ)],
+  auth: { scope: SCOPES.SUBSCRIPTIONS_READ },
   tags: ["Subscriptions"],
   summary: "Get current subscription",
   operationId: "getMySubscription",
-  responses: {
-    200: { description: "Current subscription with plan details" },
-    401: errorResponse("Missing or invalid API key"),
-    403: errorResponse("Insufficient scope"),
-  },
-  security: [{ ApiKeyAuth: [] }],
+  handler: h.getMySubscription,
 });
 
-const getHistoryRoute = createRoute({
+const getHistoryRoute = defineRoute({
   method: "get",
   path: "/history",
-  middleware: [requireScope(SCOPES.SUBSCRIPTIONS_READ)],
+  auth: { scope: SCOPES.SUBSCRIPTIONS_READ },
   tags: ["Subscriptions"],
   summary: "Get subscription history",
   operationId: "getSubscriptionHistory",
-  responses: {
-    200: { description: "Subscription history" },
-    401: errorResponse("Missing or invalid API key"),
-    403: errorResponse("Insufficient scope"),
-  },
-  security: [{ ApiKeyAuth: [] }],
+  handler: h.getSubscriptionHistory,
 });
 
-const upgradeRoute = createRoute({
+const upgradeRoute = defineRoute({
   method: "post",
   path: "/upgrade",
-  middleware: [requireScope(SCOPES.SUBSCRIPTIONS_MANAGE)],
+  auth: { scope: SCOPES.SUBSCRIPTIONS_MANAGE },
   tags: ["Subscriptions"],
   summary: "Upgrade or change plan",
   operationId: "upgradePlan",
-  request: {
-    body: {
-      required: true,
-      content: jsonContent(z.object({
-        planId: z.string(),
-        paymentMethod: z.enum(["ccp", "baridi_mob", "wise", "redotpay"]).optional(),
-      })),
-    },
-  },
-  responses: {
-    200: { description: "Subscription updated" },
-    400: errorResponse("Validation error"),
-    401: errorResponse("Missing or invalid API key"),
-    403: errorResponse("Insufficient scope"),
-    404: errorResponse("Plan not found"),
-  },
-  security: [{ ApiKeyAuth: [] }],
+  body: z.object({
+    planId: z.string(),
+    paymentMethod: z.enum(["ccp", "baridi_mob", "wise", "redotpay"]).optional(),
+  }),
+  handler: h.upgradePlan,
 });
 
 const router = new OpenAPIHono<AppContext>();
-router.openapi(listPlansRoute, h.listPlans);
-router.openapi(getPlanRoute, h.getPlan);
-router.openapi(getMySubscriptionRoute, h.getMySubscription);
-router.openapi(getHistoryRoute, h.getSubscriptionHistory);
-router.openapi(upgradeRoute, h.upgradePlan);
+router.openapi(listPlansRoute.route, listPlansRoute.handler);
+router.openapi(getPlanRoute.route, getPlanRoute.handler);
+router.openapi(getMySubscriptionRoute.route, getMySubscriptionRoute.handler);
+router.openapi(getHistoryRoute.route, getHistoryRoute.handler);
+router.openapi(upgradeRoute.route, upgradeRoute.handler);
 
 export default router;

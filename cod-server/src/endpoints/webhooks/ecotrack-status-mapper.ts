@@ -21,7 +21,7 @@
  * This mapper is used when tracking events are pulled via getTrackingInfo().
  */
 
-import type { OrderStatus } from "../../../../../cod-shared/db/schema";
+import type { OrderStatus } from "../../../../cod-shared/db/schema";
 
 // Map EcoTrack status to CodFlow order status
 const ECOTRACK_STATUS_MAP: Record<string, OrderStatus> = {

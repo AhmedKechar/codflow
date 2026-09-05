@@ -97,6 +97,10 @@ export const SCOPES = {
   SETTINGS_INTEGRATIONS: "settings:integrations",
   /** Manage notification templates */
   SETTINGS_NOTIFICATIONS: "settings:notifications",
+  /** Manage WhatsApp OTP verification settings */
+  SETTINGS_VERIFICATION: "settings:verification",
+  /** Manage transactional email sending settings */
+  SETTINGS_EMAIL: "settings:email",
 
   // Reviews
   /** View product reviews and their moderation status */

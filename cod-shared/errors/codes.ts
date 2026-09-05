@@ -44,6 +44,16 @@ export const ERROR_CODES = {
   DUPLICATE_PHONE: "DUPLICATE_PHONE",
   
   // ============================================================================
+  // BUSINESS LOGIC ERRORS - OTP VERIFICATION
+  // ============================================================================
+  OTP_NOT_ENABLED: "OTP_NOT_ENABLED",
+  OTP_VERIFICATION_REQUIRED: "OTP_VERIFICATION_REQUIRED",
+  OTP_TOKEN_INVALID: "OTP_TOKEN_INVALID",
+  OTP_PHONE_MISMATCH: "OTP_PHONE_MISMATCH",
+  OTP_QUOTA_EXHAUSTED: "OTP_QUOTA_EXHAUSTED",
+  OTP_RATE_LIMITED: "OTP_RATE_LIMITED",
+
+  // ============================================================================
   // BUSINESS LOGIC ERRORS - ORDERS
   // ============================================================================
   ORDER_NOT_FOUND: "ORDER_NOT_FOUND",
@@ -203,7 +213,17 @@ export const ERROR_CODES = {
   // ============================================================================
   PROVIDER_KEY_NOT_FOUND: "PROVIDER_KEY_NOT_FOUND",
   PROVIDER_KEY_DUPLICATE: "PROVIDER_KEY_DUPLICATE",
-  
+
+  // ============================================================================
+  // BUSINESS LOGIC ERRORS - EMAIL (Sendili)
+  // ============================================================================
+  EMAIL_NOT_ENABLED: "EMAIL_NOT_ENABLED",
+  EMAIL_SEND_FAILED: "EMAIL_SEND_FAILED",
+  EMAIL_INVALID_FROM: "EMAIL_INVALID_FROM",
+  EMAIL_RATE_LIMITED: "EMAIL_RATE_LIMITED",
+  EMAIL_OUT_OF_CREDITS: "EMAIL_OUT_OF_CREDITS",
+  EMAIL_INVALID_API_KEY: "EMAIL_INVALID_API_KEY",
+
   // ============================================================================
   // SYSTEM ERRORS (500, 502, 503)
   // ============================================================================

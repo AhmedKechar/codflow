@@ -243,7 +243,11 @@
     "disconnect": "Déconnecter",
     "success_connected": "Connecté avec succès",
     "success_updated": "Identifiants mis à jour",
-    "success_disconnected": "Déconnecté"
+    "success_disconnected": "Déconnecté",
+    "test_connection": "Tester la connexion",
+    "testing": "Test en cours...",
+    "connection_success": "Connexion vérifiée",
+    "connection_failed": "Échec de la connexion"
   },
   "shipping_profiles": {
     "linked_network": "Réseau lié",

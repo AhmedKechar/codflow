@@ -139,7 +139,7 @@ describe("Orders routes (OpenAPIHono)", () => {
 
   describe("GET /api/orders", () => {
     it("returns 200 with orders and count", async () => {
-      vi.mocked(queries.getAllOrders).mockResolvedValue([orderRow()] as any);
+      vi.mocked(queries.getOrdersPaginated).mockResolvedValue({ rows: [orderRow()], total: 1 } as any);
 
       const res = await app.request("/api/orders");
 
@@ -150,12 +150,12 @@ describe("Orders routes (OpenAPIHono)", () => {
     });
 
     it("passes filters through to the query", async () => {
-      vi.mocked(queries.getAllOrders).mockResolvedValue([] as any);
+      vi.mocked(queries.getOrdersPaginated).mockResolvedValue({ rows: [], total: 0 } as any);
 
       const res = await app.request("/api/orders?status=delivered&limit=10");
 
       expect(res.status).toBe(200);
-      expect(queries.getAllOrders).toHaveBeenCalledWith(
+      expect(queries.getOrdersPaginated).toHaveBeenCalledWith(
         mockDb,
         "test-store",
         expect.objectContaining({ status: "delivered", limit: 10 })

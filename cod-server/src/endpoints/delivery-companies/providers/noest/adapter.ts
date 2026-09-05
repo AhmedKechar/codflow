@@ -266,6 +266,16 @@ export class NoestProvider implements DeliveryProvider {
       };
     });
   }
+
+  async testConnection(): Promise<{ success: boolean; message: string; latencyMs: number }> {
+    const start = Date.now();
+    try {
+      await this.get("/api/public/desks");
+      return { success: true, message: "Credentials verified", latencyMs: Date.now() - start };
+    } catch (err) {
+      return { success: false, message: (err as Error).message, latencyMs: Date.now() - start };
+    }
+  }
   /**
    * Update a shipment at the NOEST API.
    * ✅ VERIFIED: Only works on unvalidated orders (before valid/order is called).

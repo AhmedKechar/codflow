@@ -7,15 +7,15 @@
  * PATCH  /api/abandoned-orders/:id/status → update status
  * DELETE /api/abandoned-orders/:id      → delete record
  *
- * Migrated to @hono/zod-openapi: route definitions below are the single
- * source of truth for validation and the OpenAPI spec. Handlers are inline
- * (thin query wrappers) and unchanged apart from the validated-data
+ * Migrated to defineRoute() from @/lib/route-builder — route definitions below
+ * are the single source of truth for validation and the OpenAPI spec.
+ * Handlers are thin query wrappers, unchanged apart from the validated-data
  * fallback pattern.
  */
 
-import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
+import { OpenAPIHono, z } from "@hono/zod-openapi";
 import type { AppContext } from "@/types";
-import { requireScope } from "@/rbac/middleware";
+import { defineRoute } from "@/lib/route-builder";
 import { SCOPES } from "../../../../cod-shared/rbac/scopes";
 import { getDb } from "@/db";
 import {
@@ -28,141 +28,52 @@ import {
   AbandonedOrderSchema,
   AbandonedOrderStatsSchema,
   AbandonedOrderStatusEnum,
-  ErrorResponseSchema,
 } from "@/openapi/schemas";
 
 const jsonContent = <T extends z.ZodType>(schema: T) => ({
   "application/json": { schema },
 });
 
-const errorResponse = (description: string) => ({
-  description,
-  content: jsonContent(ErrorResponseSchema),
+const listParamsSchema = z.object({
+  status: AbandonedOrderStatusEnum.optional().openapi({
+    description: "Filter by recovery status",
+  }),
+  search: z.string().optional(),
+  limit: z.coerce.number().int().positive().max(200).default(50),
+  offset: z.coerce.number().int().min(0).default(0),
 });
 
-const listRoute = createRoute({
-  method: "get",
-  path: "/",
-  middleware: [requireScope(SCOPES.ABANDONED_ORDERS_READ)],
-  tags: ["Abandoned Orders"],
-  summary: "List abandoned orders",
-  description:
-    "Paginated list of abandoned checkouts, newest first. Filter by recovery status or search by customer name / phone / session.",
-  operationId: "listAbandonedOrders",
-  request: {
-    query: z.object({
-      status: AbandonedOrderStatusEnum.optional().openapi({
-        description: "Filter by recovery status",
-      }),
-      search: z.string().optional(),
-      limit: z.coerce.number().int().positive().max(200).default(50),
-      offset: z.coerce.number().int().min(0).default(0),
-    }),
-  },
-  responses: {
-    200: {
-      description: "Paginated abandoned orders",
-      content: jsonContent(
-        z.object({
-          success: z.boolean().openapi({ example: true }),
-          data: z.array(AbandonedOrderSchema),
-          total: z.number().int().openapi({
-            description: "Total matching records (for pagination)",
-            example: 42,
-          }),
-          limit: z.number().int().openapi({ example: 50 }),
-          offset: z.number().int().openapi({ example: 0 }),
-        })
-      ),
-    },
-    401: errorResponse("Missing or invalid API key"),
-    403: errorResponse("Missing abandoned_orders:read scope"),
-  },
-  security: [{ ApiKeyAuth: [] }],
+const idParamsSchema = z.object({
+  id: z.string().openapi({ description: "Abandoned order ID" }),
 });
 
-const statsRoute = createRoute({
-  method: "get",
-  path: "/stats",
-  middleware: [requireScope(SCOPES.ABANDONED_ORDERS_READ)],
-  tags: ["Abandoned Orders"],
-  summary: "Abandoned order statistics",
-  description:
-    "Summary metrics for the recovery workflow: counts of abandoned vs converted checkouts, the recovered percentage, and estimated lost revenue still on the table.",
-  operationId: "getAbandonedOrderStats",
-  responses: {
-    200: {
-      description: "Recovery statistics",
-      content: jsonContent(
-        z.object({
-          success: z.boolean().openapi({ example: true }),
-          data: AbandonedOrderStatsSchema,
-        })
-      ),
-    },
-    401: errorResponse("Missing or invalid API key"),
-    403: errorResponse("Missing abandoned_orders:read scope"),
-  },
-  security: [{ ApiKeyAuth: [] }],
+const listResponseSchema = z.object({
+  success: z.boolean().openapi({ example: true }),
+  data: z.array(AbandonedOrderSchema),
+  total: z.number().int().openapi({
+    description: "Total matching records (for pagination)",
+    example: 42,
+  }),
+  limit: z.number().int().openapi({ example: 50 }),
+  offset: z.number().int().openapi({ example: 0 }),
 });
 
-const updateStatusRoute = createRoute({
-  method: "patch",
-  path: "/{id}/status",
-  middleware: [requireScope(SCOPES.ABANDONED_ORDERS_MANAGE)],
-  tags: ["Abandoned Orders"],
-  summary: "Update abandoned order status",
-  description:
-    "Advances the recovery status of an abandoned checkout (pending → contacted → converted, or mark as abandoned).",
-  operationId: "updateAbandonedOrderStatus",
-  request: {
-    params: z.object({ id: z.string().openapi({ description: "Abandoned order ID" }) }),
-    body: {
-      required: true,
-      content: jsonContent(
-        z.object({
-          status: AbandonedOrderStatusEnum,
-        })
-      ),
-    },
-  },
-  responses: {
-    200: {
-      description: "Status updated",
-      content: jsonContent(z.object({ success: z.boolean().openapi({ example: true }) })),
-    },
-    400: errorResponse("Invalid status value"),
-    401: errorResponse("Missing or invalid API key"),
-    403: errorResponse("Missing abandoned_orders:manage scope"),
-  },
-  security: [{ ApiKeyAuth: [] }],
+const statsResponseSchema = z.object({
+  success: z.boolean().openapi({ example: true }),
+  data: AbandonedOrderStatsSchema,
 });
 
-const deleteRoute = createRoute({
-  method: "delete",
-  path: "/{id}",
-  middleware: [requireScope(SCOPES.ABANDONED_ORDERS_MANAGE)],
-  tags: ["Abandoned Orders"],
-  summary: "Delete abandoned order",
-  description: "Permanently removes an abandoned checkout record.",
-  operationId: "deleteAbandonedOrder",
-  request: {
-    params: z.object({ id: z.string().openapi({ description: "Abandoned order ID" }) }),
-  },
-  responses: {
-    200: {
-      description: "Record deleted",
-      content: jsonContent(z.object({ success: z.boolean().openapi({ example: true }) })),
-    },
-    401: errorResponse("Missing or invalid API key"),
-    403: errorResponse("Missing abandoned_orders:manage scope"),
-  },
-  security: [{ ApiKeyAuth: [] }],
+const successResponseSchema = z.object({
+  success: z.boolean().openapi({ example: true }),
 });
 
-const router = new OpenAPIHono<AppContext>();
+const statusBodySchema = z.object({
+  status: AbandonedOrderStatusEnum,
+});
 
-router.openapi(listRoute, async (c) => {
+// ── Handlers ────────────────────────────────────────────────────────────────
+
+async function listHandler(c: any) {
   const db = getDb(c.env.DB);
   const storeId = c.get("storeId")!;
   const { status, search, limit, offset } = c.req.valid("query");
@@ -175,16 +86,16 @@ router.openapi(listRoute, async (c) => {
   });
 
   return c.json({ success: true, data: rows, total, limit, offset }, 200);
-});
+}
 
-router.openapi(statsRoute, async (c) => {
+async function statsHandler(c: any) {
   const db = getDb(c.env.DB);
   const storeId = c.get("storeId")!;
   const stats = await getAbandonedOrderStats(db, storeId);
   return c.json({ success: true, data: stats }, 200);
-});
+}
 
-router.openapi(updateStatusRoute, async (c) => {
+async function updateStatusHandler(c: any) {
   const db = getDb(c.env.DB);
   const storeId = c.get("storeId")!;
   const id = c.req.param("id");
@@ -192,14 +103,98 @@ router.openapi(updateStatusRoute, async (c) => {
 
   await updateAbandonedOrderStatus(db, storeId, id, status);
   return c.json({ success: true }, 200);
-});
+}
 
-router.openapi(deleteRoute, async (c) => {
+async function deleteHandler(c: any) {
   const db = getDb(c.env.DB);
   const storeId = c.get("storeId")!;
   const id = c.req.param("id");
   await deleteAbandonedOrder(db, storeId, id);
   return c.json({ success: true }, 200);
+}
+
+// ── Routes ──────────────────────────────────────────────────────────────────
+
+const listRoute = defineRoute({
+  method: "get",
+  path: "/",
+  auth: { scope: SCOPES.ABANDONED_ORDERS_READ },
+  tags: ["Abandoned Orders"],
+  summary: "List abandoned orders",
+  description:
+    "Paginated list of abandoned checkouts, newest first. Filter by recovery status or search by customer name / phone / session.",
+  operationId: "listAbandonedOrders",
+  query: listParamsSchema,
+  responses: {
+    200: {
+      description: "Paginated abandoned orders",
+      content: jsonContent(listResponseSchema),
+    },
+  },
+  handler: listHandler,
 });
+
+const statsRoute = defineRoute({
+  method: "get",
+  path: "/stats",
+  auth: { scope: SCOPES.ABANDONED_ORDERS_READ },
+  tags: ["Abandoned Orders"],
+  summary: "Abandoned order statistics",
+  description:
+    "Summary metrics for the recovery workflow: counts of abandoned vs converted checkouts, the recovered percentage, and estimated lost revenue still on the table.",
+  operationId: "getAbandonedOrderStats",
+  responses: {
+    200: {
+      description: "Recovery statistics",
+      content: jsonContent(statsResponseSchema),
+    },
+  },
+  handler: statsHandler,
+});
+
+const updateStatusRoute = defineRoute({
+  method: "patch",
+  path: "/{id}/status",
+  auth: { scope: SCOPES.ABANDONED_ORDERS_MANAGE },
+  tags: ["Abandoned Orders"],
+  summary: "Update abandoned order status",
+  description:
+    "Advances the recovery status of an abandoned checkout (pending → contacted → converted, or mark as abandoned).",
+  operationId: "updateAbandonedOrderStatus",
+  params: idParamsSchema,
+  body: statusBodySchema,
+  responses: {
+    200: {
+      description: "Status updated",
+      content: jsonContent(successResponseSchema),
+    },
+  },
+  handler: updateStatusHandler,
+});
+
+const deleteRoute = defineRoute({
+  method: "delete",
+  path: "/{id}",
+  auth: { scope: SCOPES.ABANDONED_ORDERS_MANAGE },
+  tags: ["Abandoned Orders"],
+  summary: "Delete abandoned order",
+  description: "Permanently removes an abandoned checkout record.",
+  operationId: "deleteAbandonedOrder",
+  params: idParamsSchema,
+  responses: {
+    200: {
+      description: "Record deleted",
+      content: jsonContent(successResponseSchema),
+    },
+  },
+  handler: deleteHandler,
+});
+
+const router = new OpenAPIHono<AppContext>();
+
+router.openapi(listRoute.route, listRoute.handler);
+router.openapi(statsRoute.route, statsRoute.handler);
+router.openapi(updateStatusRoute.route, updateStatusRoute.handler);
+router.openapi(deleteRoute.route, deleteRoute.handler);
 
 export default router;

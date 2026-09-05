@@ -13,6 +13,7 @@ import * as handlers from "./handlers";
 import * as statusTransitions from "./status-transitions";
 import * as dispatch from "./dispatch";
 import * as shipmentOps from "./shipment-operations";
+import { reconcileOrders } from "./reconcile";
 
 import {
   createOrderSchema,
@@ -657,6 +658,41 @@ Returns application/pdf with Content-Disposition: inline.`,
   handler: shipmentOps.proxyShipmentLabel,
 });
 
+const reconcileRoute = defineRoute({
+  method: "post",
+  path: "/reconcile",
+  auth: { scope: SCOPES.ORDERS_READ },
+  tags: ["Orders"],
+  summary: "Reconcile order statuses with carriers",
+  description: "Batch-synchronize all active dispatched order statuses with their carrier APIs. Pulls tracking info and updates local statuses based on the latest carrier events.",
+  operationId: "reconcileOrders",
+  responses: {
+    200: {
+      description: "Reconciliation results",
+      content: jsonContent(
+        z.object({
+          success: z.boolean(),
+          data: z.object({
+            total: z.number().int(),
+            updated: z.number().int(),
+            failed: z.number().int(),
+            results: z.array(z.object({
+              orderId: z.string(),
+              orderNumber: z.string(),
+              trackingNumber: z.string(),
+              previousStatus: z.string(),
+              newStatus: z.string().nullable(),
+              updated: z.boolean(),
+              error: z.string().optional(),
+            })),
+          }),
+        })
+      ),
+    },
+  },
+  handler: reconcileOrders,
+});
+
 // ─── Router ───────────────────────────────────────────────────────────────────
 
 // IMPORTANT: /bulk-dispatch must come before /{id} routes — otherwise
@@ -664,6 +700,7 @@ Returns application/pdf with Content-Disposition: inline.`,
 const router = new OpenAPIHono<AppContext>();
 
 router.openapi(listOrdersRoute.route, listOrdersRoute.handler);
+router.openapi(reconcileRoute.route, reconcileRoute.handler);
 router.openapi(bulkDispatchRoute.route, bulkDispatchRoute.handler);
 
 router.openapi(getOrderRoute.route, getOrderRoute.handler);

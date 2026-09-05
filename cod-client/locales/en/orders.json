@@ -265,5 +265,11 @@
     "fragile_label": "Fragile",
     "fragile_description": "Handle with care during delivery",
     "new_order_subtitle": "Fill in the customer info and add products to create a new order"
-  }
+  },
+  "reconcile_button": "Reconcile Statuses",
+  "reconcile_syncing": "Syncing...",
+  "reconcile_updated": "Updated",
+  "reconcile_of": "of",
+  "reconcile_orders": "orders",
+  "reconcile_all_synced": "All orders are up to date"
 }

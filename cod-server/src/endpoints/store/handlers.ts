@@ -7,6 +7,7 @@ import { NotFoundError, ValidationError, ConflictError, BusinessLogicError } fro
 import { ERROR_CODES } from "../../../../cod-shared/errors/codes";
 import { getPixelConfig } from "../../../../cod-shared/queries/pixel-config";
 import { sendCapiEvent } from "@/lib/capi";
+import { assertOtpVerification } from "../store-otp/otp-gate";
 
 async function sendCapiLeadMirror(
   db: ReturnType<typeof getDb>,
@@ -97,6 +98,12 @@ export async function createStoreOrder(c: Context<AppContext>) {
   const bodyData: any = (c.req as any).valid?.("json");
   const data: import("./validation").StoreOrderInput =
     bodyData ?? storeOrderSchema.parse(await c.req.json());
+
+  // Enforce OTP verification if enabled for this store
+  await assertOtpVerification(c, storeId, {
+    phone: data.phone,
+    otpToken: data.otpToken,
+  });
 
   const skuMissing = await queries.validateOrderSkus(
     db,

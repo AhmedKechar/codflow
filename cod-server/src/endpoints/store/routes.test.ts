@@ -15,6 +15,9 @@ import * as queries from "./queries";
 vi.mock("@/db", () => ({ getDb: vi.fn(() => mockDb) }));
 vi.mock("./queries");
 vi.mock("@/lib/capi", () => ({ sendCapiEvent: vi.fn(async () => ({ success: true })) }));
+vi.mock("../store-otp/otp-gate", () => ({
+  assertOtpVerification: vi.fn(async () => {}),
+}));
 
 const NOW = new Date().toISOString();
 

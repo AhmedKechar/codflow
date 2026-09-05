@@ -19,7 +19,7 @@
  * This mapper is used when tracking events are pulled via getTrackingInfo().
  */
 
-import type { OrderStatus } from "../../../../../cod-shared/db/schema";
+import type { OrderStatus } from "../../../../cod-shared/db/schema";
 
 // Map NOEST event_key to CodFlow order status
 // Keys are lowercased for case-insensitive lookup

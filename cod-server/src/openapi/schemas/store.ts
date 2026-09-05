@@ -25,12 +25,12 @@ export const StoreSchema = z
       description: "Google Fonts import URL (optional override)",
       example: "https://fonts.googleapis.com/css2?family=Cairo",
     }),
-    borderRadius: z.enum(["rounded", "sharp", "minimal"]).openapi({
+    borderRadius: z.string().openapi({
       description: "Border radius style: rounded (1.25rem), sharp (0.75rem), minimal (0.5rem)",
       example: "rounded",
     }),
-    shadowIntensity: z.enum(["soft", "medium", "strong"]).openapi({
-      description: "Shadow intensity level",
+    shadowIntensity: z.string().openapi({
+      description: "Shadow intensity level: soft, medium, strong",
       example: "soft",
     }),
     lang: z.enum(["ar", "en"]).openapi({ description: "Store UI language", example: "ar" }),
@@ -55,37 +55,12 @@ export const StoreSchema = z
       example: true,
     }),
     status: z.enum(["active", "inactive"]).openapi({ example: "active" }),
-    trustSeals: z
-      .object({
-        cashOnDelivery: z.boolean().optional(),
-        freeReturns: z.boolean().optional(),
-        secureCheckout: z.boolean().optional(),
-        fastDelivery: z.boolean().optional(),
-        customerSupport: z.boolean().optional(),
-        qualityGuarantee: z.boolean().optional(),
-      })
-      .nullable()
-      .openapi({
-        description: "Enabled trust seal badges shown on the storefront",
-      }),
-    orderFormConfig: z
-      .object({
-        showName: z.boolean().optional(),
-        showPhone: z.boolean().optional(),
-        showEmail: z.boolean().optional(),
-        showAddress: z.boolean().optional(),
-        showWilaya: z.boolean().optional(),
-        showCommune: z.boolean().optional(),
-        showDeliveryType: z.boolean().optional(),
-        showNotes: z.boolean().optional(),
-        showQuantity: z.boolean().optional(),
-        submitButtonText: z.string().max(50).nullable().optional(),
-        summaryDisplay: z.enum(["open", "closed", "hidden"]).optional(),
-      })
-      .nullable()
-      .openapi({
-        description: "Order form field visibility and display options",
-      }),
+    trustSeals: z.string().nullable().openapi({
+      description: "Enabled trust seal badges shown on the storefront (JSON string)",
+    }),
+    orderFormConfig: z.string().nullable().openapi({
+      description: "Order form field visibility and display options (JSON string)",
+    }),
     storeApiKey: z.string().nullable().openapi({
       description:
         "Plaintext storefront API key — visible to the merchant in Store Settings. Not the dashboard API key.",
@@ -307,8 +282,8 @@ export const StoreConfigSchema = z
     fontUrl: z.string().nullable().openapi({
       description: "Google Fonts CSS URL override",
     }),
-    borderRadius: z.enum(["rounded", "sharp", "minimal"]),
-    shadowIntensity: z.enum(["soft", "medium", "strong"]),
+    borderRadius: z.string(),
+    shadowIntensity: z.string(),
     lang: z.enum(["ar", "en"]),
     currency: z.string().openapi({ example: "DZD" }),
     currencySymbol: z.string().openapi({ example: "دج" }),
@@ -329,37 +304,12 @@ export const StoreConfigSchema = z
       example: true,
     }),
     status: z.enum(["active", "inactive"]),
-    trustSeals: z
-      .object({
-        cashOnDelivery: z.boolean().optional(),
-        freeReturns: z.boolean().optional(),
-        secureCheckout: z.boolean().optional(),
-        fastDelivery: z.boolean().optional(),
-        customerSupport: z.boolean().optional(),
-        qualityGuarantee: z.boolean().optional(),
-      })
-      .nullable()
-      .openapi({
-        description: "Enabled trust seal badges shown on the storefront",
-      }),
-    orderFormConfig: z
-      .object({
-        showName: z.boolean().optional(),
-        showPhone: z.boolean().optional(),
-        showEmail: z.boolean().optional(),
-        showAddress: z.boolean().optional(),
-        showWilaya: z.boolean().optional(),
-        showCommune: z.boolean().optional(),
-        showDeliveryType: z.boolean().optional(),
-        showNotes: z.boolean().optional(),
-        showQuantity: z.boolean().optional(),
-        submitButtonText: z.string().max(50).nullable().optional(),
-        summaryDisplay: z.enum(["open", "closed", "hidden"]).optional(),
-      })
-      .nullable()
-      .openapi({
-        description: "Order form field visibility and display options",
-      }),
+    trustSeals: z.string().nullable().openapi({
+      description: "Enabled trust seal badges shown on the storefront (JSON string)",
+    }),
+    orderFormConfig: z.string().nullable().openapi({
+      description: "Order form field visibility and display options (JSON string)",
+    }),
     createdAt: z.string().datetime(),
     updatedAt: z.string().datetime(),
   })

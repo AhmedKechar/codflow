@@ -243,7 +243,11 @@
     "disconnect": "قطع الاتصال",
     "success_connected": "تم الربط بنجاح",
     "success_updated": "تم تحديث بيانات الاعتماد",
-    "success_disconnected": "تم قطع الاتصال"
+    "success_disconnected": "تم قطع الاتصال",
+    "test_connection": "اختبار الاتصال",
+    "testing": "جارٍ الاختبار...",
+    "connection_success": "تم التحقق من الاتصال",
+    "connection_failed": "فشل الاتصال"
   },
   "shipping_profiles": {
     "linked_network": "الشبكة المرتبطة",

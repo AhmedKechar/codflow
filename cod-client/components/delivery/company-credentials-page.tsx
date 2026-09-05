@@ -15,7 +15,7 @@ import { useErrorLocale } from "@/lib/errors/use-locale";
 import { useDelivery, useCommon } from "@/lib/translations";
 import { useConfirm } from "@/components/ui/use-confirm";
 import { useLanguage } from "@/lib/i18n-context";
-import { createDeliveryCompany, updateDeliveryCompany } from "@/actions/delivery-companies";
+import { createDeliveryCompany, updateDeliveryCompany, testDeliveryConnection } from "@/actions/delivery-companies";
 import { getProviderConfig } from "@/lib/delivery/providers";
 import { cn } from "@/lib/utils";
 
@@ -37,6 +37,8 @@ export function CompanyCredentialsPage({ providerCode, existingCompany }: Props)
 
   const [loading, setLoading] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<{ connected: boolean; message: string; latencyMs: number } | null>(null);
   const [apiToken, setApiToken] = useState("");
   const [apiUserGuid, setApiUserGuid] = useState("");
   const [fromWilayaName, setFromWilayaName] = useState("");
@@ -56,7 +58,26 @@ export function CompanyCredentialsPage({ providerCode, existingCompany }: Props)
     setFromWilayaName(parsedWilaya);
   }, [existingCompany]);
 
-  const busy = loading || disconnecting;
+  const busy = loading || disconnecting || testing;
+
+  async function handleTestConnection() {
+    if (!existingCompany) return;
+    setTesting(true);
+    setTestResult(null);
+    try {
+      const result = await testDeliveryConnection(existingCompany.id);
+      setTestResult(result);
+      if (result.connected) {
+        showSuccessToast(`${t.credentials_dialog?.connection_success ?? "Connection verified"} (${result.latencyMs}ms)`, locale);
+      } else {
+        showErrorToast(`${t.credentials_dialog?.connection_failed ?? "Connection failed"}: ${result.message}`, locale);
+      }
+    } catch (error) {
+      showErrorToast(error instanceof Error ? error.message : "Test failed", locale);
+    } finally {
+      setTesting(false);
+    }
+  }
 
   async function handleSave() {
     if (!apiToken.trim()) {
@@ -333,6 +354,19 @@ export function CompanyCredentialsPage({ providerCode, existingCompany }: Props)
               >
                 {t.credentials_dialog.cancel}
               </Button>
+
+              {isConnected && (
+                <Button
+                  variant="outline"
+                  onClick={handleTestConnection}
+                  disabled={busy}
+                  className="w-full h-12 rounded-xl border-border font-semibold text-[11px] uppercase tracking-widest"
+                >
+                  {testing
+                    ? (t.credentials_dialog?.testing ?? "Testing...")
+                    : (t.credentials_dialog?.test_connection ?? "Test Connection")}
+                </Button>
+              )}
 
               {isConnected && (
                 <Button

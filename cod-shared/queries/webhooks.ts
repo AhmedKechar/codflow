@@ -97,6 +97,7 @@ export async function getOrderByTracking(db: AppDb, storeId: string, trackingNum
       status: orders.status,
       storeId: orders.storeId,
       wilayaId: orders.wilayaId,
+      companyId: orders.companyId,
     })
     .from(orders)
     .where(and(eq(orders.storeId, storeId), eq(orders.trackingNumber, trackingNumber)))
@@ -110,6 +111,7 @@ export async function getOrderByReference(db: AppDb, storeId: string, reference:
       status: orders.status,
       storeId: orders.storeId,
       wilayaId: orders.wilayaId,
+      companyId: orders.companyId,
     })
     .from(orders)
     .where(and(eq(orders.storeId, storeId), eq(orders.orderNumber, reference)))

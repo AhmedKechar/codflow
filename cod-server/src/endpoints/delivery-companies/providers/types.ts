@@ -150,4 +150,10 @@ export interface DeliveryProvider {
    * Not all providers support this — check before calling.
    */
   getTrackingInfo?(trackingNumber: string): Promise<TrackingEvent[]>;
+
+  /**
+   * Verify that the stored API credentials are valid by making a lightweight
+   * read-only call to the carrier API. Returns success/failure with a message.
+   */
+  testConnection(): Promise<{ success: boolean; message: string; latencyMs: number }>;
 }

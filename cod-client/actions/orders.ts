@@ -627,3 +627,44 @@ export async function validateShipment(id: string): Promise<void> {
     throw error;
   }
 }
+
+// ─── Reconcile Orders ─────────────────────────────────────────────────────────
+
+interface ReconcileResult {
+  total: number;
+  updated: number;
+  failed: number;
+  results: Array<{
+    orderId: string;
+    orderNumber: string;
+    trackingNumber: string;
+    previousStatus: string;
+    newStatus: string | null;
+    updated: boolean;
+    error?: string;
+  }>;
+}
+
+export async function reconcileOrders(): Promise<ReconcileResult> {
+  await requirePermission(SCOPES.ORDERS_READ);
+
+  const apiKey = await getUserApiKey();
+  if (!apiKey) redirect("/setup-api-key");
+
+  try {
+    const response = await apiClient.post<ApiResponse<ReconcileResult>>(
+      "/api/orders/reconcile",
+      apiKey,
+      {}
+    );
+    revalidatePath("/orders");
+    return response.data ?? { total: 0, updated: 0, failed: 0, results: [] };
+  } catch (error) {
+    if (error instanceof ApiClientError && error.code) {
+      const locale = await getLocale();
+      const userMessage = mapError(error.code, locale, error.context);
+      throw new Error(userMessage);
+    }
+    throw error;
+  }
+}

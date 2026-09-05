@@ -1,132 +1,96 @@
-import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
+/**
+ * Store Members Routes
+ *
+ * Team member management for the merchant's store: listing, updating roles,
+ * removing members, and handling invitations.
+ *
+ * Migrated to defineRoute() from @/lib/route-builder.
+ */
+
+import { OpenAPIHono, z } from "@hono/zod-openapi";
 import type { AppContext } from "@/types";
+import { defineRoute } from "@/lib/route-builder";
 import { SCOPES } from "../../../../cod-shared/rbac/scopes";
-import { requireScope } from "@/rbac/middleware";
 import * as h from "./handlers";
-import { ErrorResponseSchema } from "@/openapi/schemas";
 
-const jsonContent = <T extends z.ZodType>(schema: T) => ({
-  "application/json": { schema },
-});
-const errorResponse = (description: string) => ({
-  description,
-  content: jsonContent(ErrorResponseSchema),
-});
-
-const listMembersRoute = createRoute({
+const listMembersRoute = defineRoute({
   method: "get",
   path: "/",
-  middleware: [requireScope(SCOPES.STORE_MEMBERS_READ)],
+  auth: { scope: SCOPES.STORE_MEMBERS_READ },
   tags: ["Store Members"],
   summary: "List team members",
   operationId: "listMembers",
-  responses: {
-    200: { description: "Member list" },
-    401: errorResponse("Missing or invalid API key"),
-    403: errorResponse("Insufficient scope"),
-  },
-  security: [{ ApiKeyAuth: [] }],
+  handler: h.listMembers,
 });
 
-const getMemberRoute = createRoute({
+const getMemberRoute = defineRoute({
   method: "get",
   path: "/{id}",
-  middleware: [requireScope(SCOPES.STORE_MEMBERS_READ)],
+  auth: { scope: SCOPES.STORE_MEMBERS_READ },
   tags: ["Store Members"],
   summary: "Get member details",
   operationId: "getMember",
-  request: { params: z.object({ id: z.string() }) },
-  responses: {
-    200: { description: "Member details" },
-    401: errorResponse("Missing or invalid API key"),
-    403: errorResponse("Insufficient scope"),
-    404: errorResponse("Member not found"),
-  },
-  security: [{ ApiKeyAuth: [] }],
+  params: z.object({ id: z.string() }),
+  handler: h.getMember,
 });
 
-const updateRoleRoute = createRoute({
+const updateRoleRoute = defineRoute({
   method: "patch",
   path: "/{id}/role",
-  middleware: [requireScope(SCOPES.STORE_MEMBERS_MANAGE)],
+  auth: { scope: SCOPES.STORE_MEMBERS_MANAGE },
   tags: ["Store Members"],
   summary: "Update member role",
   operationId: "updateRole",
-  request: {
-    params: z.object({ id: z.string() }),
-    body: { required: true, content: jsonContent(z.object({ role: z.enum(["owner", "admin", "staff"]) })) },
-  },
-  responses: {
-    200: { description: "Role updated" },
-    401: errorResponse("Missing or invalid API key"),
-    403: errorResponse("Insufficient scope"),
-    404: errorResponse("Member not found"),
-  },
-  security: [{ ApiKeyAuth: [] }],
+  params: z.object({ id: z.string() }),
+  body: z.object({ role: z.enum(["owner", "admin", "staff"]) }),
+  handler: h.updateRole,
 });
 
-const removeMemberRoute = createRoute({
+const removeMemberRoute = defineRoute({
   method: "delete",
   path: "/{id}",
-  middleware: [requireScope(SCOPES.STORE_MEMBERS_MANAGE)],
+  auth: { scope: SCOPES.STORE_MEMBERS_MANAGE },
   tags: ["Store Members"],
   summary: "Remove team member",
   operationId: "removeMember",
-  request: { params: z.object({ id: z.string() }) },
-  responses: {
-    200: { description: "Member removed" },
-    401: errorResponse("Missing or invalid API key"),
-    403: errorResponse("Insufficient scope"),
-    404: errorResponse("Member not found"),
-  },
-  security: [{ ApiKeyAuth: [] }],
+  params: z.object({ id: z.string() }),
+  handler: h.removeMember,
 });
 
-const listInvitationsRoute = createRoute({
+const listInvitationsRoute = defineRoute({
   method: "get",
   path: "/invitations",
-  middleware: [requireScope(SCOPES.STORE_MEMBERS_READ)],
+  auth: { scope: SCOPES.STORE_MEMBERS_READ },
   tags: ["Store Members"],
   summary: "List pending invitations",
   operationId: "listInvitations",
-  responses: {
-    200: { description: "Invitation list" },
-    401: errorResponse("Missing or invalid API key"),
-    403: errorResponse("Insufficient scope"),
-  },
-  security: [{ ApiKeyAuth: [] }],
+  handler: h.listInvitations,
 });
 
-const sendInvitationRoute = createRoute({
+const sendInvitationRoute = defineRoute({
   method: "post",
   path: "/invitations",
-  middleware: [requireScope(SCOPES.STORE_MEMBERS_INVITE)],
+  auth: { scope: SCOPES.STORE_MEMBERS_INVITE },
   tags: ["Store Members"],
   summary: "Send team invitation",
   operationId: "sendInvitation",
-  request: {
-    body: {
-      required: true,
-      content: jsonContent(z.object({
-        email: z.string().email(),
-        role: z.enum(["owner", "admin", "staff"]).optional(),
-      })),
-    },
-  },
+  body: z.object({
+    email: z.string().email(),
+    role: z.enum(["owner", "admin", "staff"]).optional(),
+  }),
   responses: {
     201: { description: "Invitation sent" },
-    400: errorResponse("Validation error"),
-    401: errorResponse("Missing or invalid API key"),
-    403: errorResponse("Insufficient scope"),
   },
-  security: [{ ApiKeyAuth: [] }],
+  handler: h.sendInvitation,
 });
 
 const router = new OpenAPIHono<AppContext>();
-router.openapi(listMembersRoute, h.listMembers);
-router.openapi(getMemberRoute, h.getMember);
-router.openapi(updateRoleRoute, h.updateRole);
-router.openapi(removeMemberRoute, h.removeMember);
-router.openapi(listInvitationsRoute, h.listInvitations);
-router.openapi(sendInvitationRoute, h.sendInvitation);
+
+router.openapi(listMembersRoute.route, listMembersRoute.handler);
+router.openapi(getMemberRoute.route, getMemberRoute.handler);
+router.openapi(updateRoleRoute.route, updateRoleRoute.handler);
+router.openapi(removeMemberRoute.route, removeMemberRoute.handler);
+router.openapi(listInvitationsRoute.route, listInvitationsRoute.handler);
+router.openapi(sendInvitationRoute.route, sendInvitationRoute.handler);
+
 export default router;

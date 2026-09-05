@@ -265,5 +265,11 @@
     "fragile_label": "هش",
     "fragile_description": "يتم التعامل معه بعناية عند التوصيل",
     "new_order_subtitle": "أدخل بيانات العميل وأضف المنتجات لإنشاء طلب جديد"
-  }
+  },
+  "reconcile_button": "مزامنة الحالات",
+  "reconcile_syncing": "جارٍ المزامنة...",
+  "reconcile_updated": "تم تحديث",
+  "reconcile_of": "من",
+  "reconcile_orders": "طلبات",
+  "reconcile_all_synced": "جميع الطلبات محدثة"
 }

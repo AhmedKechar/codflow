@@ -446,4 +446,14 @@ export class YalidineProvider implements DeliveryProvider {
     // Store remarks in local database instead
     return false;
   }
+
+  async testConnection(): Promise<{ success: boolean; message: string; latencyMs: number }> {
+    const start = Date.now();
+    try {
+      await this.get("/v1/centers/?page_size=1");
+      return { success: true, message: "Credentials verified", latencyMs: Date.now() - start };
+    } catch (err) {
+      return { success: false, message: (err as Error).message, latencyMs: Date.now() - start };
+    }
+  }
 }

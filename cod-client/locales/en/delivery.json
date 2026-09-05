@@ -166,7 +166,11 @@
     "disconnect": "Disconnect",
     "success_connected": "Connected successfully",
     "success_updated": "Credentials updated",
-    "success_disconnected": "Disconnected"
+    "success_disconnected": "Disconnected",
+    "test_connection": "Test Connection",
+    "testing": "Testing...",
+    "connection_success": "Connection verified",
+    "connection_failed": "Connection failed"
   },
   "payments": {
     "title": "Driver Payments",

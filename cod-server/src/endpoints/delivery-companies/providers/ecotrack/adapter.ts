@@ -405,4 +405,14 @@ export class EcotrackProvider implements DeliveryProvider {
         wilayaId: c.wilaya_id,
       }));
   }
+
+  async testConnection(): Promise<{ success: boolean; message: string; latencyMs: number }> {
+    const start = Date.now();
+    try {
+      await this.get("/api/v1/get/communes");
+      return { success: true, message: "Credentials verified", latencyMs: Date.now() - start };
+    } catch (err) {
+      return { success: false, message: (err as Error).message, latencyMs: Date.now() - start };
+    }
+  }
 }

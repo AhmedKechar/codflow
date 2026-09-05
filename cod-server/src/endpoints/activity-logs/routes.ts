@@ -2,38 +2,12 @@
  * Activity Logs Routes
  *
  * All routes are admin-only — activity logs are never visible to staff.
- *
- * Migrated to @hono/zod-openapi: route definitions below are the single
- * source of truth for validation and the OpenAPI spec. Handlers are
- * unchanged and remain independently mountable/testable.
  */
 
-import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
-import type { Context, Next } from "hono";
+import { OpenAPIHono, z } from "@hono/zod-openapi";
 import type { AppContext } from "@/types";
-import {
-  ActivityLogSchema,
-  ErrorResponseSchema,
-  ListResponseSchema,
-} from "@/openapi/schemas";
+import { defineRoute } from "@/lib/route-builder";
 import { listActivityLogs, getUserActivityLogs } from "./handlers";
-import { PermissionError } from "@/lib/errors/classes";
-
-const jsonContent = (schema: z.ZodType) => ({
-  "application/json": { schema },
-});
-
-const errorResponse = (description: string) => ({
-  description,
-  content: jsonContent(ErrorResponseSchema),
-});
-
-async function adminOnly(c: Context<AppContext>, next: Next) {
-  if (c.get("user").role !== "admin") {
-    throw new PermissionError("Admin access required", "admin");
-  }
-  await next();
-}
 
 const activityLogsQuerySchema = z.object({
   actorId: z.string().optional().openapi({
@@ -77,57 +51,34 @@ const userLogsQuerySchema = z.object({
     .openapi({ description: "Number of logs to skip" }),
 });
 
-const listActivityLogsRoute = createRoute({
+const listLogs = defineRoute({
   method: "get",
   path: "/",
+  auth: "admin",
   tags: ["Activity Logs"],
   summary: "List activity logs",
   description: "Get audit trail of all system actions (admin only)",
   operationId: "listActivityLogs",
-  request: {
-    query: activityLogsQuerySchema,
-  },
-  responses: {
-    200: {
-      description: "List of activity logs",
-      content: jsonContent(ListResponseSchema(ActivityLogSchema)),
-    },
-    400: errorResponse("Validation error - invalid query parameters"),
-    401: errorResponse("Missing or invalid API key"),
-    403: errorResponse("Admin access required"),
-  },
-  security: [{ ApiKeyAuth: [] }],
+  query: activityLogsQuerySchema,
+  handler: listActivityLogs,
 });
 
-const getUserActivityLogsRoute = createRoute({
+const getUserLogs = defineRoute({
   method: "get",
   path: "/users/{userId}",
+  auth: "admin",
   tags: ["Activity Logs"],
   summary: "Get user activity logs",
   description: "Get activity logs for a specific user (admin only)",
   operationId: "getUserActivityLogs",
-  request: {
-    params: z.object({
-      userId: z.string().openapi({ description: "User ID to filter logs for" }),
-    }),
-    query: userLogsQuerySchema,
-  },
-  responses: {
-    200: {
-      description: "User activity logs",
-      content: jsonContent(ListResponseSchema(ActivityLogSchema)),
-    },
-    400: errorResponse("Validation error - invalid query parameters"),
-    401: errorResponse("Missing or invalid API key"),
-    403: errorResponse("Admin access required"),
-  },
-  security: [{ ApiKeyAuth: [] }],
+  params: z.object({
+    userId: z.string().openapi({ description: "User ID to filter logs for" }),
+  }),
+  query: userLogsQuerySchema,
+  handler: getUserActivityLogs,
 });
 
 const router = new OpenAPIHono<AppContext>();
-
-router.use("*", adminOnly);
-router.openapi(listActivityLogsRoute, listActivityLogs);
-router.openapi(getUserActivityLogsRoute, getUserActivityLogs);
-
+router.openapi(listLogs.route, listLogs.handler);
+router.openapi(getUserLogs.route, getUserLogs.handler);
 export default router;

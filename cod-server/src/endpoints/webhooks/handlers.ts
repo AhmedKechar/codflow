@@ -213,16 +213,15 @@ export async function handleZrWebhook(c: Context<AppContext>) {
       else if (stateLower.includes("driver") || stateLower.includes("out")) carrierStatus = "with_driver";
       else if (stateLower.includes("transit") || stateLower.includes("hub")) carrierStatus = "in_transit";
 
-      await upsertCarrierTracking({
-        db,
+      await upsertCarrierTracking(db, {
         orderId: resolvedOrder.id,
         storeId,
         companyId: resolvedOrder.companyId,
         trackingNumber,
         status: carrierStatus,
-        statusRaw: stateName,
-        statusAr: null,
-        location: null,
+        statusRaw: stateName ?? undefined,
+        statusAr: undefined,
+        location: undefined,
         eventTime: payload.occurredAt ?? now,
         rawData: rawBody,
       });
@@ -448,16 +447,15 @@ export async function handleYalidineWebhook(c: Context<AppContext>) {
         else if (statusLower.includes("transit")) carrierStatus = "in_transit";
         else if (statusLower.includes("tri") || statusLower.includes("hub")) carrierStatus = "at_office";
 
-        await upsertCarrierTracking({
-          db,
+        await upsertCarrierTracking(db, {
           orderId: order.id,
           storeId,
           companyId: order.companyId,
           trackingNumber: tracking,
           status: carrierStatus,
-          statusRaw: statusStr,
-          statusAr: null,
-          location: null,
+          statusRaw: statusStr ?? undefined,
+          statusAr: undefined,
+          location: undefined,
           eventTime: event.occurred_at ?? now,
           rawData: JSON.stringify(event),
         });

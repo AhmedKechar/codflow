@@ -54,4 +54,8 @@ export interface Env {
   // ─── AI Chat ───────────────────────────────────────────────────────────────
   /** OpenAI API key for AI chat streaming (set via wrangler secret put) */
   OPENAI_API_KEY: string;
+
+  // ─── OTP Rate Limiting ────────────────────────────────────────────────────
+  /** KV namespace for OTP send rate limiting (phone cooldown + IP limits) */
+  RATE_LIMIT_KV: KVNamespace;
 }

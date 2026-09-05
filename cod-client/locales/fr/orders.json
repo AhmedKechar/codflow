@@ -265,5 +265,11 @@
     "fragile_label": "Fragile",
     "fragile_description": "Manipuler avec précaution lors de la livraison",
     "new_order_subtitle": "Remplissez les informations du client et ajoutez des produits pour créer une nouvelle commande"
-  }
+  },
+  "reconcile_button": "Synchroniser les statuts",
+  "reconcile_syncing": "Synchronisation...",
+  "reconcile_updated": "Mis à jour",
+  "reconcile_of": "sur",
+  "reconcile_orders": "commandes",
+  "reconcile_all_synced": "Toutes les commandes sont à jour"
 }

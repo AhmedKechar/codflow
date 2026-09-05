@@ -1,139 +1,99 @@
-import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
+import { OpenAPIHono, z } from "@hono/zod-openapi";
 import type { AppContext } from "@/types";
 import { SCOPES } from "../../../../cod-shared/rbac/scopes";
-import { requireScope, requireAdmin } from "@/rbac/middleware";
+import { defineRoute } from "@/lib/route-builder";
 import * as h from "./handlers";
-import { ErrorResponseSchema } from "@/openapi/schemas";
 
-const jsonContent = <T extends z.ZodType>(schema: T) => ({
-  "application/json": { schema },
-});
-const errorResponse = (description: string) => ({
-  description,
-  content: jsonContent(ErrorResponseSchema),
-});
-
-const listMyPaymentsRoute = createRoute({
+const listMyPaymentsRoute = defineRoute({
   method: "get",
   path: "/",
-  middleware: [requireScope(SCOPES.PAYMENTS_READ)],
+  auth: { scope: SCOPES.PAYMENTS_READ },
   tags: ["Payments"],
   summary: "List my store payments",
   operationId: "listMyPayments",
-  responses: {
-    200: { description: "Payment list" },
-    401: errorResponse("Missing or invalid API key"),
-    403: errorResponse("Insufficient scope"),
-  },
-  security: [{ ApiKeyAuth: [] }],
+  handler: h.listMyPayments,
 });
 
-const getPaymentRoute = createRoute({
+const getPaymentRoute = defineRoute({
   method: "get",
   path: "/{id}",
-  middleware: [requireScope(SCOPES.PAYMENTS_READ)],
+  auth: { scope: SCOPES.PAYMENTS_READ },
   tags: ["Payments"],
   summary: "Get payment details",
   operationId: "getPayment",
-  request: { params: z.object({ id: z.string() }) },
-  responses: {
-    200: { description: "Payment details" },
-    401: errorResponse("Missing or invalid API key"),
-    403: errorResponse("Insufficient scope"),
-    404: errorResponse("Payment not found"),
-  },
-  security: [{ ApiKeyAuth: [] }],
+  params: z.object({ id: z.string() }),
+  handler: h.getPayment,
 });
 
-const submitPaymentRoute = createRoute({
+const submitPaymentRoute = defineRoute({
   method: "post",
   path: "/",
-  middleware: [requireScope(SCOPES.PAYMENTS_MANAGE)],
+  auth: { scope: SCOPES.PAYMENTS_MANAGE },
   tags: ["Payments"],
   summary: "Submit payment receipt",
   operationId: "submitPayment",
-  request: {
-    body: {
-      required: true,
-      content: jsonContent(z.object({
-        subscriptionId: z.string(),
-        amountDzd: z.number().min(1),
-        paymentMethod: z.enum(["ccp", "baridi_mob", "wise", "redotpay"]),
-        receiptUrl: z.string().optional(),
-        receiptFile: z.string().optional(),
-        referenceNumber: z.string().optional(),
-      })),
-    },
-  },
-  responses: {
-    201: { description: "Payment submitted" },
-    400: errorResponse("Validation error"),
-    401: errorResponse("Missing or invalid API key"),
-    403: errorResponse("Insufficient scope"),
-  },
-  security: [{ ApiKeyAuth: [] }],
+  body: z.object({
+    subscriptionId: z.string(),
+    amountDzd: z.number().min(1),
+    paymentMethod: z.enum(["ccp", "baridi_mob", "wise", "redotpay"]),
+    receiptUrl: z.string().optional(),
+    receiptFile: z.string().optional(),
+    referenceNumber: z.string().optional(),
+  }),
+  handler: h.submitPayment,
 });
 
-const listPendingRoute = createRoute({
+const listPendingRoute = defineRoute({
   method: "get",
   path: "/pending",
-  middleware: [requireScope(SCOPES.PAYMENTS_APPROVE)],
+  auth: { scope: SCOPES.PAYMENTS_APPROVE },
   tags: ["Payments"],
   summary: "List pending payments (super admin)",
   operationId: "listPendingPayments",
-  responses: {
-    200: { description: "Pending payments" },
-    401: errorResponse("Missing or invalid API key"),
-    403: errorResponse("Insufficient scope"),
-  },
-  security: [{ ApiKeyAuth: [] }],
+  handler: h.listPendingPayments,
 });
 
-const approveRoute = createRoute({
+const approveRoute = defineRoute({
   method: "post",
   path: "/{id}/approve",
-  middleware: [requireScope(SCOPES.PAYMENTS_APPROVE)],
+  auth: { scope: SCOPES.PAYMENTS_APPROVE },
   tags: ["Payments"],
   summary: "Approve payment (super admin)",
   operationId: "approvePayment",
-  request: {
-    params: z.object({ id: z.string() }),
-    body: { required: false, content: jsonContent(z.object({ notes: z.string().optional() })) },
-  },
+  params: z.object({ id: z.string() }),
+  body: z.object({ notes: z.string().optional() }),
   responses: {
     200: { description: "Payment approved" },
-    401: errorResponse("Missing or invalid API key"),
-    403: errorResponse("Insufficient scope"),
-    404: errorResponse("Payment not found"),
+    401: { description: "Missing or invalid API key" },
+    403: { description: "Insufficient scope" },
+    404: { description: "Payment not found" },
   },
-  security: [{ ApiKeyAuth: [] }],
+  handler: h.approvePayment,
 });
 
-const rejectRoute = createRoute({
+const rejectRoute = defineRoute({
   method: "post",
   path: "/{id}/reject",
-  middleware: [requireScope(SCOPES.PAYMENTS_APPROVE)],
+  auth: { scope: SCOPES.PAYMENTS_APPROVE },
   tags: ["Payments"],
   summary: "Reject payment (super admin)",
   operationId: "rejectPayment",
-  request: {
-    params: z.object({ id: z.string() }),
-    body: { required: false, content: jsonContent(z.object({ notes: z.string().optional() })) },
-  },
+  params: z.object({ id: z.string() }),
+  body: z.object({ notes: z.string().optional() }),
   responses: {
     200: { description: "Payment rejected" },
-    401: errorResponse("Missing or invalid API key"),
-    403: errorResponse("Insufficient scope"),
-    404: errorResponse("Payment not found"),
+    401: { description: "Missing or invalid API key" },
+    403: { description: "Insufficient scope" },
+    404: { description: "Payment not found" },
   },
-  security: [{ ApiKeyAuth: [] }],
+  handler: h.rejectPayment,
 });
 
 const router = new OpenAPIHono<AppContext>();
-router.openapi(listMyPaymentsRoute, h.listMyPayments);
-router.openapi(getPaymentRoute, h.getPayment);
-router.openapi(submitPaymentRoute, h.submitPayment);
-router.openapi(listPendingRoute, h.listPendingPayments);
-router.openapi(approveRoute, h.approvePayment);
-router.openapi(rejectRoute, h.rejectPayment);
+router.openapi(listMyPaymentsRoute.route, listMyPaymentsRoute.handler);
+router.openapi(getPaymentRoute.route, getPaymentRoute.handler);
+router.openapi(submitPaymentRoute.route, submitPaymentRoute.handler);
+router.openapi(listPendingRoute.route, listPendingRoute.handler);
+router.openapi(approveRoute.route, approveRoute.handler);
+router.openapi(rejectRoute.route, rejectRoute.handler);
 export default router;

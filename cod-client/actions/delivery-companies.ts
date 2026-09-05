@@ -260,6 +260,33 @@ export async function deleteDeliveryCompany(id: string): Promise<void> {
   }
 }
 
+// ─── Test Connection ──────────────────────────────────────────────────────────
+
+/**
+ * Test that stored API credentials are valid by making a lightweight call
+ * to the carrier API.
+ */
+export async function testDeliveryConnection(
+  companyId: string
+): Promise<{ connected: boolean; provider: string; message: string; latencyMs: number }> {
+  await requirePermission(SCOPES.DELIVERY_READ);
+
+  const apiKey = await getUserApiKey();
+  if (!apiKey) redirect("/setup-api-key");
+
+  try {
+    const response = await apiClient.post<
+      ApiResponse<{ connected: boolean; provider: string; message: string; latencyMs: number }>
+    >(`/api/delivery-companies/${companyId}/test-connection`, apiKey, {});
+    return response.data ?? { connected: false, provider: "", message: "No response", latencyMs: 0 };
+  } catch (error) {
+    if (error instanceof ApiClientError) {
+      throw new Error(error.message ?? "Failed to test connection");
+    }
+    throw new Error("Failed to test connection");
+  }
+}
+
 // ─── Webhook Management Actions ───────────────────────────────────────────────
 
 /**

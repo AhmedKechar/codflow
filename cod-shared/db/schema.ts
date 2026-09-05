@@ -1864,3 +1864,30 @@ export const blockedIps = sqliteTable("blocked_ips", {
   storeIdx: index("idx_blocked_ips_store").on(t.storeId),
   addressIdx: index("idx_blocked_ips_address").on(t.ipAddress),
 }));
+
+// ─── Store OTP Config ──────────────────────────────────────────────────────
+// Per-store WhatsApp OTP verification configuration via DZVerify.
+// One row per store. No row = feature completely inert (safe default).
+export const storeOtpConfig = sqliteTable("store_otp_config", {
+  id: text("id").primaryKey(),
+  storeId: text("store_id").notNull().unique().references(() => stores.id, { onDelete: "cascade" }),
+  apiKey: text("api_key").notNull(),
+  language: text("language", { enum: ["ar", "fr", "en"] }).notNull().default("ar"),
+  enabled: integer("enabled", { mode: "boolean" }).notNull().default(true),
+  createdAt: text("created_at").notNull().default(sql`(datetime('now'))`),
+  updatedAt: text("updated_at").notNull().default(sql`(datetime('now'))`),
+});
+
+// ─── Store Email Config ────────────────────────────────────────────────────
+// Per-store transactional email configuration via Sendili.
+// No row = feature inert (safe default for fresh installs).
+export const storeEmailConfig = sqliteTable("store_email_config", {
+  id: text("id").primaryKey(),
+  storeId: text("store_id").notNull().unique().references(() => stores.id, { onDelete: "cascade" }),
+  apiKey: text("api_key").notNull(),
+  fromEmail: text("from_email").notNull(),
+  fromName: text("from_name"),
+  enabled: integer("enabled", { mode: "boolean" }).notNull().default(true),
+  createdAt: text("created_at").notNull().default(sql`(datetime('now'))`),
+  updatedAt: text("updated_at").notNull().default(sql`(datetime('now'))`),
+});

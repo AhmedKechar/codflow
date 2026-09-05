@@ -41,6 +41,9 @@ export const storeOrderSchema = z.object({
     },
     z.array(variantSelectionSchema).optional()
   ),
+  // WhatsApp OTP token — returned by the storefront after customer phone verification.
+  // Required when OTP is enabled for the store; ignored when disabled.
+  otpToken: z.string().optional(),
 });
 
 export type StoreOrderInput = z.infer<typeof storeOrderSchema>;

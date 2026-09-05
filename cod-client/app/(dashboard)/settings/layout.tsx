@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { Loader2, Store, Search, Star, BarChart2, Key, Lock, ChevronRight, Sparkles } from "lucide-react";
+import { Loader2, Store, Search, Star, BarChart2, Key, Lock, ChevronRight, Sparkles, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { useSettings } from "@/lib/translations";
 import { useLanguage } from "@/lib/i18n-context";
@@ -58,6 +58,7 @@ const NAV_GROUPS: SettingsNavGroup[] = [
     labelKey: "system_group",
     items: [
       { href: "/settings/tracking", labelKey: "tracking_title", icon: BarChart2 },
+      { href: "/settings/email", labelKey: "email_title", icon: Mail },
       { href: "/settings/mcp", labelKey: "mcp_title", icon: Sparkles },
       { href: "/settings/api", labelKey: "api_key_title", icon: Key },
       { href: "/settings/security", labelKey: "security_title", icon: Lock },

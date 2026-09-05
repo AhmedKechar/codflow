@@ -121,6 +121,7 @@ async function buildAuth() {
         },
         emailAndPassword: {
           enabled: true,
+          disableSignUp: true,
           autoSignIn: true,
           sendResetPassword: async ({ user, url }, _request) => {
             const userRecord = await db.select().from(users).where(eq(users.id, user.id)).get();
@@ -152,9 +153,9 @@ async function buildAuth() {
         },
         user: {
           additionalFields: {
-            role:     { type: "string", defaultValue: "staff",  required: false },
-            status:   { type: "string", defaultValue: "active", required: false },
-            apiKey:   { type: "string", required: false },
+            role:     { type: "string", defaultValue: "staff",  required: false, input: false },
+            status:   { type: "string", defaultValue: "active", required: false, input: false },
+            apiKey:   { type: "string", required: false, input: false },
             language: { type: "string", defaultValue: "en", required: false },
           },
         },

@@ -377,3 +377,43 @@ export async function deleteDeliveryCompany(c: Context<AppContext>) {
   console.info(`[delivery-companies] deleted company=${id}`);
   return c.json({ success: true }, 200);
 }
+
+/**
+ * POST /delivery-companies/:id/test-connection
+ * Verify that stored API credentials are valid by making a lightweight
+ * read-only call to the carrier API.
+ */
+export async function testConnection(c: Context<AppContext>) {
+  const db = getDb(c.env.DB);
+  const storeId = c.get("storeId")!;
+  const { id } = (c.req as any).valid?.("param") ?? { id: c.req.param("id")! };
+
+  const company = await queries.getDeliveryCompanyRaw(db, storeId, id);
+  if (!company) throw new NotFoundError("Delivery company", id);
+
+  if (!company.apiToken) {
+    return c.json({
+      success: true,
+      data: { connected: false, provider: company.code, message: "No API credentials configured", latencyMs: 0 },
+    }, 200);
+  }
+
+  let provider;
+  try {
+    provider = getProvider(company);
+  } catch (err) {
+    throw new BusinessLogicError(
+      err instanceof Error ? err.message : "Provider not available",
+      ERROR_CODES.PROVIDER_NOT_SUPPORTED,
+      { companyId: id, code: company.code }
+    );
+  }
+
+  const result = await provider.testConnection();
+  console.info(`[delivery-companies] test-connection company=${id} provider=${company.code} success=${result.success} latency=${result.latencyMs}ms`);
+
+  return c.json({
+    success: true,
+    data: { connected: result.success, provider: company.code, message: result.message, latencyMs: result.latencyMs },
+  }, 200);
+}

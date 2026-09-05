@@ -554,6 +554,20 @@ export class ZrExpressProvider implements DeliveryProvider {
     }
   }
 
+  async testConnection(): Promise<{ success: boolean; message: string; latencyMs: number }> {
+    const start = Date.now();
+    try {
+      await this.post(`/api/v${API_VERSION}/territories/search`, {
+        keyword: "",
+        pageSize: 1,
+        pageNumber: 1,
+      });
+      return { success: true, message: "Credentials verified", latencyMs: Date.now() - start };
+    } catch (err) {
+      return { success: false, message: (err as Error).message, latencyMs: Date.now() - start };
+    }
+  }
+
   /**
    * Get label URL for a parcel by tracking number.
    * 

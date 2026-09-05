@@ -63,6 +63,7 @@ function ResetPasswordForm({ brandName }: ResetPasswordViewProps) {
     try {
       await authClient.resetPassword({
         newPassword: password,
+        token: token ?? undefined,
       });
       
       setSuccess(true);
