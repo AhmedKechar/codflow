@@ -589,47 +589,59 @@ async function deductStockWithLog(
     now: string;
   },
 ) {
-  let qtyBefore: number;
-
   if (variantId) {
-    const row = await db
-      .select({ inventory: productVariants.inventory })
-      .from(productVariants)
-      .where(eq(productVariants.id, variantId))
-      .get();
-    qtyBefore = row?.inventory ?? 0;
-    await db
+    const updated = await db
       .update(productVariants)
-      .set({ inventory: sql`${productVariants.inventory} - ${quantity}` })
-      .where(eq(productVariants.id, variantId));
+      .set({ inventory: sql`MAX(0, ${productVariants.inventory} - ${quantity})` })
+      .where(and(eq(productVariants.id, variantId), gte(productVariants.inventory, quantity)))
+      .returning({ inventory: productVariants.inventory });
+    if (!updated.length) {
+      throw new Error(`Insufficient inventory for variant ${variantId}`);
+    }
+    const qtyAfter = updated[0].inventory;
+    const qtyBefore = qtyAfter + quantity;
+    await db.insert(stockMovements).values({
+      id: crypto.randomUUID(),
+      storeId,
+      productId,
+      variantId,
+      type: "ORDER_DEDUCTED",
+      delta: -quantity,
+      qtyBefore,
+      qtyAfter,
+      reason: null,
+      reference: orderId,
+      createdBy: customerId,
+      createdByName: customerName,
+      createdAt: now,
+    });
   } else {
-    const row = await db
-      .select({ inventory: products.inventory })
-      .from(products)
-      .where(eq(products.id, productId))
-      .get();
-    qtyBefore = row?.inventory ?? 0;
-    await db
+    const updated = await db
       .update(products)
-      .set({ inventory: sql`${products.inventory} - ${quantity}` })
-      .where(eq(products.id, productId));
+      .set({ inventory: sql`MAX(0, ${products.inventory} - ${quantity})` })
+      .where(and(eq(products.id, productId), gte(products.inventory, quantity)))
+      .returning({ inventory: products.inventory });
+    if (!updated.length) {
+      throw new Error(`Insufficient inventory for product ${productId}`);
+    }
+    const qtyAfter = updated[0].inventory;
+    const qtyBefore = qtyAfter + quantity;
+    await db.insert(stockMovements).values({
+      id: crypto.randomUUID(),
+      storeId,
+      productId,
+      variantId: null,
+      type: "ORDER_DEDUCTED",
+      delta: -quantity,
+      qtyBefore,
+      qtyAfter,
+      reason: null,
+      reference: orderId,
+      createdBy: customerId,
+      createdByName: customerName,
+      createdAt: now,
+    });
   }
-
-  await db.insert(stockMovements).values({
-    id: crypto.randomUUID(),
-    storeId,
-    productId,
-    variantId,
-    type: "ORDER_DEDUCTED",
-    delta: -quantity,
-    qtyBefore,
-    qtyAfter: qtyBefore - quantity,
-    reason: null,
-    reference: orderId,
-    createdBy: customerId,
-    createdByName: customerName,
-    createdAt: now,
-  });
 }
 
 export async function createStoreOrder(

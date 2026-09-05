@@ -295,6 +295,12 @@
     "weight": "Poids (kg)",
     "fragile": "Fragile",
     "notes": "Notes",
-    "notes_placeholder": "Notes supplémentaires..."
+    "notes_placeholder": "Notes supplémentaires...",
+    "error_customer_name_required": "Le nom du client est requis",
+    "error_phone_required": "Le numéro de téléphone est requis",
+    "error_phone_invalid": "Numéro de téléphone invalide",
+    "error_wilaya_required": "La wilaya est requise",
+    "error_price_negative": "Le prix ne peut pas être négatif",
+    "error_delivery_fee_negative": "Les frais de livraison ne peuvent pas être négatifs"
   }
 }

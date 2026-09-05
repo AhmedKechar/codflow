@@ -10,6 +10,9 @@ import { corsMiddleware } from "@/middleware/cors";
 import { authMiddleware } from "@/middleware/auth";
 import { storeAuthMiddleware } from "@/middleware/storeAuth";
 import { errorHandler } from "@/middleware/error";
+import { securityHeaders } from "@/middleware/security-headers";
+import { performanceTiming } from "@/middleware/performance";
+import { storeRateLimit, webhookRateLimit, authRateLimit } from "@/middleware/rate-limit";
 
 // Import routes
 import storeRoutes from "@/endpoints/store/routes";
@@ -75,6 +78,8 @@ const app = new OpenAPIHono<AppContext>({ defaultHook: openApiValidationHook });
 
 // Global middleware
 app.use("*", corsMiddleware);
+app.use("*", securityHeaders);
+app.use("*", performanceTiming);
 app.onError(errorHandler);
 
 // Image serving — no auth required (public, cacheable)
@@ -86,10 +91,12 @@ registerSpecEndpoint(app);
 
 // Webhook receivers — public, no auth, signature-verified internally
 // MUST be mounted BEFORE app.use("/api/*", authMiddleware)
+app.use("/webhooks/*", webhookRateLimit);
 app.route("/webhooks", webhooksRouter);
 
 // Store API — separate auth (must be before /api/* authMiddleware)
 app.use("/store/*", storeAuthMiddleware);
+app.use("/store/*", storeRateLimit);
 app.route("/store", storeRoutes);
 app.route("/store", storeAbandonedRoutes);
 app.route("/store", storeOtpRoutes);
@@ -174,6 +181,7 @@ app.get("/health", (c) => {
 
 // Protected routes (require authentication)
 app.use("/api/*", authMiddleware);
+app.use("/api/*", authRateLimit);
 app.use("/api/*", subscriptionGating);
 
 // Mount endpoint routes

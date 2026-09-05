@@ -62,5 +62,21 @@
   "save": "حفظ",
   "saving": "جارٍ الحفظ...",
   "discard": "تجاهل",
-  "unsaved_changes": "لديك تغييرات غير محفوظة"
+  "unsaved_changes": "لديك تغييرات غير محفوظة",
+  "search": "بحث",
+  "searchPlaceholder": "بحث...",
+  "close": "إغلاق",
+  "block": "حظر",
+  "edit": "تعديل",
+  "delivery": "التوصيل",
+  "weight": "الوزن (كغ)",
+  "fragile": "هش",
+  "previous": "السابق",
+  "next": "التالي",
+  "clear": "مسح",
+  "apply": "تطبيق",
+  "back": "رجوع",
+  "loading": "جارٍ التحميل...",
+  "free": "مجاني",
+  "genericError": "حدث خطأ غير متوقع"
 }

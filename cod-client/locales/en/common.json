@@ -62,5 +62,21 @@
   "save": "Save",
   "saving": "Saving...",
   "discard": "Discard",
-  "unsaved_changes": "You have unsaved changes"
+  "unsaved_changes": "You have unsaved changes",
+  "search": "Search",
+  "searchPlaceholder": "Search...",
+  "close": "Close",
+  "block": "Block",
+  "edit": "Edit",
+  "delivery": "Delivery",
+  "weight": "Weight (kg)",
+  "fragile": "Fragile",
+  "previous": "Previous",
+  "next": "Next",
+  "clear": "Clear",
+  "apply": "Apply",
+  "back": "Back",
+  "loading": "Loading...",
+  "free": "Free",
+  "genericError": "An unexpected error occurred"
 }

@@ -62,5 +62,21 @@
   "save": "Enregistrer",
   "saving": "Enregistrement...",
   "discard": "Ignorer",
-  "unsaved_changes": "Vous avez des modifications non enregistrées"
+  "unsaved_changes": "Vous avez des modifications non enregistrées",
+  "search": "Rechercher",
+  "searchPlaceholder": "Rechercher...",
+  "close": "Fermer",
+  "block": "Bloquer",
+  "edit": "Modifier",
+  "delivery": "Livraison",
+  "weight": "Poids (kg)",
+  "fragile": "Fragile",
+  "previous": "Précédent",
+  "next": "Suivant",
+  "clear": "Effacer",
+  "apply": "Appliquer",
+  "back": "Retour",
+  "loading": "Chargement...",
+  "free": "Gratuit",
+  "genericError": "Une erreur inattendue est survenue"
 }

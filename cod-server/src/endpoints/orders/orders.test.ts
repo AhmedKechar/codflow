@@ -521,7 +521,7 @@ describe("Orders — targeted business-logic tests", () => {
       expect(body.code).toBe(ERROR_CODES.OPERATION_NOT_SUPPORTED);
     });
 
-    it("resets status to 'confirmed' when cancelled from 'shipped'", async () => {
+    it("does NOT reset status when cancelled from 'shipped' (post-dispatch gap)", async () => {
       vi.mocked(queries.getOrderById).mockResolvedValue(
         orderRow({ trackingNumber: "TRK001", status: "shipped" }) as any
       );
@@ -539,9 +539,7 @@ describe("Orders — targeted business-logic tests", () => {
 
       await app.request("/api/orders/ord_1/cancel-shipment", { method: "POST" });
 
-      expect(queries.updateOrderStatus).toHaveBeenCalledWith(
-        expect.anything(), "test-store", "ord_1", "confirmed", expect.anything(), expect.anything()
-      );
+      expect(queries.updateOrderStatus).not.toHaveBeenCalled();
     });
   });
 
@@ -664,9 +662,9 @@ describe("Orders — targeted business-logic tests", () => {
       );
     });
 
-    it("returns 422 for EcoTrack order that is not in confirmed status", async () => {
+    it("returns 422 for EcoTrack order that is already validated (not shipped)", async () => {
       vi.mocked(queries.getOrderById).mockResolvedValue(
-        orderRow({ trackingNumber: "TRK001", status: "shipped" }) as any
+        orderRow({ trackingNumber: "TRK001", status: "delivered" }) as any
       );
       vi.mocked(deliveryCompanyQueries.getDeliveryCompanyRaw).mockResolvedValue(
         companyRow({ code: "packers" }) as any

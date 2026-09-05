@@ -295,6 +295,12 @@
     "weight": "Weight (kg)",
     "fragile": "Fragile",
     "notes": "Notes",
-    "notes_placeholder": "Additional notes..."
+    "notes_placeholder": "Additional notes...",
+    "error_customer_name_required": "Customer name is required",
+    "error_phone_required": "Phone number is required",
+    "error_phone_invalid": "Invalid phone number",
+    "error_wilaya_required": "Wilaya is required",
+    "error_price_negative": "Price cannot be negative",
+    "error_delivery_fee_negative": "Delivery fee cannot be negative"
   }
 }

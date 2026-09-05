@@ -295,6 +295,12 @@
     "weight": "الوزن (كغ)",
     "fragile": "قابل للكسر",
     "notes": "ملاحظات",
-    "notes_placeholder": "ملاحظات إضافية..."
+    "notes_placeholder": "ملاحظات إضافية...",
+    "error_customer_name_required": "اسم العميل مطلوب",
+    "error_phone_required": "الهاتف مطلوب",
+    "error_phone_invalid": "رقم الهاتف غير صحيح",
+    "error_wilaya_required": "الولاية مطلوبة",
+    "error_price_negative": "السعر لا يمكن أن يكون سالباً",
+    "error_delivery_fee_negative": "رسوم التوصيل لا يمكن أن تكون سالبة"
   }
 }

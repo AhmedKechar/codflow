@@ -166,6 +166,7 @@ export function orderRow(overrides: Record<string, unknown> = {}): Record<string
     tracking_number: null,
     tracking_url: null,
     external_order_id: null,
+    delivery_method_name: null,
     delivery_type: "home",
     station_code: null,
     delivery_fee: 400,

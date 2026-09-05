@@ -3,7 +3,7 @@ import type { AppContext } from "@/types";
 import { getDb } from "@/db";
 import * as queries from "./queries";
 import { createDiscountCodeSchema, updateDiscountCodeSchema } from "./validation";
-import { NotFoundError, SystemError } from "@/lib/errors/classes";
+import { NotFoundError, SystemError, ConflictError } from "@/lib/errors/classes";
 
 export async function listDiscountCodes(c: Context<AppContext>) {
   const db = getDb(c.env.DB);
@@ -44,10 +44,7 @@ export async function createDiscountCode(c: Context<AppContext>) {
     data.code,
   );
   if (existing) {
-    return c.json(
-      { success: false, error: "A discount code with this code already exists" },
-      409,
-    );
+    throw new ConflictError("A discount code with this code already exists", "DUPLICATE_ENTITY");
   }
 
   const { id } = await queries.createDiscountCode(db, storeId, data);
@@ -75,13 +72,7 @@ export async function updateDiscountCode(c: Context<AppContext>) {
       data.code,
     );
     if (codeConflict && codeConflict.id !== id) {
-      return c.json(
-        {
-          success: false,
-          error: "A discount code with this code already exists",
-        },
-        409,
-      );
+      throw new ConflictError("A discount code with this code already exists", "DUPLICATE_ENTITY");
     }
   }
 

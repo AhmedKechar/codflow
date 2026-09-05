@@ -53,12 +53,12 @@ export function OrderEditForm({ order, wilayas, communes }: Props) {
 
   function validate(): FormErrors {
     const e: FormErrors = {};
-    if (!customerName.trim()) e.customerName = "اسم العميل مطلوب";
-    if (!phone.trim()) e.phone = "الهاتف مطلوب";
-    else if (!/^0[5-7]\d{8}$/.test(phone)) e.phone = "رقم الهاتف غير صحيح";
-    if (!wilayaId) e.wilayaId = "الولاية مطلوبة";
-    if (price < 0) e.price = "السعر لا يمكن أن يكون سالباً";
-    if (deliveryFee < 0) e.deliveryFee = "رسوم التوصيل لا يمكن أن تكون سالبة";
+    if (!customerName.trim()) e.customerName = t.edit?.error_customer_name_required ?? "اسم العميل مطلوب";
+    if (!phone.trim()) e.phone = t.edit?.error_phone_required ?? "الهاتف مطلوب";
+    else if (!/^0[5-7]\d{8}$/.test(phone)) e.phone = t.edit?.error_phone_invalid ?? "رقم الهاتف غير صحيح";
+    if (!wilayaId) e.wilayaId = t.edit?.error_wilaya_required ?? "الولاية مطلوبة";
+    if (price < 0) e.price = t.edit?.error_price_negative ?? "السعر لا يمكن أن يكون سالباً";
+    if (deliveryFee < 0) e.deliveryFee = t.edit?.error_delivery_fee_negative ?? "رسوم التوصيل لا يمكن أن تكون سالبة";
     return e;
   }
 
