@@ -64,6 +64,8 @@ export function initProductPage() {
   const outOfStockLabel    = el.dataset.outOfStockLabel ?? "نفد المخزون";
   const qtyMaxStockLabel   = el.dataset.qtyMaxStock ?? "آخر {n} قطعة فقط";
   const productInventory   = parseInt(el.dataset.inventory ?? "100") || 100;
+  const formHomeDelivery   = el.dataset.formHomeDelivery ?? "توصيل منزلي";
+  const formStopDesk       = el.dataset.formStopDesk ?? "استلام من المكتب";
 
   /** @type {Array<Object>} Active offers for this product */
   type OfferData = {
@@ -546,12 +548,12 @@ export function initProductPage() {
     const stopPrice = rate ? rate.stopDesk : null;
 
     labels[0].textContent = homePrice != null
-      ? (homePrice === 0 ? `${content.formHomeDelivery} (مجانا)` : `${content.formHomeDelivery} ${fmt(homePrice)} ${cur}`)
-      : content.formHomeDelivery;
+      ? (homePrice === 0 ? `${formHomeDelivery} (مجانا)` : `${formHomeDelivery} ${fmt(homePrice)} ${cur}`)
+      : formHomeDelivery;
 
     labels[1].textContent = stopPrice != null
-      ? (stopPrice === 0 ? `${content.formStopDesk} (مجانا)` : `${content.formStopDesk} ${fmt(stopPrice)} ${cur}`)
-      : content.formStopDesk;
+      ? (stopPrice === 0 ? `${formStopDesk} (مجانا)` : `${formStopDesk} ${fmt(stopPrice)} ${cur}`)
+      : formStopDesk;
   }
 
   function hideDeliveryType() {
@@ -662,7 +664,80 @@ export function initProductPage() {
 
   // ── SUBMIT GUARD ───────────────────────────────────────────────────────────
   const form = document.querySelector<HTMLFormElement>("form[method='POST']");
-  form?.addEventListener("submit", () => {
+  
+  /**
+   * Validates phone number format (Algerian mobile numbers).
+   * @param phone - The phone number to validate.
+   * @returns true if valid, false otherwise.
+   */
+  function isValidPhone(phone: string): boolean {
+    return /^(05|06|07)[0-9]{8}$/.test(phone.replace(/\s/g, ''));
+  }
+
+  /**
+   * Shows inline error message below an input field.
+   * @param fieldId - The ID of the input field.
+   * @param message - The error message to display.
+   */
+  function showFieldError(fieldId: string, message: string) {
+    const field = document.getElementById(fieldId);
+    if (!field) return;
+    
+    // Remove existing error
+    const existingError = field.parentElement?.querySelector('.field-error');
+    if (existingError) existingError.remove();
+    
+    // Add error class
+    field.classList.add('error');
+    
+    // Create error message
+    const errorEl = document.createElement('p');
+    errorEl.className = 'field-error text-[0.8125rem] font-medium mt-2 ps-1';
+    errorEl.style.color = 'var(--clr-error)';
+    errorEl.textContent = message;
+    field.parentElement?.appendChild(errorEl);
+  }
+
+  /**
+   * Removes inline error message from an input field.
+   * @param fieldId - The ID of the input field.
+   */
+  function clearFieldError(fieldId: string) {
+    const field = document.getElementById(fieldId);
+    if (!field) return;
+    
+    field.classList.remove('error');
+    const existingError = field.parentElement?.querySelector('.field-error');
+    if (existingError) existingError.remove();
+  }
+
+  // Real-time phone validation
+  const phoneInput = document.getElementById("f-phone") as HTMLInputElement | null;
+  phoneInput?.addEventListener("input", () => {
+    const value = phoneInput.value.replace(/\s/g, '');
+    if (value.length === 10) {
+      if (isValidPhone(value)) {
+        clearFieldError("f-phone");
+      } else {
+        showFieldError("f-phone", "رقم الهاتف غير صحيح (يجب أن يبدأ بـ 05 أو 06 أو 07)");
+      }
+    } else if (value.length > 0) {
+      clearFieldError("f-phone");
+    }
+  });
+
+  form?.addEventListener("submit", (e) => {
+    // Validate phone before submit
+    if (phoneInput) {
+      const phone = phoneInput.value.replace(/\s/g, '');
+      if (phone && !isValidPhone(phone)) {
+        e.preventDefault();
+        showFieldError("f-phone", "رقم الهاتف غير صحيح (يجب أن يبدأ بـ 05 أو 06 أو 07)");
+        phoneInput.focus();
+        return;
+      }
+    }
+    
     if (submitBtn) submitBtn.disabled = true;
   });
 

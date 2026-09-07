@@ -32,6 +32,30 @@ const submitText = orderFormConfig?.submitButtonText || null;
 const comparePrice = defaultVariant?.compareAtPrice ?? product.compareAtPrice ?? null;
 ---
 
+<!-- Progress indicator -->
+<div class="flex items-center justify-center gap-2 mb-4">
+  <div class="flex items-center gap-2">
+    <div class="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--clr-primary)] text-white text-sm font-bold">
+      <Icon name="heroicons:shopping-cart" class="w-4 h-4" />
+    </div>
+    <span class="text-sm font-semibold" style="color: var(--clr-primary)">{content.progressSelectProduct ?? "اختيار المنتج"}</span>
+  </div>
+  <div class="w-12 h-0.5 bg-[var(--clr-primary)]"></div>
+  <div class="flex items-center gap-2">
+    <div class="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--clr-primary)] text-white text-sm font-bold">
+      <Icon name="heroicons:user" class="w-4 h-4" />
+    </div>
+    <span class="text-sm font-semibold" style="color: var(--clr-primary)">{content.progressCustomerInfo ?? "بيانات العميل"}</span>
+  </div>
+  <div class="w-12 h-0.5 bg-[var(--clr-border)]"></div>
+  <div class="flex items-center gap-2">
+    <div class="flex items-center justify-center w-8 h-8 rounded-full border-2 text-sm font-bold" style="border-color: var(--clr-border); color: var(--clr-text-2)">
+      <Icon name="heroicons:check-circle" class="w-4 h-4" />
+    </div>
+    <span class="text-sm font-medium" style="color: var(--clr-text-2)">{content.progressConfirmation ?? "تأكيد الطلب"}</span>
+  </div>
+</div>
+
 <!-- Order form card -->
 <div class="card" id="order-section" style="border-color: var(--clr-primary)">
   <!-- Card header -->

@@ -301,4 +301,12 @@ export interface StoreFrontContent {
   contentFooterAbout: string;
   /** Footer copyright text */
   contentFooterRights: string;
+
+  // ── Progress indicator keys ──────────────────────────────────────────────
+  /** Progress step 1: Select product */
+  progressSelectProduct: string;
+  /** Progress step 2: Customer info */
+  progressCustomerInfo: string;
+  /** Progress step 3: Confirmation */
+  progressConfirmation: string;
 }

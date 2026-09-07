@@ -262,4 +262,7 @@ export const fr: StoreFrontContent = {
   contentAnnouncement: "Paiement à la livraison disponible dans toutes les wilayas",
   contentFooterAbout: "Votre boutique en ligne de confiance en Algérie avec paiement à la livraison",
   contentFooterRights: "Tous droits réservés",
+  progressSelectProduct: "Sélectionner le produit",
+  progressCustomerInfo: "Informations client",
+  progressConfirmation: "Confirmation",
 };

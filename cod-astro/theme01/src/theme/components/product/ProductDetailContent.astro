@@ -98,6 +98,8 @@ const jsonLd = getProductJsonLd(product, basePrice);
   data-price-range-min={priceRange?.min ?? ""}
   data-price-range-max={priceRange?.max ?? ""}
   data-order-count={String(product.orderCount ?? 0)}
+  data-form-home-delivery={content.formHomeDelivery}
+  data-form-stop-desk={content.formStopDesk}
 />
 
 {pp.showShipping && <ShippingIsland server:defer />}

@@ -262,4 +262,7 @@ export const ar: StoreFrontContent = {
   contentAnnouncement: "الدفع عند الاستلام متاح لجميع الولايات",
   contentFooterAbout: "متجرك الموثوق عبر الإنترنت في الجزائر مع الدفع عند الاستلام",
   contentFooterRights: "جميع الحقوق محفوظة",
+  progressSelectProduct: "اختيار المنتج",
+  progressCustomerInfo: "بيانات العميل",
+  progressConfirmation: "تأكيد الطلب",
 };

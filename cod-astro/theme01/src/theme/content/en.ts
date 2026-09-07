@@ -262,4 +262,7 @@ export const en: StoreFrontContent = {
   contentAnnouncement: "Cash on Delivery Available Across Algeria",
   contentFooterAbout: "Your trusted online store in Algeria with cash on delivery",
   contentFooterRights: "All rights reserved",
+  progressSelectProduct: "Select Product",
+  progressCustomerInfo: "Customer Info",
+  progressConfirmation: "Confirmation",
 };
