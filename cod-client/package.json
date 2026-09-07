@@ -65,7 +65,7 @@
     "@types/node": "^26",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@vitest/coverage-v8": "^4.1.11",
+    "@vitest/coverage-v8": "^5.0.0",
     "@vitest/ui": "^4.1.11",
     "fast-check": "^4.9.0",
     "glob": "^13.0.6",
