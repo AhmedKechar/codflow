@@ -25,6 +25,7 @@
   "loading": "Loading theme settings...",
   "tabAppearance": "Appearance",
   "tabHomepage": "Homepage",
+  "tabContent": "Content & Text",
   "tabProducts": "Products",
   "tabProductPage": "Product page",
   "tabOrderForm": "Order form",
@@ -154,5 +155,10 @@
       "name": "Peak Design",
       "description": "High-contrast, bold design with Geist font. Ideal for premium and tech brands."
     }
-  }
+  },
+  "content_title": "Content & Text",
+  "content_subtitle": "Edit all text displayed in your storefront",
+  "content_default_value": "Default value",
+  "content_reset": "Reset",
+  "content_reset_all": "Reset All"
 }

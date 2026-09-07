@@ -241,4 +241,64 @@ export interface StoreFrontContent {
   viewedByText: string;
   orderedTimesText: string;
   lastPiecesText: string;
+
+  // ── Content editor keys (Dashboard-editable section titles) ───────────────
+  /** Hero eyebrow badge text */
+  contentHeroEyebrow: string;
+  /** Hero main headline */
+  contentHeroTitle: string;
+  /** Hero subtitle */
+  contentHeroSubtitle: string;
+  /** Hero primary CTA button text */
+  contentHeroCtaPrimary: string;
+  /** Hero secondary CTA button text */
+  contentHeroCtaSecondary: string;
+  /** Best sellers section title */
+  contentBestSellersTitle: string;
+  /** Best sellers section subtitle */
+  contentBestSellersSubtitle: string;
+  /** New arrivals section title */
+  contentNewArrivalsTitle: string;
+  /** New arrivals section subtitle */
+  contentNewArrivalsSubtitle: string;
+  /** How it works section title */
+  contentHowItWorksTitle: string;
+  /** How it works section subtitle */
+  contentHowItWorksSubtitle: string;
+  /** How it works step 1 title */
+  contentHowStep1Title: string;
+  /** How it works step 1 subtitle */
+  contentHowStep1Sub: string;
+  /** How it works step 2 title */
+  contentHowStep2Title: string;
+  /** How it works step 2 subtitle */
+  contentHowStep2Sub: string;
+  /** How it works step 3 title */
+  contentHowStep3Title: string;
+  /** How it works step 3 subtitle */
+  contentHowStep3Sub: string;
+  /** Features bar item 1 */
+  contentFeature1: string;
+  /** Features bar item 2 */
+  contentFeature2: string;
+  /** Features bar item 3 */
+  contentFeature3: string;
+  /** Features bar item 4 */
+  contentFeature4: string;
+  /** Testimonials section title */
+  contentTestimonialsTitle: string;
+  /** Testimonials section subtitle */
+  contentTestimonialsSubtitle: string;
+  /** WhatsApp CTA title */
+  contentWhatsappTitle: string;
+  /** WhatsApp CTA subtitle */
+  contentWhatsappSubtitle: string;
+  /** WhatsApp CTA button text */
+  contentWhatsappCta: string;
+  /** Announcement bar text */
+  contentAnnouncement: string;
+  /** Footer about text */
+  contentFooterAbout: string;
+  /** Footer copyright text */
+  contentFooterRights: string;
 }

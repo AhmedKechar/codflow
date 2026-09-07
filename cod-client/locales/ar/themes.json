@@ -25,6 +25,7 @@
   "loading": "جاري تحميل المظهر...",
   "tabAppearance": "المظهر",
   "tabHomepage": "الصفحة الرئيسية",
+  "tabContent": "المحتوى والنصوص",
   "tabProducts": "المنتجات",
   "tabProductPage": "صفحة المنتج",
   "tabOrderForm": "فورم الطلب",
@@ -154,5 +155,10 @@
       "name": "Peak Design",
       "description": "تصميم عالي التباين مع خط Geist. مناسب للعلامات التجارية الفاخرة والمنتجات التقنية."
     }
-  }
+  },
+  "content_title": "المحتوى والنصوص",
+  "content_subtitle": "تعديل جميع النصوص المعروضة في المتجر",
+  "content_default_value": "القيمة الافتراضية",
+  "content_reset": "إعادة",
+  "content_reset_all": "إعادة الكل"
 }

@@ -10,12 +10,12 @@ interface Props {
 
 const { content, heroConfig } = Astro.props;
 
-const eyebrow = heroConfig?.eyebrow ?? content.heroEyebrow;
-const title = heroConfig?.title ?? content.heroTitle;
-const subtitle = heroConfig?.subtitle ?? content.heroSubtitle;
-const primaryLabel = heroConfig?.primaryCtaLabel ?? content.heroCtaPrimary;
+const eyebrow = heroConfig?.eyebrow ?? content.contentHeroEyebrow ?? content.heroEyebrow;
+const title = heroConfig?.title ?? content.contentHeroTitle ?? content.heroTitle;
+const subtitle = heroConfig?.subtitle ?? content.contentHeroSubtitle ?? content.heroSubtitle;
+const primaryLabel = heroConfig?.primaryCtaLabel ?? content.contentHeroCtaPrimary ?? content.heroCtaPrimary;
 const primaryHref = heroConfig?.primaryCtaHref ?? "/products";
-const secondaryLabel = heroConfig?.secondaryCtaLabel ?? content.heroCtaSecondary;
+const secondaryLabel = heroConfig?.secondaryCtaLabel ?? content.contentHeroCtaSecondary ?? content.heroCtaSecondary;
 const secondaryHref = heroConfig?.secondaryCtaHref ?? "#best-sellers";
 ---
 

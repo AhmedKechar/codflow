@@ -50,7 +50,7 @@ const badges = [
           )}
         </a>
         <p class="text-sm font-normal leading-relaxed max-w-sm text-text-muted">
-          {content?.footerAbout}
+          {content?.contentFooterAbout ?? content?.footerAbout}
         </p>
         {showSocials && socials.length > 0 && (
           <SocialLinks
@@ -129,7 +129,7 @@ const badges = [
     {/* Bottom Bar */}
     <div class="border-t border-border mt-8 pt-5 text-center">
       <p class="text-xs font-normal text-text-muted">
-        &copy; {year} {config.name}. {content?.footerRights}
+        &copy; {year} {config.name}. {content?.contentFooterRights ?? content?.footerRights}
       </p>
     </div>
   </div>

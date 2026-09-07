@@ -66,10 +66,10 @@ const fontHref = config.fontUrl?.replace(/["<>]/g, "")
 
   <body class:list={[!hideMobileNav && "has-mobile-nav"]}>
     <!-- Announcement bar -->
-    {(siteBuilder.pages.showAnnouncementBar && (config.announcementBar || content?.announcementText)) && (
+    {(siteBuilder.pages.showAnnouncementBar && (config.announcementBar || content?.contentAnnouncement || content?.announcementText)) && (
       <div class="store-announce">
         <Icon name="heroicons:truck" class="w-3.5 h-3.5 opacity-80" />
-        <span>{config.announcementBar ?? content?.announcementText}</span>
+        <span>{config.announcementBar ?? content?.contentAnnouncement ?? content?.announcementText}</span>
       </div>
     )}
 

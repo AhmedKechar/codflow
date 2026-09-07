@@ -9,10 +9,10 @@ interface Props {
 const { content } = Astro.props;
 
 const features = [
-  { icon: "heroicons:check-badge",  title: content.feature1Title },
-  { icon: "heroicons:truck",        title: content.feature2Title },
-  { icon: "heroicons:banknotes",    title: content.feature3Title },
-  { icon: "heroicons:clock",        title: content.feature5Title },
+  { icon: "heroicons:check-badge",  title: content.contentFeature1 ?? content.feature1Title },
+  { icon: "heroicons:truck",        title: content.contentFeature2 ?? content.feature2Title },
+  { icon: "heroicons:banknotes",    title: content.contentFeature3 ?? content.feature3Title },
+  { icon: "heroicons:clock",        title: content.contentFeature4 ?? content.feature5Title },
 ];
 ---
 

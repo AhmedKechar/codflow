@@ -44,17 +44,17 @@ const gridClassNames = `grid ${mobileCols} sm:grid-cols-3 ${desktopCols}`;
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
       <div>
         <h2 class="text-2xl sm:text-3xl font-semibold tracking-tight text-text-main">
-          {content.bestSellersSection}
+          {content.contentBestSellersTitle ?? content.bestSellersSection}
         </h2>
         <p class="text-sm sm:text-base font-normal mt-3 text-text-muted">
-          {content.bestSellersSub}
+          {content.contentBestSellersSubtitle ?? content.bestSellersSub}
         </p>
       </div>
       {showViewAll && (
         <a
           href="/products"
           class="inline-flex items-center gap-2 text-sm font-semibold transition-colors hover:text-primary group text-text-main"
-          aria-label={`${content.viewAllCta} - ${content.bestSellersSection}`}
+          aria-label={`${content.viewAllCta} - ${content.contentBestSellersTitle ?? content.bestSellersSection}`}
         >
           {content.viewAllCta}
           <Icon name="heroicons:arrow-right" class="w-4 h-4 transition-transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1" />

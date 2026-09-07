@@ -12,10 +12,12 @@ import { ProductPageEditor } from "@/components/themes/editors/product-page-edit
 import { OrderFormEditor } from "@/components/themes/editors/order-form-editor";
 import { ThankYouEditor } from "@/components/themes/editors/thank-you-editor";
 import { PagesEditor } from "@/components/themes/editors/pages-editor";
+import { ContentEditor } from "@/components/themes/editors/content-editor";
 
 type TabId =
   | "appearance"
   | "homepage"
+  | "content"
   | "products"
   | "product-page"
   | "order-form"
@@ -25,6 +27,7 @@ type TabId =
 type TabLabelKey =
   | "tabAppearance"
   | "tabHomepage"
+  | "tabContent"
   | "tabProducts"
   | "tabProductPage"
   | "tabOrderForm"
@@ -34,6 +37,7 @@ type TabLabelKey =
 const TABS: { id: TabId; labelKey: TabLabelKey }[] = [
   { id: "appearance", labelKey: "tabAppearance" },
   { id: "homepage", labelKey: "tabHomepage" },
+  { id: "content", labelKey: "tabContent" },
   { id: "products", labelKey: "tabProducts" },
   { id: "product-page", labelKey: "tabProductPage" },
   { id: "order-form", labelKey: "tabOrderForm" },
@@ -121,6 +125,14 @@ export function ThemePageContent() {
         );
       case "homepage":
         return <SiteBuilderEditor siteJson={storeConfig.siteJson} onSaved={handleThemeChanged} {...editorProps} />;
+      case "content":
+        return (
+          <ContentEditor
+            contentJson={storeConfig.contentJson}
+            onSaved={handleThemeChanged}
+            {...editorProps}
+          />
+        );
       case "products":
         return <ProductsEditor siteJson={storeConfig.siteJson} onSaved={handleThemeChanged} {...editorProps} />;
       case "product-page":

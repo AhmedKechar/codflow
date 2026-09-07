@@ -36,6 +36,7 @@ export async function updateThemeColors(colors: {
   shadowIntensity?: ShadowIntensity;
   trustSeals?: TrustSealsConfig;
   orderFormConfig?: OrderFormConfig;
+  contentJson?: string;
 }): Promise<void> {
   await requirePermission(SCOPES.SETTINGS_VIEW);
   const key = await getApiKey();

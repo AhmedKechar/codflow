@@ -9,9 +9,9 @@ interface Props {
 const { content } = Astro.props;
 
 const steps = [
-  { num: "1", title: content.howStep1Title, sub: content.howStep1Sub, icon: "heroicons:shopping-bag" },
-  { num: "2", title: content.howStep2Title, sub: content.howStep2Sub, icon: "heroicons:chat-bubble-left-right" },
-  { num: "3", title: content.howStep3Title, sub: content.howStep3Sub, icon: "heroicons:banknotes" },
+  { num: "1", title: content.contentHowStep1Title ?? content.howStep1Title, sub: content.contentHowStep1Sub ?? content.howStep1Sub, icon: "heroicons:shopping-bag" },
+  { num: "2", title: content.contentHowStep2Title ?? content.howStep2Title, sub: content.contentHowStep2Sub ?? content.howStep2Sub, icon: "heroicons:chat-bubble-left-right" },
+  { num: "3", title: content.contentHowStep3Title ?? content.howStep3Title, sub: content.contentHowStep3Sub ?? content.howStep3Sub, icon: "heroicons:banknotes" },
 ];
 ---
 
@@ -24,10 +24,10 @@ const steps = [
     <!-- Heading -->
     <div class="max-w-3xl mx-auto text-center mb-16">
       <h2 class="text-2xl sm:text-3xl font-semibold tracking-tight text-text-main">
-        {content.howItWorksTitle}
+        {content.contentHowItWorksTitle ?? content.howItWorksTitle}
       </h2>
       <p class="text-base sm:text-lg font-normal mt-4 leading-relaxed text-text-muted">
-        {content.howItWorksSub}
+        {content.contentHowItWorksSubtitle ?? content.howItWorksSub}
       </p>
     </div>
 

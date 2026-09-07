@@ -25,6 +25,7 @@
   "loading": "Chargement des paramètres du thème...",
   "tabAppearance": "Apparence",
   "tabHomepage": "Page d'accueil",
+  "tabContent": "Contenu et texte",
   "tabProducts": "Produits",
   "tabProductPage": "Page produit",
   "tabOrderForm": "Formulaire de commande",
@@ -154,5 +155,10 @@
       "name": "Peak Design",
       "description": "Design à fort contraste et audacieux avec la police Geist. Idéal pour les marques premium et tech."
     }
-  }
+  },
+  "content_title": "Contenu et texte",
+  "content_subtitle": "Modifiez tous les textes affichés dans votre boutique",
+  "content_default_value": "Valeur par défaut",
+  "content_reset": "Réinitialiser",
+  "content_reset_all": "Tout réinitialiser"
 }
