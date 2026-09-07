@@ -43,9 +43,9 @@ export const server = {
       customerName: z.string().min(2, "الاسم مطلوب"),
       phone: z
         .string()
-        .min(9, "رقم الهاتف غير صحيح")
+        .min(10, "رقم الهاتف غير صحيح")
         .max(20)
-        .regex(/^[0-9+\s-]+$/, "رقم الهاتف غير صحيح"),
+        .regex(/^0[5-7]\d{8}$/, "رقم الهاتف غير صحيح (يجب أن يبدأ بـ 05 أو 06 أو 07)"),
       wilayaId: z.coerce.number().int().min(1).max(58),
       communeId: z.string().min(1, "يرجى اختيار البلدية"),
       address: z.string().max(300).optional(),
