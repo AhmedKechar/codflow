@@ -114,9 +114,13 @@ export function initProductPage() {
   const dots      = document.querySelectorAll<HTMLButtonElement>(".gallery-dot");
   const thumbs    = document.querySelectorAll<HTMLButtonElement>(".gallery-thumb");
   const submitBtn     = document.getElementById("submit-btn") as HTMLButtonElement | null;
-  const submitLabel   = submitBtn?.textContent?.trim() ?? "";
+  const submitLabel   = submitBtn?.querySelector("#submit-btn-text")?.textContent?.trim() ?? submitBtn?.textContent?.trim() ?? "";
+  const submitPrice   = document.getElementById("submit-price") as HTMLSpanElement | null;
   const qtyPlusBtn    = document.getElementById("qty-plus") as HTMLButtonElement | null;
+  const qtyMinusBtn   = document.getElementById("qty-minus") as HTMLButtonElement | null;
+  const qtyDisplay    = document.getElementById("qty-display") as HTMLSpanElement | null;
   const qtyStockHint  = document.getElementById("qty-stock-hint") as HTMLParagraphElement | null;
+  const summaryQtyBadge = document.getElementById("summary-qty-badge") as HTMLSpanElement | null;
 
   // ── OFFER TIER SELECTION ───────────────────────────────────────────────────
   
@@ -295,13 +299,17 @@ export function initProductPage() {
       el.innerHTML = `${fmt(currentPrice)} <span style="font-size:.6em;font-weight:700"> ${cur}</span>`;
     });
 
-    // 2. Update order summary rows
+    // 2. Update qty display and summary badge
+    if (qtyDisplay) qtyDisplay.textContent = String(qty);
+    if (summaryQtyBadge) summaryQtyBadge.textContent = `×${qty}`;
+
+    // 3. Update submit button price
+    if (submitPrice) submitPrice.textContent = `${fmt(itemTotal)} ${cur}`;
+
+    // 4. Update order summary rows
     const summaryItemPrice = document.getElementById("summary-item-price");
     if (summaryItemPrice) summaryItemPrice.textContent = `${fmt(itemTotal)} ${cur}`;
     
-    const summaryQtyLabel = document.getElementById("summary-qty-label");
-    if (summaryQtyLabel) summaryQtyLabel.textContent = `${qty} ×`;
-
     const shippingEl = document.getElementById("summary-shipping");
     const totalEl    = document.getElementById("summary-total");
 
@@ -375,7 +383,8 @@ export function initProductPage() {
     submitBtn.disabled = oos;
     submitBtn.style.background = oos ? "var(--clr-disabled)" : "";
     submitBtn.style.cursor     = oos ? "not-allowed" : "";
-    submitBtn.textContent      = oos ? outOfStockLabel : submitLabel;
+    const btnText = submitBtn.querySelector("#submit-btn-text");
+    if (btnText) btnText.textContent = oos ? outOfStockLabel : submitLabel;
   }
 
   /**
@@ -522,6 +531,35 @@ export function initProductPage() {
   }
 
   /**
+   * Shows delivery type container and updates labels with shipping prices.
+   */
+  function updateDeliveryLabels(wilayaId: string) {
+    const container = document.getElementById("delivery-type-container");
+    if (!container) return;
+    container.classList.remove("hidden");
+
+    const rate = rates[wilayaId];
+    const labels = container.querySelectorAll(".delivery-label-text");
+    if (labels.length < 2) return;
+
+    const homePrice = rate ? rate.home : null;
+    const stopPrice = rate ? rate.stopDesk : null;
+
+    labels[0].textContent = homePrice != null
+      ? (homePrice === 0 ? `${content.formHomeDelivery} (مجانا)` : `${content.formHomeDelivery} ${fmt(homePrice)} ${cur}`)
+      : content.formHomeDelivery;
+
+    labels[1].textContent = stopPrice != null
+      ? (stopPrice === 0 ? `${content.formStopDesk} (مجانا)` : `${content.formStopDesk} ${fmt(stopPrice)} ${cur}`)
+      : content.formStopDesk;
+  }
+
+  function hideDeliveryType() {
+    const container = document.getElementById("delivery-type-container");
+    if (container) container.classList.add("hidden");
+  }
+
+  /**
    * Recalculates shipping cost based on selected wilaya and delivery type.
    */
   function refreshShipping() {
@@ -581,10 +619,12 @@ export function initProductPage() {
     const wilayaId = (e.target as HTMLInputElement).value;
     if (wilayaId) {
       loadCommunes(wilayaId);
+      updateDeliveryLabels(wilayaId);
     } else {
       if (typeof window.__selectSetDisabled === 'function') {
         window.__selectSetDisabled("f-commune", communeDisabled);
       }
+      hideDeliveryType();
     }
     refreshShipping();
   });

@@ -13,20 +13,28 @@ interface Props {
   error?: string;
   /** When true: starts disabled with no options; populated later via window.__selectPopulate() */
   dynamic?: boolean;
+  /** Optional icon name to show inside the trigger */
+  icon?: string;
 }
-const { id, name, label, placeholder, searchPlaceholder = "Search...", noResultsText = "No results found", options, required, error, dynamic } = Astro.props;
+const { id, name, label, placeholder, searchPlaceholder = "Search...", noResultsText = "No results found", options, required, error, dynamic, icon } = Astro.props;
 ---
 
-<div class="custom-select-container relative w-full mb-4" data-id={id}>
+<div class="custom-select-container relative w-full" data-id={id}>
   <label for={id} class="form-label">{label} {required && <span class="text-[var(--clr-error)]">*</span>}</label>
 
   <div class="relative">
+    {icon && (
+      <span class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none z-10" style="color: var(--clr-text-2)">
+        <Icon name={icon} class="w-4 h-4" />
+      </span>
+    )}
     <button
       type="button"
       id={`${id}-trigger`}
       disabled={dynamic || undefined}
       class:list={[
-        "w-full h-11 px-3.5 flex items-center justify-between text-start rounded-lg border transition-colors focus:border-[var(--clr-primary)] outline-none",
+        "w-full h-12 px-3.5 flex items-center justify-between text-start rounded-lg border transition-colors focus:border-[var(--clr-primary)] outline-none",
+        icon && "!ps-10",
         error && "border-[var(--clr-error)] bg-[var(--clr-error-bg)]",
         dynamic && "opacity-50 cursor-not-allowed",
       ]}

@@ -182,7 +182,7 @@ body {
 
 .form-input {
   width: 100%;
-  min-height: 2.75rem;
+  min-height: 3rem;
   padding-inline: 0.875rem;
   background: var(--clr-surface);
   border: 1px solid var(--clr-input-border);

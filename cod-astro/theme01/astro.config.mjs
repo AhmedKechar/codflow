@@ -68,6 +68,9 @@ export default defineConfig({
           "chat-bubble-left",  // WhatsApp CTA
           "star",              // reviews header
           "home-modern",       // delivery: home
+          "user",              // form: customer name
+          "map-pin",           // form: wilaya
+          "building-office",   // form: commune
         ],
       },
     }),
@@ -95,7 +98,7 @@ export default defineConfig({
           // vite.environments.ssr — the legacy vite.ssr.optimizeDeps key is
           // ignored by Vite 8 here.
           noDiscovery: true,
-          exclude: ["astro/assets/services/noop", "astro-icon/components"],
+          exclude: ["astro/assets/services/noop", "astro-icon/components", "@astrojs/cloudflare/entrypoints/server"],
         },
       },
     },

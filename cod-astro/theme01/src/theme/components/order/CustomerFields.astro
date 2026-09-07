@@ -17,7 +17,7 @@ const cfg = {
   showName:        orderFormConfig?.showName        ?? true,
   showPhone:       orderFormConfig?.showPhone       ?? true,
   showEmail:       orderFormConfig?.showEmail       ?? false,
-  showAddress:     orderFormConfig?.showAddress     ?? true,
+  showAddress:     orderFormConfig?.showAddress     ?? false,
   showWilaya:      orderFormConfig?.showWilaya      ?? true,
   showCommune:     orderFormConfig?.showCommune     ?? true,
   showDeliveryType: orderFormConfig?.showDeliveryType ?? true,
@@ -26,107 +26,15 @@ const cfg = {
 };
 ---
 
-<div class="space-y-5 pt-2">
-  <div class="flex items-center gap-3 py-2">
-    <div class="h-px flex-1 bg-[var(--clr-border)]"></div>
-    <span class="text-xs font-semibold uppercase tracking-[0.05em]" style="color: var(--clr-text-2)">{content.formDeliverySection}</span>
-    <div class="h-px flex-1 bg-[var(--clr-border)]"></div>
-  </div>
-
-  {cfg.showName && (
-  <div>
-    <label for="f-name" class="form-label">
-      {content.formNameLabel} <span class="text-[var(--clr-error)]">*</span>
-    </label>
-    <input
-      id="f-name" type="text" name="customerName"
-      required autocomplete="name"
-      placeholder={content.formNameLabel}
-      class:list={["form-input", fieldErrors.customerName && "error"]}
-    />
-    {fieldErrors.customerName && (
-      <p class="text-[0.8125rem] font-medium mt-2 ps-1" style="color: var(--clr-error)">{fieldErrors.customerName[0]}</p>
-    )}
-  </div>
-  )}
-
-  {cfg.showPhone && (
-  <div>
-    <label for="f-phone" class="form-label">
-      {content.formPhoneLabel} <span class="text-[var(--clr-error)]">*</span>
-    </label>
-    <input
-      id="f-phone" type="tel" name="phone"
-      required autocomplete="tel" inputmode="tel"
-      placeholder={content.formPhoneLabel}
-      dir="ltr"
-      class:list={["form-input", fieldErrors.phone && "error"]}
-    />
-    {fieldErrors.phone && (
-      <p class="text-[0.8125rem] font-medium mt-2 ps-1" style="color: var(--clr-error)">{fieldErrors.phone[0]}</p>
-    )}
-  </div>
-  )}
-
-  {cfg.showEmail && (
-  <div>
-    <label for="f-email" class="form-label">{content.formEmailLabel ?? "البريد الإلكتروني"}</label>
-    <input
-      id="f-email" type="email" name="email"
-      autocomplete="email"
-      placeholder={content.formEmailPlaceholder ?? "بريدك الإلكتروني"}
-      dir="ltr"
-      class="form-input"
-    />
-  </div>
-  )}
-
-  {cfg.showWilaya && (
-  <div class="mb-1">
-    <Select
-      id="f-wilaya"
-      name="wilayaId"
-      label={content.formWilayaLabel}
-      placeholder={content.formWilayaPlaceholder}
-      searchPlaceholder={content.searchLabel}
-      noResultsText={content.noResultsLabel}
-      required={true}
-      error={fieldErrors.wilayaId?.[0]}
-      options={WILAYAS.map(w => ({
-        value: w.id,
-        label: `${w.id.toString().padStart(2, "0")} — ${isRTL ? w.nameAr : w.name}`
-      }))}
-    />
-    {fieldErrors.wilayaId && (
-      <p class="text-[0.8125rem] font-medium mt-2 ps-1" style="color: var(--clr-error)">{fieldErrors.wilayaId[0]}</p>
-    )}
-  </div>
-  )}
-
-  {cfg.showCommune && (
-  <div class="mb-1">
-    <Select
-      id="f-commune"
-      name="communeId"
-      label={content.formCommuneLabel}
-      placeholder={content.formCommuneDisabled}
-      searchPlaceholder={content.searchLabel}
-      noResultsText={content.noResultsLabel}
-      required={true}
-      error={fieldErrors.communeId?.[0]}
-      options={[]}
-      dynamic={true}
-    />
-    {fieldErrors.communeId && (
-      <p class="text-[0.8125rem] font-medium mt-2 ps-1" style="color: var(--clr-error)">{fieldErrors.communeId[0]}</p>
-    )}
-  </div>
-  )}
+<div class="space-y-2 pt-1">
+  <style>
+    .custom-select-container > label { display: none !important; }
+    .custom-select-container { margin-bottom: 0 !important; }
+  </style>
 
   {cfg.showDeliveryType && (
-  <div>
+  <div id="delivery-type-container" class="hidden">
     <fieldset>
-      <legend class="form-label">{content.formDeliveryLabel}</legend>
       <div class="grid grid-cols-2 gap-3" id="delivery-type-group">
         {[
           { value: "home",      icon: "heroicons:home", label: content.formHomeDelivery },
@@ -138,12 +46,12 @@ const cfg = {
               checked={i === 0} class="sr-only delivery-radio-input"
             />
             <div class:list={[
-              "h-14 rounded-lg border flex items-center justify-center gap-2.5 font-semibold text-sm transition-colors select-none cursor-pointer",
+              "h-12 rounded-lg border flex items-center justify-center gap-2.5 font-semibold text-sm transition-colors select-none cursor-pointer",
               i === 0
                 ? "border-[var(--clr-primary)] text-[var(--clr-primary)] bg-[var(--clr-primary)]/5"
                 : "border-[var(--clr-border)] text-[var(--clr-text-2)] bg-[var(--clr-surface)]"
             ]}>
-              <Icon name={icon} class="w-5 h-5" /><span>{label}</span>
+              <Icon name={icon} class="w-5 h-5" /><span class="delivery-label-text">{label}</span>
             </div>
           </label>
         ))}
@@ -152,13 +60,111 @@ const cfg = {
   </div>
   )}
 
+  {(cfg.showName || cfg.showPhone) && (
+  <div class="grid grid-cols-2 gap-3">
+    {cfg.showName && (
+    <div class="relative">
+      <span class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none" style="color: var(--clr-text-2)">
+        <Icon name="heroicons:user" class="w-4 h-4" />
+      </span>
+      <input
+        id="f-name" type="text" name="customerName"
+        required autocomplete="name"
+        placeholder={content.formNameLabel}
+        class:list={["form-input !ps-10", fieldErrors.customerName && "error"]}
+      />
+      {fieldErrors.customerName && (
+        <p class="text-[0.8125rem] font-medium mt-2 ps-1" style="color: var(--clr-error)">{fieldErrors.customerName[0]}</p>
+      )}
+    </div>
+    )}
+
+    {cfg.showPhone && (
+    <div class="relative">
+      <span class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none" style="color: var(--clr-text-2)">
+        <Icon name="heroicons:phone" class="w-4 h-4" />
+      </span>
+      <input
+        id="f-phone" type="tel" name="phone"
+        required autocomplete="tel" inputmode="tel"
+        placeholder={content.formPhoneLabel}
+        dir="rtl"
+        class:list={["form-input !ps-10", fieldErrors.phone && "error"]}
+      />
+      {fieldErrors.phone && (
+        <p class="text-[0.8125rem] font-medium mt-2 ps-1" style="color: var(--clr-error)">{fieldErrors.phone[0]}</p>
+      )}
+    </div>
+    )}
+  </div>
+  )}
+
+  {cfg.showEmail && (
+  <div>
+    <input
+      id="f-email" type="email" name="email"
+      autocomplete="email"
+      placeholder={content.formEmailLabel ?? "البريد الإلكتروني"}
+      dir="ltr"
+      class="form-input"
+    />
+  </div>
+  )}
+
+  {(cfg.showWilaya || cfg.showCommune) && (
+  <div class="grid grid-cols-2 gap-3">
+    {cfg.showWilaya && (
+    <div>
+      <Select
+        id="f-wilaya"
+        name="wilayaId"
+        label=""
+        placeholder={content.formWilayaLabel}
+        searchPlaceholder={content.searchLabel}
+        noResultsText={content.noResultsLabel}
+        required={false}
+        error={fieldErrors.wilayaId?.[0]}
+        icon="heroicons:map-pin"
+        options={WILAYAS.map(w => ({
+          value: w.id,
+          label: `${w.id.toString().padStart(2, "0")} — ${isRTL ? w.nameAr : w.name}`
+        }))}
+      />
+      {fieldErrors.wilayaId && (
+        <p class="text-[0.8125rem] font-medium mt-2 ps-1" style="color: var(--clr-error)">{fieldErrors.wilayaId[0]}</p>
+      )}
+    </div>
+    )}
+
+    {cfg.showCommune && (
+    <div>
+      <Select
+        id="f-commune"
+        name="communeId"
+        label=""
+        placeholder={content.formCommuneLabel}
+        searchPlaceholder={content.searchLabel}
+        noResultsText={content.noResultsLabel}
+        required={false}
+        error={fieldErrors.communeId?.[0]}
+        icon="heroicons:building-office"
+        options={[]}
+        dynamic={true}
+      />
+      {fieldErrors.communeId && (
+        <p class="text-[0.8125rem] font-medium mt-2 ps-1" style="color: var(--clr-error)">{fieldErrors.communeId[0]}</p>
+      )}
+    </div>
+    )}
+  </div>
+  )}
+
   {cfg.showAddress && (
-  <div id="address-field-container">
-    <label for="f-address" class="form-label">{content.formAddressLabel}</label>
+  <div id="address-field-container" class="hidden">
     <input
       id="f-address" type="text" name="address"
       autocomplete="street-address"
-      placeholder={content.formAddressPlaceholder}
+      placeholder={content.formAddressLabel}
       class="form-input"
     />
   </div>
@@ -166,10 +172,9 @@ const cfg = {
 
   {cfg.showNotes && (
   <div>
-    <label for="f-notes" class="form-label">{content.formNotesLabel}</label>
     <textarea
       id="f-notes" name="notes" rows="2"
-      placeholder={content.formNotesPlaceholder}
+      placeholder={content.formNotesLabel}
       class="form-input"
     ></textarea>
   </div>

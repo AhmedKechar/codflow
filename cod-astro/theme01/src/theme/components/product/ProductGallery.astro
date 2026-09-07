@@ -1,5 +1,4 @@
 ---
-import { Image } from "astro:assets";
 import type { Product } from "@/core/api/types";
 import type { StoreFrontContent } from "@/theme/config/content";
 import { Icon } from "astro-icon/components";
@@ -20,36 +19,15 @@ const { product, hasDiscount, discountPct, isRTL, content } = Astro.props;
   <div class="gallery-track rounded-[var(--radius-card)] aspect-square lg:aspect-[4/5]" id="gallery">
     {product.images.length > 0 ? product.images.map((img, idx) => (
       <div class="gallery-slide" data-image-id={img.id}>
-        {idx === 0 ? (
-          /* LCP image: priority=true → fetchpriority=high + loading=eager + decoding=sync.
-             widths + sizes let the browser pick the right resolution:
-             ~400 px on mobile, ~720 px on desktop (saves ~15 KiB vs always fetching 800 px). */
-          <Image
-            src={img.src}
-            alt={img.altText ?? product.name}
-            width={800}
-            height={800}
-            widths={[400, 720, 800]}
-            sizes="(min-width: 1024px) 50vw, 100vw"
-            priority={true}
-            format="webp"
-            quality={90}
-            class="w-full h-full object-cover"
-          />
-        ) : (
-          /* Non-visible slides: lazy so they don't compete with the LCP image. */
-          <Image
-            src={img.src}
-            alt={img.altText ?? product.name}
-            width={800}
-            height={800}
-            loading="lazy"
-            decoding="async"
-            format="webp"
-            quality={90}
-            class="w-full h-full object-cover"
-          />
-        )}
+        <img
+          src={img.src}
+          alt={img.altText ?? product.name}
+          width={800}
+          height={800}
+          loading={idx === 0 ? "eager" : "lazy"}
+          decoding="async"
+          class="w-full h-full object-cover"
+        />
       </div>
     )) : (
       <div class="gallery-slide flex items-center justify-center" style="background: var(--clr-surface-alt)">
@@ -98,15 +76,13 @@ const { product, hasDiscount, discountPct, isRTL, content } = Astro.props;
             ]}
             data-index={i}
           >
-            <Image
+            <img
               src={img.src}
               alt={img.altText ?? `${i + 1}`}
               width={80}
               height={80}
               loading={i < 4 ? "eager" : "lazy"}
               decoding="async"
-              format="webp"
-              quality={80}
               class="w-full h-full object-cover"
             />
           </button>

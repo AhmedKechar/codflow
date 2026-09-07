@@ -33,20 +33,15 @@ const comparePrice = defaultVariant?.compareAtPrice ?? product.compareAtPrice ??
 ---
 
 <!-- Order form card -->
-<div class="card" id="order-section">
+<div class="card" id="order-section" style="border-color: var(--clr-primary)">
   <!-- Card header -->
-  <div class="px-6 py-5 border-b border-[var(--clr-border)]">
-    <div class="flex items-center gap-3">
-       <div class="w-10 h-10 rounded-lg flex items-center justify-center bg-[var(--clr-surface-alt)]" style="color: var(--clr-primary)">
-          <Icon name="heroicons:shopping-bag" class="w-5 h-5" />
-       </div>
-       <div>
-          <h2 class="font-semibold text-lg leading-tight" style="color: var(--clr-text)">
-            {content.formTitle}
-          </h2>
-          <p class="text-xs font-medium uppercase tracking-[0.05em] mt-1" style="color: var(--clr-text-2)">{content.orderCtaSubtext}</p>
-       </div>
-    </div>
+  <div class="px-4 py-3 border-b text-center" style="border-color: var(--clr-primary)">
+    <h2 class="font-semibold text-lg" style="color: var(--clr-text)">
+      {content.formTitleNew}
+    </h2>
+    <p class="text-xs uppercase mt-1" style="color: var(--clr-text-2)">
+      {content.orderCtaSubtext}
+    </p>
   </div>
 
   {serverError && (
@@ -56,7 +51,7 @@ const comparePrice = defaultVariant?.compareAtPrice ?? product.compareAtPrice ??
     </div>
   )}
 
-  <form method="POST" action={actions.placeOrder} class="p-6 space-y-6">
+  <form method="POST" action={actions.placeOrder} class="p-4 space-y-4">
     <!-- Hidden product fields -->
     <input type="hidden" name="productId"          value={product.id} />
     <!-- Meta Pixel tracking (populated by JS at submit time) -->
@@ -68,9 +63,6 @@ const comparePrice = defaultVariant?.compareAtPrice ?? product.compareAtPrice ??
     <input type="hidden" name="variantLabel"       value="" id="variant-label-input" />
     <input type="hidden" name="offerId"            value="" id="offer-id-input" />
     <input type="hidden" name="variantSelections"  value="[]" id="variant-selections-input" />
-
-    {/* Standalone variant selector only when no offers — otherwise it lives inside the tier cards */}
-    {offers.length === 0 && <VariantSelector product={product} />}
 
     <OfferTiers
       product={product}
@@ -90,6 +82,31 @@ const comparePrice = defaultVariant?.compareAtPrice ?? product.compareAtPrice ??
       orderFormConfig={orderFormConfig}
     />
 
+    {/* Standalone variant selector only when no offers — otherwise it lives inside the tier cards */}
+    {offers.length === 0 && <VariantSelector product={product} />}
+
+    <!-- Qty + Submit (before summary) -->
+    <div class="flex items-center gap-2">
+      <div class="flex items-center border border-[var(--clr-border)] rounded-lg overflow-hidden shrink-0" style="direction: ltr">
+        <button type="button" id="qty-minus" class="w-9 h-14 flex items-center justify-center text-lg font-bold">−</button>
+        <span id="qty-display" class="w-9 h-14 flex items-center justify-center font-semibold text-sm border-x border-[var(--clr-border)]">1</span>
+        <button type="button" id="qty-plus" class="w-9 h-14 flex items-center justify-center text-lg font-bold">+</button>
+      </div>
+      <button
+        type="submit"
+        id="submit-btn"
+        class:list={[
+          "flex-1 h-14 rounded-lg font-bold text-white bg-[var(--clr-primary)]",
+          isOutOfStock && "!bg-[var(--clr-disabled)] cursor-not-allowed"
+        ]}
+        disabled={isOutOfStock || undefined}
+      >
+        <span id="submit-btn-text" class="text-lg">{isOutOfStock ? content.outOfStock : (submitText || content.formSubmit)}</span>
+        <span id="submit-price" class="ms-2 text-base opacity-90"></span>
+      </button>
+    </div>
+    <input type="hidden" name="quantity" id="qty-input" value="1" />
+
     <OrderSummary
       product={product}
       basePrice={basePrice}
@@ -98,22 +115,5 @@ const comparePrice = defaultVariant?.compareAtPrice ?? product.compareAtPrice ??
       content={content}
       summaryDisplay={summaryDisplay}
     />
-
-    <!-- Submit -->
-    <button
-      type="submit"
-      class:list={[
-        "btn-primary",
-        isOutOfStock && "!bg-[var(--clr-disabled)] cursor-not-allowed"
-      ]}
-      id="submit-btn"
-      disabled={isOutOfStock || undefined}
-    >
-      {isOutOfStock ? content.outOfStock : (submitText || content.formSubmit)}
-    </button>
-
-    <p class="text-center text-sm font-medium px-4" style="color: var(--clr-text-2)">
-      {content.formConfirmNote}
-    </p>
   </form>
 </div>

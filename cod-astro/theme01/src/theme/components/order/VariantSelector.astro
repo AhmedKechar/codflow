@@ -27,12 +27,12 @@ function firstInStockIdx(optName: string): number {
 ---
 
 {product.hasVariants && product.variantOptions && product.variants.length > 0 && (
-  <div class="space-y-4">
+  <div class="space-y-2">
     {product.variantOptions.map((opt) => {
       const defaultIdx = firstInStockIdx(opt.name);
       return (
         <div class="space-y-2">
-          <span class="text-[0.8125rem] font-semibold" style="color: var(--clr-text-2)">{opt.name}</span>
+          <span class="text-[0.8125rem] font-semibold" style="color: var(--clr-text)">اختر {opt.name} :</span>
           <!-- -mx-6 px-6 lets the scroll bleed to card edges without clipping -->
           <div class="flex gap-2 overflow-x-auto -mx-6 px-6 pb-1 scrollbar-hide">
             {opt.values.map((val, vi) => {
