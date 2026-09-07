@@ -1,0 +1,189 @@
+---
+interface Props {
+  title?: string;
+  body?: string;
+  ctaLabel?: string;
+  ctaHref?: string;
+  image?: string;
+  align?: 'left' | 'center' | 'right';
+}
+
+const {
+  title,
+  body,
+  ctaLabel,
+  ctaHref = '#',
+  image,
+  align = 'center'
+} = Astro.props;
+
+const hasImage = !!image;
+const dir = align === 'right' ? 'rtl' : 'ltr';
+---
+
+<section class="rich-text" dir={dir}>
+  <div class="rich-text__container">
+    <div class:list={[
+      "rich-text__grid",
+      hasImage && "rich-text__grid--with-image"
+    ]}>
+      <div class:list={[
+        "rich-text__content",
+        align === 'center' && "rich-text__content--center",
+        align === 'right' && "rich-text__content--right"
+      ]}>
+        {title && (
+          <h2 class="rich-text__title">{title}</h2>
+        )}
+        {body && (
+          <div class="rich-text__body" set:html={body} />
+        )}
+        {ctaLabel && (
+          <div class="rich-text__cta-wrapper">
+            <a href={ctaHref} class="btn-primary rich-text__cta">
+              {ctaLabel}
+            </a>
+          </div>
+        )}
+      </div>
+
+      {hasImage && (
+        <div class="rich-text__image-wrapper">
+          <img
+            src={image}
+            alt={title || ''}
+            class="rich-text__image"
+            loading="lazy"
+          />
+        </div>
+      )}
+    </div>
+  </div>
+</section>
+
+<style>
+  .rich-text {
+    padding: 4rem 0;
+  }
+
+  @media (min-width: 640px) {
+    .rich-text {
+      padding: 5rem 0;
+    }
+  }
+
+  .rich-text__container {
+    max-width: 80rem;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .rich-text__container {
+      padding: 0 1.5rem;
+    }
+  }
+
+  .rich-text__grid {
+    display: grid;
+    gap: 3rem;
+    align-items: center;
+  }
+
+  @media (min-width: 1024px) {
+    .rich-text__grid--with-image {
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+    }
+  }
+
+  .rich-text__content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .rich-text__content--center {
+    text-align: center;
+  }
+
+  .rich-text__content--right {
+    text-align: right;
+  }
+
+  .rich-text__title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--clr-text);
+    margin: 0;
+  }
+
+  @media (min-width: 640px) {
+    .rich-text__title {
+      font-size: 2.25rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .rich-text__title {
+      font-size: 2.5rem;
+    }
+  }
+
+  .rich-text__body {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--clr-text-2);
+  }
+
+  @media (min-width: 640px) {
+    .rich-text__body {
+      font-size: 1.125rem;
+    }
+  }
+
+  .rich-text__body :global(p) {
+    margin: 0 0 1rem 0;
+  }
+
+  .rich-text__body :global(p:last-child) {
+    margin-bottom: 0;
+  }
+
+  .rich-text__cta-wrapper {
+    display: flex;
+  }
+
+  .rich-text__content--center .rich-text__cta-wrapper {
+    justify-content: center;
+  }
+
+  .rich-text__content--right .rich-text__cta-wrapper {
+    justify-content: flex-end;
+  }
+
+  .rich-text__cta {
+    display: inline-flex;
+    min-width: 160px;
+    justify-content: center;
+  }
+
+  .rich-text__image-wrapper {
+    order: -1;
+  }
+
+  @media (min-width: 1024px) {
+    .rich-text__image-wrapper {
+      order: 0;
+    }
+  }
+
+  .rich-text__image {
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-md);
+    object-fit: cover;
+  }
+</style>

@@ -8,10 +8,12 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import StoreLayout from "@/theme/layouts/StoreLayout.astro";
 import Hero from "@/theme/components/home/Hero.astro";
+import Slideshow from "@/theme/components/home/Slideshow.astro";
 import CategoryCards from "@/theme/components/home/CategoryCards.astro";
 import BestSellers from "@/theme/components/home/BestSellers.astro";
 import HowItWorks from "@/theme/components/home/HowItWorks.astro";
 import NewArrivals from "@/theme/components/home/NewArrivals.astro";
+import RichText from "@/theme/components/home/RichText.astro";
 import FeaturesBar from "@/theme/components/home/FeaturesBar.astro";
 import WhatsAppCTA from "@/theme/components/home/WhatsAppCTA.astro";
 import CustomerTestimonials from "@/theme/components/home/CustomerTestimonials.astro";
@@ -35,6 +37,10 @@ const colsMobile = siteBuilder.home.columnsMobile;
 <StoreLayout config={config} content={content} siteBuilder={siteBuilder}>
   {sections.includes("hero") && (
     <Hero content={content} heroConfig={siteBuilder.hero} />
+  )}
+
+  {sections.includes("slideshow") && siteBuilder.slideshow.slides.length > 0 && (
+    <Slideshow content={content} slides={siteBuilder.slideshow.slides} />
   )}
 
   {sections.includes("categoryCards") && (
@@ -64,6 +70,17 @@ const colsMobile = siteBuilder.home.columnsMobile;
       rowsMobile={rowsMobile}
       columnsDesktop={colsDesktop}
       columnsMobile={colsMobile}
+    />
+  )}
+
+  {sections.includes("richText") && (
+    <RichText
+      title={siteBuilder.richtext.title}
+      body={siteBuilder.richtext.body}
+      ctaLabel={siteBuilder.richtext.ctaLabel}
+      ctaHref={siteBuilder.richtext.ctaHref}
+      image={siteBuilder.richtext.image}
+      align={siteBuilder.richtext.align}
     />
   )}
 

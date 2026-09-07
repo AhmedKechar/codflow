@@ -1,0 +1,325 @@
+---
+import { Image } from "astro:assets";
+import type { StoreFrontContent } from "@/theme/config/content";
+
+interface Slide {
+  image: string;
+  title?: string;
+  subtitle?: string;
+  ctaLabel?: string;
+  ctaHref?: string;
+}
+
+interface Props {
+  content: StoreFrontContent;
+  slides?: Slide[];
+}
+
+const { content, slides = [] } = Astro.props;
+
+const defaultSlides: Slide[] = slides.length > 0 ? slides : [
+  {
+    image: "/slide-1.jpg",
+    title: content.contentHeroTitle,
+    subtitle: content.contentHeroSubtitle,
+    ctaLabel: content.contentHeroCtaPrimary,
+    ctaHref: "/products",
+  },
+];
+---
+
+<section class="slideshow" aria-label="Slideshow">
+  <div class="slideshow__track" data-total={defaultSlides.length}>
+    {defaultSlides.map((slide, i) => (
+      <div class:list={["slideshow__slide", i === 0 && "active"]} data-index={i}>
+        <Image
+          src={slide.image}
+          alt={slide.title || ''}
+          width={1920}
+          height={600}
+          class="slideshow__image"
+          loading={i === 0 ? "eager" : "lazy"}
+        />
+        {(slide.title || slide.subtitle) && (
+          <div class="slideshow__overlay">
+            <div class="slideshow__content">
+              {slide.title && (
+                <h2 class="slideshow__title">{slide.title}</h2>
+              )}
+              {slide.subtitle && (
+                <p class="slideshow__subtitle">{slide.subtitle}</p>
+              )}
+              {slide.ctaLabel && (
+                <a href={slide.ctaHref || '/products'} class="btn-primary slideshow__cta">
+                  {slide.ctaLabel}
+                </a>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    ))}
+  </div>
+
+  {defaultSlides.length > 1 && (
+    <>
+      <button type="button" class="slideshow__nav slideshow__nav--prev" aria-label="Previous slide">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+      <button type="button" class="slideshow__nav slideshow__nav--next" aria-label="Next slide">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+
+      <div class="slideshow__dots">
+        {defaultSlides.map((_, i) => (
+          <button
+            type="button"
+            class:list={["slideshow__dot", i === 0 && "active"]}
+            data-index={i}
+            aria-label={`Go to slide ${i + 1}`}
+          />
+        ))}
+      </div>
+    </>
+  )}
+</section>
+
+<style>
+  .slideshow {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .slideshow__track {
+    display: flex;
+    transition: transform 0.5s ease;
+  }
+
+  .slideshow__slide {
+    flex: 0 0 100%;
+    position: relative;
+  }
+
+  .slideshow__image {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    display: block;
+  }
+
+  @media (min-width: 640px) {
+    .slideshow__image {
+      height: 500px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .slideshow__image {
+      height: 560px;
+    }
+  }
+
+  .slideshow__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.2));
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .slideshow__content {
+    max-width: 600px;
+    padding: 2rem;
+    color: white;
+  }
+
+  .slideshow__title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    line-height: 1.2;
+  }
+
+  @media (min-width: 640px) {
+    .slideshow__title {
+      font-size: 2.5rem;
+    }
+  }
+
+  .slideshow__subtitle {
+    font-size: 1rem;
+    opacity: 0.9;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
+
+  @media (min-width: 640px) {
+    .slideshow__subtitle {
+      font-size: 1.125rem;
+    }
+  }
+
+  .slideshow__cta {
+    display: inline-flex;
+    min-width: 160px;
+    justify-content: center;
+  }
+
+  .slideshow__nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 50%;
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, opacity 0.2s;
+    z-index: 10;
+    color: var(--clr-text);
+  }
+
+  .slideshow__nav:hover {
+    background: white;
+  }
+
+  .slideshow__nav--prev {
+    left: 1rem;
+  }
+
+  .slideshow__nav--next {
+    right: 1rem;
+  }
+
+  .slideshow__dots {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 0.5rem;
+    z-index: 10;
+  }
+
+  .slideshow__dot {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+    padding: 0;
+  }
+
+  .slideshow__dot:hover {
+    background: rgba(255, 255, 255, 0.8);
+  }
+
+  .slideshow__dot.active {
+    background: white;
+    transform: scale(1.2);
+  }
+</style>
+
+<script>
+  function initSlideshow() {
+    const sections = document.querySelectorAll<HTMLElement>('.slideshow');
+    
+    sections.forEach((section) => {
+      const track = section.querySelector<HTMLElement>('.slideshow__track');
+      const prevBtn = section.querySelector<HTMLButtonElement>('.slideshow__nav--prev');
+      const nextBtn = section.querySelector<HTMLButtonElement>('.slideshow__nav--next');
+      const dots = section.querySelectorAll<HTMLButtonElement>('.slideshow__dot');
+      const slides = section.querySelectorAll<HTMLElement>('.slideshow__slide');
+      
+      if (!track || slides.length <= 1) return;
+      
+      let currentIndex = 0;
+      const total = slides.length;
+      
+      function goTo(index: number) {
+        if (index < 0) index = total - 1;
+        if (index >= total) index = 0;
+        
+        currentIndex = index;
+        if (track) {
+          track.style.transform = `translateX(-${currentIndex * 100}%)`;
+        }
+        
+        dots.forEach((dot, i) => {
+          dot.classList.toggle('active', i === currentIndex);
+        });
+        
+        slides.forEach((slide, i) => {
+          slide.classList.toggle('active', i === currentIndex);
+        });
+      }
+      
+      prevBtn?.addEventListener('click', () => goTo(currentIndex - 1));
+      nextBtn?.addEventListener('click', () => goTo(currentIndex + 1));
+      
+      dots.forEach((dot) => {
+        dot.addEventListener('click', () => {
+          const index = parseInt(dot.dataset.index || '0');
+          goTo(index);
+        });
+      });
+      
+      // Auto-play
+      let autoplayInterval = setInterval(() => {
+        goTo(currentIndex + 1);
+      }, 5000);
+      
+      // Pause on hover
+      section.addEventListener('mouseenter', () => {
+        clearInterval(autoplayInterval);
+      });
+      
+      section.addEventListener('mouseleave', () => {
+        autoplayInterval = setInterval(() => {
+          goTo(currentIndex + 1);
+        }, 5000);
+      });
+      
+      // Touch support
+      let touchStartX = 0;
+      let touchEndX = 0;
+      
+      track.addEventListener('touchstart', (e) => {
+        touchStartX = e.touches[0].clientX;
+      }, { passive: true });
+      
+      track.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].clientX;
+        const diff = touchStartX - touchEndX;
+        
+        if (Math.abs(diff) > 50) {
+          if (diff > 0) {
+            goTo(currentIndex + 1);
+          } else {
+            goTo(currentIndex - 1);
+          }
+        }
+      }, { passive: true });
+    });
+  }
+  
+  if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initSlideshow);
+    } else {
+      initSlideshow();
+    }
+  }
+</script>

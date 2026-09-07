@@ -32,20 +32,24 @@ interface SiteBuilderEditorProps {
 
 type SectionLabelKey =
   | "section_hero"
+  | "section_slideshow"
   | "section_categoryCards"
   | "section_bestSellers"
   | "section_howItWorks"
   | "section_newArrivals"
+  | "section_richText"
   | "section_featuresBar"
   | "section_whatsappCta"
   | "section_testimonials";
 
 const SECTION_KEYS: { id: HomeSectionId; key: SectionLabelKey }[] = [
   { id: "hero", key: "section_hero" },
+  { id: "slideshow", key: "section_slideshow" },
   { id: "categoryCards", key: "section_categoryCards" },
   { id: "bestSellers", key: "section_bestSellers" },
   { id: "howItWorks", key: "section_howItWorks" },
   { id: "newArrivals", key: "section_newArrivals" },
+  { id: "richText", key: "section_richText" },
   { id: "featuresBar", key: "section_featuresBar" },
   { id: "whatsappCta", key: "section_whatsappCta" },
   { id: "testimonials", key: "section_testimonials" },
@@ -246,6 +250,124 @@ export function SiteBuilderEditor({ siteJson, onSaved, onDirtyChange, saveRef }:
             onChange={(v) => update((p) => ({ ...p, hero: { ...p.hero, subtitle: v || undefined } }))}
             placeholder={t.hero_subtitle}
           />
+        </div>
+      </PanelCard>
+
+      {/* Slideshow */}
+      <PanelCard icon={LayoutDashboard} title={t.slideshow_section} subtitle={t.slideshow_section_hint}>
+        <ToggleRow
+          label={t.visible}
+          checked={site.slideshow.enabled}
+          onChange={(v) => update((p) => ({ ...p, slideshow: { ...p.slideshow, enabled: v } }))}
+        />
+        <ToggleRow
+          label={t.autoplay}
+          checked={site.slideshow.autoplay ?? true}
+          onChange={(v) => update((p) => ({ ...p, slideshow: { ...p.slideshow, autoplay: v } }))}
+        />
+        <div className="mt-3 space-y-2">
+          <TextInput
+            label={t.slide_interval}
+            value={String(site.slideshow.intervalMs ?? 5000)}
+            onChange={(v) => update((p) => ({ ...p, slideshow: { ...p.slideshow, intervalMs: parseInt(v) || 5000 } }))}
+          />
+        </div>
+        <div className="mt-4 space-y-3">
+          {site.slideshow.slides.map((slide, index) => (
+            <div key={index} className="rounded-lg border border-border p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-foreground">{t.slide} {index + 1}</span>
+                <button
+                  type="button"
+                  onClick={() => update((p) => ({ ...p, slideshow: { ...p.slideshow, slides: p.slideshow.slides.filter((_, i) => i !== index) } }))}
+                  className="text-muted-foreground hover:text-destructive"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+              <TextInput
+                label={t.image_url}
+                value={slide.image}
+                onChange={(v) => update((p) => ({ ...p, slideshow: { ...p.slideshow, slides: p.slideshow.slides.map((s, i) => i === index ? { ...s, image: v } : s) } }))}
+              />
+              <TextInput
+                label={t.title}
+                value={slide.title ?? ""}
+                onChange={(v) => update((p) => ({ ...p, slideshow: { ...p.slideshow, slides: p.slideshow.slides.map((s, i) => i === index ? { ...s, title: v || undefined } : s) } }))}
+              />
+              <TextInput
+                label={t.subtitle}
+                value={slide.subtitle ?? ""}
+                onChange={(v) => update((p) => ({ ...p, slideshow: { ...p.slideshow, slides: p.slideshow.slides.map((s, i) => i === index ? { ...s, subtitle: v || undefined } : s) } }))}
+              />
+              <TextInput
+                label={t.cta_label}
+                value={slide.ctaLabel ?? ""}
+                onChange={(v) => update((p) => ({ ...p, slideshow: { ...p.slideshow, slides: p.slideshow.slides.map((s, i) => i === index ? { ...s, ctaLabel: v || undefined } : s) } }))}
+              />
+              <TextInput
+                label={t.cta_href}
+                value={slide.ctaHref ?? ""}
+                onChange={(v) => update((p) => ({ ...p, slideshow: { ...p.slideshow, slides: p.slideshow.slides.map((s, i) => i === index ? { ...s, ctaHref: v || undefined } : s) } }))}
+              />
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => update((p) => ({ ...p, slideshow: { ...p.slideshow, slides: [...p.slideshow.slides, { image: "" }] } }))}
+            className="mt-1 inline-flex h-9 items-center gap-2 rounded-lg border border-border px-3 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted"
+          >
+            <Plus size={15} />
+            {t.add_slide}
+          </button>
+        </div>
+      </PanelCard>
+
+      {/* Rich Text */}
+      <PanelCard icon={LayoutDashboard} title={t.richtext_section} subtitle={t.richtext_section_hint}>
+        <ToggleRow
+          label={t.visible}
+          checked={site.richtext.enabled}
+          onChange={(v) => update((p) => ({ ...p, richtext: { ...p.richtext, enabled: v } }))}
+        />
+        <div className="mt-3 space-y-3">
+          <TextInput
+            label={t.title}
+            value={site.richtext.title ?? ""}
+            onChange={(v) => update((p) => ({ ...p, richtext: { ...p.richtext, title: v || undefined } }))}
+          />
+          <TextInput
+            label={t.body}
+            value={site.richtext.body ?? ""}
+            onChange={(v) => update((p) => ({ ...p, richtext: { ...p.richtext, body: v || undefined } }))}
+          />
+          <TextInput
+            label={t.cta_label}
+            value={site.richtext.ctaLabel ?? ""}
+            onChange={(v) => update((p) => ({ ...p, richtext: { ...p.richtext, ctaLabel: v || undefined } }))}
+          />
+          <TextInput
+            label={t.cta_href}
+            value={site.richtext.ctaHref ?? ""}
+            onChange={(v) => update((p) => ({ ...p, richtext: { ...p.richtext, ctaHref: v || undefined } }))}
+          />
+          <TextInput
+            label={t.image_url}
+            value={site.richtext.image ?? ""}
+            onChange={(v) => update((p) => ({ ...p, richtext: { ...p.richtext, image: v || undefined } }))}
+          />
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-foreground">{t.alignment}</label>
+            <select
+              value={site.richtext.align ?? "center"}
+              onChange={(e) => update((p) => ({ ...p, richtext: { ...p.richtext, align: e.target.value as 'left' | 'center' | 'right' } }))}
+              className={inputCls}
+            >
+              <option value="left">{t.left}</option>
+              <option value="center">{t.center}</option>
+              <option value="right">{t.right}</option>
+            </select>
+          </div>
         </div>
       </PanelCard>
 

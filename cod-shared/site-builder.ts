@@ -34,10 +34,12 @@ export interface NavLink {
 /** Homepage section ids that map 1:1 to theme components in index.astro. */
 export type HomeSectionId =
   | "hero"
+  | "slideshow"
   | "categoryCards"
   | "bestSellers"
   | "howItWorks"
   | "newArrivals"
+  | "richText"
   | "featuresBar"
   | "whatsappCta"
   | "testimonials";
@@ -66,6 +68,31 @@ export interface HeroConfig {
   primaryCtaHref?: string;
   secondaryCtaLabel?: string;
   secondaryCtaHref?: string;
+}
+
+export interface SlideshowSlide {
+  image: string;
+  title?: string;
+  subtitle?: string;
+  ctaLabel?: string;
+  ctaHref?: string;
+}
+
+export interface SlideshowConfig {
+  enabled: boolean;
+  slides: SlideshowSlide[];
+  autoplay?: boolean;
+  intervalMs?: number;
+}
+
+export interface RichTextConfig {
+  enabled: boolean;
+  title?: string;
+  body?: string;
+  ctaLabel?: string;
+  ctaHref?: string;
+  image?: string;
+  align?: 'left' | 'center' | 'right';
 }
 
 export interface FooterConfig {
@@ -140,6 +167,8 @@ export interface PagesConfig {
 export interface SiteBuilderConfig {
   header: HeaderConfig;
   hero: HeroConfig;
+  slideshow: SlideshowConfig;
+  richtext: RichTextConfig;
   footer: FooterConfig;
   socials: SocialLink[];
   home: {
@@ -167,13 +196,15 @@ const DEFAULT_NAV_LINKS: NavLink[] = [
 /** Matches the current hardcoded homepage section order exactly. */
 const DEFAULT_HOME_SECTIONS: HomeSectionConfig[] = [
   { id: "hero", enabled: true, order: 0 },
-  { id: "categoryCards", enabled: true, order: 1 },
-  { id: "bestSellers", enabled: true, order: 2 },
-  { id: "howItWorks", enabled: true, order: 3 },
-  { id: "newArrivals", enabled: true, order: 4 },
-  { id: "featuresBar", enabled: true, order: 5 },
-  { id: "whatsappCta", enabled: true, order: 6 },
-  { id: "testimonials", enabled: true, order: 7 },
+  { id: "slideshow", enabled: false, order: 1 },
+  { id: "categoryCards", enabled: true, order: 2 },
+  { id: "bestSellers", enabled: true, order: 3 },
+  { id: "howItWorks", enabled: true, order: 4 },
+  { id: "newArrivals", enabled: true, order: 5 },
+  { id: "richText", enabled: false, order: 6 },
+  { id: "featuresBar", enabled: true, order: 7 },
+  { id: "whatsappCta", enabled: true, order: 8 },
+  { id: "testimonials", enabled: true, order: 9 },
 ];
 
 export function getDefaultSiteBuilder(): SiteBuilderConfig {
@@ -186,6 +217,16 @@ export function getDefaultSiteBuilder(): SiteBuilderConfig {
     },
     hero: {
       enabled: true,
+    },
+    slideshow: {
+      enabled: false,
+      slides: [],
+      autoplay: true,
+      intervalMs: 5000,
+    },
+    richtext: {
+      enabled: false,
+      align: 'center',
     },
     footer: {
       showBrand: true,
@@ -251,6 +292,14 @@ export function mergeSiteBuilder(raw: unknown): SiteBuilderConfig {
     hero: {
       ...defaults.hero,
       ...(isRecord(input.hero) ? input.hero : {}),
+    },
+    slideshow: {
+      ...defaults.slideshow,
+      ...(isRecord(input.slideshow) ? input.slideshow : {}),
+    },
+    richtext: {
+      ...defaults.richtext,
+      ...(isRecord(input.richtext) ? input.richtext : {}),
     },
     footer: {
       ...defaults.footer,
