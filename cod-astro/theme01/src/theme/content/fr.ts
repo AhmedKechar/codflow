@@ -182,6 +182,7 @@ export const fr: StoreFrontContent = {
   sealQualityGuarantee: "Garantie qualité",
 
   // ── Order form (email & summary) ──────────────────────────────────────────
+  formEmailLabel: "Adresse email",
   formEmailPlaceholder: "Votre email",
   formSummaryOpen: "Résumé de la commande",
   formSummaryClosed: "Ouvrir le résumé",
@@ -203,7 +204,7 @@ export const fr: StoreFrontContent = {
   reviewFormMinLengthError: "Veuillez écrire un avis d'au moins 10 caractères",
   reviewFormRatingRequired: "Veuillez choisir une évaluation de 1 à 5 étoiles",
   offerSaveBadge: "Économisez {n}%",
-  offerSavingsText: "Économie de {amount} {currency}",
+  offerSavingsText: "Économisez {amount} {currency}",
   offerUnitLabel: "Unité {n}",
   ariaMainNavigation: "Navigation principale",
   ariaSocials: "Réseaux sociaux",
@@ -216,4 +217,18 @@ export const fr: StoreFrontContent = {
   navContact: "Contactez-nous",
   thankYouPageTitle: "Commande reçue",
   defaultMetaDescription: "Achetez chez {storeName} - Les meilleurs produits à des prix abordables avec livraison dans toutes les wilayas",
+
+  // ── New CRO keys ──────────────────────────────────────────────────────────
+  formTitleNew: "Remplissez vos coordonnées pour commander",
+  stickyCtaText: "Commander",
+  orderSummaryTitle: "Résumé de la commande",
+  urgencyTitle: "Offre limitée!",
+  urgencySubtitle: "Remise spéciale pour vous",
+  urgencyDescription: "Utilisez le code de réduction lors de la commande pour obtenir une remise exclusive",
+  urgencyCta: "Appliquer la réduction",
+  urgencyExpires: "L'offre se termine dans",
+  urgencyClose: "Plus tard",
+  viewedByText: "{x} personnes consultent",
+  orderedTimesText: "Commandé {n} fois",
+  lastPiecesText: "Dernières {n} pièces",
 };

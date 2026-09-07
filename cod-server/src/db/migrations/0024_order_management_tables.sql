@@ -1,5 +1,4 @@
 -- Migration 0024: Create carrier_tracking, notification_settings, blocked_ips tables
--- Adds carrier tracking events, per-store notification preferences, and IP blocking
 
 CREATE TABLE `carrier_tracking` (
   `id` text PRIMARY KEY NOT NULL,
@@ -27,8 +26,6 @@ CREATE INDEX `idx_carrier_tracking_store` ON `carrier_tracking` (`store_id`);
 --> statement-breakpoint
 CREATE INDEX `idx_carrier_tracking_store_order` ON `carrier_tracking` (`store_id`, `order_id`);
 --> statement-breakpoint
-ALTER TABLE `carrier_tracking` ADD CONSTRAINT `chk_tracking_status` CHECK (`status` IN ('received', 'in_transit', 'at_office', 'with_driver', 'delivered', 'returned'));
---> statement-breakpoint
 CREATE TABLE `notification_settings` (
   `id` text PRIMARY KEY NOT NULL,
   `store_id` text NOT NULL,
@@ -45,10 +42,6 @@ CREATE TABLE `notification_settings` (
 CREATE INDEX `idx_notification_settings_store` ON `notification_settings` (`store_id`);
 --> statement-breakpoint
 CREATE UNIQUE INDEX `notification_settings_store_status_unique` ON `notification_settings` (`store_id`, `order_status`);
---> statement-breakpoint
-ALTER TABLE `notification_settings` ADD CONSTRAINT `chk_notification_status` CHECK (`order_status` IN ('new', 'confirmed', 'unreachable', 'busy', 'postponed', 'shipped', 'delivered', 'cancelled', 'fake', 'duplicate', 'returned'));
---> statement-breakpoint
-ALTER TABLE `notification_settings` ADD CONSTRAINT `chk_notification_channel` CHECK (`channel` IN ('whatsapp', 'sms', 'both'));
 --> statement-breakpoint
 CREATE TABLE `blocked_ips` (
   `id` text PRIMARY KEY NOT NULL,

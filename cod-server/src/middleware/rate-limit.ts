@@ -6,15 +6,16 @@ interface RateLimitEntry {
 }
 
 const buckets = new Map<string, RateLimitEntry>();
+let lastCleanup = Date.now();
 
-function cleanup() {
+function lazyCleanup() {
   const now = Date.now();
+  if (now - lastCleanup < 60_000) return;
+  lastCleanup = now;
   for (const [key, entry] of buckets) {
     if (now > entry.resetAt) buckets.delete(key);
   }
 }
-
-setInterval(cleanup, 60_000).unref?.();
 
 export function rateLimit(opts: {
   windowMs: number;
@@ -25,6 +26,8 @@ export function rateLimit(opts: {
   const { windowMs, max, keyPrefix = "rl", message = "Too many requests" } = opts;
 
   return async (c: Context, next: Next) => {
+    lazyCleanup();
+
     const ip =
       c.req.header("cf-connecting-ip") ||
       c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ||

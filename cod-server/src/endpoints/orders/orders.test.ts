@@ -37,6 +37,12 @@ import * as registry from "@/endpoints/delivery-companies/providers/registry";
 vi.mock("@/db", () => ({ getDb: vi.fn(() => mockDb) }));
 vi.mock("./queries");
 vi.mock("./resolve-fee");
+vi.mock("@/services/notifications", () => ({
+  sendOrderConfirmationNotification: vi.fn(async () => {}),
+  sendOrderStatusNotification: vi.fn(async () => {}),
+  sendDeliveryNotification: vi.fn(async () => {}),
+  sendStatusNotification: vi.fn(async () => {}),
+}));
 vi.mock("@/lib/activity", () => ({
   logActivity: vi.fn(async () => {}),
   ACTIONS: {

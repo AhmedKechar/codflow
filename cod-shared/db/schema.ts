@@ -676,6 +676,12 @@ export const products = sqliteTable("products", {
   /** Fixed home delivery price in DZD, applied to all wilayas for this product only. */
   shippingHomePrice: integer("shipping_home_price"),
   externalUrl: text("external_url"),
+  /** Total orders placed for this product (denormalized for conversion display). */
+  orderCount: integer("order_count").notNull().default(0),
+  /** Total page views for this product (denormalized for conversion display). */
+  viewCount: integer("view_count").notNull().default(0),
+  /** JSON urgency popup config: { enabled, delaySeconds, discountPercent, discountCode, expiresAt } */
+  popupConfig: text("popup_config"),
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),
 });

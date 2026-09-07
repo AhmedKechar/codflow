@@ -266,21 +266,6 @@ function varVal(variations: unknown, key: string): string | undefined {
         </label>
       );
     })}
-
-    <input type="number" name="quantity" id="qty-input" value="1" min="1" max="100" class="sr-only" aria-label={content.ariaQuantity} />
   </div>
-) : (
-  <div class="flex items-center justify-between gap-4">
-    <!-- No offers: standalone quantity stepper -->
-    <div>
-      <p class="font-semibold text-base" style="color: var(--clr-text)">{content.qtyLabel}</p>
-      <p class="text-sm font-medium mt-0.5" style="color: var(--clr-text-2)">{content.qtyUnit}</p>
-    </div>
-    <div class="flex items-center border rounded-lg p-1 gap-0.5 shrink-0" style="background: var(--clr-surface-alt); border-color: var(--clr-border)" dir="ltr">
-      <button type="button" id="qty-minus" class="w-11 h-11 rounded-md font-medium text-xl flex items-center justify-center transition-colors select-none" style="background: var(--clr-surface); color: var(--clr-text-2)">−</button>
-      <input type="number" name="quantity" id="qty-input" value="1" min="1" max="100" inputmode="numeric" class="w-12 bg-transparent text-center font-semibold text-[1.25rem] focus:outline-none" style="color: var(--clr-text)" aria-label={content.ariaQuantity} />
-      <button type="button" id="qty-plus" class="w-11 h-11 rounded-md font-medium text-xl flex items-center justify-center transition-colors select-none text-white" style="background: var(--clr-primary)">+</button>
-    </div>
-  </div>
-)}
+) : null}
 <p id="qty-stock-hint" class="text-[0.75rem] text-amber-600 font-bold text-end hidden mt-1" aria-live="polite"></p>

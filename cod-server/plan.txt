@@ -1,0 +1,618 @@
+## الخطة التفصيلية — فريق متخصص (Orchestrator Pattern)
+
+---
+
+### الفريق специалистов
+
+| الدور | التخصص | الخبرة |
+|---|---|---|
+| **🛡️ الأمني** | Auth, RBAC, Security Hardening | 30+ سنة أمن سيبراني |
+| **🗄️ قائد قواعد البيانات** | Schema, Migrations, D1 Performance | 30+ سنة تصميم قواعد بيانات |
+| **⚙️ المعماري** | defineRoute, Server Architecture | 30+ سنة هندسة برمجيات |
+| **📦 التكاملات** | DZVerify, Sendili, APIs خارجية | 30+ سنة تكامل الأنظمة |
+| **🎨 الواجهة** | Dashboard UI, Storefront, i18n | 30+ سنة تصميم واجهات |
+
+---
+
+## المرحلة 1: إصلاحات حرجة (يوم 1)
+
+### 👨‍💻 المسؤول: الأمني
+
+#### المهمة 1.1: تأمين Better Auth
+**الملف:** `cod-client/lib/auth.ts`
+
+| التعديل | التفاصيل | الأولوية |
+|---|---|---|
+| إضافة `input: false` | على `role`, `status`, `apiKey` في `additionalFields` | حرجة |
+| إضافة `disableSignUp: true` | في `emailAndPassword` config | حرجة |
+
+```typescript
+// الكود المطلوب
+user: {
+  additionalFields: {
+    role:     { type: "string", defaultValue: "staff",  required: false, input: false },
+    status:   { type: "string", defaultValue: "active", required: false, input: false },
+    apiKey:   { type: "string", required: false, input: false },
+    language: { type: "string", defaultValue: "en", required: false },
+  },
+},
+emailAndPassword: {
+  enabled: true,
+  disableSignUp: true,  // <-- إضافة جديدة
+  autoSignIn: true,
+  ...
+},
+```
+
+#### المهمة 1.2: فحص حالة المستخدم في Middleware
+**الملف:** `cod-server/src/rbac/middleware.ts`
+
+```typescript
+// إضافة فحص user.status في جميع الدوال
+if (user.status === "inactive") {
+  return c.json({ error: "Account is deactivated" }, 403);
+}
+```
+
+**الملفات المطلوب تعديلها:**
+- `cod-server/src/rbac/middleware.ts` — 4 دوال (`requireAdmin`, `requireSuperAdmin`, `requireScope`, `requireAnyScope`)
+
+#### المهمة 1.3: إصلاح validation schema
+**الملف:** `cod-server/src/endpoints/users/validation.ts`
+
+```typescript
+// إضافة "super_admin" لقائمة الأدوار
+role: z.enum(["admin", "staff", "super_admin"]).default("staff")
+```
+
+#### المهمة 1.4: اختبار صفحة إعادة تعيين كلمة المرور
+**الملف:** `cod-client/components/auth/reset-password-view.tsx`
+
+```typescript
+// التأكد من تمرير token
+await authClient.resetPassword({
+  newPassword: password,
+  token,  // <-- تمرير الصيغة بشكل صريح
+});
+```
+
+---
+
+## المرحلة 2: DZVerify WhatsApp OTP (أيام 2-3)
+
+### 👨‍💻 المسؤول: التكاملات
+
+#### المهمة 2.1: Schema + Migration (يوم 2)
+
+**ملف جديد:** `cod-server/src/db/migrations/0030_store_otp_config.sql`
+
+```sql
+CREATE TABLE IF NOT EXISTS `store_otp_config` (
+  `id`         text PRIMARY KEY NOT NULL,
+  `store_id`   text NOT NULL UNIQUE REFERENCES `stores`(`id`) ON DELETE CASCADE,
+  `api_key`    text NOT NULL,
+  `language`   text NOT NULL DEFAULT 'ar',
+  `enabled`    integer NOT NULL DEFAULT 1,
+  `created_at` text NOT NULL,
+  `updated_at` text NOT NULL
+);
+```
+
+**تعديل:** `cod-shared/db/schema.ts`
+```typescript
+export const storeOtpConfig = sqliteTable("store_otp_config", {
+  id: text("id").primaryKey(),
+  storeId: text("store_id").notNull().unique()
+    .references(() => stores.id, { onDelete: "cascade" }),
+  apiKey: text("api_key").notNull(),
+  language: text("language").notNull().default("ar"),
+  enabled: integer("enabled", { mode: "boolean" }).notNull().default(true),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+});
+```
+
+**ملف جديد:** `cod-shared/queries/otp-config.ts`
+- `getOtpConfig(db, storeId)` — بدون API key (للواجهة)
+- `getOtpConfigRaw(db, storeId)` — مع API key (للخادم فقط)
+- `upsertOtpConfig(db, storeId, data)` — INSERT ON CONFLICT
+
+#### المهمة 2.2: Server Endpoints (يوم 2)
+
+**ملفات جديدة (6 ملفات):**
+
+| الملف | الوصف |
+|---|---|
+| `cod-server/src/endpoints/store-otp/dzverify.ts` | عميل DZVerify API |
+| `cod-server/src/endpoints/store-otp/phone.ts` | تطبيع رقم الهاتف الجزائري |
+| `cod-server/src/endpoints/store-otp/token.ts` | HMAC tokens (15 دقيقة TTL) |
+| `cod-server/src/endpoints/store-otp/guards.ts` | حدود KV (60 ثانية cooldown) |
+| `cod-server/src/endpoints/store-otp/handlers.ts` | handlers للإرسال والتحقق |
+| `cod-server/src/endpoints/store-otp/store-routes.ts` | OpenAPI routes |
+
+**نقاط النهاية:**
+
+| Method | Path | الوصف |
+|---|---|---|
+| `POST` | `/store/otp/send` | إرسال رمز التحقق |
+| `POST` | `/store/otp/verify` | التحقق من الرمز |
+| `GET` | `/api/stores/otp-config` | عرض الإعدادات |
+| `POST` | `/api/stores/otp-config` | حفظ الإعدادات |
+| `POST` | `/api/stores/otp-config/test` | اختبار الاتصال |
+
+**ملف جديد:** `cod-server/src/endpoints/store/otp-gate.ts`
+- `assertOtpVerification(c, db, data)` — فرض OTP عند إنشاء الطلب
+
+**تعديل:** `cod-server/src/endpoints/store/validation.ts`
+```typescript
+otpToken: z.preprocess(
+  (v) => (v === "" || v == null ? undefined : v),
+  z.string().min(10).max(1024).optional()
+),
+```
+
+**تعديل:** `cod-server/src/endpoints/store/handlers.ts`
+```typescript
+// بعد فحص المخزون
+await assertOtpVerification(c, db, data);
+```
+
+#### المهمة 2.3: RBAC + Error Codes (يوم 2)
+
+**تعديل:** `cod-shared/rbac/scopes.ts`
+```typescript
+SETTINGS_VERIFICATION: "settings:verification"
+```
+
+**تعديل:** `cod-shared/errors/codes.ts`
+```typescript
+OTP_NOT_ENABLED: "OTP_NOT_ENABLED",
+OTP_VERIFICATION_REQUIRED: "OTP_VERIFICATION_REQUIRED",
+OTP_TOKEN_INVALID: "OTP_TOKEN_INVALID",
+OTP_PHONE_MISMATCH: "OTP_PHONE_MISMATCH",
+OTP_QUOTA_EXHAUSTED: "OTP_QUOTA_EXHAUSTED",
+OTP_RATE_LIMITED: "OTP_RATE_LIMITED",
+```
+
+#### المهمة 2.4: Dashboard Settings UI (يوم 3)
+
+**ملف جديد:** `cod-client/components/settings/verification-settings.tsx`
+
+المكونات:
+- Toggle switch للتفعيل/تعطيل
+- حقل API Key مع إظهار/إخفاء
+- قائمة منسدلة للغة (ar/fr/en)
+- زر اختبار الاتصال
+- زر حفظ
+
+**تعديل:** `cod-client/app/(dashboard)/settings/page.tsx`
+- إضافة تبويب "التحقق" جديد
+
+**تعديل:** `cod-client/locales/ar/settings.json`
+- إضافة ترجمات OTP
+
+#### المهمة 2.5: Storefront OTP Step (يوم 3)
+
+**ملف جديد:** `cod-astro/theme01/src/theme/components/order/OtpStep.astro`
+- حقل إدخال 6 أرقام
+- إرسال تلقائي عند إكمال 6 أرقام
+- عداد تنازلي لإعادة الإرسال (60 ثانية)
+
+**ملف جديد:** `cod-astro/theme01/src/theme/scripts/otp-step.ts`
+- اعتراض form submit
+- Flux flow: show OTP → send → verify → submit
+
+**ملفات جديدة:**
+- `cod-astro/theme01/src/core/endpoints/otp-send.ts`
+- `cod-astro/theme01/src/core/endpoints/otp-verify.ts`
+- `cod-astro/theme01/src/pages/api/otp/send.ts`
+- `cod-astro/theme01/src/pages/api/otp/verify.ts`
+
+**تعديل:** `cod-astro/theme01/src/core/api/client.ts`
+```typescript
+sendOtp(phone: string) { ... }
+verifyOtp(phone: string, requestId: string, code: string) { ... }
+```
+
+**تعديل:** `cod-astro/theme01/src/core/actions/index.ts`
+```typescript
+otpToken: z.string().optional()
+```
+
+---
+
+## المرحلة 3: Sendili Email (أيام 4-5)
+
+### 👨‍💻 المسؤول: التكاملات
+
+#### المهمة 3.1: Schema + Migration (يوم 4)
+
+**ملف جديد:** `cod-server/src/db/migrations/0031_store_email_config.sql`
+
+```sql
+CREATE TABLE IF NOT EXISTS `store_email_config` (
+  `id`         text PRIMARY KEY NOT NULL,
+  `store_id`   text NOT NULL UNIQUE REFERENCES `stores`(`id`) ON DELETE CASCADE,
+  `api_key`    text NOT NULL,
+  `from_email` text NOT NULL,
+  `from_name`  text,
+  `enabled`    integer NOT NULL DEFAULT 1,
+  `created_at` text NOT NULL,
+  `updated_at` text NOT NULL
+);
+```
+
+**تعديل:** `cod-shared/db/schema.ts`
+```typescript
+export const storeEmailConfig = sqliteTable("store_email_config", {
+  id: text("id").primaryKey(),
+  storeId: text("store_id").notNull().unique()
+    .references(() => stores.id, { onDelete: "cascade" }),
+  apiKey: text("api_key").notNull(),
+  fromEmail: text("from_email").notNull(),
+  fromName: text("from_name"),
+  enabled: integer("enabled", { mode: "boolean" }).notNull().default(true),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+});
+```
+
+#### المهمة 3.2: Sendili Client + Shared Library (يوم 4)
+
+**ملف جديد:** `cod-shared/lib/sendili.ts` (~300 سطر)
+- `createSendiliClient(apiKey)` — factory
+- `send(email)` — POST /v1/emails
+- `getAccount()` — GET /v1/account
+- `SendiliError` class مع error taxonomy
+
+**ملف جديد:** `cod-shared/lib/transactional-email.ts`
+- `sendTransactionalEmail(db, email)` — مسار إرسال واحد
+- Never throws — all failures caught
+- Idempotency keys
+
+**ملف جديد:** `cod-shared/lib/email-templates.ts`
+- `renderInviteEmail(input)` — دعوة الفريق
+- `renderPasswordResetEmail(input)` — إعادة تعيين كلمة المرور
+- Arabic RTL + English templates
+
+**ملف جديد:** `cod-shared/queries/email-config.ts`
+- `getEmailConfig(db, storeId)` — بدون API key
+- `getEmailConfigRaw(db, storeId)` — مع API key
+- `upsertEmailConfig(db, storeId, data)`
+
+#### المهمة 3.3: Server Endpoints (يوم 4)
+
+**تعديل:** `cod-server/src/endpoints/stores/routes.ts`
+```typescript
+// 3 routes جديدة
+GET  /api/stores/email-config   — settings:email
+POST /api/stores/email-config   — settings:email
+POST /api/stores/email-config/test — settings:email
+```
+
+**تعديل:** `cod-server/src/endpoints/stores/handlers.ts`
+```typescript
+// 3 handlers جديدة
+getOtpConfig()
+saveOtpConfig()
+testOtpConnection()
+```
+
+#### المهمة 3.4: Team Invite Email (يوم 5)
+
+**ملف جديد:** `cod-server/src/endpoints/users/invite-email.ts`
+```typescript
+sendInviteEmail(db, env, input)
+// Idempotency key: invite-{userId}
+// Best-effort — never blocks user creation
+```
+
+**تعديل:** `cod-server/src/endpoints/users/handlers.ts`
+```typescript
+// في createUser
+const outcome = await sendInviteEmail(db, env, { userId, name, email, tempPassword, language });
+return { tempPassword, apiKey, emailSent: outcome.sent, emailError: outcome.error };
+```
+
+#### المهمة 3.5: Password Reset Email (يوم 5)
+
+**تعديل:** `cod-client/lib/auth.ts`
+```typescript
+sendResetPassword: async ({ user, url, token }, _request) => {
+  // استخدام Sendili بدلاً من Cloudflare Email
+  const outcome = await sendTransactionalEmail(db, {
+    to: user.email,
+    subject: email.subject,
+    html: email.html,
+    text: email.text,
+    idempotencyKey: `reset-${user.id}-${token.slice(0, 12)}`,
+  });
+},
+```
+
+#### المهمة 3.6: Dashboard Settings UI (يوم 5)
+
+**ملف جديد:** `cod-client/components/settings/email-settings.tsx`
+
+المكونات:
+- Toggle switch للتفعيل/تعطيل
+- حقل API Key مع إظهار/إخفاء
+- حقل From Email (محلي + نطاق)
+- حقل From Name (اختياري)
+- زر اختبار الاتصال
+- عرض النطاقات الموثقة
+
+---
+
+## المرحلة 4: D1 Performance (يوم 6)
+
+### 👨‍💻 المسؤول: قائد قواعد البيانات
+
+#### المهمة 4.1: فهارس جديدة
+
+**ملف جديد:** `cod-server/src/db/migrations/0032_d1_performance_indexes.sql`
+
+```sql
+-- فهرس فريد على هاتف العميل
+CREATE UNIQUE INDEX IF NOT EXISTS idx_customers_phone_unique
+ON customers (store_id, phone);
+
+-- فهارس Keyset pagination
+CREATE INDEX IF NOT EXISTS idx_orders_keyset
+ON orders (store_id, created_at DESC, id DESC);
+
+CREATE INDEX IF NOT EXISTS idx_orders_status_keyset
+ON orders (store_id, status, created_at DESC, id DESC);
+
+-- فهرس جزئي للطلبات النشطة
+CREATE INDEX IF NOT EXISTS idx_orders_active
+ON orders (store_id, created_at DESC)
+WHERE status NOT IN ('delivered', 'returned', 'cancelled');
+
+-- فهرس جزئي للطلبات مع tracking
+CREATE INDEX IF NOT EXISTS idx_orders_tracking
+ON orders (store_id, tracking_number)
+WHERE tracking_number IS NOT NULL;
+
+-- فهرس لـ shipping profiles الافتراضية
+CREATE INDEX IF NOT EXISTS idx_shipping_profiles_default
+ON shipping_profiles (store_id, is_default)
+WHERE is_default = 1;
+
+-- فهرس لتاريخ حالات الطلب
+CREATE INDEX IF NOT EXISTS idx_order_status_history_order
+ON order_status_history (order_id);
+```
+
+#### المهمة 4.2: إصلاح N+1 في Products
+
+**الملف:** `cod-shared/queries/products.ts`
+
+**المشكلة:** `getAllProducts()` تسبب 301 استعلام لـ 50 منتج
+
+**الحل:** استبدال الـ 6 استعلامات لكل منتج بـ batch واحدة:
+
+```typescript
+// بدلاً من N+1
+const rows = await db.select({...}).from(products)...all();
+
+// استخدام db.batch() لجمع جميع الاستعلامات
+const batchResults = await db.batch(
+  rows.flatMap(p => [
+    db.select({ count: count() }).from(productVariants).where(eq(productVariants.productId, p.id)),
+    db.select({ total: sum(productVariants.inventory) }).from(productVariants).where(eq(productVariants.productId, p.id)),
+    db.select({ src: productImages.src }).from(productImages).where(eq(productImages.productId, p.id)).limit(1),
+    db.select().from(productVariants).where(eq(productVariants.productId, p.id)),
+    db.select({ count: count() }).from(reviews).where(eq(reviews.productId, p.id)),
+    db.select({ avg: avg(reviews.rating) }).from(reviews).where(eq(reviews.productId, p.id)),
+  ])
+);
+```
+
+#### المهمة 4.3: إصلاح N+1 في Customers
+
+**الملف:** `cod-shared/queries/customers.ts`
+
+**المشكلة:** `getOrdersByCustomerId()` تسبب 51 استعلام لـ 50 طلب
+
+**الحل:** استخدام JOIN بدلاً من N+1:
+
+```typescript
+// بدلاً من
+const ordersWithHistory = await Promise.all(
+  customerOrders.map(async (order) => {
+    const history = await db.select().from(orderStatusHistory)
+      .where(eq(orderStatusHistory.orderId, order.id)).all();
+    return { ...order, statusHistory: history };
+  })
+);
+
+// استخدم
+const ordersWithHistory = await db.select({
+  ...orderFields,
+  statusHistory: sql`json_group_array(json_object(...))`
+}).from(orders)
+  .leftJoin(orderStatusHistory, eq(orders.id, orderStatusHistory.orderId))
+  .groupBy(orders.id);
+```
+
+#### المهمة 4.4: db.batch() في Orders
+
+**الملف:** `cod-shared/queries/orders.ts`
+
+**الدوال المطلوب تحسينها:**
+- `createOrder()` — 7 استعلامات متسلسلة لكل صنف
+- `updateOrderStatus()` — استعلامات متسلسلة لكل صنف
+- `deleteOrder()` — استعلامات متسلسلة لكل صنف
+
+```typescript
+// مثال لـ createOrder
+await db.batch([
+  db.insert(orders).values(orderData),
+  ...orderItems.flatMap(item => [
+    db.select().from(productVariants).where(eq(productVariants.id, item.variantId)),
+    db.update(productVariants).set({ inventory: sql`${productVariants.inventory} - ${item.quantity}` }),
+    db.insert(stockMovements).values({ ... }),
+  ])
+]);
+```
+
+---
+
+## المرحلة 5: defineRoute() Migration (أيام 7-8)
+
+### 👨‍💻 المسؤول: المعماري
+
+#### المهمة 5.1: ترقية route-builder.ts (يوم 7)
+
+**الملف:** `cod-server/src/lib/route-builder.ts`
+
+**إضافات مطلوبة:**
+
+```typescript
+// 1. إضافة "public" auth strategy
+type AuthStrategy = "api-key" | "admin" | "store" | "public" | { scope: string } | ...;
+
+// 2. إضافة headers parameter
+interface RouteDefinition {
+  ...
+  headers?: Record<string, ZodType>;
+}
+
+// 3. إضافة bodyContent parameter
+interface RouteDefinition {
+  ...
+  bodyContent?: Record<string, { schema: ZodType }>;
+}
+```
+
+#### المهمة 5.2: ترجمة الملفات السهلة (يوم 7)
+
+**3 ملفات، 5 routes:**
+
+| الملف | Routes | الملاحظات |
+|---|---|---|
+| `analytics/routes.ts` | 1 | بسيط |
+| `ai-chat/routes.ts` | 1 | بسيط |
+| `ai-credits/routes.ts` | 2 | بسيط |
+
+#### المهمة 5.3: ترجمة الملفات المتوسطة (يوم 7-8)
+
+**19 ملف، 113 routes:**
+
+| الملف | Routes |
+|---|---|
+| `customers/routes.ts` | 8 |
+| `users/routes.ts` | 8 |
+| `drivers/routes.ts` | 9 |
+| `store-members/routes.ts` | 6 |
+| `payments/routes.ts` | 6 |
+| `offers/routes.ts` | 5 |
+| `product-groups/routes.ts` | 5 |
+| `subscriptions/routes.ts` | 5 |
+| `stock/routes.ts` | 7 |
+| `customer-tags/routes.ts` | 7 |
+| `customer-groups/routes.ts` | 7 |
+| `reviews/routes.ts` | 3 |
+| `driver-payments/routes.ts` | 3 |
+| `abandoned-orders/routes.ts` | 4 |
+| `stores/routes.ts` | 4 |
+| `shipping-profiles/routes.ts` | 10 |
+| `delivery-companies/routes.ts` | 12 |
+| `notification-settings/routes.ts` | 5 |
+| `gift-cards/routes.ts` | 5 |
+
+#### المهمة 5.4: ترجمة الملفات الصعبة (يوم 8)
+
+**5 ملفات، 21 routes:**
+
+| الملف | Routes | السبب |
+|---|---|---|
+| `webhooks/routes.ts` | 3 | لا يوجد auth + headers |
+| `images/routes.ts` | 2 | multipart/form-data |
+| `activity-logs/routes.ts` | 2 | adminOnly() مخصص |
+| `super-admin/routes.ts` | 6 | requireSuperAdmin() |
+| `store/routes.ts` | 9 | StoreAuth مختلف |
+
+**حل مشكلة webhooks:**
+```typescript
+// إضافة "public" auth في route-builder
+const webhookRoute = defineRoute({
+  method: "post",
+  path: "/",
+  auth: "public",  // <-- بدون auth
+  headers: z.object({ "svix-id": z.string(), "svix-timestamp": z.string(), "svix-signature": z.string() }),
+  body: z.string(),
+  handler: handlers.handleWebhook,
+});
+```
+
+---
+
+## المرحلة 6: تحسينات إضافية (يوم 9)
+
+### 👨‍💻 المسؤول: التكاملات + الواجهة
+
+#### المهمة 6.1: test-connection لشركات التوصيل
+
+**تعديل:** `cod-server/src/endpoints/delivery-companies/handlers.ts`
+```typescript
+async function testConnection(c) {
+  const { id } = c.req.valid("param");
+  const company = await getDeliveryCompanyById(db, storeId, id);
+  const provider = getProvider(company.code);
+  const result = await provider.testConnection(company.credentials);
+  return c.json({ success: true, data: result });
+}
+```
+
+**تعديل:** `cod-server/src/endpoints/delivery-companies/routes.ts`
+```typescript
+const testConnectionRoute = defineRoute({
+  method: "post",
+  path: "/:id/test-connection",
+  auth: { scope: SCOPES.DELIVERY_READ },
+  handler: handlers.testConnection,
+});
+```
+
+#### المهمة 6.2: reconcile-orders لشركات التوصيل
+
+**ملف جديد:** `cod-server/src/endpoints/delivery-companies/providers/ecotrack/reconcile.ts`
+```typescript
+async function reconcileOrders(db, storeId, companyId) {
+  // جلب الشحنات من EcoTrack
+  // مقارنة مع حالة الطلب المحلية
+  // تحديث الحالة إذا كانت مختلفة
+}
+```
+
+#### المهمة 6.3: تحسين Self-Service Profile
+
+**الملف:** `cod-client/components/profile/profile-view.tsx`
+
+**تحسينات:**
+- إضافة حقل تغيير الاسم
+- إضافة حقل تغيير البريد الإلكتروني
+- إضافة حقل تغيير اللغة
+- إضافة زر حفظ التغييرات
+
+---
+
+## جدول التنفيذ
+
+| اليوم | المرحلة | المسؤول | المخرجات |
+|---|---|---|---|
+| 1 | إصلاحات حرجة | الأمني | 4 ملفات معدّلة |
+| 2 | DZVerify (Part 1) | التكاملات | Schema + Server + RBAC |
+| 3 | DZVerify (Part 2) | التكاملات | Dashboard UI + Storefront |
+| 4 | Sendili (Part 1) | التكاملات | Schema + Client + Shared |
+| 5 | Sendili (Part 2) | التكاملات | Server + Dashboard UI |
+| 6 | D1 Performance | قائد قواعد البيانات | م Mig + Query fixes |
+| 7 | defineRoute (Part 1) | المعماري | route-builder + 3 سهلة + 10 متوسطة |
+| 8 | defineRoute (Part 2) | المعماري | 9 متوسطة + 5 صعبة |
+| 9 | تحسينات إضافية | الفريق | test-connection + reconcile + profile |
+
+---
+
+**هل تريد البدء بالمرحلة 1 (الإصلاحات الحرجة)؟**

@@ -120,6 +120,9 @@ export async function getStoreProducts(
       shippingProfileId: products.shippingProfileId,
       barcode: products.barcode,
       weightKg: products.weightKg,
+      orderCount: products.orderCount,
+      viewCount: products.viewCount,
+      popupConfig: products.popupConfig,
       createdAt: products.createdAt,
       updatedAt: products.updatedAt,
     })
@@ -311,6 +314,7 @@ export async function getStoreProductByHandle(db: AppDb, storeId: string, handle
     inventory: totalInventory,
     variantOptions: product.variantOptions ? JSON.parse(product.variantOptions) : null,
     tags: product.tags ? JSON.parse(product.tags) : [],
+    popupConfig: product.popupConfig ? JSON.parse(product.popupConfig) : null,
     category: category ?? null,
     variants: variants.map((v) => ({
       ...v,
@@ -330,6 +334,43 @@ export async function getStoreProductByHandle(db: AppDb, storeId: string, handle
 
 export async function getStoreCategories(db: AppDb, storeId: string) {
   return db.select().from(productCategories).where(eq(productCategories.storeId, storeId)).orderBy(productCategories.position).all();
+}
+
+// ─── Product view tracking ────────────────────────────────────────────────────
+
+export async function recordProductView(db: AppDb, productId: string) {
+  await db
+    .update(products)
+    .set({ viewCount: sql`${products.viewCount} + 1` })
+    .where(eq(products.id, productId))
+    .run();
+}
+
+export async function incrementOrderCount(db: AppDb, productId: string, quantity: number) {
+  await db
+    .update(products)
+    .set({ orderCount: sql`${products.orderCount} + ${quantity}` })
+    .where(eq(products.id, productId))
+    .run();
+}
+
+export async function getProductConversionStats(db: AppDb, productId: string) {
+  const row = await db
+    .select({
+      orderCount: products.orderCount,
+      viewCount: products.viewCount,
+      popupConfig: products.popupConfig,
+    })
+    .from(products)
+    .where(eq(products.id, productId))
+    .get();
+  if (!row) return null;
+  return {
+    orderCount: row.orderCount,
+    viewCount: row.viewCount,
+    conversionRate: row.viewCount > 0 ? Math.round((row.orderCount / row.viewCount) * 100 * 100) / 100 : 0,
+    popupConfig: row.popupConfig ? JSON.parse(row.popupConfig) : null,
+  };
 }
 
 export async function getStoreCommunes(db: AppDb, storeId: string, wilayaId: number) {
@@ -971,6 +1012,9 @@ export async function createStoreOrder(
       });
     }
   }
+
+  // Increment product order count for conversion display
+  await incrementOrderCount(db, data.productId, data.quantity);
 
   return { id, orderNumber, price, deliveryFee: finalDeliveryFee };
 }

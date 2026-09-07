@@ -1,5 +1,3 @@
--- Migration 0018: Add super_admin role for platform operators
-
--- Super Admin role must be valid (platform operators, not store owners)
-ALTER TABLE `users` ADD CONSTRAINT `chk_users_role` CHECK (`role` IN ('admin', 'staff', 'super_admin'));
---> statement-breakpoint
+-- Migration 0018: Super admin role
+-- NOTE: SQLite does not support ALTER TABLE ADD CONSTRAINT.
+-- Role validation is enforced at the application layer.

@@ -1,0 +1,29 @@
+---
+import { fetchProductByHandle } from "@/core/api/client";
+import ProductInfo from "@/theme/components/product/ProductInfo.astro";
+import { getStoreContext } from "@/theme/config/store";
+
+const { slug } = Astro.props;
+
+const product = await fetchProductByHandle(slug ?? "hidha-riyadhi");
+const { config, content } = await getStoreContext();
+const basePrice = product?.price ?? 0;
+const comparePrice = product?.compareAtPrice ?? null;
+
+if (!product) {
+  throw new Error("Product not found for slug: " + slug);
+}
+---
+
+<div>Product: {product.name}</div>
+<ProductInfo
+  product={product}
+  basePrice={basePrice}
+  comparePrice={comparePrice}
+  cur={config.currencySymbol}
+  isLowStock={false}
+  lowStockText=""
+  priceRange={null}
+  orderCount={product.orderCount ?? 0}
+  content={content}
+/>

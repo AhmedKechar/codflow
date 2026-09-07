@@ -10,7 +10,7 @@ import type { AppContext } from "@/types";
 import { getDb } from "@/db";
 import { wilayas, communes } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import * as queries from "./queries";
+import { getOrderById, updateOrderStatus } from "./queries";
 import * as validation from "./validation";
 import { logActivity, ACTIONS } from "@/lib/activity";
 import { getProvider, isEcotrackCompany } from "@/endpoints/delivery-companies/providers/registry";
@@ -37,7 +37,7 @@ export async function dispatchToCompany(c: Context<AppContext>) {
   const orderId = c.req.param("id")!;
 
   // Load order
-  const order = await queries.getOrderById(db, storeId, orderId);
+  const order = await getOrderById(db, storeId, orderId);
   if (!order) {
     throw new NotFoundError("Order", orderId);
   }
@@ -86,7 +86,8 @@ export async function dispatchToCompany(c: Context<AppContext>) {
 
   // If a new companyId was supplied, persist it on the order before dispatching
   if (bodyCompanyId && bodyCompanyId !== order.companyId) {
-    await queries.assignCompany(db, storeId, orderId, bodyCompanyId);
+    const { assignCompany } = await import("../../../../cod-shared/queries/orders");
+    await assignCompany(db, storeId, orderId, bodyCompanyId);
   }
 
   if (!order.wilayaId || !order.communeId) {
@@ -188,7 +189,8 @@ export async function dispatchToCompany(c: Context<AppContext>) {
       rawResponse: result.rawResponse,
     });
 
-    await queries.updateOrderTracking(db, storeId, order.id, result.trackingNumber, undefined, company.name);
+    const { updateOrderTracking } = await import("../../../../cod-shared/queries/orders");
+    await updateOrderTracking(db, storeId, order.id, result.trackingNumber, undefined, company.name);
 
     const dispatchUser = c.get("user");
     const PRE_DISPATCH_STATUSES = ["new", "confirmed", "unreachable", "busy", "postponed"];
@@ -244,12 +246,12 @@ export async function dispatchToCompany(c: Context<AppContext>) {
         console.warn(`[dispatch] validate failed order=${orderId} via ${company.code}:`, validateMsg);
       }
       if (PRE_DISPATCH_STATUSES.includes(order.status)) {
-        await queries.updateOrderStatus(db, storeId, order.id, "shipped", dispatchUser?.id, dispatchUser?.name ?? undefined);
+        await updateOrderStatus(db, storeId, order.id, "shipped", dispatchUser?.id, dispatchUser?.name ?? undefined);
       }
     } else {
       // Manual-validate path: parcel created at carrier, waits for team to validate.
       if (PRE_DISPATCH_STATUSES.includes(order.status)) {
-        await queries.updateOrderStatus(db, storeId, order.id, "shipped", dispatchUser?.id, dispatchUser?.name ?? undefined);
+        await updateOrderStatus(db, storeId, order.id, "shipped", dispatchUser?.id, dispatchUser?.name ?? undefined);
       }
     }
 
@@ -292,7 +294,7 @@ export async function validateShipmentManually(c: Context<AppContext>) {
   const storeId = c.get("storeId")!;
   const orderId = c.req.param("id")!;
 
-  const order = await queries.getOrderById(db, storeId, orderId);
+  const order = await getOrderById(db, storeId, orderId);
   if (!order) throw new NotFoundError("Order", orderId);
 
   if (order.status !== "shipped") {
@@ -345,7 +347,7 @@ export async function validateShipmentManually(c: Context<AppContext>) {
         await setShipmentValidated(db, shipment.id, true);
       }
 
-      await queries.updateOrderStatus(db, storeId, orderId, "shipped",
+      await updateOrderStatus(db, storeId, orderId, "shipped",
         c.get("user")?.id, c.get("user")?.name ?? undefined);
 
       await logApiCall(db, {
@@ -446,10 +448,10 @@ export async function bulkDispatch(c: Context<AppContext>) {
     error?: string;
   }> = [];
 
-  const validOrders: Array<{ order: NonNullable<Awaited<ReturnType<typeof queries.getOrderById>>>; input: import("@/endpoints/delivery-companies/providers/types").CreateShipmentInput }> = [];
+  const validOrders: Array<{ order: NonNullable<Awaited<ReturnType<typeof getOrderById>>>; input: import("@/endpoints/delivery-companies/providers/types").CreateShipmentInput }> = [];
 
   for (const orderId of validated.orderIds) {
-    const order = await queries.getOrderById(db, storeId, orderId);
+    const order = await getOrderById(db, storeId, orderId);
     if (!order) {
       orderResults.push({ orderId, error: `Order not found: ${orderId}` });
       continue;
@@ -550,7 +552,8 @@ export async function bulkDispatch(c: Context<AppContext>) {
           rawResponse: result,
         });
 
-        await queries.updateOrderTracking(db, storeId, order.id, result.trackingNumber, undefined, company.name);
+    const { updateOrderTracking } = await import("../../../../cod-shared/queries/orders");
+    await updateOrderTracking(db, storeId, order.id, result.trackingNumber, undefined, company.name);
 
         if (company.autoValidate) {
           const validateStart = Date.now();
@@ -584,11 +587,11 @@ export async function bulkDispatch(c: Context<AppContext>) {
           }
 
           if (validated && PRE_DISPATCH_STATUSES.includes(order.status)) {
-            await queries.updateOrderStatus(db, storeId, order.id, "shipped", actor?.id, actor?.name ?? undefined);
+            await updateOrderStatus(db, storeId, order.id, "shipped", actor?.id, actor?.name ?? undefined);
           }
         } else {
           if (PRE_DISPATCH_STATUSES.includes(order.status)) {
-            await queries.updateOrderStatus(db, storeId, order.id, "shipped", actor?.id, actor?.name ?? undefined);
+            await updateOrderStatus(db, storeId, order.id, "shipped", actor?.id, actor?.name ?? undefined);
           }
         }
 

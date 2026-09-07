@@ -231,6 +231,23 @@ export const ProductSchema = z
     images: z.array(ProductImageSchema).optional().openapi({
       description: "Images ordered by position. Included only in GET /{id} detail and mutation responses.",
     }),
+    orderCount: z.number().int().optional().openapi({
+      description: "Total orders placed for this product (denormalized for conversion display).",
+      example: 42,
+    }),
+    viewCount: z.number().int().optional().openapi({
+      description: "Total page views for this product (denormalized for conversion display).",
+      example: 1250,
+    }),
+    popupConfig: z.object({
+      enabled: z.boolean(),
+      delaySeconds: z.number().optional(),
+      discountPercent: z.number().optional(),
+      discountCode: z.string().optional(),
+      expiresAt: z.string().optional(),
+    }).nullable().optional().openapi({
+      description: "Urgency popup configuration for this product.",
+    }),
   })
   .openapi("Product");
 

@@ -95,6 +95,31 @@ export interface ProductPageConfig {
   showReviews: boolean;
   showShipping: boolean;
   showTrustSeals: boolean;
+  showStickyCta: boolean;
+  showUrgencyPopup: boolean;
+  showConversionSignals: boolean;
+}
+
+/** Order form configuration (merchant can customize per-store). */
+export interface OrderFormConfig {
+  showName: boolean;
+  showPhone: boolean;
+  showEmail: boolean;
+  showAddress: boolean;
+  showWilaya: boolean;
+  showCommune: boolean;
+  showDeliveryType: boolean;
+  showNotes: boolean;
+  showQuantity: boolean;
+  submitButtonText: string;
+  summaryDisplay: "open" | "closed" | "hidden";
+  popupEnabled: boolean;
+  popupDelaySeconds: number;
+  popupDiscountPercent: number;
+  popupDiscountCode: string;
+  popupExpiresAt: string;
+  stickyCtaEnabled: boolean;
+  showUrgencySignals: boolean;
 }
 
 /** Thank-you page (see pages/thank-you.astro). */
@@ -189,6 +214,9 @@ export function getDefaultSiteBuilder(): SiteBuilderConfig {
       showReviews: true,
       showShipping: true,
       showTrustSeals: true,
+      showStickyCta: true,
+      showUrgencyPopup: true,
+      showConversionSignals: true,
     },
     thankYou: {
       showOrderNumber: true,

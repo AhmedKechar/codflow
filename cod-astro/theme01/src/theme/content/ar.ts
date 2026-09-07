@@ -99,7 +99,7 @@ export const ar: StoreFrontContent = {
   formAddressPlaceholder: "الشارع، الحي، رقم المبنى...",
   formDeliveryLabel: "طريقة التوصيل",
   formHomeDelivery: "توصيل للمنزل",
-  formStopDesk: "مكتب البريد",
+  formStopDesk: "مكتب التوصيل",
   formNotesLabel: "ملاحظات",
   formNotesPlaceholder: "أي تفاصيل إضافية للتوصيل...",
   formSubmit: "تأكيد الطلب",
@@ -182,6 +182,7 @@ export const ar: StoreFrontContent = {
   sealQualityGuarantee: "ضمان الجودة",
 
   // ── Order form (email & summary) ──────────────────────────────────────────
+  formEmailLabel: "البريد الإلكتروني",
   formEmailPlaceholder: "بريدك الإلكتروني",
   formSummaryOpen: "ملخص الطلب",
   formSummaryClosed: "افتح ملخص الطلب",
@@ -216,4 +217,18 @@ export const ar: StoreFrontContent = {
   navContact: "اتصل بنا",
   thankYouPageTitle: "تم استلام طلبك",
   defaultMetaDescription: "تسوق من {storeName} - أفضل المنتجات بأسعار مناسبة مع توصيل لجميع الولايات",
+
+  // ── New CRO keys ──────────────────────────────────────────────────────────
+  formTitleNew: "للطلب يرجى ملأ استمارة التواصل",
+  stickyCtaText: "اطلب الآن",
+  orderSummaryTitle: "ملخص الطلب",
+  urgencyTitle: "عرض محدود!",
+  urgencySubtitle: "خصم خاص لك",
+  urgencyDescription: "استخدم كود الخصم عند الطلب واحصل على خصم حصري",
+  urgencyCta: "طبق الخصم",
+  urgencyExpires: "العرض ينتهي خلال",
+  urgencyClose: "لاحقاً",
+  viewedByText: "يتصفح الآن {x} شخص",
+  orderedTimesText: "تم طلب {n} مرة",
+  lastPiecesText: "آخر {n} قطعة متبقية",
 };

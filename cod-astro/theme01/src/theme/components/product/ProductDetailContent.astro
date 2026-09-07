@@ -1,13 +1,12 @@
 ---
-// ── STREAMING COMPONENT ──
-// This component handles the product fetch and rendering
-// Allows the parent page to stream layout/head immediately
 import OrderForm from "@/theme/components/order/OrderForm.astro";
 import ProductGallery from "@/theme/components/product/ProductGallery.astro";
 import ProductInfo from "@/theme/components/product/ProductInfo.astro";
 import ReviewsIsland from "@/theme/components/product/ReviewsIsland.astro";
 import ShippingIsland from "@/theme/components/product/ShippingIsland.astro";
 import TrustSeals from "@/theme/components/product/TrustSeals.astro";
+import StickyMobileCTA from "@/theme/components/product/StickyMobileCTA.astro";
+import UrgencyPopup from "@/theme/components/product/UrgencyPopup.astro";
 import { getProductJsonLd } from "@/theme/utils/seo";
 import { fetchProductByHandle } from "@/core/api/client";
 import {
@@ -27,13 +26,11 @@ interface Props {
 
 const { slug, config, content, isRTL, fieldErrors, serverError, productPageConfig } = Astro.props;
 
-// Backward compatible: absent config keeps the current full layout.
 const pp: ProductPageConfig = {
   ...getDefaultSiteBuilder().productPage,
   ...(productPageConfig ?? {}),
 };
 
-// Fetch product data (this component streams when ready)
 const product = await fetchProductByHandle(slug);
 
 if (!product) return Astro.redirect("/");
@@ -46,6 +43,13 @@ const basePrice    = defaultVariant?.price ?? product.price;
 const comparePrice = defaultVariant?.compareAtPrice ?? product.compareAtPrice;
 const hasDiscount  = comparePrice != null && comparePrice > basePrice;
 const discountPct  = hasDiscount ? Math.round((1 - basePrice / comparePrice!) * 100) : 0;
+
+const variantPrices = product.hasVariants && product.variants.length > 0
+  ? product.variants.map((v: typeof product.variants[0]) => v.price)
+  : [];
+const priceRange = variantPrices.length > 1
+  ? { min: Math.min(...variantPrices), max: Math.max(...variantPrices) }
+  : null;
 
 const isOutOfStock = product.trackInventory && product.inventory === 0;
 const isLowStock   = product.trackInventory && product.inventory > 0 && product.inventory <= 5;
@@ -62,7 +66,6 @@ const jsonLd = getProductJsonLd(product, basePrice);
 
 <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
 
-<!-- Data bridge: server-computed values → client script -->
 <div
   id="page-data"
   class="sr-only"
@@ -92,16 +95,30 @@ const jsonLd = getProductJsonLd(product, basePrice);
   data-pixel-id={config.pixelId ?? ""}
   data-product-id={product.id}
   data-product-name={product.name}
+  data-price-range-min={priceRange?.min ?? ""}
+  data-price-range-max={priceRange?.max ?? ""}
+  data-order-count={String(product.orderCount ?? 0)}
 />
 
-<!-- Dynamic data Island (Deferred) -->
 {pp.showShipping && <ShippingIsland server:defer />}
 
 <div class="max-w-6xl mx-auto px-0 sm:px-5 py-0 sm:py-8">
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-10">
 
-    <!-- ── LEFT: Images ── -->
     <div>
+      {pp.showInfo && (
+        <ProductInfo
+          product={product}
+          basePrice={basePrice}
+          comparePrice={comparePrice}
+          cur={cur}
+          isLowStock={isLowStock}
+          lowStockText={lowStockText}
+          priceRange={priceRange}
+          orderCount={product.orderCount ?? 0}
+          content={content}
+        />
+      )}
       {pp.showGallery && (
         <ProductGallery
           product={product}
@@ -111,6 +128,9 @@ const jsonLd = getProductJsonLd(product, basePrice);
           content={content}
         />
       )}
+    </div>
+
+    <div class="px-5 sm:px-0 py-6 sm:py-0">
       {pp.showInfo && (
         <ProductInfo
           product={product}
@@ -120,22 +140,10 @@ const jsonLd = getProductJsonLd(product, basePrice);
           isLowStock={isLowStock}
           lowStockText={lowStockText}
           isDesktop={true}
-        />
-      )}
-    </div>
-
-    <!-- ── RIGHT: Product info + Order form ── -->
-    <div class="px-5 sm:px-0 py-6 sm:py-0">
-
-      <!-- Mobile Info -->
-      {pp.showInfo && (
-        <ProductInfo
-          product={product}
-          basePrice={basePrice}
-          comparePrice={comparePrice}
-          cur={cur}
-          isLowStock={isLowStock}
-          lowStockText={lowStockText}
+          showDescription={false}
+          priceRange={priceRange}
+          orderCount={product.orderCount ?? 0}
+          content={content}
         />
       )}
 
@@ -152,30 +160,36 @@ const jsonLd = getProductJsonLd(product, basePrice);
           offers={product.offers}
           defaultVariantId={defaultVariantId}
           isOutOfStock={isOutOfStock}
-          orderFormConfig={config.orderFormConfig}
         />
-      )}
-
-      {pp.showTrustSeals && (
-        <div class="mt-4">
-          <TrustSeals
-            trustSeals={config.trustSeals}
-            primaryColor={primaryColor}
-            accentColor={accentColor}
-            borderRadius={borderRadius}
-            content={content}
-          />
-        </div>
       )}
     </div>
   </div>
 </div>
 
-<!-- Reviews section (Deferred Server Island) -->
+{pp.showInfo && product.description && (
+  <div class="max-w-6xl mx-auto px-5 sm:px-5 pb-8">
+    <div class="py-6" style="border-top: 1px solid var(--clr-border)">
+      <h2 class="text-lg font-bold mb-3" style="color: var(--clr-text)">{content.productDetails || "تفاصيل المنتج"}</h2>
+      <p class="text-[0.9375rem] font-normal leading-relaxed" style="color: var(--clr-text-2)">{product.description}</p>
+    </div>
+  </div>
+)}
+
+{pp.showTrustSeals && (
+  <div class="max-w-6xl mx-auto px-5 pb-12">
+    <TrustSeals
+      trustSeals={config.trustSeals}
+      primaryColor={primaryColor}
+      accentColor={accentColor}
+      borderRadius={borderRadius}
+      content={content}
+    />
+  </div>
+)}
+
 {pp.showReviews && config.reviewsEnabled && (
   <div class="max-w-6xl mx-auto px-5 pb-12">
     <ReviewsIsland productId={product.id} content={content} server:defer>
-      <!-- Skeleton fallback while loading -->
       <div slot="fallback" class="animate-pulse space-y-8 mt-12 pt-10" style="border-top: 1px solid var(--clr-border)">
         <div class="h-8 rounded-lg w-1/4" style="background: var(--clr-surface-alt)"></div>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -190,3 +204,31 @@ const jsonLd = getProductJsonLd(product, basePrice);
     </ReviewsIsland>
   </div>
 )}
+
+{pp.showStickyCta && (
+  <StickyMobileCTA
+    product={product}
+    basePrice={basePrice}
+    cur={cur}
+    isRTL={isRTL}
+    content={content}
+  />
+)}
+
+{product.popupConfig && product.popupConfig.enabled && (
+  <UrgencyPopup
+    enabled={product.popupConfig.enabled}
+    delaySeconds={product.popupConfig.delaySeconds || 30}
+    discountPercent={product.popupConfig.discountPercent || 10}
+    discountCode={product.popupConfig.discountCode || "FLASH10"}
+    expiresAt={product.popupConfig.expiresAt || ""}
+    productName={product.name}
+    cur={cur}
+    content={content}
+  />
+)}
+
+<script>
+  import "@/theme/scripts/product.ts";
+</script>
+

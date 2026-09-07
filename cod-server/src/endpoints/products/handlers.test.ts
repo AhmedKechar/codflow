@@ -137,6 +137,9 @@ describe("Products Endpoint - Error Scenarios", () => {
         shippingOfficePrice: null,
         shippingHomePrice: null,
         externalUrl: null,
+        orderCount: 0,
+        viewCount: 0,
+        popupConfig: null,
       });
 
       const res = await app.request("/products/prod_123", {
@@ -237,6 +240,9 @@ describe("Products Endpoint - Error Scenarios", () => {
         shippingOfficePrice: null,
         shippingHomePrice: null,
         externalUrl: null,
+        orderCount: 0,
+        viewCount: 0,
+        popupConfig: null,
       });
 
       const res = await app.request("/products", {
@@ -387,6 +393,9 @@ describe("Products Endpoint - Error Scenarios", () => {
         shippingOfficePrice: null,
         shippingHomePrice: null,
         externalUrl: null,
+        orderCount: 0,
+        viewCount: 0,
+        popupConfig: null,
       });
 
       // Mock database query to return order with this product
@@ -457,6 +466,9 @@ describe("Products Endpoint - Error Scenarios", () => {
         shippingOfficePrice: null,
         shippingHomePrice: null,
         externalUrl: null,
+        orderCount: 0,
+        viewCount: 0,
+        popupConfig: null,
       });
 
       // Mock no orders with this product

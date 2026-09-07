@@ -82,6 +82,15 @@ export const ProductSchema = z.object({
     reviewCount: z.number(),
   }).nullable().optional(),
   offers: z.array(OfferSchema),
+  orderCount: z.number().int().optional().default(0),
+  viewCount: z.number().int().optional().default(0),
+  popupConfig: z.object({
+    enabled: z.boolean(),
+    delaySeconds: z.number().optional(),
+    discountPercent: z.number().optional(),
+    discountCode: z.string().optional(),
+    expiresAt: z.string().optional(),
+  }).nullable().optional(),
 });
 
 /**

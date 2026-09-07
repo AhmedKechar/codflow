@@ -10,7 +10,7 @@ import type { AppContext } from "@/types";
 import { getDb } from "@/db";
 import { wilayas, communes, customers } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import * as queries from "./queries";
+import { getOrderById as getOrderByIdQuery, getOrdersPaginated, createOrder as createOrderQuery, updateOrder as updateOrderQuery, setOrderProductReturn, deleteOrder as deleteOrderQuery } from "./queries";
 import * as validation from "./validation";
 import { resolveDeliveryFee, applyFreeShippingOffer } from "./resolve-fee";
 import { logActivity, ACTIONS } from "@/lib/activity";
@@ -38,8 +38,7 @@ export async function listOrders(c: Context<AppContext>) {
       offset: c.req.query("offset"),
     });
 
-    // ⚡ Use paginated query for total count
-    const { rows, total } = await queries.getOrdersPaginated(db, storeId, filters);
+    const { rows, total } = await getOrdersPaginated(db, storeId, filters);
 
     return c.json({
       success: true,
@@ -65,7 +64,7 @@ export async function getOrder(c: Context<AppContext>) {
     throw new ValidationError("Order ID is required", ERROR_CODES.REQUIRED_FIELD_MISSING);
   }
 
-  const order = await queries.getOrderById(db, storeId, orderId);
+  const order = await getOrderByIdQuery(db, storeId, orderId);
 
   if (!order) {
     throw new NotFoundError("Order", orderId);
@@ -210,8 +209,7 @@ export async function createOrder(c: Context<AppContext>) {
     }));
 
     const actor = c.get("user");
-    // Create order — passes actor so stock movements are attributed correctly
-    await queries.createOrder(db, storeId, orderData, productsData, actor ? { id: actor.id, name: actor.name ?? "Unknown" } : null);
+    await createOrderQuery(db, storeId, orderData, productsData, actor ? { id: actor.id, name: actor.name ?? "Unknown" } : null);
     await logActivity(db, actor, ACTIONS.ORDER_CREATED, {
       type: "order", id: orderId, label: orderNumber,
     });
@@ -274,7 +272,7 @@ export async function returnOrderProduct(c: Context<AppContext>) {
     throw new ValidationError("Order ID and product line ID are required", ERROR_CODES.REQUIRED_FIELD_MISSING);
   }
 
-  const order = await queries.getOrderById(db, storeId, orderId);
+  const order = await getOrderByIdQuery(db, storeId, orderId);
   if (!order) {
     throw new NotFoundError("Order", orderId);
   }
@@ -297,7 +295,7 @@ export async function returnOrderProduct(c: Context<AppContext>) {
 
   let result;
   try {
-    result = await queries.setOrderProductReturn(
+    result = await setOrderProductReturn(
       db,
       storeId,
       orderId,
@@ -338,7 +336,7 @@ export async function updateOrder(c: Context<AppContext>) {
   const user = c.get("user");
 
   try {
-    const updated = await queries.updateOrder(db, orderId, storeId, validated);
+    const updated = await updateOrderQuery(db, orderId, storeId, validated);
 
     if (!updated) {
       throw new NotFoundError("Order", orderId);
@@ -381,12 +379,12 @@ export async function deleteOrder(c: Context<AppContext>) {
   }
 
   // Check if order exists
-  const order = await queries.getOrderById(db, storeId, orderId);
+  const order = await getOrderByIdQuery(db, storeId, orderId);
   if (!order) {
     throw new NotFoundError("Order", orderId);
   }
 
-  await queries.deleteOrder(db, storeId, orderId);
+  await deleteOrderQuery(db, storeId, orderId);
 
   const deleteActor = c.get("user");
   await logActivity(db, deleteActor, ACTIONS.ORDER_DELETED, {
@@ -413,7 +411,7 @@ export async function getCarrierTracking(c: Context<AppContext>) {
     throw new ValidationError("Order ID is required", ERROR_CODES.REQUIRED_FIELD_MISSING);
   }
 
-  const order = await queries.getOrderById(db, storeId, orderId);
+  const order = await getOrderByIdQuery(db, storeId, orderId);
   if (!order) {
     throw new NotFoundError("Order", orderId);
   }

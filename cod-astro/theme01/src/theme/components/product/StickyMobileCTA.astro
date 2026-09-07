@@ -1,0 +1,91 @@
+---
+import { Icon } from "astro-icon/components";
+import type { Product } from "@/core/api/types";
+
+interface Props {
+  product: Product;
+  basePrice: number;
+  cur: string;
+  isRTL: boolean;
+  content: any;
+}
+
+const { product, basePrice, cur, isRTL, content } = Astro.props;
+
+function fmt(n: number) {
+  return n.toLocaleString("ar-DZ");
+}
+---
+
+<div id="sticky-cta" class="fixed bottom-0 inset-x-0 z-50 bg-white border-t-2 border-[var(--clr-primary)] shadow-2xl transform translate-y-full transition-transform duration-300">
+  <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-4">
+    <!-- Product info -->
+    <div class="flex-1 min-w-0">
+      <p class="text-sm font-semibold truncate" style="color: var(--clr-text)">
+        {product.name}
+      </p>
+      <p class="text-lg font-bold" style="color: var(--clr-primary)">
+        {fmt(basePrice)} <span class="text-sm font-medium">{cur}</span>
+      </p>
+    </div>
+    
+    <!-- CTA Button -->
+    <button
+      type="button"
+      id="sticky-cta-btn"
+      class="flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-white transition-all duration-200 shadow-lg hover:shadow-xl active:scale-[0.98]"
+      style="background: var(--clr-primary)"
+    >
+      <Icon name="heroicons:shopping-bag" class="w-5 h-5" />
+      <span>{content.stickyCtaText || content.formSubmit}</span>
+    </button>
+  </div>
+</div>
+
+<script>
+  const stickyCta = document.getElementById('sticky-cta');
+  const stickyCtaBtn = document.getElementById('sticky-cta-btn');
+  const orderSection = document.getElementById('order-section');
+  
+  if (stickyCta && stickyCtaBtn && orderSection) {
+    // Show/hide based on scroll position
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          // Hide sticky CTA when order form is visible
+          if (entry.isIntersecting) {
+            stickyCta.classList.add('translate-y-full');
+          } else {
+            // Show sticky CTA when scrolled past the form
+            const rect = entry.boundingClientRect;
+            if (rect.top < 0) {
+              stickyCta.classList.remove('translate-y-full');
+            }
+          }
+        });
+      },
+      { threshold: 0, rootMargin: '-100px 0px 0px 0px' }
+    );
+    
+    observer.observe(orderSection);
+    
+    // Also show on scroll
+    let lastScrollY = 0;
+    window.addEventListener('scroll', () => {
+      const currentScrollY = window.scrollY;
+      const orderRect = orderSection.getBoundingClientRect();
+      
+      // Show sticky CTA when scrolled down and order form is above viewport
+      if (orderRect.bottom < 0 && currentScrollY > lastScrollY) {
+        stickyCta.classList.remove('translate-y-full');
+      }
+      
+      lastScrollY = currentScrollY;
+    });
+    
+    // Click to scroll to order form
+    stickyCtaBtn.addEventListener('click', () => {
+      orderSection.scrollIntoView({ behavior: 'smooth' });
+    });
+  }
+</script>

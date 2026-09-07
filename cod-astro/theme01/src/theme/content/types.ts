@@ -192,6 +192,7 @@ export interface StoreFrontContent {
   sealQualityGuarantee: string;
 
   // ── Order form (email & summary) ──────────────────────────────────────────
+  formEmailLabel: string;
   formEmailPlaceholder: string;
   formSummaryOpen: string;
   formSummaryClosed: string;
@@ -226,4 +227,18 @@ export interface StoreFrontContent {
   navContact: string;
   thankYouPageTitle: string;
   defaultMetaDescription: string;
+
+  // ── New CRO keys ──────────────────────────────────────────────────────────
+  formTitleNew: string;
+  stickyCtaText: string;
+  orderSummaryTitle: string;
+  urgencyTitle: string;
+  urgencySubtitle: string;
+  urgencyDescription: string;
+  urgencyCta: string;
+  urgencyExpires: string;
+  urgencyClose: string;
+  viewedByText: string;
+  orderedTimesText: string;
+  lastPiecesText: string;
 }

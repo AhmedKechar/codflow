@@ -45,6 +45,72 @@ const countEnvelope = <T extends z.ZodType>(itemSchema: T) =>
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
+const recordProductViewRoute = createRoute({
+  method: "post",
+  path: "/products/{productId}/view",
+  tags: ["Store API"],
+  summary: "Record a product page view",
+  description: "Increment the view counter for a product. Called by the storefront on product detail page load.",
+  operationId: "recordProductView",
+  request: {
+    params: z.object({
+      productId: z.string().openapi({ example: "prod_abc123" }),
+    }),
+  },
+  responses: {
+    200: {
+      description: "View recorded",
+      content: jsonContent(
+        z.object({
+          success: z.boolean().openapi({ example: true }),
+        })
+      ),
+    },
+    401: unauthorized,
+    404: errorResponse("Product not found"),
+  },
+  security: [{ StoreAuth: [] }],
+});
+
+const getProductConversionRoute = createRoute({
+  method: "get",
+  path: "/products/{productId}/conversion",
+  tags: ["Store API"],
+  summary: "Get product conversion stats",
+  description: "Returns order count, view count, and conversion rate for a product.",
+  operationId: "getProductConversion",
+  request: {
+    params: z.object({
+      productId: z.string().openapi({ example: "prod_abc123" }),
+    }),
+  },
+  responses: {
+    200: {
+      description: "Conversion stats",
+      content: jsonContent(
+        z.object({
+          success: z.boolean().openapi({ example: true }),
+          data: z.object({
+            orderCount: z.number().int(),
+            viewCount: z.number().int(),
+            conversionRate: z.number(),
+            popupConfig: z.object({
+              enabled: z.boolean(),
+              delaySeconds: z.number().int(),
+              discountPercent: z.number().int(),
+              discountCode: z.string(),
+              expiresAt: z.string(),
+            }).nullable(),
+          }),
+        })
+      ),
+    },
+    401: unauthorized,
+    404: errorResponse("Product not found"),
+  },
+  security: [{ StoreAuth: [] }],
+});
+
 const getStoreConfigRoute = createRoute({
   method: "get",
   path: "/config",
@@ -343,6 +409,8 @@ Identity is derived from the resolved order — no customer login required. One 
 
 const router = new OpenAPIHono<AppContext>();
 
+router.openapi(recordProductViewRoute, h.recordProductView);
+router.openapi(getProductConversionRoute, h.getProductConversion);
 router.openapi(getStoreConfigRoute, h.getStoreConfig);
 router.openapi(listStoreProductsRoute, h.listStoreProducts);
 router.openapi(getStoreProductRoute, h.getStoreProduct);

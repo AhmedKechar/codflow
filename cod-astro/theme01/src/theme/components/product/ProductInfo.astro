@@ -10,37 +10,75 @@ interface Props {
   isLowStock: boolean;
   lowStockText: string;
   isDesktop?: boolean;
+  showDescription?: boolean;
+  priceRange?: { min: number; max: number } | null;
+  orderCount?: number;
+  content?: any;
 }
 
-const { product, basePrice, comparePrice, cur, isLowStock, lowStockText, isDesktop = false } = Astro.props;
+const { product, basePrice, comparePrice, cur, isLowStock, lowStockText, isDesktop = false, showDescription = true, priceRange, orderCount, content } = Astro.props;
 const hasDiscount = comparePrice != null && comparePrice > basePrice;
 
 function fmt(n: number) {
   return n.toLocaleString("ar-DZ");
 }
+
+const hasPriceRange = priceRange && priceRange.min !== priceRange.max;
+
+// Estimated viewers: ~30% of order count, min 1
+const estimatedViewers = orderCount ? Math.max(1, Math.floor(orderCount * 0.3)) : 0;
 ---
 
 <div class:list={[isDesktop ? "hidden lg:block" : "lg:hidden", "mb-6"]}>
-  <h1 class:list={[isDesktop ? "text-2xl" : "text-2xl", "font-semibold leading-tight mb-3 tracking-tight"]} style="color: var(--clr-text)">
+  <h1 class:list={[isDesktop ? "text-3xl" : "text-2xl", "font-extrabold leading-tight mb-3 tracking-tight"]} style="color: var(--clr-text)">
     {product.name}
   </h1>
   
-  {product.description && (
+  {showDescription && product.description && (
     <p class:list={[isDesktop ? "text-[1.0625rem] mb-6" : "text-[0.9375rem] mb-4", "font-normal leading-relaxed"]} style="color: var(--clr-text-2)">
       {product.description}
     </p>
   )}
 
   <div class="flex items-baseline gap-4">
-    <span class:list={[isDesktop ? "text-xl" : "text-xl", "font-semibold"]} style="color: var(--clr-text)" id={isDesktop ? "price-display-desktop" : "price-display-mobile"}>
-      {fmt(basePrice)} <span class:list={[isDesktop ? "text-base" : "text-base", "font-medium"]}>{cur}</span>
+    <span class:list={[isDesktop ? "text-2xl" : "text-xl", "font-bold"]} style="color: var(--clr-primary)" id={isDesktop ? "price-display-desktop" : "price-display-mobile"}>
+      {hasPriceRange ? (
+        <span>{fmt(priceRange.min)} - {fmt(priceRange.max)}</span>
+      ) : (
+        <span>{fmt(basePrice)}</span>
+      )}
+      <span class:list={[isDesktop ? "text-lg" : "text-base", "font-bold"]}> {cur}</span>
     </span>
-    {hasDiscount && (
+    {hasDiscount && !hasPriceRange && (
       <span class:list={[isDesktop ? "text-base" : "text-base", "line-through font-normal"]} style="color: var(--clr-text-2)">
         {fmt(comparePrice!)} {cur}
       </span>
     )}
   </div>
+
+  {/* Conversion signals */}
+  {!isDesktop && (
+    <div class="flex flex-wrap items-center gap-3 mt-4">
+      {estimatedViewers > 0 && (
+        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[0.75rem] font-medium" style="background: var(--clr-surface-alt); color: var(--clr-text-2)">
+          <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+          {content?.viewedByText?.replace("{x}", String(estimatedViewers)) || `${estimatedViewers} يتصفح الآن`}
+        </div>
+      )}
+      {orderCount && orderCount > 0 && (
+        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[0.75rem] font-medium" style="background: var(--clr-surface-alt); color: var(--clr-text-2)">
+          <Icon name="heroicons:shopping-bag" class="w-3.5 h-3.5" />
+          {content?.orderedTimesText?.replace("{n}", String(orderCount)) || `تم طلب ${orderCount} مرة`}
+        </div>
+      )}
+      {product.trackInventory && product.inventory > 0 && product.inventory <= 5 && (
+        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[0.75rem] font-medium bg-orange-100 text-orange-700">
+          <Icon name="heroicons:fire" class="w-3.5 h-3.5" />
+          {content?.lastPiecesText?.replace("{n}", String(product.inventory)) || `آخر ${product.inventory} قطع`}
+        </div>
+      )}
+    </div>
+  )}
 
   {!isDesktop && isLowStock && (
     <div class="mt-4 inline-flex items-center gap-2 bg-[var(--clr-surface-alt)] text-text-main px-3 py-1.5 rounded-full text-[0.8125rem] font-medium border border-border">

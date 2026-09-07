@@ -6,7 +6,7 @@ import Link from "next/link";
 import {
   AlertCircle, Package, DollarSign, Layers, Settings2, BarChart3,
   ImageIcon, Upload, File, Truck, Search, ChevronDown,
-  ChevronUp, Hash, Plus,
+  ChevronUp, Hash, Plus, Timer,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -145,6 +145,13 @@ export function ProductFormPage({ productId, groups, shippingProfiles = [] }: Pr
   const [metaDescription, setMetaDescription] = useState("");
   const [metaKeywords, setMetaKeywords] = useState("");
 
+  // Urgency Popup
+  const [popupEnabled, setPopupEnabled] = useState(false);
+  const [popupDelaySeconds, setPopupDelaySeconds] = useState("30");
+  const [popupDiscountPercent, setPopupDiscountPercent] = useState("10");
+  const [popupDiscountCode, setPopupDiscountCode] = useState("");
+  const [popupExpiresAt, setPopupExpiresAt] = useState("");
+
   // Collapsible sections
   const [inventoryExpanded, setInventoryExpanded] = useState(false);
 
@@ -247,6 +254,16 @@ export function ProductFormPage({ productId, groups, shippingProfiles = [] }: Pr
       setMetaDescription(p.metaDescription ?? "");
       setMetaKeywords(p.metaKeywords ?? "");
       setIsDigital(p.type === "DIGITAL");
+
+      // Load popup config
+      const pc = (p as any).popupConfig;
+      if (pc) {
+        setPopupEnabled(pc.enabled ?? false);
+        setPopupDelaySeconds(String(pc.delaySeconds ?? 30));
+        setPopupDiscountPercent(String(pc.discountPercent ?? 10));
+        setPopupDiscountCode(pc.discountCode ?? "");
+        setPopupExpiresAt(pc.expiresAt ?? "");
+      }
 
       if (p.hasVariants) {
         setHasVariantsSwitch(true);
@@ -399,6 +416,13 @@ export function ProductFormPage({ productId, groups, shippingProfiles = [] }: Pr
           metaTitle: metaTitle || undefined,
           metaDescription: metaDescription || undefined,
           metaKeywords: metaKeywords || undefined,
+          popupConfig: popupEnabled ? {
+            enabled: true,
+            delaySeconds: Number(popupDelaySeconds) || 30,
+            discountPercent: Number(popupDiscountPercent) || 10,
+            discountCode: popupDiscountCode || undefined,
+            expiresAt: popupExpiresAt || undefined,
+          } : null,
           ...(isEdit ? {} : { inventory: hasVariants ? 0 : (Number(inventory) || 0) }),
           lowStockThreshold: hasVariants ? undefined : (Number(lowStockThreshold) || 5),
           hasVariants,
@@ -635,9 +659,86 @@ export function ProductFormPage({ productId, groups, shippingProfiles = [] }: Pr
                       <AlertCircle size={11} />{errors.costPrice}
                     </p>
                   )}
+              </Field>
+            </div>
+          </Section>
+
+          {/* Urgency Popup */}
+          <Section
+            title={t.form.section_urgency_popup ?? "Urgency Popup"}
+            icon={<Timer size={18} />}
+            action={
+              <label className="flex items-center gap-2 cursor-pointer">
+                <span className="text-xs font-semibold text-foreground">{t.form.popup_enable ?? "Enable"}</span>
+                <Switch
+                  checked={popupEnabled}
+                  onCheckedChange={(v) => { setPopupEnabled(v); markDirty(); }}
+                  disabled={isPending}
+                />
+              </label>
+            }
+          >
+            {popupEnabled && (
+              <div className="space-y-4">
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  {t.form.popup_hint ?? "Show a discount popup after a delay to encourage purchase. The customer sees it on the product page."}
+                </p>
+
+                <Field label={t.form.popup_delay ?? "Delay (seconds)"}>
+                  <div className="relative">
+                    <Input
+                      type="number"
+                      inputMode="numeric"
+                      min={5}
+                      max={300}
+                      value={popupDelaySeconds}
+                      onChange={(e) => { setPopupDelaySeconds(e.target.value); markDirty(); }}
+                      className="h-11 bg-card border-border rounded-md px-4 text-sm pe-12"
+                      disabled={isPending}
+                    />
+                    <span className="absolute end-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">s</span>
+                  </div>
+                </Field>
+
+                <Field label={t.form.popup_discount_percent ?? "Discount (%)"}>
+                  <div className="relative">
+                    <Input
+                      type="number"
+                      inputMode="numeric"
+                      min={1}
+                      max={90}
+                      value={popupDiscountPercent}
+                      onChange={(e) => { setPopupDiscountPercent(e.target.value); markDirty(); }}
+                      className="h-11 bg-card border-border rounded-md px-4 text-sm pe-12"
+                      disabled={isPending}
+                    />
+                    <span className="absolute end-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">%</span>
+                  </div>
+                </Field>
+
+                <Field label={t.form.popup_discount_code ?? "Discount Code"}>
+                  <Input
+                    value={popupDiscountCode}
+                    onChange={(e) => { setPopupDiscountCode(e.target.value.toUpperCase()); markDirty(); }}
+                    placeholder={t.form.popup_discount_code_placeholder ?? "FLASH10"}
+                    className="h-11 bg-card border-border rounded-md px-4 text-sm uppercase"
+                    disabled={isPending}
+                  />
+                </Field>
+
+                <Field label={t.form.popup_expires_at ?? "Expires At"}>
+                  <Input
+                    type="datetime-local"
+                    value={popupExpiresAt}
+                    onChange={(e) => { setPopupExpiresAt(e.target.value); markDirty(); }}
+                    className="h-11 bg-card border-border rounded-md px-4 text-sm"
+                    disabled={isPending}
+                  />
                 </Field>
               </div>
-            </div>
+            )}
+          </Section>
+        </div>
           </Section>
 
           {/* Options & Variants */}

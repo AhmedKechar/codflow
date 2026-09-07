@@ -41,7 +41,7 @@ const cfg = {
     <input
       id="f-name" type="text" name="customerName"
       required autocomplete="name"
-      placeholder={content.formNamePlaceholder}
+      placeholder={content.formNameLabel}
       class:list={["form-input", fieldErrors.customerName && "error"]}
     />
     {fieldErrors.customerName && (
@@ -58,7 +58,7 @@ const cfg = {
     <input
       id="f-phone" type="tel" name="phone"
       required autocomplete="tel" inputmode="tel"
-      placeholder={content.formPhonePlaceholder}
+      placeholder={content.formPhoneLabel}
       dir="ltr"
       class:list={["form-input", fieldErrors.phone && "error"]}
     />

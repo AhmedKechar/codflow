@@ -202,6 +202,23 @@ export async function createStoreOrder(c: Context<AppContext>) {
   );
 }
 
+export async function recordProductView(c: Context<AppContext>) {
+  const db = getDb(c.env.DB);
+  const productId = c.req.param("productId")!;
+  await queries.recordProductView(db, productId);
+  return c.json({ success: true }, 200);
+}
+
+export async function getProductConversion(c: Context<AppContext>) {
+  const db = getDb(c.env.DB);
+  const productId = c.req.param("productId")!;
+  const stats = await queries.getProductConversionStats(db, productId);
+  if (!stats) {
+    throw new NotFoundError("Product", productId);
+  }
+  return c.json({ success: true, data: stats }, 200);
+}
+
 export async function listProductReviews(c: Context<AppContext>) {
   const storeId = c.get("storeId")!;
   const db = getDb(c.env.DB);

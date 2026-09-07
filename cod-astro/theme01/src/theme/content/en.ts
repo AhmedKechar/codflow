@@ -182,6 +182,7 @@ export const en: StoreFrontContent = {
   sealQualityGuarantee: "Quality Guarantee",
 
   // ── Order form (email & summary) ──────────────────────────────────────────
+  formEmailLabel: "Email address",
   formEmailPlaceholder: "Your email",
   formSummaryOpen: "Order Summary",
   formSummaryClosed: "Open order summary",
@@ -216,4 +217,18 @@ export const en: StoreFrontContent = {
   navContact: "Contact",
   thankYouPageTitle: "Order Received",
   defaultMetaDescription: "Shop from {storeName} - Best products at great prices with delivery nationwide",
+
+  // ── New CRO keys ──────────────────────────────────────────────────────────
+  formTitleNew: "Fill in your details to order",
+  stickyCtaText: "Order Now",
+  orderSummaryTitle: "Order Summary",
+  urgencyTitle: "Limited Offer!",
+  urgencySubtitle: "Special discount for you",
+  urgencyDescription: "Use the discount code when ordering to get an exclusive discount",
+  urgencyCta: "Apply Discount",
+  urgencyExpires: "Offer ends in",
+  urgencyClose: "Later",
+  viewedByText: "{x} people viewing now",
+  orderedTimesText: "Ordered {n} times",
+  lastPiecesText: "Only {n} left",
 };

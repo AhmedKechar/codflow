@@ -10,8 +10,7 @@ import type { AppContext } from "@/types";
 import { getDb } from "@/db";
 import { communes } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import * as queries from "./queries";
-import { clearOrderTracking, syncOrderAfterCarrierUpdate } from "./queries";
+import { getOrderById, updateOrderStatus, syncOrderAfterCarrierUpdate, clearOrderTracking } from "./queries";
 import { logActivity, ACTIONS } from "@/lib/activity";
 import { getProvider, isEcotrackCompany } from "@/endpoints/delivery-companies/providers/registry";
 import { ZrExpressProvider } from "@/endpoints/delivery-companies/providers/zr_express/adapter";
@@ -37,7 +36,7 @@ export async function updateShipmentInfo(c: Context<AppContext>) {
   const storeId = c.get("storeId")!;
   const orderId = c.req.param("id")!;
 
-  const order = await queries.getOrderById(db, storeId, orderId);
+  const order = await getOrderById(db, storeId, orderId);
   if (!order) throw new NotFoundError("Order", orderId);
 
   if (!order.trackingNumber) {
@@ -189,7 +188,7 @@ export async function cancelShipment(c: Context<AppContext>) {
   const storeId = c.get("storeId")!;
   const orderId = c.req.param("id")!;
 
-  const order = await queries.getOrderById(db, storeId, orderId);
+  const order = await getOrderById(db, storeId, orderId);
   if (!order) throw new NotFoundError("Order", orderId);
 
   if (!order.trackingNumber) {
@@ -246,7 +245,7 @@ export async function cancelShipment(c: Context<AppContext>) {
     const actor = c.get("user");
     const PRE_DISPATCH_STATUSES = ["new", "confirmed", "unreachable", "busy", "postponed"];
     if (PRE_DISPATCH_STATUSES.includes(order.status)) {
-      await queries.updateOrderStatus(db, storeId, orderId, "confirmed", actor?.id, actor?.name ?? undefined);
+      await updateOrderStatus(db, storeId, orderId, "confirmed", actor?.id, actor?.name ?? undefined);
     }
 
     await logActivity(db, actor, ACTIONS.ORDER_STATUS_CHANGED, {
@@ -283,7 +282,7 @@ export async function addShipmentRemark(c: Context<AppContext>) {
   const storeId = c.get("storeId")!;
   const orderId = c.req.param("id")!;
 
-  const order = await queries.getOrderById(db, storeId, orderId);
+  const order = await getOrderById(db, storeId, orderId);
   if (!order) throw new NotFoundError("Order", orderId);
 
   if (!order.trackingNumber) {
@@ -362,7 +361,7 @@ export async function getShipmentRemarks(c: Context<AppContext>) {
   const storeId = c.get("storeId")!;
   const orderId = c.req.param("id")!;
 
-  const order = await queries.getOrderById(db, storeId, orderId);
+  const order = await getOrderById(db, storeId, orderId);
   if (!order) throw new NotFoundError("Order", orderId);
 
   if (!order.trackingNumber) {
@@ -404,7 +403,7 @@ export async function getShipmentTracking(c: Context<AppContext>) {
   const storeId = c.get("storeId")!;
   const orderId = c.req.param("id")!;
 
-  const order = await queries.getOrderById(db, storeId, orderId);
+  const order = await getOrderById(db, storeId, orderId);
   if (!order) throw new NotFoundError("Order", orderId);
 
   if (!order.trackingNumber) {
@@ -520,7 +519,7 @@ export async function getShipmentTracking(c: Context<AppContext>) {
       // But never go backward (e.g., delivered → shipped)
       if (newRank >= currentRank && latestOrderStatus !== order.status) {
         const dispatchUser = c.get("user");
-        await queries.updateOrderStatus(db, storeId, order.id, latestOrderStatus, dispatchUser?.id, dispatchUser?.name ?? undefined);
+        await updateOrderStatus(db, storeId, order.id, latestOrderStatus, dispatchUser?.id, dispatchUser?.name ?? undefined);
         await logActivity(db, dispatchUser, ACTIONS.ORDER_STATUS_CHANGED, {
           type: "order", id: order.id, label: order.orderNumber,
         }, { from: order.status, to: latestOrderStatus, source: "pull_tracking" });
@@ -553,7 +552,7 @@ export async function proxyShipmentLabel(c: Context<AppContext>) {
   const storeId = c.get("storeId")!;
   const orderId = c.req.param("id")!;
 
-  const order = await queries.getOrderById(db, storeId, orderId);
+  const order = await getOrderById(db, storeId, orderId);
   if (!order) throw new NotFoundError("Order", orderId);
 
   if (!order.trackingNumber) {
